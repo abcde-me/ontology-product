@@ -10,8 +10,8 @@ const getLatestModalMask = (container: Element) => {
   return masks[masks.length - 1] as HTMLElement | undefined;
 };
 
-const removeModalMaskDisplay = (container: Element) => {
-  const masks = container.querySelectorAll('.arco-modal-mask');
+const removeModalMaskDisplay = (container?: Element) => {
+  const masks = (container || document).querySelectorAll('.arco-modal-mask');
   masks.forEach((mask) => {
     (mask as HTMLElement).style.removeProperty('display');
   });
@@ -68,10 +68,9 @@ OntoModal.confirm = (props: ConfirmProps) => {
     window.cancelAnimationFrame(frameId);
     if (!isFirefoxBrowser() || props.mask === false) return;
 
-    const container = getContainer();
-    removeModalMaskDisplay(container);
+    removeModalMaskDisplay(getContainer());
     frameId = window.requestAnimationFrame(() => {
-      removeModalMaskDisplay(container);
+      removeModalMaskDisplay(getContainer());
     });
   };
 
@@ -84,7 +83,8 @@ OntoModal.confirm = (props: ConfirmProps) => {
     afterClose: () => {
       removeMaskDisplay();
       afterClose?.();
-    }
+    },
+    unmountOnExit: true
   });
 
   frameId = window.requestAnimationFrame(showMaskInFirefox);
