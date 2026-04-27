@@ -10,6 +10,13 @@ const getLatestModalMask = (container: Element) => {
   return masks[masks.length - 1] as HTMLElement | undefined;
 };
 
+const removeModalMaskDisplay = (container: Element) => {
+  const masks = container.querySelectorAll('.arco-modal-mask');
+  masks.forEach((mask) => {
+    (mask as HTMLElement).style.removeProperty('display');
+  });
+};
+
 type OsModalComponent = React.FC<ComponentProps<typeof Modal>> & {
   confirm: (props: ConfirmProps) => ReturnType<typeof Modal.confirm>;
 };
@@ -47,21 +54,25 @@ export const OntoModal: OsModalComponent = (props) => {
 
 OntoModal.confirm = (props: ConfirmProps) => {
   const { afterOpen, afterClose } = props;
-  let currentMask: HTMLElement | undefined;
   let frameId = 0;
 
   const getContainer = () => props.getPopupContainer?.() || document.body;
   const showMaskInFirefox = () => {
     if (!isFirefoxBrowser() || props.mask === false) return;
 
-    currentMask = getLatestModalMask(getContainer());
+    const currentMask = getLatestModalMask(getContainer());
     currentMask?.style.setProperty('display', 'block', 'important');
   };
 
   const removeMaskDisplay = () => {
     window.cancelAnimationFrame(frameId);
-    currentMask?.style.removeProperty('display');
-    currentMask = undefined;
+    if (!isFirefoxBrowser() || props.mask === false) return;
+
+    const container = getContainer();
+    removeModalMaskDisplay(container);
+    frameId = window.requestAnimationFrame(() => {
+      removeModalMaskDisplay(container);
+    });
   };
 
   const modal = Modal.confirm({
