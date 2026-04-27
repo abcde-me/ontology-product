@@ -17,6 +17,10 @@ const removeModalMaskDisplay = (container: Element) => {
   });
 };
 
+const removeAllModalMaskDisplay = () => {
+  removeModalMaskDisplay(document);
+};
+
 type OsModalComponent = React.FC<ComponentProps<typeof Modal>> & {
   confirm: (props: ConfirmProps) => ReturnType<typeof Modal.confirm>;
 };
@@ -68,10 +72,9 @@ OntoModal.confirm = (props: ConfirmProps) => {
     window.cancelAnimationFrame(frameId);
     if (!isFirefoxBrowser() || props.mask === false) return;
 
-    const container = getContainer();
-    removeModalMaskDisplay(container);
+    removeAllModalMaskDisplay();
     frameId = window.requestAnimationFrame(() => {
-      removeModalMaskDisplay(container);
+      removeAllModalMaskDisplay();
     });
   };
 
@@ -81,6 +84,7 @@ OntoModal.confirm = (props: ConfirmProps) => {
       showMaskInFirefox();
       afterOpen?.();
     },
+    wrapClassName: `${props.wrapClassName} arco-modal-firefox-mask`,
     afterClose: () => {
       removeMaskDisplay();
       afterClose?.();
