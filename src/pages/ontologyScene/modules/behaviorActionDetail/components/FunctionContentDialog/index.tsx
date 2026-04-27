@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, ModalProps } from '@arco-design/web-react';
 import { OntologyFunctionDetail } from '@/pages/ontologyScene/types/ontologyFunction';
 import styles from './index.module.scss';
-import { OsModal, PyCodeContent } from '@/pages/ontologyScene/components';
+import { OntoModal, PyCodeContent } from '@/pages/ontologyScene/components';
 
 export const FunctionContentDialog = (
   props: ModalProps & {
@@ -11,7 +11,7 @@ export const FunctionContentDialog = (
 ) => {
   const { data, visible, ...otherProps } = props;
   return (
-    <OsModal
+    <OntoModal
       {...otherProps}
       style={{ width: 900, maxHeight: 600 }}
       footer={null}
@@ -22,6 +22,6 @@ export const FunctionContentDialog = (
       <div className={styles['function-content-code']}>
         <PyCodeContent value={data?.content || ''} readOnly />
       </div>
-    </OsModal>
+    </OntoModal>
   );
 };

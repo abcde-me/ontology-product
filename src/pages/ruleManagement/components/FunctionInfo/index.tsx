@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { OntologyFunctionDetail } from '@/pages/ontologyScene/types/ontologyFunction';
 import { GlobalTooltip } from '@ceai-front/arco-material';
 import { IconInfoCircle } from '@arco-design/web-react/icon';
-import { OsModal, PyCodeContent } from '@/pages/ontologyScene/components';
+import { OntoModal, PyCodeContent } from '@/pages/ontologyScene/components';
 import styles from './index.module.scss';
 import { Tooltip } from '@arco-design/web-react';
 
@@ -28,7 +28,7 @@ export const FunctionInfo = ({
           />
         </Tooltip>
       </div>
-      <OsModal
+      <OntoModal
         className={styles['function-modal']}
         style={{ width: 900, maxHeight: 600 }}
         title={functionInfo?.name || '-'}
@@ -39,7 +39,7 @@ export const FunctionInfo = ({
         onCancel={() => setShow(false)}
       >
         <PyCodeContent value={functionInfo?.content} />
-      </OsModal>
+      </OntoModal>
     </>
   );
 };

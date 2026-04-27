@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { DrawerWithEditBtn } from '@/pages/ontologyScene/components';
+import { DrawerWithEditBtn, OntoModal } from '@/pages/ontologyScene/components';
 import { DotStatus, NoDataCard } from '@ceai-front/arco-material';
 import { IconLoading } from '@arco-design/web-react/icon';
 import { Tabs, Message, Modal } from '@arco-design/web-react';
@@ -36,7 +36,7 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
   const handleClose = () => {
     // 如果正在测试，显示确认对话框
     if (testIng || loading) {
-      Modal.confirm({
+      OntoModal.confirm({
         title: '确认关闭',
         content: '测试正在运行中，关闭后将停止运行，确定要关闭吗？',
         okText: '确定',
