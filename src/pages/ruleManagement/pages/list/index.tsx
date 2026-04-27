@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import styles from './index.module.scss';
 import PageHeader from '@/components/PageHeader';
 import {
@@ -55,6 +55,7 @@ const RuleListPage = () => {
   const [showFunction, setShowFunction] = useState<number>();
   const ruleInfoViewAble = useHasPermission(AUTOMATION_PERMISSIONS.GET);
   const [delRule, setDelRule] = useState<AutoRuleItem>();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const routeToInfo = (pageType: string, ruleId?: number) => {
     if (!ruleId)
@@ -238,7 +239,7 @@ const RuleListPage = () => {
   );
 
   return (
-    <div className={styles['rule-list-page']}>
+    <div className={styles['rule-list-page']} ref={containerRef}>
       <PageHeader
         title={'规则管理'}
         subTitle={'基于函数条件的自动化规则引擎，支持定时与条件触发。'}
@@ -295,6 +296,9 @@ const RuleListPage = () => {
         visible={!!delRule}
         closeIcon={null}
         style={{ width: 400 }}
+        getPopupContainer={() => {
+          return containerRef.current || document.body;
+        }}
         title={
           <>
             <IconInfoCircleFill
