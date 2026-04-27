@@ -68,9 +68,9 @@ OntoModal.confirm = (props: ConfirmProps) => {
     window.cancelAnimationFrame(frameId);
     if (!isFirefoxBrowser() || props.mask === false) return;
 
-    removeModalMaskDisplay();
+    removeModalMaskDisplay(getContainer());
     frameId = window.requestAnimationFrame(() => {
-      removeModalMaskDisplay();
+      removeModalMaskDisplay(getContainer());
     });
   };
 
@@ -80,11 +80,11 @@ OntoModal.confirm = (props: ConfirmProps) => {
       showMaskInFirefox();
       afterOpen?.();
     },
-    wrapClassName: `${props.wrapClassName} arco-modal-firefox-mask`,
     afterClose: () => {
       removeMaskDisplay();
       afterClose?.();
-    }
+    },
+    unmountOnExit: true
   });
 
   frameId = window.requestAnimationFrame(showMaskInFirefox);
