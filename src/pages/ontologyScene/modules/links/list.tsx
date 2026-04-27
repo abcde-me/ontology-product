@@ -56,7 +56,7 @@ import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 import TaskLogDrawer from '@/pages/ontologyScene/components/TaskLogDrawer';
 import LogIcon from '@/pages/ontologyScene/assets/log-icon.svg';
-import { EllipsisPopover } from '@/pages/ontologyScene/components';
+import { EllipsisPopover, OntoModal } from '@/pages/ontologyScene/components';
 import classNames from 'classnames';
 
 // 将 SyncStatus 枚举转换为 LinkDetailDrawer 期望的字符串类型
@@ -289,7 +289,7 @@ export default function OntologySceneLinksList() {
       return;
     }
 
-    Modal.confirm({
+    OntoModal.confirm({
       title: '确认删除链接吗？',
       content: `删除后，不可恢复`,
       onOk: async () => {

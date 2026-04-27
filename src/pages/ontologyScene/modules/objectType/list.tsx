@@ -45,7 +45,7 @@ import dayjs from 'dayjs';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 import LogIcon from '@/pages/ontologyScene/assets/log-icon.svg';
-import { EllipsisPopover } from '@/pages/ontologyScene/components';
+import { EllipsisPopover, OntoModal } from '@/pages/ontologyScene/components';
 
 export default function OntologySceneObjectTypeList() {
   const [form] = Form.useForm();
@@ -188,7 +188,7 @@ export default function OntologySceneObjectTypeList() {
 
   // 处理删除
   const handleDelete = (record: ObjectType) => {
-    Modal.confirm({
+    OntoModal.confirm({
       title: '确认删除对象类型吗？',
       content: `删除后，不可恢复`,
       onOk: async () => {

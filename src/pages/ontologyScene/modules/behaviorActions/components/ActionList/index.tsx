@@ -32,7 +32,8 @@ import ObjectTypeDetailDrawer from '@/pages/ontologyScene/components/ObjectTypeD
 import { FunctionDetailDrawer } from '@/pages/ontologyScene/components/FunctionDetailDrawer';
 import {
   ContentWithCopy,
-  EllipsisPopover
+  EllipsisPopover,
+  OntoModal
 } from '@/pages/ontologyScene/components';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
@@ -247,7 +248,7 @@ export const ActionList = (props: {
   ];
 
   const handleDelete = (record: BehaviorActionItem) => {
-    Modal.confirm({
+    OntoModal.confirm({
       title: `确定删除${record.name}吗？`,
       content: '删除后，不可恢复',
       onOk: () => {

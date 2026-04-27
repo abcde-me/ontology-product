@@ -40,7 +40,7 @@ import { PermissionWrapper } from '@/components/PermissionGuard';
 import PermissionButton from '@/components/PermissionButton';
 import { isNil } from 'lodash-es';
 import { IconSearch } from '@ceai-front/svg-icons';
-import { OsModal } from '@/components/OSModal';
+import { OntoModal } from '@/components/OSModal';
 import { IconInfoCircleFill } from '@arco-design/web-react/icon';
 
 const TRIGGER_TYPE_MAP: Record<number, string> = {
@@ -292,7 +292,7 @@ const RuleListPage = () => {
         }}
         onEdit={() => {}}
       />
-      <OsModal
+      <OntoModal
         visible={!!delRule}
         closeIcon={null}
         style={{ width: 400 }}
@@ -316,7 +316,7 @@ const RuleListPage = () => {
           refresh();
         }}
         onCancel={() => setDelRule(undefined)}
-      >{`确定删除规则“${delRule?.name || '-'}”吗？`}</OsModal>
+      >{`确定删除规则“${delRule?.name || '-'}”吗？`}</OntoModal>
     </div>
   );
 };

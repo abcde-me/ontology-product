@@ -7,6 +7,7 @@ import BehaviorRefreshSvg from '@/assets/benti/behaviorRefresh.svg';
 import { TestFunctionInfo } from '@/pages/ontologyScene/hooks/useTestFunction';
 import { buildActionTestItem } from '@/pages/ontologyScene/utils';
 import { useParams } from 'react-router-dom';
+import { OntoModal } from '@/components/OSModal';
 
 interface CanvasHeaderProps {
   testFunctionHook: TestFunctionInfo;
@@ -43,7 +44,7 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
     }
 
     // 有节点时才弹窗确认
-    Modal.confirm({
+    OntoModal.confirm({
       title: '确认刷新',
       content: '刷新后将清空当前编排和配置，确认继续吗？',
       onOk: () => {

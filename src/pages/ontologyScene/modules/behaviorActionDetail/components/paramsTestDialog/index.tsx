@@ -33,7 +33,7 @@ import { useParams } from 'react-router-dom';
 import {
   FormItem,
   ObjInsValue,
-  OsModal
+  OntoModal
 } from '@/pages/ontologyScene/components';
 import { UploadItem } from '@arco-design/web-react/es/Upload';
 
@@ -192,7 +192,7 @@ export const ParamsTestDialog = (props: IProps) => {
   };
 
   return (
-    <OsModal
+    <OntoModal
       title={'参数测试'}
       footer={null}
       visible={visible}
@@ -280,6 +280,6 @@ export const ParamsTestDialog = (props: IProps) => {
           <div className={styles['body']}>{renderRunLog()}</div>
         </div>
       </div>
-    </OsModal>
+    </OntoModal>
   );
 };
