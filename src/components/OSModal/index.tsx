@@ -10,15 +10,11 @@ const getLatestModalMask = (container: Element) => {
   return masks[masks.length - 1] as HTMLElement | undefined;
 };
 
-const removeModalMaskDisplay = (container: Element) => {
-  const masks = container.querySelectorAll('.arco-modal-mask');
+const removeModalMaskDisplay = (container?: Element) => {
+  const masks = (container || document).querySelectorAll('.arco-modal-mask');
   masks.forEach((mask) => {
     (mask as HTMLElement).style.removeProperty('display');
   });
-};
-
-const removeAllModalMaskDisplay = () => {
-  removeModalMaskDisplay(document);
 };
 
 type OsModalComponent = React.FC<ComponentProps<typeof Modal>> & {
@@ -72,9 +68,9 @@ OntoModal.confirm = (props: ConfirmProps) => {
     window.cancelAnimationFrame(frameId);
     if (!isFirefoxBrowser() || props.mask === false) return;
 
-    removeAllModalMaskDisplay();
+    removeModalMaskDisplay();
     frameId = window.requestAnimationFrame(() => {
-      removeAllModalMaskDisplay();
+      removeModalMaskDisplay();
     });
   };
 
