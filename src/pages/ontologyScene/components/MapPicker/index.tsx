@@ -471,6 +471,8 @@ const GlobalMapPickerModal = () => {
         clearGlobalMapPickerRequest();
       }}
       className={styles.modal}
+      // 弹窗上面叠加弹窗，提高地图弹窗的层高
+      wrapClassName={'!z-[9999]'}
       getPopupContainer={request?.getPopupContainer || (() => document.body)}
     >
       <div className={'flex h-full w-full flex-col'}>
