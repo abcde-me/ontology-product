@@ -109,7 +109,6 @@ export const useColumns = ({
             )}
             <Button
               type="text"
-              status="danger"
               size="small"
               className="p-0"
               onClick={() => onDelete(record.id)}
