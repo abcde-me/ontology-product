@@ -126,6 +126,19 @@ export const menus: MenuModel[] = [
   },
   {
     type: 'itemGroup',
+    title: '数据链接',
+    key: 'DataConnection',
+    children: [
+      {
+        title: '数据源管理',
+        icon: <IconMdpDatasetMgmt className={iconClass} />,
+        key: 'DataSourceManagement',
+        path: '/tenant/compute/onto/dataConnection/dataSource'
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
     title: '业务自动化',
     key: 'BusinessAutomation',
     children: [
