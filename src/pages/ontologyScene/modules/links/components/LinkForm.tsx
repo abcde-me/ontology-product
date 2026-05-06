@@ -1156,7 +1156,8 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                     } else {
                       callback();
                     }
-                  }
+                  },
+                  validateTrigger: []
                 }
               ]}
             >
