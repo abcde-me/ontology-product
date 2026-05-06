@@ -875,7 +875,21 @@ export const ModaForgeResourceEndpoints = {
   // 获取规则快照
   GetAutoExecLogRuleSnapshotApi: PrefixAimdp + '/GetAutoExecLogRuleSnapshot',
   // 获取今日统计
-  GetAutoLogStatsApi: PrefixAimdp + '/GetAutoLogStats'
+  GetAutoLogStatsApi: PrefixAimdp + '/GetAutoLogStats',
+
+  // ===================== 数据源管理相关 =====================
+  // 创建数据源连接器
+  CreateConnectorApi: '/ontology-manager/api/v1/CreateConnector',
+  // 获取数据源列表
+  ListConnectorsApi: '/ontology-manager/api/v1/ListConnectors',
+  // 获取数据源详情
+  GetConnectorApi: '/ontology-manager/api/v1/GetConnector',
+  // 更新数据源
+  EditConnectorApi: '/ontology-manager/api/v1/EditConnector',
+  // 删除数据源
+  DeleteConnectorApi: '/ontology-manager/api/v1/DeleteConnector',
+  // 测试数据源连接
+  TestConnectorApi: '/ontology-manager/api/v1/TestConnector'
 };
 
 /**

@@ -14,7 +14,8 @@ import { DataSourceType, ConnectionStatus } from './types';
 import {
   fetchDataSourceList,
   deleteDataSource,
-  testConnection
+  testConnection,
+  getDataSourceDetail
 } from './services/api';
 import styles from './index.module.scss';
 
@@ -136,9 +137,16 @@ export default function DataSourceManagement() {
   };
 
   // 处理查看详情
-  const handleViewDetail = (record: DataSourceItem) => {
-    setDetailRecord(record);
-    setDetailVisible(true);
+  const handleViewDetail = async (record: DataSourceItem) => {
+    try {
+      // 调用接口获取详细信息
+      const detail = await getDataSourceDetail(record.id);
+      setDetailRecord(detail);
+      setDetailVisible(true);
+    } catch (error) {
+      Message.error('获取详情失败');
+      console.error(error);
+    }
   };
 
   // 处理表格变化（筛选）
