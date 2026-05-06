@@ -66,8 +66,7 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
         port: port || 3306,
         database: database || '',
         username: 'admin',
-        password: '******',
-        databaseIdentifier: ''
+        password: '******'
       });
     } else if (visible && !editingRecord) {
       // 新增模式：重置表单
@@ -110,27 +109,21 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
 
   const handleTestConnection = async () => {
     try {
-      // 验证表单
-      await form.validate();
-      const values = form.getFieldsValue();
+      // 如果是编辑模式，直接使用 id 测试
+      if (isEdit && editingRecord) {
+        setTestLoading(true);
+        const result = await testConnection(editingRecord.id);
 
-      setTestLoading(true);
-
-      const result = await testConnection(
-        isEdit && editingRecord ? editingRecord.id : undefined,
-        values as DataSourceFormData
-      );
-
-      if (result.success) {
-        Message.success(result.message);
+        if (result.success) {
+          Message.success(result.message);
+        } else {
+          Message.error(result.message);
+        }
       } else {
-        Message.error(result.message);
+        // 新增模式暂不支持测试（需要先保存）
+        Message.warning('请先保存数据源后再进行连接测试');
       }
     } catch (error: any) {
-      if (error?.errors) {
-        Message.warning('请先完善表单信息');
-        return;
-      }
       Message.error('连接测试失败');
       console.error(error);
     } finally {
@@ -253,9 +246,6 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
           rules={[{ required: true, message: '请输入密码' }]}
         >
           <Input.Password placeholder="请输入密码" />
-        </FormItem>
-        <FormItem label="数据库标识" field="databaseIdentifier">
-          <Input placeholder="请输入数据库标识" />
         </FormItem>
       </Form>
     </Drawer>

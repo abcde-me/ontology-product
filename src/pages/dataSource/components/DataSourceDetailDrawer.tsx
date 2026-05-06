@@ -127,17 +127,6 @@ export const DataSourceDetailDrawer: React.FC<DataSourceDetailDrawerProps> = ({
             </div>
           </div>
 
-          {dataSource.databaseIdentifier && (
-            <div className="flex items-start leading-[22px]">
-              <div className="w-[100px] flex-shrink-0 text-sm font-normal text-[#86909c]">
-                数据库标识：
-              </div>
-              <div className="flex-1 break-all text-sm text-[#1d2129]">
-                {dataSource.databaseIdentifier}
-              </div>
-            </div>
-          )}
-
           <Divider />
 
           <div className="flex items-start leading-[22px]">

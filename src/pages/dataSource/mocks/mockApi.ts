@@ -206,11 +206,19 @@ export const updateDataSource = async (
  * 测试数据源连接
  */
 export const testConnection = async (
-  id?: string,
-  data?: DataSourceFormData
+  id: string
 ): Promise<{ success: boolean; message: string }> => {
   // 模拟网络延迟
   await new Promise((resolve) => setTimeout(resolve, 1200));
+
+  // 检查数据源是否存在
+  const item = dataStore.find((d) => d.id === id);
+  if (!item) {
+    return {
+      success: false,
+      message: '数据源不存在'
+    };
+  }
 
   // 随机成功或失败
   const random = Math.random();

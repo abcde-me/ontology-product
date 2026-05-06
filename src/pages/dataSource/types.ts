@@ -19,7 +19,6 @@ export interface DataSourceItem {
   dataSourceType: DataSourceType;
   connectionInfo: string;
   connectionStatus: ConnectionStatus;
-  databaseIdentifier?: string;
   creator?: string;
   creatorOrg?: string;
   createTime: string;
@@ -53,5 +52,4 @@ export interface DataSourceFormData {
   database?: string;
   username: string;
   password: string;
-  databaseIdentifier?: string;
 }
