@@ -64,6 +64,15 @@ interface BackendOperationResponse {
 }
 
 /**
+ * 后端删除返回数据
+ */
+interface BackendDeleteResponse {
+  data: {
+    deleted: number; // 删除失败-0；删除成功-1
+  };
+}
+
+/**
  * 转换后端数据源项为前端格式
  */
 const transformBackendItem = (item: BackendDataSourceItem): DataSourceItem => ({
@@ -134,10 +143,11 @@ export const deleteDataSource = async (id: string): Promise<void> => {
 
   // 真实 API 调用
   const result = await connectorApi.deleteConnector(Number(id));
-  const backendData = result as BackendOperationResponse;
+  const backendData = result as BackendDeleteResponse;
 
-  if (backendData.status !== 'succeed') {
-    throw new Error(backendData.message || '删除失败');
+  // 根据 deleted 字段判断是否成功：0-失败，1-成功
+  if (backendData.data?.deleted !== 1) {
+    throw new Error('删除失败');
   }
 };
 
