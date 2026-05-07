@@ -15,7 +15,7 @@ const API_PREFIX = '/ceai';
 export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
-export const PrefixAimdp = API_PREFIX + '/aimdp-manager/api/v1';
+export const PrefixAimdp = '/ontology-manager/api/v1'; // TODO: 加ceai
 export const PrefixLabelService = API_PREFIX + '/label-service/api/v1';
 export const PrefixUserCenter = API_PREFIX + '/user-space/api/v1';
 export const ResourceEndpointsV2 = {
@@ -879,17 +879,17 @@ export const ModaForgeResourceEndpoints = {
 
   // ===================== 数据源管理相关 =====================
   // 创建数据源连接器
-  CreateConnectorApi: '/ontology-manager/api/v1/CreateConnector',
+  CreateConnectorApi: PrefixAimdp + '/CreateConnector',
   // 获取数据源列表
-  ListConnectorsApi: '/ontology-manager/api/v1/ListConnectors',
+  ListConnectorsApi: PrefixAimdp + '/ListConnectors',
   // 获取数据源详情
-  GetConnectorApi: '/ontology-manager/api/v1/GetConnector',
+  GetConnectorApi: PrefixAimdp + '/GetConnector',
   // 更新数据源
-  EditConnectorApi: '/ontology-manager/api/v1/EditConnector',
+  EditConnectorApi: PrefixAimdp + '/EditConnector',
   // 删除数据源
-  DeleteConnectorApi: '/ontology-manager/api/v1/DeleteConnector',
+  DeleteConnectorApi: PrefixAimdp + '/DeleteConnector',
   // 测试数据源连接
-  TestConnectorApi: '/ontology-manager/api/v1/TestConnector'
+  TestConnectorApi: PrefixAimdp + '/TestConnector'
 };
 
 /**

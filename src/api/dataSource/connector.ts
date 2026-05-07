@@ -24,10 +24,10 @@ export interface CreateConnectorParams {
 export interface ListConnectorsParams {
   type: 'sql'; // 数据源类型，固定为 "sql"
   name?: string; // 根据连接器名称搜索，模糊匹配
-  subtype?: string; // 数据源子类型：mysql、dameng、postgresql
-  page?: string; // 页码，默认 1
-  page_size?: string; // 每页数量
-  status?: string; // 连接状态：succeed、failed
+  subtype?: string | string[]; // 数据源子类型：mysql、dameng、postgresql，支持数组
+  page?: number; // 页码，默认 1
+  page_size?: number; // 每页数量
+  status?: string | string[]; // 连接状态：succeed、failed，支持数组
   sort_by?: 'create_time' | 'update_time'; // 排序字段，默认 create_time
   sort?: 'asc' | 'desc'; // 排序方式，默认 desc
 }
@@ -105,7 +105,7 @@ export async function createConnector(params: CreateConnectorParams) {
     .post(params)
     .inRegion()
     .do();
-  return res.data;
+  return res;
 }
 
 /**
@@ -113,7 +113,7 @@ export async function createConnector(params: CreateConnectorParams) {
  */
 export async function listConnectors(params: ListConnectorsParams) {
   const res = await UAPI.RES.ListConnectorsApi({}).post(params).inRegion().do();
-  return res.data;
+  return res;
 }
 
 /**
@@ -121,7 +121,7 @@ export async function listConnectors(params: ListConnectorsParams) {
  */
 export async function getConnector(id: number) {
   const res = await UAPI.RES.GetConnectorApi({}).post({ id }).inRegion().do();
-  return res.data;
+  return res;
 }
 
 /**
@@ -129,7 +129,7 @@ export async function getConnector(id: number) {
  */
 export async function updateConnector(params: UpdateConnectorParams) {
   const res = await UAPI.RES.EditConnectorApi({}).post(params).inRegion().do();
-  return res.data;
+  return res;
 }
 
 /**
@@ -140,7 +140,7 @@ export async function deleteConnector(id: number) {
     .post({ id })
     .inRegion()
     .do();
-  return res.data;
+  return res;
 }
 
 /**
@@ -148,5 +148,5 @@ export async function deleteConnector(id: number) {
  */
 export async function testConnector(id: number) {
   const res = await UAPI.RES.TestConnectorApi({}).post({ id }).inRegion().do();
-  return res.data;
+  return res;
 }

@@ -81,6 +81,23 @@ module.exports = function (app) {
       })
     );
     app.use(
+      ['/ontology-manager/api/v1'],
+      createProxyMiddleware({
+        target: 'http://10.252.216.16:30281',
+        changeOrigin: true,
+        secure: false,
+        logger: console,
+        pathRewrite: (path, req) => {
+          // todo 待删除 test
+          if (currentTarget === targets['test']) {
+            return path;
+          }
+
+          return req.baseUrl + req.url;
+        }
+      })
+    );
+    app.use(
       ['/metadata-service/api/v1'],
       createProxyMiddleware({
         target: 'http://10.252.216.16:30895',

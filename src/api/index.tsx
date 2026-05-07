@@ -40,6 +40,17 @@ UAPI_CONFIG.addRequestInterceptor(
     // 尝试获取 token（如果有的话）
     const consolePluginToken = getLoginToken();
     const projectId = useUserInfoStore.getState().projectId;
+
+    // 本地开发环境添加测试用户 header
+    if (
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1'
+    ) {
+      if (config.headers) {
+        config.headers['X-Ceai-User-Id'] = 'user-gqj121nu';
+      }
+    }
+
     // config.headers['Access-Control-Allow-Origin'] = '*';
     //配置自定义请求头
     if (config.headers && !config.headers?.['x-auth-validate'])

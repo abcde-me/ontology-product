@@ -65,6 +65,7 @@ export default function DataSourceManagement() {
         connectionStatuses:
           connectionStatusFilter.length > 0 ? connectionStatusFilter : undefined
       });
+      console.log('result', result);
 
       return {
         data: {
@@ -92,8 +93,10 @@ export default function DataSourceManagement() {
           await deleteDataSource(id);
           Message.success('删除成功');
           refresh();
-        } catch (error) {
-          Message.error('删除失败');
+        } catch (error: any) {
+          // 显示后端返回的错误消息
+          const errorMessage = error?.message || '删除失败';
+          Message.error(errorMessage);
           console.error(error);
         }
       }
@@ -112,8 +115,10 @@ export default function DataSourceManagement() {
       } else {
         Message.error(result.message);
       }
-    } catch (error) {
-      Message.error('连接测试失败');
+    } catch (error: any) {
+      // 显示后端返回的错误消息
+      const errorMessage = error?.message || '连接测试失败';
+      Message.error(errorMessage);
       console.error(error);
     } finally {
       setTestingIds((prev) => {
@@ -125,9 +130,18 @@ export default function DataSourceManagement() {
   };
 
   // 处理编辑
-  const handleEdit = (record: DataSourceItem) => {
-    setEditingRecord(record);
-    setDrawerVisible(true);
+  const handleEdit = async (record: DataSourceItem) => {
+    try {
+      // 调用详情接口获取完整数据（包括密码）
+      const detail = await getDataSourceDetail(record.id);
+      setEditingRecord(detail);
+      setDrawerVisible(true);
+    } catch (error: any) {
+      // 显示后端返回的错误消息
+      const errorMessage = error?.message || '获取数据源详情失败';
+      Message.error(errorMessage);
+      console.error(error);
+    }
   };
 
   // 处理新增
@@ -143,8 +157,10 @@ export default function DataSourceManagement() {
       const detail = await getDataSourceDetail(record.id);
       setDetailRecord(detail);
       setDetailVisible(true);
-    } catch (error) {
-      Message.error('获取详情失败');
+    } catch (error: any) {
+      // 显示后端返回的错误消息
+      const errorMessage = error?.message || '获取详情失败';
+      Message.error(errorMessage);
       console.error(error);
     }
   };

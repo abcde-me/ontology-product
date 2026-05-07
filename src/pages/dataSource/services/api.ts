@@ -31,8 +31,8 @@ interface BackendDataSourceItem {
   };
   creator?: string;
   creator_org?: string;
-  create_time: string;
-  update_time: string;
+  created_time: string; // 后端返回的是 created_time
+  updated_time: string; // 后端返回的是 updated_time
   status: string;
 }
 
@@ -40,12 +40,10 @@ interface BackendDataSourceItem {
  * 后端列表返回数据
  */
 interface BackendListResponse {
-  data: {
-    items: BackendDataSourceItem[];
-    total: number;
-    page: number;
-    page_size: number;
-  };
+  items: BackendDataSourceItem[];
+  total: number;
+  page: number;
+  page_size: number;
 }
 
 /**
@@ -56,20 +54,37 @@ interface BackendDetailResponse {
 }
 
 /**
+ * 后端通用返回数据
+ */
+interface BackendBaseResponse {
+  code: string; // 错误码，空字符串表示成功，有值表示失败
+  message: string; // 消息
+  status: number; // HTTP 状态码
+  requestId: string; // 请求ID
+}
+
+/**
  * 后端操作返回数据
  */
 interface BackendOperationResponse {
-  status: string;
-  message?: string;
+  code: string; // 错误码
+  message: string; // 消息
+  data: any;
+  status: string; // 连接状态：succeed、failed
+  requestId: string; // 请求ID
 }
 
 /**
  * 后端删除返回数据
  */
 interface BackendDeleteResponse {
+  code: string; // 错误码
+  message: string; // 消息
   data: {
     deleted: number; // 删除失败-0；删除成功-1
-  };
+  } | null;
+  status: number; // HTTP 状态码
+  requestId: string; // 请求ID
 }
 
 /**
@@ -84,8 +99,9 @@ const transformBackendItem = (item: BackendDataSourceItem): DataSourceItem => ({
   connectionStatus: ConnectionStatusMap[item.status] || item.status,
   creator: item.creator,
   creatorOrg: item.creator_org,
-  createTime: item.create_time,
-  updateTime: item.update_time
+  createTime: item.created_time, // 映射 created_time 到 createTime
+  updateTime: item.updated_time, // 映射 updated_time 到 updateTime
+  config: item.config // 保留 config 信息，用于编辑时获取真实密码
 });
 
 /**
@@ -102,34 +118,54 @@ export const fetchDataSourceList = async (
   const apiParams: connectorApi.ListConnectorsParams = {
     type: 'sql',
     name: params.filter,
-    page: String(params.pageNo),
-    page_size: String(params.pageSize),
+    page: params.pageNo,
+    page_size: params.pageSize,
     sort_by: 'create_time',
     sort: 'desc'
   };
 
-  // 处理数据源类型筛选（多选）
+  // 处理数据源类型筛选（支持多选）
   if (params.dataSourceTypes && params.dataSourceTypes.length > 0) {
-    // 如果有多个类型，只取第一个（后端不支持多选）
-    const frontendType = params.dataSourceTypes[0] as DataSourceType;
-    apiParams.subtype = DataSourceTypeMap[frontendType];
+    // 将前端类型映射为后端类型
+    const backendTypes = params.dataSourceTypes.map(
+      (type) => DataSourceTypeMap[type as DataSourceType]
+    );
+    // 如果只有一个，传字符串；多个则传数组
+    apiParams.subtype =
+      backendTypes.length === 1 ? backendTypes[0] : backendTypes;
   }
 
-  // 处理连接状态筛选（多选）
+  // 处理连接状态筛选（支持多选）
   if (params.connectionStatuses && params.connectionStatuses.length > 0) {
-    // 如果有多个状态，只取第一个（后端不支持多选）
-    const frontendStatus = params.connectionStatuses[0];
-    apiParams.status = frontendStatus === 'success' ? 'succeed' : 'failed';
+    // 将前端状态映射为后端状态
+    const backendStatuses = params.connectionStatuses.map((status) =>
+      status === 'success' ? 'succeed' : 'failed'
+    );
+    // 如果只有一个，传字符串；多个则传数组
+    apiParams.status =
+      backendStatuses.length === 1 ? backendStatuses[0] : backendStatuses;
   }
 
+  console.log('📤 请求参数:', apiParams);
   const result = await connectorApi.listConnectors(apiParams);
-  const backendData = result as BackendListResponse;
+  console.log('📥 原始响应:', result);
+
+  // 检查是否有错误
+  if (result.code) {
+    throw new Error(result.message || '获取数据源列表失败');
+  }
+
+  const backendData = result.data as BackendListResponse;
+  console.log('📊 解析后的数据:', backendData);
+
+  const transformedItems = (backendData.items || []).map(transformBackendItem);
+  console.log('✅ 转换后的数据:', transformedItems);
 
   return {
-    items: (backendData.data?.items || []).map(transformBackendItem),
-    total: backendData.data?.total || 0,
-    pageNo: backendData.data?.page || params.pageNo,
-    pageSize: backendData.data?.page_size || params.pageSize
+    items: transformedItems,
+    total: backendData.total || 0,
+    pageNo: backendData.page || params.pageNo,
+    pageSize: backendData.page_size || params.pageSize
   };
 };
 
@@ -141,13 +177,23 @@ export const deleteDataSource = async (id: string): Promise<void> => {
     return mockApi.deleteDataSource(id);
   }
 
-  // 真实 API 调用
-  const result = await connectorApi.deleteConnector(Number(id));
-  const backendData = result as BackendDeleteResponse;
+  try {
+    const result = await connectorApi.deleteConnector(Number(id));
 
-  // 根据 deleted 字段判断是否成功：0-失败，1-成功
-  if (backendData.data?.deleted !== 1) {
-    throw new Error('删除失败');
+    // 检查返回的 code 字段，如果有值说明失败
+    if (result.code) {
+      throw new Error(result.message || '删除失败');
+    }
+
+    // 检查 deleted 字段：0-失败，1-成功
+    if (result.data?.deleted !== 1) {
+      throw new Error(result.message || '删除失败');
+    }
+  } catch (error: any) {
+    // 如果是 axios 错误，提取 message
+    const message =
+      error?.response?.data?.message || error?.message || '删除失败';
+    throw new Error(message);
   }
 };
 
@@ -156,29 +202,38 @@ export const deleteDataSource = async (id: string): Promise<void> => {
  */
 export const addDataSource = async (
   data: DataSourceFormData
-): Promise<DataSourceItem> => {
+): Promise<void> => {
   if (USE_MOCK) {
-    return mockApi.addDataSource(data);
+    await mockApi.addDataSource(data);
+    return;
   }
 
-  // 真实 API 调用
-  const subtype = DataSourceTypeMap[data.dataSourceType];
-  const result = await connectorApi.createConnector({
-    name: data.name,
-    type: 'sql',
-    subtype,
-    description: data.description,
-    config: {
-      host: data.host,
-      port: String(data.port),
-      user: data.username,
-      password: data.password,
-      database: data.database
-    }
-  });
+  try {
+    const subtype = DataSourceTypeMap[data.dataSourceType];
+    const result = await connectorApi.createConnector({
+      name: data.name,
+      type: 'sql',
+      subtype,
+      description: data.description,
+      config: {
+        host: data.host,
+        port: String(data.port),
+        user: data.username,
+        password: data.password,
+        database: data.database
+      }
+    });
 
-  const backendData = result as BackendDataSourceItem;
-  return transformBackendItem(backendData);
+    // 检查返回的 code 字段，如果有值说明失败
+    if (result.code) {
+      throw new Error(result.message || '新增数据源失败');
+    }
+  } catch (error: any) {
+    // 如果是 axios 错误，提取 message
+    const message =
+      error?.response?.data?.message || error?.message || '新增数据源失败';
+    throw new Error(message);
+  }
 };
 
 /**
@@ -187,30 +242,39 @@ export const addDataSource = async (
 export const updateDataSource = async (
   id: string,
   data: DataSourceFormData
-): Promise<DataSourceItem> => {
+): Promise<void> => {
   if (USE_MOCK) {
-    return mockApi.updateDataSource(id, data);
+    await mockApi.updateDataSource(id, data);
+    return;
   }
 
-  // 真实 API 调用
-  const subtype = DataSourceTypeMap[data.dataSourceType];
-  const result = await connectorApi.updateConnector({
-    id: Number(id),
-    name: data.name,
-    type: 'sql',
-    subtype,
-    description: data.description,
-    config: {
-      host: data.host,
-      port: String(data.port),
-      user: data.username,
-      password: data.password,
-      database: data.database
-    }
-  });
+  try {
+    const subtype = DataSourceTypeMap[data.dataSourceType];
+    const result = await connectorApi.updateConnector({
+      id: Number(id),
+      name: data.name,
+      type: 'sql',
+      subtype,
+      description: data.description,
+      config: {
+        host: data.host,
+        port: String(data.port),
+        user: data.username,
+        password: data.password,
+        database: data.database
+      }
+    });
 
-  const backendData = result as BackendDataSourceItem;
-  return transformBackendItem(backendData);
+    // 检查返回的 code 字段，如果有值说明失败
+    if (result.code) {
+      throw new Error(result.message || '更新数据源失败');
+    }
+  } catch (error: any) {
+    // 如果是 axios 错误，提取 message
+    const message =
+      error?.response?.data?.message || error?.message || '更新数据源失败';
+    throw new Error(message);
+  }
 };
 
 /**
@@ -223,15 +287,32 @@ export const testConnection = async (
     return mockApi.testConnection(id);
   }
 
-  // 真实 API 调用
-  const result = await connectorApi.testConnector(Number(id));
-  const backendData = result as BackendOperationResponse;
-  const isSuccess = backendData.status === 'succeed';
+  try {
+    const result = await connectorApi.testConnector(Number(id));
 
-  return {
-    success: isSuccess,
-    message: isSuccess ? '连接成功' : '连接失败'
-  };
+    // 检查返回的 code 字段，如果有值说明失败
+    if (result.code) {
+      return {
+        success: false,
+        message: result.message || '连接测试失败'
+      };
+    }
+
+    // 检查 status 字段
+    const isSuccess = result.data?.status === 'succeed';
+    return {
+      success: isSuccess,
+      message: result.message || (isSuccess ? '连接成功' : '连接失败')
+    };
+  } catch (error: any) {
+    // 如果是 axios 错误，提取 message
+    const message =
+      error?.response?.data?.message || error?.message || '连接测试失败';
+    return {
+      success: false,
+      message
+    };
+  }
 };
 
 /**
@@ -246,8 +327,12 @@ export const getDataSourceDetail = async (
 
   // 真实 API 调用
   const result = await connectorApi.getConnector(Number(id));
-  const backendData = result as BackendDetailResponse;
-  const item = backendData.data || (result as BackendDataSourceItem);
 
+  // 检查是否有错误
+  if (result.code) {
+    throw new Error(result.message || '获取数据源详情失败');
+  }
+
+  const item = result.data;
   return transformBackendItem(item);
 };
