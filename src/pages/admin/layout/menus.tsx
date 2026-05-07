@@ -9,7 +9,8 @@ import {
   USER_GROUP_PERMISSIONS,
   ROLE_PERMISSIONS,
   PROJECT_PERMISSIONS,
-  AUTOMATION_PERMISSIONS
+  AUTOMATION_PERMISSIONS,
+  DATA_SOURCE_PERMISSIONS
 } from '@/config/permissions';
 import OntologyLibrary from '@/assets/sider/ontology-library.svg';
 import OrganMenu from '@/assets/sider/organmenu.svg';
@@ -133,7 +134,8 @@ export const menus: MenuModel[] = [
         title: '数据源管理',
         icon: <IconMdpDatasetMgmt className={iconClass} />,
         key: 'DataSourceManagement',
-        path: '/tenant/compute/onto/dataConnection/dataSource'
+        path: '/tenant/compute/onto/dataConnection/dataSource',
+        permission: DATA_SOURCE_PERMISSIONS.LIST
       }
     ]
   },

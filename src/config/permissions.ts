@@ -21,6 +21,14 @@ export const AUTOMATION_PERMISSIONS = {
   DELETE: 'aimdp-manager:rule:manage:delete'
 };
 
+// 数据源管理权限
+export const DATA_SOURCE_PERMISSIONS = {
+  LIST: 'ontology:connector:read:get', // 菜单权限
+  CREATE: 'ontology:connector:manage:create',
+  MODIFY: 'ontology:connector:manage:modify',
+  DELETE: 'ontology:connector:manage:delete'
+} as const;
+
 // 需求管理权限
 export const REQUIREMENT_PERMISSIONS = {
   LIST: 'aimdp-manager:label_req_manager:read:get_req_list', // 菜单权限

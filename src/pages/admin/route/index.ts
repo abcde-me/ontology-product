@@ -9,7 +9,8 @@ import {
   ROLE_PERMISSIONS,
   USER_GROUP_PERMISSIONS,
   PROJECT_PERMISSIONS,
-  API_KEY_PERMISSIONS
+  API_KEY_PERMISSIONS,
+  DATA_SOURCE_PERMISSIONS
 } from '@/config/permissions';
 import { ONTOLOGY_SCENE_MENU_ITEM_KEYS } from '@/common/constants';
 
@@ -154,6 +155,7 @@ export const routes: IRoute[] = [
     name: 'dataSourceManagement',
     key: '/tenant/compute/onto/dataConnection/dataSource',
     component: React.lazy(async () => import('../../dataSource')),
+    permission: DATA_SOURCE_PERMISSIONS.LIST,
     children: []
   },
   // 运营中心页面
