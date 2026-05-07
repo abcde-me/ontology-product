@@ -1,5 +1,7 @@
 import React from 'react';
 import { Drawer } from '@arco-design/web-react';
+import dayjs from 'dayjs';
+import { GlobalTooltip } from '@ceai-front/arco-material';
 import type { DataSourceItem } from '../types';
 import { DataSourceType } from '../types';
 
@@ -44,22 +46,6 @@ export const DataSourceDetailDrawer: React.FC<DataSourceDetailDrawerProps> = ({
   // 从 config 中获取用户名
   const username = dataSource.config?.user || '-';
 
-  // 格式化时间
-  const formatTime = (timeStr: string) => {
-    try {
-      const date = new Date(timeStr);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      const seconds = String(date.getSeconds()).padStart(2, '0');
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    } catch (e) {
-      return timeStr;
-    }
-  };
-
   // 数据源类型映射
   const getDataSourceTypeTag = (type: DataSourceType) => {
     const typeMap = {
@@ -92,9 +78,10 @@ export const DataSourceDetailDrawer: React.FC<DataSourceDetailDrawerProps> = ({
         {/* 标题区域 */}
         <div className="flex flex-col gap-1">
           <div className="flex h-8 items-center gap-2">
-            <p className="overflow-hidden text-ellipsis whitespace-nowrap text-xl font-semibold leading-[30px] text-[#0f172a]">
-              {dataSource.name}
-            </p>
+            <GlobalTooltip.Ellipsis
+              text={dataSource.name}
+              className="text-xl font-semibold leading-[30px] text-[#0f172a]"
+            />
             {getDataSourceTypeTag(dataSource.dataSourceType)}
           </div>
         </div>
@@ -166,7 +153,7 @@ export const DataSourceDetailDrawer: React.FC<DataSourceDetailDrawerProps> = ({
             </div>
             <div className="flex w-full items-center gap-2">
               <p className="min-w-px flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm leading-[22px] text-[#292f42]">
-                {formatTime(dataSource.updateTime)}
+                {dayjs(dataSource.updateTime).format('YYYY-MM-DD HH:mm:ss')}
               </p>
             </div>
           </div>

@@ -194,7 +194,7 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
             { maxLength: 100, message: '数据源名称不能超过100个字符' }
           ]}
         >
-          <Input placeholder="请输入数据源名称" maxLength={100} />
+          <Input placeholder="请输入数据源名称" showWordLimit maxLength={100} />
         </FormItem>
         <FormItem
           label="数据源类型"
