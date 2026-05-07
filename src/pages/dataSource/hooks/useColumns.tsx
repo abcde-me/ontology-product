@@ -3,6 +3,7 @@ import { Button, Space } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
 import { DotStatus } from '@ceai-front/arco-material';
 import { ContentWithCopy } from '@/components/ContentWithCopy';
+import dayjs from 'dayjs';
 import type { DataSourceItem } from '../types';
 import { DataSourceType, ConnectionStatus } from '../types';
 
@@ -79,7 +80,10 @@ export const useColumns = ({
       {
         title: '创建时间',
         dataIndex: 'createTime',
-        width: 180
+        width: 180,
+        render: (time: string) => {
+          return dayjs(time).format('YYYY-MM-DD HH:mm:ss');
+        }
       },
       {
         title: '操作',

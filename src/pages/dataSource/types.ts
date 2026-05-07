@@ -23,6 +23,14 @@ export interface DataSourceItem {
   creatorOrg?: string;
   createTime: string;
   updateTime: string;
+  // 添加 config 字段，用于编辑时获取真实的用户名和密码
+  config?: {
+    host: string;
+    port: string;
+    user: string;
+    password: string;
+    database?: string;
+  };
 }
 
 // API 响应
