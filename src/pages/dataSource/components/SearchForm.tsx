@@ -2,6 +2,8 @@ import React from 'react';
 import { Form, Input, Button } from '@arco-design/web-react';
 import { IconSearch, IconPlus } from '@arco-design/web-react/icon';
 import { FormInstance } from '@arco-design/web-react';
+import { PermissionWrapper } from '@/components/PermissionGuard/PermissionWrapper';
+import { DATA_SOURCE_PERMISSIONS } from '@/config/permissions';
 
 interface SearchFormProps {
   form: FormInstance;
@@ -29,9 +31,11 @@ export const SearchForm: React.FC<SearchFormProps> = ({
         </Form.Item>
       </Form>
       {onAdd && (
-        <Button type="primary" icon={<IconPlus />} onClick={onAdd}>
-          新增
-        </Button>
+        <PermissionWrapper permission={DATA_SOURCE_PERMISSIONS.CREATE}>
+          <Button type="primary" icon={<IconPlus />} onClick={onAdd}>
+            新增
+          </Button>
+        </PermissionWrapper>
       )}
     </div>
   );
