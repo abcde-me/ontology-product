@@ -16,6 +16,7 @@ export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = API_PREFIX + '/aimdp-manager/api/v1';
+export const PrefixOntologyManager = API_PREFIX + '/ontology-manager/api/v1';
 export const PrefixLabelService = API_PREFIX + '/label-service/api/v1';
 export const PrefixUserCenter = API_PREFIX + '/user-space/api/v1';
 export const ResourceEndpointsV2 = {
@@ -346,6 +347,20 @@ export const ModaForgeResourceEndpoints = {
   editconnection: PrefixAimdp + '/EditConnector',
   // 查看连接器详情数据
   getconnection: PrefixAimdp + '/GetConnector',
+  // 获取 SQL 连接器列表
+  ListOntologyConnectorsApi: PrefixOntologyManager + '/ListConnectors',
+  // 获取 SQL 连接器库表
+  ListSqlConnectorDBAndTablesApi:
+    PrefixOntologyManager + '/ListSqlConnectorDBAndTables',
+  // 获取 SQL 连接器表 Schema
+  GetSqlConnectorTableSchemaApi:
+    PrefixOntologyManager + '/GetSqlConnectorTableSchema',
+  // 获取转换为 TiDB 类型的 SQL 连接器表 Schema
+  GetSqlConnectorTableSchemaToTIDBApi:
+    PrefixOntologyManager + '/GetSqlConnectorTableSchemaToTIDB',
+  // 映射对象类型字段与数据源表字段
+  MapOntologyObjectTypeColumnsApi:
+    PrefixOntologyManager + '/MapOntologyObjectTypeColumns',
 
   // 数据载入接口
 
