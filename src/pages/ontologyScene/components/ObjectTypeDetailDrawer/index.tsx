@@ -577,7 +577,13 @@ export default function ObjectTypeDetailDrawer({
       width: columnWidth,
       ellipsis: true,
       render: (text: string) => {
-        return <GlobalTooltip.Ellipsis text={text || '-'} />;
+        // 只有 null、undefined 或空字符串时显示 '-'
+        // 0 会正常显示
+        const displayText =
+          text === null || text === undefined || text === ''
+            ? '-'
+            : String(text);
+        return <GlobalTooltip.Ellipsis text={displayText} />;
       }
     }));
   };
