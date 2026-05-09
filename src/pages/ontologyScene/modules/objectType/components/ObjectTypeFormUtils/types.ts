@@ -1,4 +1,8 @@
-import { CreateOntologyPhysicalProperty, SourceType } from '@/types/objectType';
+import {
+  CreateOntologyPhysicalProperty,
+  OntologyPhysicalPropertiesList,
+  SourceType
+} from '@/types/objectType';
 import { DataSourceType } from '@/pages/ontologyScene/common/constants';
 
 export interface FileData {
@@ -22,12 +26,74 @@ export interface AttributeField extends CreateOntologyPhysicalProperty {
   _vectorPropertyId?: string | number;
 }
 
+export interface SqlSourceDataInfo {
+  connectorId?: number;
+  connectorName?: string;
+  connectorSubtype?: string;
+  databaseName?: string;
+  tableName?: string;
+  queryMode: 'selected' | 'sql';
+  sql?: string;
+}
+
+export interface SourceTableField {
+  fieldId: string;
+  fieldComment: string;
+  fieldType: string;
+}
+
+export interface ObjectTypeAttributeField {
+  key: string;
+  propertyID: string;
+  propertyComment: string;
+  propertyType: string;
+  isPrimary: 1 | 0;
+  isStoreAsPublic: 1 | 0;
+  publicPropertyID?: number;
+  isVector?: 1 | 0;
+  sourceColumnName: string;
+  sourceColumnComment: string;
+  _storedPublicPropertyId?: number;
+  _vectorizationOn?: boolean;
+  _vectorComment?: string;
+  _vectorPropertyId?: string | number;
+}
+
+export interface InstanceSyncMappingField {
+  key: string;
+  sourceColumnName?: string;
+  sourceColumnComment?: string;
+  sourceColumnType?: string;
+  propertyID: string;
+  propertyComment: string;
+  propertyType: string;
+  isPrimary: 1 | 0;
+  isVector: 1 | 0;
+}
+
 export interface ObjectTypeDataSourceState {
   type: DataSourceType;
+  connectorId?: number;
+  connectorName?: string;
+  connectorSubtype?: string;
   database?: string;
   table?: string;
   file?: any;
   filePath?: string;
+  queryMode?: 'selected' | 'sql';
+  sql?: string;
+}
+
+export interface SyncSourceDataStrategyFormState {
+  sourceDataInfo: SqlSourceDataInfo;
+  mode: string;
+  conflictStrategy: string;
+  syncScope: string;
+  pollFetchSize: number;
+  parallelism: number;
+  exceptionStrategy: string;
+  jdbcSyncSqlFull?: string;
+  jdbcSyncSqlIncrement?: string;
 }
 
 export interface ObjectTypeFormData {
@@ -40,7 +106,14 @@ export interface ObjectTypeFormData {
   originalDbName: string;
   originalTableName: string;
   sourceType?: SourceType;
-  ontologyPhysicalPropertiesList?: CreateOntologyPhysicalProperty[];
+  ontologyPhysicalPropertiesList?:
+    | CreateOntologyPhysicalProperty[]
+    | OntologyPhysicalPropertiesList[];
+  objectTypeAttributes?: ObjectTypeAttributeField[];
+  sourceDataInfo?: SqlSourceDataInfo;
+  enableSyncSourceData?: boolean;
+  syncSourceDataStrategy?: SyncSourceDataStrategyFormState;
+  syncMappingFields?: InstanceSyncMappingField[];
   isReUpload?: boolean;
   // 内部使用的字段
   _dataSource?: ObjectTypeDataSourceState;

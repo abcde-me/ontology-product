@@ -177,6 +177,104 @@ export enum SourceType {
   FILE_UPLOAD = 2
 }
 
+export interface SourceDataInfo {
+  /**
+   * 数据源id（连接器id）
+   */
+  connectorId?: number;
+  /**
+   * 数据库名称
+   */
+  databaseName?: string;
+  /**
+   * 数据源查询模式，“selected”：选择数据表，“sql”：自定义sql
+   */
+  queryMode: 'selected' | 'sql' | string;
+  /**
+   * 自定义sql
+   */
+  sql?: string;
+  /**
+   * 数据表名称
+   */
+  tableName?: string;
+}
+
+export interface OntologyPhysicalPropertiesList {
+  /**
+   * 是否主键，1：是，0：否
+   */
+  isPrimary?: number;
+  /**
+   * 是否向量化，1：是，0：否
+   */
+  isVector: number;
+  /**
+   * 属性名称（注释）
+   */
+  propertyComment?: string;
+  /**
+   * 属性id，对象类型ID
+   */
+  propertyID: string;
+  /**
+   * 属性类型，示例：varchar(2000)
+   */
+  propertyType: string;
+  /**
+   * 公共属性ID
+   */
+  publicPropertyID?: number;
+  /**
+   * 数据源表字段注释
+   */
+  sourceColumnComment: string;
+  /**
+   * 数据源表字段名
+   */
+  sourceColumnName: string;
+  /**
+   * 向量源字段
+   */
+  vectorSourceFieldName?: string;
+}
+
+export interface SyncSourceDataStrategy {
+  /**
+   * 冲突策略，保留数据源-"KEEP_SOURCE";保留目标表-"KEEP_TARGET"
+   */
+  conflictStrategy: string;
+  /**
+   * 异常策略，立即停止-"STOP_ON_ERROR";继续消费-"LOG_ERROR_AND_CONTINUE"
+   */
+  exceptionStrategy: string;
+  /**
+   * 轮询-全量sql
+   */
+  jdbcSyncSqlFull?: string;
+  /**
+   * 轮询-增量sql
+   */
+  jdbcSyncSqlIncrement?: string;
+  /**
+   * 同步模式，CDC-"BINLOG_CDC"; 轮询-"JDBC_POLLING"
+   */
+  mode: string;
+  /**
+   * 并行度
+   */
+  parallelism: number;
+  /**
+   * 批次同步数
+   */
+  pollFetchSize: number;
+  sourceDataInfo: SourceDataInfo;
+  /**
+   * 同步范围，增量-"INCREMENTAL";全量-"FULL";全量+增量-"FULL_THEN_INCREMENTAL"
+   */
+  syncScope: string;
+}
+
 export interface CreateOntologyObjectTypeReq {
   /**
    * 对象类型id
@@ -190,6 +288,10 @@ export interface CreateOntologyObjectTypeReq {
    * 本地CSV导入的文件地址
    */
   filePath?: string;
+  /**
+   * 创建模式，只建模不导入数据-"false";建模并导入数据-"true"
+   */
+  enableSyncSourceData?: boolean;
   /**
    * 图标类型
    */
@@ -205,7 +307,9 @@ export interface CreateOntologyObjectTypeReq {
   /**
    * 物理属性列表
    */
-  ontologyPhysicalPropertiesList?: CreateOntologyPhysicalProperty[];
+  ontologyPhysicalPropertiesList?:
+    | CreateOntologyPhysicalProperty[]
+    | OntologyPhysicalPropertiesList[];
   /**
    * 数据库名称
    */
@@ -218,6 +322,14 @@ export interface CreateOntologyObjectTypeReq {
    * 来源类型 1 来自iceberg  2 文件上传
    */
   sourceType?: SourceType;
+  /**
+   * 建模数据源信息
+   */
+  sourceDataInfo?: SourceDataInfo;
+  /**
+   * 同步策略信息
+   */
+  syncSourceDataStrategy?: SyncSourceDataStrategy;
 }
 
 export interface UpdateOntologyObjectTypeReq
@@ -242,6 +354,77 @@ export interface UploadOntologyCSVFileAndParseRes {
     columnList: string[];
     path: string;
   };
+}
+
+export interface ListConnectorsReq {
+  name?: string;
+  page?: string;
+  page_size?: string;
+  projectID?: string;
+  sort?: 'asc' | 'desc' | string;
+  sort_by?: 'create_time' | 'update_time' | string;
+  status?: string[];
+  subtype?: string[];
+  type: string;
+}
+
+export interface SqlConnectorItem {
+  id: number;
+  name: string;
+  subtype?: string;
+  [property: string]: any;
+}
+
+export type ListConnectorsRes = SqlConnectorItem[];
+
+export interface ListSqlConnectorDBAndTablesReq {
+  id: number;
+  projectID?: string;
+}
+
+export interface SqlConnectorTableItem {
+  name: string;
+  [property: string]: any;
+}
+
+export interface SqlConnectorDatabaseItem {
+  database_name: string;
+  tables: SqlConnectorTableItem[];
+  [property: string]: any;
+}
+
+export type ListSqlConnectorDBAndTablesRes = SqlConnectorDatabaseItem[];
+
+export interface GetSqlConnectorTableSchemaReq {
+  database_name: string;
+  id: number;
+  projectID?: string;
+  table_name: string;
+}
+
+export interface SqlConnectorSchemaField {
+  field_comment: string;
+  field_id: string;
+  field_type: string;
+  [property: string]: any;
+}
+
+export type GetSqlConnectorTableSchemaRes = SqlConnectorSchemaField[];
+
+export interface MapOntologyObjectTypeColumnsReq {
+  objectTypeColumns: string[];
+  sourceTableColumns: string[];
+}
+
+export interface MapRelation {
+  objectTypeColumnName: string;
+  sourceTableColumnName: string;
+  [property: string]: any;
+}
+
+export interface MapOntologyObjectTypeColumnsRes {
+  mapRelations: MapRelation[];
+  [property: string]: any;
 }
 
 export interface MetadataMenuItem {
