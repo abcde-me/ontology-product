@@ -182,6 +182,23 @@ export default function InstanceSyncStep({
     }
   };
 
+  const handleSqlColumnsParsed = async (columns: string[]) => {
+    const trimmedColumns = columns
+      .map((column) => column.trim())
+      .filter((column) => !!column);
+    if (!trimmedColumns.length) {
+      setSourceFields([]);
+      return;
+    }
+    const fields: SourceTableField[] = trimmedColumns.map((column) => ({
+      fieldId: column,
+      fieldComment: column,
+      fieldType: 'string'
+    }));
+    setSourceFields(fields);
+    await applyAutoMapping(fields);
+  };
+
   return (
     <>
       <div className="my-[16px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
@@ -192,6 +209,7 @@ export default function InstanceSyncStep({
         value={syncSourceDataStrategy.sourceDataInfo}
         onChange={handleSourceChange}
         onTableSelected={loadTableSchema}
+        onSqlColumnsParsed={handleSqlColumnsParsed}
         fieldPrefix="sync"
         styles={styles}
       />

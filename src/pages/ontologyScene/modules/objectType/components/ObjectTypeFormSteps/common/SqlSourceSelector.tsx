@@ -1,13 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  Button,
   Cascader,
   Form,
   Input,
   Message,
   Radio,
-  Select
+  Select,
+  Space,
+  Tooltip
 } from '@arco-design/web-react';
 import {
+  connectorAnalyseFinkSQLColumns,
+  connectorTestFinkSQL,
   listOntologyConnectors,
   listSqlConnectorDBAndTables
 } from '@/api/ontologySceneLibrary/objectType';
@@ -33,6 +38,7 @@ interface SqlSourceSelectorProps {
       Pick<SqlSourceDataInfo, 'connectorId' | 'databaseName' | 'tableName'>
     >
   ) => void;
+  onSqlColumnsParsed?: (columns: string[]) => void;
   fieldPrefix: string;
   styles: Record<string, string>;
 }
@@ -58,11 +64,154 @@ function filterCascaderOption(
     .some((item) => String(item).toLowerCase().includes(q));
 }
 
+function findKeywordAtTopLevel(sql: string, keyword: string, start = 0) {
+  const target = keyword.toLowerCase();
+  let depth = 0;
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+  let inBacktick = false;
+  for (let i = start; i < sql.length; i += 1) {
+    const ch = sql[i];
+    const prev = sql[i - 1];
+    if (!inDoubleQuote && !inBacktick && ch === "'" && prev !== '\\') {
+      inSingleQuote = !inSingleQuote;
+      continue;
+    }
+    if (!inSingleQuote && !inBacktick && ch === '"' && prev !== '\\') {
+      inDoubleQuote = !inDoubleQuote;
+      continue;
+    }
+    if (!inSingleQuote && !inDoubleQuote && ch === '`') {
+      inBacktick = !inBacktick;
+      continue;
+    }
+    if (inSingleQuote || inDoubleQuote || inBacktick) continue;
+    if (ch === '(') {
+      depth += 1;
+      continue;
+    }
+    if (ch === ')') {
+      depth = Math.max(0, depth - 1);
+      continue;
+    }
+    if (depth !== 0) continue;
+    const segment = sql.slice(i, i + target.length).toLowerCase();
+    if (segment !== target) continue;
+    const before = i === 0 ? ' ' : sql[i - 1];
+    const after = sql[i + target.length] ?? ' ';
+    if (/[a-zA-Z0-9_]/.test(before) || /[a-zA-Z0-9_]/.test(after)) {
+      continue;
+    }
+    return i;
+  }
+  return -1;
+}
+
+function splitTopLevelByComma(input: string) {
+  const parts: string[] = [];
+  let depth = 0;
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+  let inBacktick = false;
+  let current = '';
+  for (let i = 0; i < input.length; i += 1) {
+    const ch = input[i];
+    const prev = input[i - 1];
+    if (!inDoubleQuote && !inBacktick && ch === "'" && prev !== '\\') {
+      inSingleQuote = !inSingleQuote;
+      current += ch;
+      continue;
+    }
+    if (!inSingleQuote && !inBacktick && ch === '"' && prev !== '\\') {
+      inDoubleQuote = !inDoubleQuote;
+      current += ch;
+      continue;
+    }
+    if (!inSingleQuote && !inDoubleQuote && ch === '`') {
+      inBacktick = !inBacktick;
+      current += ch;
+      continue;
+    }
+    if (inSingleQuote || inDoubleQuote || inBacktick) {
+      current += ch;
+      continue;
+    }
+    if (ch === '(') {
+      depth += 1;
+      current += ch;
+      continue;
+    }
+    if (ch === ')') {
+      depth = Math.max(0, depth - 1);
+      current += ch;
+      continue;
+    }
+    if (ch === ',' && depth === 0) {
+      parts.push(current.trim());
+      current = '';
+      continue;
+    }
+    current += ch;
+  }
+  if (current.trim()) {
+    parts.push(current.trim());
+  }
+  return parts;
+}
+
+function validateCustomSql(sqlText: string): {
+  valid: boolean;
+  message?: string;
+} {
+  const sql = sqlText.trim().replace(/;+\s*$/g, '');
+  if (!sql) {
+    return { valid: false, message: '请先输入自定义SQL' };
+  }
+  if (!/^(select|with)\b/i.test(sql)) {
+    return {
+      valid: false,
+      message: '自定义SQL只支持查询操作，最外层仅支持SELECT语句'
+    };
+  }
+  const selectIndex = findKeywordAtTopLevel(sql, 'select');
+  if (selectIndex < 0) {
+    return {
+      valid: false,
+      message: '自定义SQL只支持查询操作，最外层仅支持SELECT语句'
+    };
+  }
+  const fromIndex = findKeywordAtTopLevel(sql, 'from', selectIndex + 6);
+  if (fromIndex < 0 || fromIndex <= selectIndex + 6) {
+    return { valid: false, message: 'SQL格式不正确，请检查SELECT语句' };
+  }
+  const projectionClause = sql.slice(selectIndex + 6, fromIndex).trim();
+  if (!projectionClause) {
+    return { valid: false, message: '请在SELECT中明确指定输出字段' };
+  }
+  const projectionItems = splitTopLevelByComma(projectionClause).map((item) =>
+    item.trim()
+  );
+  const hasWildcardProjection = projectionItems.some((item) => {
+    if (!item) return false;
+    const normalized = item.replace(/\s+/g, '');
+    if (normalized === '*') return true;
+    return /^((`[^`]+`|"[^"]+"|[a-zA-Z_][\w$]*)\.)\*$/.test(normalized);
+  });
+  if (hasWildcardProjection) {
+    return {
+      valid: false,
+      message: '最外层SELECT必须明确输出字段，不支持SELECT *'
+    };
+  }
+  return { valid: true };
+}
+
 export default function SqlSourceSelector({
   form,
   value,
   onChange,
   onTableSelected,
+  onSqlColumnsParsed,
   fieldPrefix,
   styles
 }: SqlSourceSelectorProps) {
@@ -70,6 +219,14 @@ export default function SqlSourceSelector({
   const [connectorsLoading, setConnectorsLoading] = useState(false);
   const [tablesLoading, setTablesLoading] = useState(false);
   const [databases, setDatabases] = useState<SqlConnectorDatabaseItem[]>([]);
+  const [testLoading, setTestLoading] = useState(false);
+  const [parseLoading, setParseLoading] = useState(false);
+  const [sqlActionResult, setSqlActionResult] = useState<{
+    type: 'test' | 'parse';
+    status: 'succeed' | 'failed';
+    message: string;
+    columns?: string[];
+  } | null>(null);
 
   useEffect(() => {
     const loadConnectors = async () => {
@@ -147,6 +304,101 @@ export default function SqlSourceSelector({
     value.databaseName && value.tableName
       ? [value.databaseName, value.tableName]
       : undefined;
+  const currentQueryMode = value.queryMode || 'selected';
+  const trimmedSql = value.sql?.trim() || '';
+  const canTriggerSqlAction = !!trimmedSql;
+
+  useEffect(() => {
+    if (!value.queryMode) {
+      onChange({
+        ...value,
+        queryMode: 'selected'
+      });
+      form.setFieldValue(`${fieldPrefix}QueryMode`, 'selected');
+    }
+  }, [fieldPrefix, form, onChange, value]);
+
+  const executeTestSql = async () => {
+    if (!trimmedSql) return;
+    const validation = validateCustomSql(trimmedSql);
+    if (!validation.valid) {
+      Message.warning(validation.message || 'SQL校验失败');
+      return;
+    }
+    if (!value.connectorId) {
+      Message.warning('请先选择数据源链接');
+      return;
+    }
+    setTestLoading(true);
+    try {
+      const response = await connectorTestFinkSQL({
+        id: value.connectorId,
+        sql: trimmedSql
+      });
+      const passed =
+        isSuccessResponse(response) && response.data?.status === 'succeed';
+      const message =
+        response.data?.message ||
+        response.message ||
+        (passed ? '测试通过' : '测试失败');
+      setSqlActionResult({
+        type: 'test',
+        status: passed ? 'succeed' : 'failed',
+        message
+      });
+    } catch (error) {
+      console.error('测试 SQL 失败:', error);
+      setSqlActionResult({
+        type: 'test',
+        status: 'failed',
+        message: '测试失败，请稍后重试'
+      });
+    } finally {
+      setTestLoading(false);
+    }
+  };
+
+  const executeParseSqlColumns = async () => {
+    if (!trimmedSql) return;
+    const validation = validateCustomSql(trimmedSql);
+    if (!validation.valid) {
+      Message.warning(validation.message || 'SQL校验失败');
+      return;
+    }
+    if (!value.connectorId) {
+      Message.warning('请先选择数据源链接');
+      return;
+    }
+    setParseLoading(true);
+    try {
+      const response = await connectorAnalyseFinkSQLColumns({
+        id: value.connectorId,
+        sql: trimmedSql
+      });
+      const columns = response.data?.columns || [];
+      const succeeded = isSuccessResponse(response);
+      const message = response.message || (succeeded ? '解析成功' : '解析失败');
+      setSqlActionResult({
+        type: 'parse',
+        status: succeeded ? 'succeed' : 'failed',
+        message,
+        columns
+      });
+      if (succeeded) {
+        onSqlColumnsParsed?.(columns);
+      }
+    } catch (error) {
+      console.error('解析 SQL 字段失败:', error);
+      setSqlActionResult({
+        type: 'parse',
+        status: 'failed',
+        message: '解析失败，请稍后重试',
+        columns: []
+      });
+    } finally {
+      setParseLoading(false);
+    }
+  };
 
   const handleConnectorChange = (connectorId?: number | string) => {
     const normalizedConnectorId =
@@ -215,9 +467,14 @@ export default function SqlSourceSelector({
         />
       </FormItem>
 
-      <FormItem label="数据表" field={`${fieldPrefix}QueryMode`}>
+      <FormItem
+        label="数据表"
+        field={`${fieldPrefix}QueryMode`}
+        initialValue="selected"
+        rules={[{ required: true }]}
+      >
         <Radio.Group
-          value={value.queryMode}
+          value={currentQueryMode}
           onChange={(queryMode) =>
             onChange({
               ...value,
@@ -233,19 +490,90 @@ export default function SqlSourceSelector({
         </Radio.Group>
       </FormItem>
 
-      {value.queryMode === 'sql' ? (
-        <FormItem field={`${fieldPrefix}Sql`}>
-          <TextArea
-            placeholder="请输入自定义SQL"
-            value={value.sql}
-            autoSize={{ minRows: 6 }}
-            onChange={(sql) => onChange({ ...value, sql })}
-          />
+      {currentQueryMode === 'sql' ? (
+        <FormItem label=" " field={`${fieldPrefix}Sql`}>
+          <div className={styles['sql-editor-wrapper']}>
+            <div className={styles['sql-editor-toolbar']}>
+              <span className={styles['sql-editor-toolbar-title']}>
+                自定义SQL
+              </span>
+              <Space size={8}>
+                <Tooltip
+                  content={!canTriggerSqlAction ? '请先输入自定义SQL' : ''}
+                >
+                  <span>
+                    <Button
+                      type="text"
+                      size="small"
+                      loading={testLoading}
+                      disabled={!canTriggerSqlAction}
+                      onClick={executeTestSql}
+                    >
+                      测试
+                    </Button>
+                  </span>
+                </Tooltip>
+                <Tooltip
+                  content={!canTriggerSqlAction ? '请先输入自定义SQL' : ''}
+                >
+                  <span>
+                    <Button
+                      type="text"
+                      size="small"
+                      loading={parseLoading}
+                      disabled={!canTriggerSqlAction}
+                      onClick={executeParseSqlColumns}
+                    >
+                      解析字段
+                    </Button>
+                  </span>
+                </Tooltip>
+              </Space>
+            </div>
+            <TextArea
+              placeholder="请输入自定义SQL，例如 SELECT line_id,voltage_level,maint_org FROM ods_line_assets"
+              value={value.sql}
+              autoSize={{ minRows: 6 }}
+              onChange={(sql) => {
+                onChange({ ...value, sql });
+                setSqlActionResult(null);
+              }}
+            />
+            {sqlActionResult && (
+              <div className={styles['sql-action-result']}>
+                <div className={styles['sql-action-result-header']}>
+                  <span>
+                    {sqlActionResult.type === 'test' ? '测试结果' : '解析结果'}
+                  </span>
+                  <span
+                    className={
+                      sqlActionResult.status === 'succeed'
+                        ? styles['sql-action-result-success']
+                        : styles['sql-action-result-failed']
+                    }
+                  >
+                    {sqlActionResult.status === 'succeed' ? '通过' : '失败'}
+                  </span>
+                </div>
+                <div className={styles['sql-action-result-message']}>
+                  {sqlActionResult.message}
+                </div>
+                {sqlActionResult.type === 'parse' && (
+                  <div className={styles['sql-action-result-columns']}>
+                    {(sqlActionResult.columns || []).length > 0
+                      ? (sqlActionResult.columns || []).join(', ')
+                      : '-'}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </FormItem>
       ) : (
         <FormItem
+          label=" "
           field={`${fieldPrefix}DatabaseTable`}
-          rules={[{ required: true, message: '请选择数据表' }]}
+          rules={[{ message: '请选择数据表' }]}
         >
           <Cascader
             placeholder="请选择数据表"

@@ -348,19 +348,22 @@ export const ModaForgeResourceEndpoints = {
   // 查看连接器详情数据
   getconnection: PrefixAimdp + '/GetConnector',
   // 获取 SQL 连接器列表
-  ListOntologyConnectorsApi: PrefixOntologyManager + '/ListConnectors',
+  ListOntologyConnectorsApi: PrefixAimdp + '/ListConnectors',
   // 获取 SQL 连接器库表
-  ListSqlConnectorDBAndTablesApi:
-    PrefixOntologyManager + '/ListSqlConnectorDBAndTables',
+  ListSqlConnectorDBAndTablesApi: PrefixAimdp + '/ListSqlConnectorDBAndTables',
   // 获取 SQL 连接器表 Schema
-  GetSqlConnectorTableSchemaApi:
-    PrefixOntologyManager + '/GetSqlConnectorTableSchema',
+  GetSqlConnectorTableSchemaApi: PrefixAimdp + '/GetSqlConnectorTableSchema',
   // 获取转换为 TiDB 类型的 SQL 连接器表 Schema
   GetSqlConnectorTableSchemaToTIDBApi:
-    PrefixOntologyManager + '/GetSqlConnectorTableSchemaToTIDB',
+    PrefixAimdp + '/GetSqlConnectorTableSchemaToTIDB',
+  // 解析 Flink SQL 字段
+  ConnectorAnalyseFinkSQLColumnsApi:
+    PrefixAimdp + '/ConnectorAnalyseFinkSQLColumns',
+  // 测试 Flink SQL
+  ConnectorTestFinkSQLApi: PrefixAimdp + '/ConnectorTestFinkSQL',
   // 映射对象类型字段与数据源表字段
   MapOntologyObjectTypeColumnsApi:
-    PrefixOntologyManager + '/MapOntologyObjectTypeColumns',
+    PrefixAimdp + '/MapOntologyObjectTypeColumns',
 
   // 数据载入接口
 

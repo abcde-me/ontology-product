@@ -111,3 +111,68 @@
     max-width: 100%;
   }
 }
+
+.sql-editor-wrapper {
+  border: 1px solid var(--color-border-2);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--color-bg-2);
+
+  :global(.arco-textarea-wrapper) {
+    border: none;
+    border-top: 1px solid var(--color-border-2);
+    border-radius: 0;
+  }
+}
+
+.sql-editor-toolbar {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: var(--color-fill-2);
+}
+
+.sql-editor-toolbar-title {
+  font-weight: 500;
+  color: var(--color-text-1);
+}
+
+.sql-action-result {
+  margin: 8px 12px 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-2);
+  border-radius: 4px;
+  background: var(--color-fill-1);
+  max-height: 200px;
+  overflow: auto;
+}
+
+.sql-action-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.sql-action-result-success {
+  color: #00b42a;
+}
+
+.sql-action-result-failed {
+  color: #f53f3f;
+}
+
+.sql-action-result-message {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sql-action-result-columns {
+  margin-top: 8px;
+  color: var(--color-text-2);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
