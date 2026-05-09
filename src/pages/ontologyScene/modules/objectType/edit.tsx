@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { Message, Button, Spin } from '@arco-design/web-react';
 import ObjectTypeForm, {
-  ObjectTypeFormData,
-  ObjectTypeFormRef
+  ObjectTypeFormData
 } from './components/ObjectTypeForm';
 import {
   getOntologyObjectTypeDetail,
   updateOntologyObjectType
 } from '@/api/ontologySceneLibrary/objectType';
+import { buildUpdateObjectTypeRequest } from './components/ObjectTypeFormHooks/useObjectTypeSubmit';
 import { SourceType } from '@/types/objectType';
 import { DATA_SOURCE_TYPE } from '@/pages/ontologyScene/common/constants';
-import { ProButton } from '@ceai-front/arco-material';
+
 import { IconLeft } from '@arco-design/web-react/icon';
 
 export default function OntologySceneObjectTypeEdit() {
@@ -23,7 +23,6 @@ export default function OntologySceneObjectTypeEdit() {
   const [loading, setLoading] = useState(false);
   const [initialValues, setInitialValues] =
     useState<Partial<ObjectTypeFormData>>();
-  const formRef = useRef<ObjectTypeFormRef>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -71,16 +70,69 @@ export default function OntologySceneObjectTypeEdit() {
           sourceType: objectType.sourceType,
           ontologyPhysicalPropertiesList:
             objectType.ontologyPhysicalPropertiesList || [],
+          sourceDataInfo: objectType.sourceDataInfo
+            ? {
+                connectorId: objectType.sourceDataInfo.connectorId,
+                databaseName: objectType.sourceDataInfo.databaseName,
+                tableName: objectType.sourceDataInfo.tableName,
+                queryMode:
+                  objectType.sourceDataInfo.queryMode === 'sql'
+                    ? 'sql'
+                    : 'selected',
+                sql: objectType.sourceDataInfo.sql
+              }
+            : undefined,
+          enableSyncSourceData: objectType.enableSyncSourceData,
+          syncSourceDataStrategy: objectType.syncSourceDataStrategy
+            ? {
+                sourceDataInfo: {
+                  connectorId:
+                    objectType.syncSourceDataStrategy.sourceDataInfo
+                      ?.connectorId,
+                  databaseName:
+                    objectType.syncSourceDataStrategy.sourceDataInfo
+                      ?.databaseName,
+                  tableName:
+                    objectType.syncSourceDataStrategy.sourceDataInfo?.tableName,
+                  queryMode:
+                    objectType.syncSourceDataStrategy.sourceDataInfo
+                      ?.queryMode === 'sql'
+                      ? 'sql'
+                      : 'selected',
+                  sql: objectType.syncSourceDataStrategy.sourceDataInfo?.sql
+                },
+                mode: objectType.syncSourceDataStrategy.mode,
+                conflictStrategy:
+                  objectType.syncSourceDataStrategy.conflictStrategy,
+                syncScope: objectType.syncSourceDataStrategy.syncScope,
+                pollFetchSize: objectType.syncSourceDataStrategy.pollFetchSize,
+                parallelism: objectType.syncSourceDataStrategy.parallelism,
+                exceptionStrategy:
+                  objectType.syncSourceDataStrategy.exceptionStrategy,
+                jdbcSyncSqlFull:
+                  objectType.syncSourceDataStrategy.jdbcSyncSqlFull,
+                jdbcSyncSqlIncrement:
+                  objectType.syncSourceDataStrategy.jdbcSyncSqlIncrement
+              }
+            : undefined,
           _dataSource: {
             type: dataSourceType,
+            connectorId: objectType.sourceDataInfo?.connectorId,
             database:
               dataSourceType === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC
-                ? objectType.originalDbName
+                ? objectType.sourceDataInfo?.databaseName ||
+                  objectType.originalDbName
                 : undefined,
             table:
               dataSourceType === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC
-                ? objectType.originalTableName
-                : undefined
+                ? objectType.sourceDataInfo?.tableName ||
+                  objectType.originalTableName
+                : undefined,
+            queryMode:
+              objectType.sourceDataInfo?.queryMode === 'sql'
+                ? 'sql'
+                : 'selected',
+            sql: objectType.sourceDataInfo?.sql
           }
         };
 
@@ -109,23 +161,9 @@ export default function OntologySceneObjectTypeEdit() {
 
     setLoading(true);
     try {
-      // 构建更新请求参数
-      const updateParams = {
-        id: objectTypeIdNum,
-        code: data.code,
-        name: data.name,
-        description: data.description,
-        icon: data.icon,
-        ontologyModelID: data.ontologyModelID,
-        filePath: data.filePath,
-        originalDbName: data.originalDbName,
-        originalTableName: data.originalTableName,
-        sourceType: data.sourceType,
-        ontologyPhysicalPropertiesList: data.ontologyPhysicalPropertiesList,
-        isReUpload: data.isReUpload ? 1 : 0
-      };
-
-      const res = await updateOntologyObjectType(updateParams);
+      const res = await updateOntologyObjectType(
+        buildUpdateObjectTypeRequest(objectTypeIdNum, data)
+      );
 
       if (res.status !== 200) {
         Message.error(res.message || '更新失败，请重试');
@@ -174,31 +212,12 @@ export default function OntologySceneObjectTypeEdit() {
               {initialValues && (
                 <ObjectTypeForm
                   isEdit={true}
-                  ref={formRef}
                   initialValues={initialValues}
                   onSubmit={handleSubmit}
                   onCancel={handleCancel}
                   loading={loading}
-                  showFooter={false}
                 />
               )}
-            </div>
-            {/* 底部操作按钮 */}
-            <div className="absolute bottom-0 left-0 right-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">
-              <div className="flex justify-start gap-[8px]">
-                <Button
-                  type="primary"
-                  onClick={() => {
-                    formRef.current?.submit();
-                  }}
-                  loading={loading}
-                >
-                  确定
-                </Button>
-                <Button onClick={handleCancel} disabled={loading}>
-                  取消
-                </Button>
-              </div>
             </div>
           </div>
         </div>
