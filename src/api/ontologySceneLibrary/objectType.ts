@@ -1,12 +1,20 @@
 import {
   CreateOntologyObjectTypeReq,
   CreateOntologyPhysicalProperty,
+  GetSqlConnectorTableSchemaReq,
+  GetSqlConnectorTableSchemaRes,
   GetOntologyObjectTypeDetailRes,
+  ListConnectorsReq,
+  ListConnectorsRes,
   ListMetadataIcebergDatabaseNameRes,
   ListMetadataIcebergTableReq,
   ListMetadataIcebergTableRes,
   ListMetadataIcebergTiDBTableReq,
   ListMetadataIcebergTiDBTableRes,
+  ListSqlConnectorDBAndTablesReq,
+  ListSqlConnectorDBAndTablesRes,
+  MapOntologyObjectTypeColumnsReq,
+  MapOntologyObjectTypeColumnsRes,
   ListOntologyObjectTypeReq,
   ListOntologyObjectTypeRes,
   ObjectType,
@@ -84,6 +92,51 @@ export const uploadOntologyCSVFileAndParse = async (params: {
   file: File;
 }): Promise<ApiRes<UploadOntologyCSVFileAndParseRes>> => {
   return await UAPI.RES.UploadOntologyEntityDataFileApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};
+
+export const listOntologyConnectors = async (
+  params: ListConnectorsReq
+): Promise<ApiRes<ListConnectorsRes>> => {
+  return await UAPI.RES.ListOntologyConnectorsApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};
+
+export const listSqlConnectorDBAndTables = async (
+  params: ListSqlConnectorDBAndTablesReq
+): Promise<ApiRes<ListSqlConnectorDBAndTablesRes>> => {
+  return await UAPI.RES.ListSqlConnectorDBAndTablesApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};
+
+export const getSqlConnectorTableSchema = async (
+  params: GetSqlConnectorTableSchemaReq
+): Promise<ApiRes<GetSqlConnectorTableSchemaRes>> => {
+  return await UAPI.RES.GetSqlConnectorTableSchemaApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};
+
+export const getSqlConnectorTableSchemaToTIDB = async (
+  params: GetSqlConnectorTableSchemaReq
+): Promise<ApiRes<GetSqlConnectorTableSchemaRes>> => {
+  return await UAPI.RES.GetSqlConnectorTableSchemaToTIDBApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};
+
+export const mapOntologyObjectTypeColumns = async (
+  params: MapOntologyObjectTypeColumnsReq
+): Promise<ApiRes<MapOntologyObjectTypeColumnsRes>> => {
+  return await UAPI.RES.MapOntologyObjectTypeColumnsApi({})
     .post(params)
     .inRegion()
     .do();

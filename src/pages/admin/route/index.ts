@@ -149,6 +149,13 @@ export const routes: IRoute[] = [
     component: React.lazy(async () => import('../../ruleRunLog')),
     children: []
   },
+  // 数据源管理
+  {
+    name: 'dataSourceManagement',
+    key: '/tenant/compute/onto/dataConnection/dataSource',
+    component: React.lazy(async () => import('../../dataSource')),
+    children: []
+  },
   // 运营中心页面
   {
     name: 'operationCenter',

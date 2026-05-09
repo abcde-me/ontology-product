@@ -351,10 +351,30 @@
   dependencies:
     color "^3.1.3"
 
-"@arco-design/web-react@2.66.5", "@arco-design/web-react@>=2.66.5":
+"@arco-design/web-react@2.66.5":
   version "2.66.5"
   resolved "http://npm.cestc.cn/@arco-design/web-react/download/@arco-design/web-react-2.66.5.tgz#3562e58d33ca5fc41747d48c25b683a6e2af9afa"
   integrity sha1-NWLljTPKX8QXR9SMJbaDpuKvmvo=
+  dependencies:
+    "@arco-design/color" "^0.4.0"
+    "@babel/runtime" "^7.5.5"
+    b-tween "^0.3.3"
+    b-validate "^1.4.2"
+    compute-scroll-into-view "^1.0.17"
+    dayjs "^1.10.5"
+    lodash "^4.17.21"
+    number-precision "^1.3.1"
+    react-focus-lock "^2.13.2"
+    react-is "^18.2.0"
+    react-transition-group "^4.3.0"
+    resize-observer-polyfill "^1.5.1"
+    scroll-into-view-if-needed "^2.2.20"
+    shallowequal "^1.1.0"
+
+"@arco-design/web-react@>=2.66.5":
+  version "2.66.12"
+  resolved "http://npm.cestc.cn/@arco-design/web-react/download/@arco-design/web-react-2.66.12.tgz#918f0d060023ff623856516c2b59f15693b129bb"
+  integrity sha1-kY8NBgAj/2I4VlFsK1nxVpOxKbs=
   dependencies:
     "@arco-design/color" "^0.4.0"
     "@babel/runtime" "^7.5.5"
@@ -405,9 +425,9 @@
     micromatch "^4.0.2"
 
 "@arco-themes/react-aiux2026@^1.0.0":
-  version "1.0.0"
-  resolved "http://npm.cestc.cn/@arco-themes/react-aiux2026/download/@arco-themes/react-aiux2026-1.0.0.tgz#98d68aea5d5689cf83f554b02612436f9ce359f3"
-  integrity sha1-mNaK6l1Wic+D9VSwJhJDb5zjWfM=
+  version "1.0.1"
+  resolved "http://npm.cestc.cn/@arco-themes/react-aiux2026/download/@arco-themes/react-aiux2026-1.0.1.tgz#6e478435fc20cb8db29bc2119212b25533d4fd2b"
+  integrity sha1-bkeENfwgy42ym8IRkhKyVTPU/Ss=
 
 "@arco-themes/react-arco-pro@^0.0.7":
   version "0.0.7"
@@ -1511,7 +1531,7 @@
     "@babel/plugin-transform-modules-commonjs" "^7.27.1"
     "@babel/plugin-transform-typescript" "^7.28.5"
 
-"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.10.1", "@babel/runtime@^7.11.1", "@babel/runtime@^7.11.2", "@babel/runtime@^7.12.0", "@babel/runtime@^7.12.1", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.18", "@babel/runtime@^7.12.5", "@babel/runtime@^7.14.5", "@babel/runtime@^7.15.4", "@babel/runtime@^7.16.0", "@babel/runtime@^7.16.3", "@babel/runtime@^7.17.2", "@babel/runtime@^7.18.3", "@babel/runtime@^7.18.6", "@babel/runtime@^7.19.0", "@babel/runtime@^7.20.13", "@babel/runtime@^7.20.7", "@babel/runtime@^7.21.0", "@babel/runtime@^7.21.5", "@babel/runtime@^7.22.6", "@babel/runtime@^7.23.2", "@babel/runtime@^7.23.8", "@babel/runtime@^7.27.6", "@babel/runtime@^7.3.1", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.2", "@babel/runtime@^7.7.2", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
+"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.10.1", "@babel/runtime@^7.11.1", "@babel/runtime@^7.11.2", "@babel/runtime@^7.12.0", "@babel/runtime@^7.12.1", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.18", "@babel/runtime@^7.12.5", "@babel/runtime@^7.14.5", "@babel/runtime@^7.15.4", "@babel/runtime@^7.16.0", "@babel/runtime@^7.16.3", "@babel/runtime@^7.17.2", "@babel/runtime@^7.18.3", "@babel/runtime@^7.18.6", "@babel/runtime@^7.19.0", "@babel/runtime@^7.20.13", "@babel/runtime@^7.20.7", "@babel/runtime@^7.21.0", "@babel/runtime@^7.21.5", "@babel/runtime@^7.22.6", "@babel/runtime@^7.23.2", "@babel/runtime@^7.23.8", "@babel/runtime@^7.3.1", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.2", "@babel/runtime@^7.7.2", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
   version "7.28.4"
   resolved "http://npm.cestc.cn/@babel/runtime/download/@babel/runtime-7.28.4.tgz#a70226016fabe25c5783b2f22d3e1c9bc5ca3326"
   integrity sha1-pwImAW+r4lxXg7LyLT4cm8XKMyY=
@@ -1521,7 +1541,7 @@
   resolved "http://npm.cestc.cn/@babel/runtime/download/@babel/runtime-7.28.6.tgz#d267a43cb1836dc4d182cce93ae75ba954ef6d2b"
   integrity sha1-0mekPLGDbcTRgszpOudbqVTvbSs=
 
-"@babel/runtime@^7.28.4":
+"@babel/runtime@^7.27.6", "@babel/runtime@^7.28.4":
   version "7.29.2"
   resolved "http://npm.cestc.cn/@babel/runtime/download/@babel/runtime-7.29.2.tgz#9a6e2d05f4b6692e1801cd4fb176ad823930ed5e"
   integrity sha1-mm4tBfS2aS4YAc1PsXatgjkw7V4=
@@ -1729,9 +1749,9 @@
     zustand "^4.5.2"
 
 "@ceai-front/workflow@^0.2.3":
-  version "0.2.3"
-  resolved "http://npm.cestc.cn/@ceai-front/workflow/download/@ceai-front/workflow-0.2.3.tgz#e8747cd6dea7455af68bec2c805115f12ebdb120"
-  integrity sha1-6HR81t6nRVr2i+wsgFEV8S69sSA=
+  version "0.2.5"
+  resolved "http://npm.cestc.cn/@ceai-front/workflow/download/@ceai-front/workflow-0.2.5.tgz#d6ee98dcfcb7b36897f38ed875ddbb1a86808a7e"
+  integrity sha1-1u6Y3Py3s2iX847Ydd27GoaAin4=
   dependencies:
     "@arco-design/web-react" ">=2.66.5"
     "@dagrejs/dagre" "^1.1.4"
@@ -4046,10 +4066,10 @@
     lodash.merge "^4.6.2"
     postcss-selector-parser "6.0.10"
 
-"@tanstack/query-core@5.90.6":
-  version "5.90.6"
-  resolved "http://npm.cestc.cn/@tanstack/query-core/download/@tanstack/query-core-5.90.6.tgz#e4627c442a4701adb350270dae5f6b72b2498eae"
-  integrity sha1-5GJ8RCpHAa2zUCcNrl9rcrJJjq4=
+"@tanstack/query-core@5.95.2":
+  version "5.95.2"
+  resolved "http://npm.cestc.cn/@tanstack/query-core/download/@tanstack/query-core-5.95.2.tgz#9e3299d0c1c8785dd9e3d0cac1993e45f35113f2"
+  integrity sha1-njKZ0MHIeF3Z49DKwZk+RfNRE/I=
 
 "@tanstack/query-devtools@5.73.3":
   version "5.73.3"
@@ -4064,11 +4084,11 @@
     "@tanstack/query-devtools" "5.73.3"
 
 "@tanstack/react-query@^5.60.5":
-  version "5.90.6"
-  resolved "http://npm.cestc.cn/@tanstack/react-query/download/@tanstack/react-query-5.90.6.tgz#50f46ca81679c3fda185ea7d2c7787af78ed0364"
-  integrity sha1-UPRsqBZ5w/2hhep9LHeHr3jtA2Q=
+  version "5.95.2"
+  resolved "http://npm.cestc.cn/@tanstack/react-query/download/@tanstack/react-query-5.95.2.tgz#7daf77342a4e374c22fad88bb98ea13fc19ae086"
+  integrity sha1-fa93NCpON0wi+tiLuY6hP8Ga4IY=
   dependencies:
-    "@tanstack/query-core" "5.90.6"
+    "@tanstack/query-core" "5.95.2"
 
 "@tanstack/react-virtual@^3.0.0-beta.60":
   version "3.13.12"
@@ -6028,9 +6048,9 @@
     "@types/node" "*"
 
 "@types/sortablejs@1":
-  version "1.15.8"
-  resolved "http://npm.cestc.cn/@types/sortablejs/download/@types/sortablejs-1.15.8.tgz#11ed555076046e00869a5ef85d1e7651e7a66ef6"
-  integrity sha1-Ee1VUHYEbgCGml74XR52UeembvY=
+  version "1.15.9"
+  resolved "http://npm.cestc.cn/@types/sortablejs/download/@types/sortablejs-1.15.9.tgz#82d2337f54d4db827914d80dee5cf65539ae3c8b"
+  integrity sha1-gtIzf1TU24J5FNgN7lz2VTmuPIs=
 
 "@types/stack-utils@^1.0.1":
   version "1.0.1"
@@ -23621,7 +23641,15 @@ svgo@^2.7.0:
     picocolors "^1.0.0"
     stable "^0.1.8"
 
-swr@^2.1.0, swr@^2.2.5:
+swr@^2.1.0:
+  version "2.4.1"
+  resolved "http://npm.cestc.cn/swr/download/swr-2.4.1.tgz#c9e48abff6bf4b04846342e2f1f6be108a078cf6"
+  integrity sha1-yeSKv/a/SwSEY0Li8fa+EIoHjPY=
+  dependencies:
+    dequal "^2.0.3"
+    use-sync-external-store "^1.6.0"
+
+swr@^2.2.5:
   version "2.3.6"
   resolved "http://npm.cestc.cn/swr/download/swr-2.3.6.tgz#5fee0ee8a0762a16871ee371075cb09422b64f50"
   integrity sha1-X+4O6KB2KhaHHuNxB1ywlCK2T1A=
@@ -24932,7 +24960,7 @@ use-sidecar@^1.1.3:
     detect-node-es "^1.1.0"
     tslib "^2.0.0"
 
-use-sync-external-store@^1.2.2, use-sync-external-store@^1.4.0, use-sync-external-store@^1.5.0:
+use-sync-external-store@^1.2.2, use-sync-external-store@^1.4.0, use-sync-external-store@^1.5.0, use-sync-external-store@^1.6.0:
   version "1.6.0"
   resolved "http://npm.cestc.cn/use-sync-external-store/download/use-sync-external-store-1.6.0.tgz#b174bfa65cb2b526732d9f2ac0a408027876f32d"
   integrity sha1-sXS/plyytSZzLZ8qwKQIAnh28y0=
