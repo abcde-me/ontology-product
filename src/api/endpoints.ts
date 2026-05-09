@@ -15,8 +15,7 @@ const API_PREFIX = '/ceai';
 export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
-export const PrefixAimdp = API_PREFIX + '/aimdp-manager/api/v1';
-export const PrefixOntologyManager = API_PREFIX + '/ontology-manager/api/v1';
+export const PrefixAimdp = API_PREFIX + '/ontology-manager/api/v1';
 export const PrefixLabelService = API_PREFIX + '/label-service/api/v1';
 export const PrefixUserCenter = API_PREFIX + '/user-space/api/v1';
 export const ResourceEndpointsV2 = {
@@ -348,19 +347,19 @@ export const ModaForgeResourceEndpoints = {
   // 查看连接器详情数据
   getconnection: PrefixAimdp + '/GetConnector',
   // 获取 SQL 连接器列表
-  ListOntologyConnectorsApi: PrefixOntologyManager + '/ListConnectors',
+  ListOntologyConnectorsApi: PrefixAimdp + '/ListConnectors',
   // 获取 SQL 连接器库表
   ListSqlConnectorDBAndTablesApi:
-    PrefixOntologyManager + '/ListSqlConnectorDBAndTables',
+    PrefixAimdp + '/ListSqlConnectorDBAndTables',
   // 获取 SQL 连接器表 Schema
   GetSqlConnectorTableSchemaApi:
-    PrefixOntologyManager + '/GetSqlConnectorTableSchema',
+    PrefixAimdp + '/GetSqlConnectorTableSchema',
   // 获取转换为 TiDB 类型的 SQL 连接器表 Schema
   GetSqlConnectorTableSchemaToTIDBApi:
-    PrefixOntologyManager + '/GetSqlConnectorTableSchemaToTIDB',
+    PrefixAimdp + '/GetSqlConnectorTableSchemaToTIDB',
   // 映射对象类型字段与数据源表字段
   MapOntologyObjectTypeColumnsApi:
-    PrefixOntologyManager + '/MapOntologyObjectTypeColumns',
+    PrefixAimdp + '/MapOntologyObjectTypeColumns',
 
   // 数据载入接口
 
@@ -890,7 +889,21 @@ export const ModaForgeResourceEndpoints = {
   // 获取规则快照
   GetAutoExecLogRuleSnapshotApi: PrefixAimdp + '/GetAutoExecLogRuleSnapshot',
   // 获取今日统计
-  GetAutoLogStatsApi: PrefixAimdp + '/GetAutoLogStats'
+  GetAutoLogStatsApi: PrefixAimdp + '/GetAutoLogStats',
+
+  // ===================== 数据源管理相关 =====================
+  // 创建数据源连接器
+  CreateConnectorApi: PrefixAimdp + '/CreateConnector',
+  // 获取数据源列表
+  ListConnectorsApi: PrefixAimdp + '/ListConnectors',
+  // 获取数据源详情
+  GetConnectorApi: PrefixAimdp + '/GetConnector',
+  // 更新数据源
+  EditConnectorApi: PrefixAimdp + '/EditConnector',
+  // 删除数据源
+  DeleteConnectorApi: PrefixAimdp + '/DeleteConnector',
+  // 测试数据源连接
+  TestConnectorApi: PrefixAimdp + '/TestConnector'
 };
 
 /**

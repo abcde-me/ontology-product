@@ -23,3 +23,8 @@ export * from './Icons';
 export * from './EllipsisPopover';
 export * from '../../../components/OSModal';
 export * from './ParamValueRenderer';
+export { default as CollapsibleSection } from './CollapsibleSection';
+export { default as DataSourceInfo } from './DataSourceInfo';
+export { default as SyncStrategyInfo } from './SyncStrategyInfo';
+export { default as SqlDetailModal } from './SqlDetailModal';
+export * from './CollapsibleSection/types';

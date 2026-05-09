@@ -45,6 +45,8 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
       let host = '';
       let port = 3306;
       let database = '';
+      let username = '';
+      let password = '';
 
       // 简单解析连接字符串
       try {
@@ -58,16 +60,21 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
         console.error('解析连接信息失败', e);
       }
 
+      // 从 editingRecord 中获取用户名和密码（如果有的话）
+      // 注意：这里需要确保 editingRecord 包含完整的配置信息
+      if ((editingRecord as any).config) {
+        username = (editingRecord as any).config.user || '';
+        password = (editingRecord as any).config.password || '';
+      }
+
       form.setFieldsValue({
         name: editingRecord.name,
-        description: editingRecord.description || '',
         dataSourceType: editingRecord.dataSourceType,
         host: host || 'localhost',
         port: port || 3306,
         database: database || '',
-        username: 'admin',
-        password: '******',
-        databaseIdentifier: ''
+        username: username || '',
+        password: password || ''
       });
     } else if (visible && !editingRecord) {
       // 新增模式：重置表单
@@ -96,7 +103,9 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
         // 表单验证错误，不需要提示
         return;
       }
-      Message.error(isEdit ? '更新失败' : '新增失败');
+      // 显示后端返回的错误消息
+      const errorMessage = error?.message || (isEdit ? '更新失败' : '新增失败');
+      Message.error(errorMessage);
       console.error(error);
     } finally {
       setSubmitLoading(false);
@@ -110,28 +119,20 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
 
   const handleTestConnection = async () => {
     try {
-      // 验证表单
-      await form.validate();
-      const values = form.getFieldsValue();
+      if (isEdit && editingRecord) {
+        setTestLoading(true);
+        const result = await testConnection(editingRecord.id);
 
-      setTestLoading(true);
-
-      const result = await testConnection(
-        isEdit && editingRecord ? editingRecord.id : undefined,
-        values as DataSourceFormData
-      );
-
-      if (result.success) {
-        Message.success(result.message);
-      } else {
-        Message.error(result.message);
+        if (result.success) {
+          Message.success(result.message);
+        } else {
+          Message.error(result.message);
+        }
       }
     } catch (error: any) {
-      if (error?.errors) {
-        Message.warning('请先完善表单信息');
-        return;
-      }
-      Message.error('连接测试失败');
+      // 显示后端返回的错误消息
+      const errorMessage = error?.message || '连接测试失败';
+      Message.error(errorMessage);
       console.error(error);
     } finally {
       setTestLoading(false);
@@ -148,19 +149,21 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
         <div
           style={{
             display: 'flex',
-            justifyContent: 'space-between',
+            justifyContent: isEdit ? 'space-between' : 'flex-end',
             alignItems: 'center'
           }}
         >
-          <div>
-            <Button
-              type="outline"
-              loading={testLoading}
-              onClick={handleTestConnection}
-            >
-              连接测试
-            </Button>
-          </div>
+          {isEdit && (
+            <div>
+              <Button
+                type="outline"
+                loading={testLoading}
+                onClick={handleTestConnection}
+              >
+                连接测试
+              </Button>
+            </div>
+          )}
           <Space>
             <Button onClick={handleCancel}>取消</Button>
             <Button
@@ -186,17 +189,12 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
           label="数据源名称"
           field="name"
           required
-          rules={[{ required: true, message: '请输入数据源名称' }]}
+          rules={[
+            { required: true, message: '请输入数据源名称' },
+            { maxLength: 100, message: '数据源名称不能超过100个字符' }
+          ]}
         >
-          <Input placeholder="请输入数据源名称" />
-        </FormItem>
-        <FormItem label="描述" field="description">
-          <Input.TextArea
-            placeholder="请输入描述信息"
-            rows={3}
-            maxLength={200}
-            showWordLimit
-          />
+          <Input placeholder="请输入数据源名称" showWordLimit maxLength={100} />
         </FormItem>
         <FormItem
           label="数据源类型"
@@ -252,10 +250,7 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
           required
           rules={[{ required: true, message: '请输入密码' }]}
         >
-          <Input.Password placeholder="请输入密码" />
-        </FormItem>
-        <FormItem label="数据库标识" field="databaseIdentifier">
-          <Input placeholder="请输入数据库标识" />
+          <Input placeholder="请输入密码" />
         </FormItem>
       </Form>
     </Drawer>

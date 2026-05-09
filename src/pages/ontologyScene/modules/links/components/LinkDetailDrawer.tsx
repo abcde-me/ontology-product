@@ -18,8 +18,17 @@ import {
 } from '@ceai-front/arco-material';
 import {
   DrawerWithEditBtn,
-  EllipsisPopover
+  EllipsisPopover,
+  CollapsibleSection,
+  DataSourceInfo,
+  SyncStrategyInfo
 } from '@/pages/ontologyScene/components';
+import type {
+  SourceDataInfo,
+  SyncSourceDataStrategy
+} from '@/pages/ontologyScene/components/CollapsibleSection/types';
+import ExpandIcon from '../../../assets/expand.svg';
+import AsideIcon from '../../../assets/aside.svg';
 import {
   getOntologyLinkType,
   listOntologyLinkTypeData,
@@ -55,6 +64,12 @@ export interface LinkDetailData {
   };
   instanceCount: number;
   attributeCount: number;
+  // 新增字段：数据源和同步策略
+  sourceType?: number;
+  filePath?: string;
+  sourceDataInfo?: SourceDataInfo;
+  enableSyncSourceData?: boolean;
+  syncSourceDataStrategy?: SyncSourceDataStrategy;
 }
 
 interface LinkDetailDrawerProps {
@@ -239,6 +254,71 @@ export default function LinkDetailDrawer({
       setBasicInfoLoading(true);
       try {
         const res = await fetchBasicInfoFn(resolvedLinkId);
+
+        // TODO: MOCK 数据 - 用于测试显示效果，后端接口返回真实数据后删除
+        const mockData = {
+          ...res,
+          // Mock 数据源 - 情况1: 本地CSV
+          // sourceType: 2,
+          // filePath: '/uploads/data/link_data.csv',
+          // sourceDataInfo: {
+          //   connectorName: '本地文件',
+          // },
+
+          // Mock 数据源 - 情况2: 数据库/表-选择数据表
+          // sourceType: 1,
+          // sourceDataInfo: {
+          //   queryMode: 'selected',
+          //   connectorId: 2,
+          //   connectorName: 'PostgreSQL数据源',
+          //   connectorType: 'PostgreSQL',
+          //   connectorSubtype: 'PostgreSQL 14',
+          //   databaseName: 'link_db',
+          //   tableName: 'relationship_table',
+          // },
+
+          // Mock 数据源 - 情况3: 数据库/表-自定义SQL
+          sourceType: 1,
+          sourceDataInfo: {
+            queryMode: 'sql',
+            connectorId: 2,
+            connectorName: 'PostgreSQL数据源',
+            connectorType: 'PostgreSQL',
+            connectorSubtype: 'PostgreSQL 14',
+            databaseName: 'link_db',
+            sql: 'SELECT source_id, target_id, relation_type FROM relationships WHERE is_active = true'
+          },
+
+          // Mock 同步策略 - 有同步策略（轮询模式）
+          enableSyncSourceData: true,
+          syncSourceDataStrategy: {
+            mode: 'JDBC_POLLING',
+            conflictStrategy: 'KEEP_TARGET',
+            syncScope: 'FULL_THEN_INCREMENTAL',
+            pollFetchSize: 500,
+            parallelism: 2,
+            exceptionStrategy: 'LOG_ERROR_AND_CONTINUE',
+            jdbcSyncSqlFull:
+              'SELECT * FROM relationships WHERE created_at <= NOW()',
+            jdbcSyncSqlIncrement:
+              'SELECT * FROM relationships WHERE updated_at > ${last_sync_time}'
+          }
+
+          // Mock 同步策略 - 有同步策略（CDC模式）
+          // enableSyncSourceData: true,
+          // syncSourceDataStrategy: {
+          //   mode: 'BINLOG_CDC',
+          //   conflictStrategy: 'KEEP_SOURCE',
+          //   syncScope: 'INCREMENTAL',
+          //   pollFetchSize: 1000,
+          //   parallelism: 4,
+          //   exceptionStrategy: 'STOP_ON_ERROR',
+          // },
+
+          // Mock 同步策略 - 无同步策略
+          // enableSyncSourceData: false,
+        };
+
         setBasicInfo(res);
       } catch (e) {
         Message.error('加载基本信息失败');
@@ -387,92 +467,104 @@ export default function LinkDetailDrawer({
     >
       <div className="flex flex-col gap-[24px]">
         {/* 基本信息 */}
-        <div className="flex flex-col gap-[12px]">
-          <div className="text-[14px] font-[600] leading-[22px] text-[var(--color-text-1)]">
-            基本信息
-          </div>
-          <Spin loading={basicInfoLoading}>
-            <div className="mb-[12px] flex gap-[16px]">
-              <div className="flex w-[418px] gap-[8px]">
-                <div className="w-[100px] text-[14px] leading-[22px] text-[var(--color-text-4)]">
-                  链接名称：
-                </div>
-                <div className="min-w-0 flex-1">
-                  <EllipsisPopover
-                    // preferTypography
-                    value={displayData?.name || '-'}
-                    wrapperClassName="w-full"
-                    isEdit={false}
-                    className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
+        <CollapsibleSection
+          title="基本信息"
+          defaultExpanded={true}
+          loading={basicInfoLoading}
+          expandIcon={
+            <ExpandIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+          }
+          collapseIcon={
+            <AsideIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+          }
+        >
+          <div className="mb-[12px] flex gap-[16px]">
+            <div className="flex w-[418px] gap-[8px]">
+              <div className="w-[100px] text-[14px] leading-[22px] text-[var(--color-text-4)]">
+                链接名称：
+              </div>
+              <div className="min-w-0 flex-1">
+                <EllipsisPopover
+                  // preferTypography
+                  value={displayData?.name || '-'}
+                  wrapperClassName="w-full"
+                  isEdit={false}
+                  className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
+                />
+              </div>
+            </div>
+            <div className="flex gap-[8px]">
+              <div className="w-[70px] font-PingFangSc text-sm font-normal leading-[22px] text-[#86909c]">
+                同步状态：
+              </div>
+              <div className="flex items-center gap-2 font-PingFangSc text-sm font-normal leading-[22px] text-[#23293b]">
+                {!isNil(displayData?.syncStatus) ? (
+                  <DotStatus
+                    text={
+                      OBJECT_TYPE_SYNC_STATUS_CONFIG[displayData!.syncStatus]
+                        .text
+                    }
+                    color={
+                      OBJECT_TYPE_SYNC_STATUS_CONFIG[displayData!.syncStatus]
+                        .color
+                    }
                   />
-                </div>
-              </div>
-              <div className="flex gap-[8px]">
-                <div className="w-[70px] font-PingFangSc text-sm font-normal leading-[22px] text-[#86909c]">
-                  同步状态：
-                </div>
-                <div className="flex items-center gap-2 font-PingFangSc text-sm font-normal leading-[22px] text-[#23293b]">
-                  {!isNil(displayData?.syncStatus) ? (
-                    <DotStatus
-                      text={
-                        OBJECT_TYPE_SYNC_STATUS_CONFIG[displayData!.syncStatus]
-                          .text
-                      }
-                      color={
-                        OBJECT_TYPE_SYNC_STATUS_CONFIG[displayData!.syncStatus]
-                          .color
-                      }
-                    />
-                  ) : (
-                    '-'
-                  )}
-                </div>
+                ) : (
+                  '-'
+                )}
               </div>
             </div>
+          </div>
 
-            <div className="flex gap-[16px]">
-              <div className="flex w-[418px] gap-[8px]">
-                <div className="w-[100px] flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-4)]">
-                  链接id:
-                </div>
-                <div className="flex items-center gap-[4px] overflow-hidden">
-                  <GlobalTooltip.Ellipsis
-                    text={displayData?.code || '-'}
-                    className="flex-1 text-[14px] leading-[22px] text-[var(--color-text-1)]"
-                  >
-                    {/*{displayData?.code || '-'}*/}
-                  </GlobalTooltip.Ellipsis>
-                  {!isNil(displayData?.code) && (
-                    <Popover content="复制">
-                      <IconCopy
-                        fontSize={14}
-                        className="flex-shrink-0 hover:cursor-pointer hover:text-[rgba(var(--primary-6))]"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          void handleCopy(String(displayData?.code));
-                        }}
-                      />
-                    </Popover>
-                  )}
-                </div>
+          <div className="flex gap-[16px]">
+            <div className="flex w-[418px] gap-[8px]">
+              <div className="w-[100px] flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-4)]">
+                链接id:
               </div>
-              <div className="flex gap-[8px]">
-                <div className="text-[14px] leading-[22px] text-[var(--color-text-4)]">
-                  链接类型：
-                </div>
-                <div className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
-                  {displayData?.type ? getLinkTypeText(displayData.type) : '-'}
-                </div>
+              <div className="flex items-center gap-[4px] overflow-hidden">
+                <GlobalTooltip.Ellipsis
+                  text={displayData?.code || '-'}
+                  className="flex-1 text-[14px] leading-[22px] text-[var(--color-text-1)]"
+                >
+                  {/*{displayData?.code || '-'}*/}
+                </GlobalTooltip.Ellipsis>
+                {!isNil(displayData?.code) && (
+                  <Popover content="复制">
+                    <IconCopy
+                      fontSize={14}
+                      className="flex-shrink-0 hover:cursor-pointer hover:text-[rgba(var(--primary-6))]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void handleCopy(String(displayData?.code));
+                      }}
+                    />
+                  </Popover>
+                )}
               </div>
             </div>
-          </Spin>
-        </div>
+            <div className="flex gap-[8px]">
+              <div className="text-[14px] leading-[22px] text-[var(--color-text-4)]">
+                链接类型：
+              </div>
+              <div className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
+                {displayData?.type ? getLinkTypeText(displayData.type) : '-'}
+              </div>
+            </div>
+          </div>
+        </CollapsibleSection>
 
         {/* 关系对 */}
-        <div className="flex flex-col gap-[12px]">
-          <div className="text-[14px] font-[600] leading-[22px] text-[var(--color-text-1)]">
-            关系对
-          </div>
+        <CollapsibleSection
+          title="关系对"
+          defaultExpanded={true}
+          loading={basicInfoLoading}
+          expandIcon={
+            <ExpandIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+          }
+          collapseIcon={
+            <AsideIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+          }
+        >
           <div className="flex items-center bg-[#F2F8FF] p-[12px]">
             {renderObjectTypeCard(
               {
@@ -499,7 +591,44 @@ export default function LinkDetailDrawer({
               false
             )}
           </div>
-        </div>
+        </CollapsibleSection>
+
+        {/* 数据源 */}
+        <CollapsibleSection
+          title="数据源"
+          defaultExpanded={false}
+          loading={basicInfoLoading}
+          expandIcon={
+            <ExpandIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+          }
+          collapseIcon={
+            <AsideIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+          }
+        >
+          <DataSourceInfo
+            sourceType={basicInfo?.sourceType}
+            sourceDataInfo={basicInfo?.sourceDataInfo}
+            filePath={basicInfo?.filePath}
+          />
+        </CollapsibleSection>
+
+        {/* 同步策略 */}
+        <CollapsibleSection
+          title="同步策略"
+          defaultExpanded={false}
+          loading={basicInfoLoading}
+          expandIcon={
+            <ExpandIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+          }
+          collapseIcon={
+            <AsideIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+          }
+        >
+          <SyncStrategyInfo
+            enableSyncSourceData={basicInfo?.enableSyncSourceData}
+            syncSourceDataStrategy={basicInfo?.syncSourceDataStrategy}
+          />
+        </CollapsibleSection>
 
         {/* Tab 内容 */}
         <Tabs
