@@ -17,13 +17,22 @@ import {
   Popover
 } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
-import { DrawerWithEditBtn } from '@/pages/ontologyScene/components';
+import {
+  DrawerWithEditBtn,
+  CollapsibleSection,
+  DataSourceInfo,
+  SyncStrategyInfo
+} from '@/pages/ontologyScene/components';
 import {
   DotStatus,
   GlobalTooltip,
   NoDataCard,
   copyToClipboard
 } from '@ceai-front/arco-material';
+import type {
+  SourceDataInfo,
+  SyncSourceDataStrategy
+} from '@/pages/ontologyScene/components/CollapsibleSection/types';
 
 import { getOntologyObjectTypeDetail } from '@/api/ontologySceneLibrary/objectType';
 import {
@@ -63,6 +72,12 @@ export interface ObjectTypeDetailData {
   instanceCount: number;
   attributeCount: number;
   linkCount: number;
+  // 新增字段：数据源和同步策略
+  sourceType?: number;
+  filePath?: string;
+  sourceDataInfo?: SourceDataInfo;
+  enableSyncSourceData?: boolean;
+  syncSourceDataStrategy?: SyncSourceDataStrategy;
 }
 
 // 实例数据接口
@@ -134,7 +149,13 @@ const convertDetailResToDetailData = (
     icon: detailRes.icon,
     instanceCount,
     attributeCount,
-    linkCount
+    linkCount,
+    // 新增字段：数据源和同步策略
+    sourceType: detailRes.sourceType,
+    filePath: detailRes.filePath,
+    sourceDataInfo: detailRes.sourceDataInfo,
+    enableSyncSourceData: detailRes.enableSyncSourceData,
+    syncSourceDataStrategy: detailRes.syncSourceDataStrategy
   };
 };
 
@@ -475,8 +496,72 @@ export default function ObjectTypeDetailDrawer({
           });
           if (res.status === 200 && res.code === '' && res.data) {
             const detailRes = res.data;
+
+            // TODO: MOCK 数据 - 用于测试显示效果，后端接口返回真实数据后删除
+            const mockData = {
+              ...detailRes,
+              // Mock 数据源 - 情况1: 本地CSV
+              // sourceType: 2,
+              // filePath: '/uploads/data/sample_data.csv',
+              // sourceDataInfo: {
+              //   connectorName: '本地文件',
+              // },
+
+              // Mock 数据源 - 情况2: 数据库/表-选择数据表
+              sourceType: 1,
+              sourceDataInfo: {
+                queryMode: 'selected',
+                connectorId: 1,
+                connectorName: 'MySQL数据源',
+                connectorType: 'MySQL',
+                connectorSubtype: 'MySQL 8.0',
+                databaseName: 'ontology_db',
+                tableName: 'user_table'
+              },
+
+              // Mock 数据源 - 情况3: 数据库/表-自定义SQL
+              // sourceType: 1,
+              // sourceDataInfo: {
+              //   queryMode: 'sql',
+              //   connectorId: 1,
+              //   connectorName: 'MySQL数据源',
+              //   connectorType: 'MySQL',
+              //   connectorSubtype: 'MySQL 8.0',
+              //   databaseName: 'ontology_db',
+              //   sql: 'SELECT id, name, age, email FROM users WHERE status = 1 AND created_at > "2024-01-01"',
+              // },
+
+              // Mock 同步策略 - 有同步策略（CDC模式）
+              // enableSyncSourceData: true,
+              // syncSourceDataStrategy: {
+              //   mode: 'BINLOG_CDC',
+              //   conflictStrategy: 'KEEP_SOURCE',
+              //   syncScope: 'INCREMENTAL',
+              //   pollFetchSize: 1000,
+              //   parallelism: 4,
+              //   exceptionStrategy: 'STOP_ON_ERROR',
+              // },
+
+              // Mock 同步策略 - 有同步策略（轮询模式）
+              enableSyncSourceData: true,
+              syncSourceDataStrategy: {
+                mode: 'JDBC_POLLING',
+                conflictStrategy: 'KEEP_TARGET',
+                syncScope: 'FULL_THEN_INCREMENTAL',
+                pollFetchSize: 500,
+                parallelism: 2,
+                exceptionStrategy: 'LOG_ERROR_AND_CONTINUE',
+                jdbcSyncSqlFull:
+                  'SELECT * FROM users WHERE created_at <= NOW()',
+                jdbcSyncSqlIncrement:
+                  'SELECT * FROM users WHERE updated_at > ${last_sync_time}'
+              }
+
+              // Mock 同步策略 - 无同步策略
+              // enableSyncSourceData: false,
+            };
+
             // 使用 GetOntologyObjectTypeDetailRes 转换函数
-            // 注意：GetOntologyObjectTypeDetailRes 不包含 syncStatus，使用默认值
             const detailData = convertDetailResToDetailData(detailRes);
             setBasicInfo(detailData);
           }
@@ -801,86 +886,110 @@ export default function ObjectTypeDetailDrawer({
     >
       <div className="flex flex-col gap-[24px]">
         {/* 基本信息 */}
-        <div className="flex flex-col gap-[12px]">
-          <div className="text-[14px] font-[600] leading-[22px] text-[var(--color-text-1)]">
-            基本信息
-          </div>
-          <Spin loading={basicInfoLoading}>
-            <div className="mb-[12px] flex gap-[16px]">
-              <div className="flex w-[418px] gap-[8px]">
-                <div className="w-[100px] text-[14px] leading-[22px] text-[var(--color-text-4)]">
-                  对象类型名称：
-                </div>
-                <div className="flex min-w-0 flex-1 items-center gap-[4px]">
-                  {displayData?.name ? (
-                    <>
-                      {renderObjectTypeIcon(displayData.icon)}
-                      <div className="min-w-0 flex-1">
-                        <GlobalTooltip.Ellipsis
-                          text={displayData?.name}
-                          className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
-                        />
-                      </div>
-                    </>
-                  ) : (
-                    '-'
-                  )}
-                </div>
+        <CollapsibleSection
+          title="基本信息"
+          defaultExpanded={true}
+          loading={basicInfoLoading}
+        >
+          <div className="mb-[12px] flex gap-[16px]">
+            <div className="flex w-[418px] gap-[8px]">
+              <div className="w-[100px] text-[14px] leading-[22px] text-[var(--color-text-4)]">
+                对象类型名称：
               </div>
-              <div className="flex gap-[8px]">
-                <div className="w-[90px] text-sm font-normal leading-[22px] text-[#86909c]">
-                  同步状态：
-                </div>
-                <div className="flex items-center gap-2 text-sm font-normal leading-[22px] text-[#23293b]">
-                  <div
-                    className="h-2 w-2 flex-shrink-0 rounded-full"
-                    style={{ backgroundColor: syncStatusConfig.color }}
-                  ></div>
-                  <span>{syncStatusConfig.text}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-[16px]">
-              <div className="flex gap-[8px]">
-                <div className="flex w-[418px] gap-[8px]">
-                  <div className="w-[100px] flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-4)]">
-                    描述说明：
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <GlobalTooltip.Ellipsis
-                      text={displayData?.description || '-'}
-                      className="w-full text-[14px] leading-[22px] text-[var(--color-text-1)]"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="flex min-w-0 flex-1 gap-[8px]">
-                <div className="w-[90px] text-[14px] leading-[22px] text-[var(--color-text-4)]">
-                  对象类型id:
-                </div>
-                <div className="flex min-w-0 flex-1 items-center gap-[4px]">
-                  <GlobalTooltip.Ellipsis
-                    text={displayData?.code ?? '-'}
-                    className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
-                  />
-                  {displayData?.code && (
-                    <Popover content="复制">
-                      <IconCopy
-                        fontSize={14}
-                        className="flex-shrink-0 hover:cursor-pointer hover:text-[rgba(var(--primary-6))]"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          void handleCopy(String(displayData?.code));
-                        }}
+              <div className="flex min-w-0 flex-1 items-center gap-[4px]">
+                {displayData?.name ? (
+                  <>
+                    {renderObjectTypeIcon(displayData.icon)}
+                    <div className="min-w-0 flex-1">
+                      <GlobalTooltip.Ellipsis
+                        text={displayData?.name}
+                        className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
                       />
-                    </Popover>
-                  )}
+                    </div>
+                  </>
+                ) : (
+                  '-'
+                )}
+              </div>
+            </div>
+            <div className="flex gap-[8px]">
+              <div className="w-[90px] text-sm font-normal leading-[22px] text-[#86909c]">
+                同步状态：
+              </div>
+              <div className="flex items-center gap-2 text-sm font-normal leading-[22px] text-[#23293b]">
+                <div
+                  className="h-2 w-2 flex-shrink-0 rounded-full"
+                  style={{ backgroundColor: syncStatusConfig.color }}
+                ></div>
+                <span>{syncStatusConfig.text}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-[16px]">
+            <div className="flex gap-[8px]">
+              <div className="flex w-[418px] gap-[8px]">
+                <div className="w-[100px] flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-4)]">
+                  描述说明：
+                </div>
+                <div className="min-w-0 flex-1">
+                  <GlobalTooltip.Ellipsis
+                    text={displayData?.description || '-'}
+                    className="w-full text-[14px] leading-[22px] text-[var(--color-text-1)]"
+                  />
                 </div>
               </div>
             </div>
-          </Spin>
-        </div>
+            <div className="flex min-w-0 flex-1 gap-[8px]">
+              <div className="w-[90px] text-[14px] leading-[22px] text-[var(--color-text-4)]">
+                对象类型id:
+              </div>
+              <div className="flex min-w-0 flex-1 items-center gap-[4px]">
+                <GlobalTooltip.Ellipsis
+                  text={displayData?.code ?? '-'}
+                  className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
+                />
+                {displayData?.code && (
+                  <Popover content="复制">
+                    <IconCopy
+                      fontSize={14}
+                      className="flex-shrink-0 hover:cursor-pointer hover:text-[rgba(var(--primary-6))]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void handleCopy(String(displayData?.code));
+                      }}
+                    />
+                  </Popover>
+                )}
+              </div>
+            </div>
+          </div>
+        </CollapsibleSection>
+
+        {/* 数据源 */}
+        <CollapsibleSection
+          title="数据源"
+          defaultExpanded={false}
+          loading={basicInfoLoading}
+        >
+          <DataSourceInfo
+            sourceType={basicInfo?.sourceType}
+            sourceDataInfo={basicInfo?.sourceDataInfo}
+            filePath={basicInfo?.filePath}
+          />
+        </CollapsibleSection>
+
+        {/* 同步策略 */}
+        <CollapsibleSection
+          title="同步策略"
+          defaultExpanded={false}
+          loading={basicInfoLoading}
+        >
+          <SyncStrategyInfo
+            enableSyncSourceData={basicInfo?.enableSyncSourceData}
+            syncSourceDataStrategy={basicInfo?.syncSourceDataStrategy}
+          />
+        </CollapsibleSection>
 
         {/* Tab 内容 */}
         <Tabs
