@@ -1,36 +1,27 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { Message, Button } from '@arco-design/web-react';
 import ObjectTypeForm, {
-  ObjectTypeFormData,
-  ObjectTypeFormRef
+  ObjectTypeFormData
 } from './components/ObjectTypeForm';
 import { createOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
+import { buildCreateObjectTypeRequest } from './components/ObjectTypeFormHooks/useObjectTypeSubmit';
 import { IconLeft } from '@arco-design/web-react/icon';
-import { ProButton } from '@ceai-front/arco-material';
 
 export default function OntologySceneObjectTypeCreate() {
   const history = useHistory();
   const { id: OSId } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(false);
-  const formRef = useRef<ObjectTypeFormRef>(null);
 
   const handleSubmit = async (data: ObjectTypeFormData) => {
     setLoading(true);
     try {
-      // 调用创建API
-      const response = await createOntologyObjectType({
-        code: data.code,
-        name: data.name,
-        description: data.description,
-        icon: data.icon,
-        ontologyModelID: Number(OSId),
-        filePath: data.filePath,
-        originalDbName: data.originalDbName,
-        originalTableName: data.originalTableName,
-        sourceType: data.sourceType,
-        ontologyPhysicalPropertiesList: data.ontologyPhysicalPropertiesList
-      });
+      const response = await createOntologyObjectType(
+        buildCreateObjectTypeRequest({
+          ...data,
+          ontologyModelID: Number(OSId)
+        })
+      );
 
       if (response.status === 200 && response.code === '') {
         Message.success('创建成功');
@@ -74,32 +65,13 @@ export default function OntologySceneObjectTypeCreate() {
       <div className="flex flex-1 flex-col overflow-hidden">
         <div className="overflow-y-auto pb-[65px]">
           <ObjectTypeForm
-            ref={formRef}
             initialValues={{
               ontologyModelID: Number(OSId)
             }}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             loading={loading}
-            showFooter={false}
           />
-        </div>
-        {/* 底部操作按钮 */}
-        <div className="absolute bottom-0 left-0 right-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">
-          <div className="flex justify-start gap-[8px]">
-            <Button
-              type="primary"
-              onClick={() => {
-                formRef.current?.submit();
-              }}
-              loading={loading}
-            >
-              确定
-            </Button>
-            <Button onClick={handleCancel} disabled={loading}>
-              取消
-            </Button>
-          </div>
         </div>
       </div>
     </div>

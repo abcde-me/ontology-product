@@ -1,0 +1,250 @@
+import {
+  CreateOntologyPhysicalProperty,
+  OntologyPhysicalPropertiesList
+} from '@/types/objectType';
+import {
+  AttributeField,
+  InstanceSyncMappingField,
+  ObjectTypeAttributeField,
+  SourceTableField
+} from './types';
+
+/** 向量列表字段 / 属性名称后缀（与后端约定一致） */
+export const VECTOR_FIELD_SUFFIX = '_vector';
+
+export function getAttributeRowKey(record: AttributeField): string {
+  return String(record.name || record.id || `field-${record.name}`);
+}
+
+export function createObjectTypeAttributeKey(prefix = 'attribute'): string {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export function getObjectTypeAttributeRowKey(
+  record: ObjectTypeAttributeField
+): string {
+  return record.key || record.propertyID || createObjectTypeAttributeKey();
+}
+
+export function sourceFieldToObjectTypeAttribute(
+  field: SourceTableField,
+  index: number
+): ObjectTypeAttributeField {
+  const isPrimary = index === 0;
+  const propertyID = field.fieldId;
+  const propertyComment = field.fieldComment || field.fieldId;
+  return {
+    key: createObjectTypeAttributeKey('schema-field'),
+    propertyID,
+    propertyComment,
+    propertyType: normalizeColumnTypeForPrimary(field.fieldType, isPrimary),
+    isPrimary: isPrimary ? 1 : 0,
+    isStoreAsPublic: 0,
+    publicPropertyID: 0,
+    isVector: 0,
+    sourceColumnName: field.fieldId,
+    sourceColumnComment: field.fieldComment || field.fieldId,
+    _vectorizationOn: false
+  };
+}
+
+export function objectTypeAttributeToLegacyField(
+  field: ObjectTypeAttributeField
+): AttributeField {
+  return {
+    name: field.propertyID,
+    comment: field.propertyComment,
+    columnType: field.propertyType,
+    isPrimary: field.isPrimary,
+    isUse: 1,
+    isStoreAsPublic: field.isStoreAsPublic,
+    publicPropertyID: field.publicPropertyID || 0,
+    isVector: field.isVector,
+    vectorSourceFieldName: undefined,
+    _tableField: field.sourceColumnName || field.propertyID,
+    _attributeName: field.propertyComment,
+    _storedPublicPropertyId: field._storedPublicPropertyId,
+    _vectorizationOn: field._vectorizationOn,
+    _vectorComment: field._vectorComment,
+    _vectorPropertyId: field._vectorPropertyId
+  };
+}
+
+interface LegacyAttributeLike {
+  name?: string;
+  comment?: string;
+  columnType?: string;
+  propertyID?: string | number;
+  propertyComment?: string;
+  propertyType?: string;
+  isPrimary?: number;
+  isStoreAsPublic?: number;
+  publicPropertyID?: number;
+  isVector?: number;
+  sourceColumnName?: string;
+  sourceColumnComment?: string;
+  _storedPublicPropertyId?: number;
+  _vectorizationOn?: boolean;
+  _vectorComment?: string;
+  _vectorPropertyId?: string | number;
+}
+
+export function legacyFieldToObjectTypeAttribute(
+  field:
+    | CreateOntologyPhysicalProperty
+    | AttributeField
+    | OntologyPhysicalPropertiesList
+): ObjectTypeAttributeField {
+  const raw: LegacyAttributeLike = field;
+  const propertyID =
+    raw.propertyID != null ? String(raw.propertyID) : raw.name || '';
+  const propertyComment =
+    raw.propertyComment ?? raw.comment ?? propertyID ?? '';
+  const propertyType = raw.propertyType ?? raw.columnType ?? '';
+  const sourceColumnName = raw.sourceColumnName ?? raw.name ?? propertyID;
+  const sourceColumnComment =
+    raw.sourceColumnComment ?? raw.comment ?? propertyComment ?? '';
+  return {
+    key: createObjectTypeAttributeKey('legacy-field'),
+    propertyID,
+    propertyComment,
+    propertyType,
+    isPrimary: raw.isPrimary === 1 ? 1 : 0,
+    isStoreAsPublic: raw.isStoreAsPublic === 1 ? 1 : 0,
+    publicPropertyID: raw.publicPropertyID || 0,
+    isVector: raw.isVector === 1 ? 1 : 0,
+    sourceColumnName,
+    sourceColumnComment,
+    _storedPublicPropertyId: raw._storedPublicPropertyId,
+    _vectorizationOn: raw._vectorizationOn,
+    _vectorComment: raw._vectorComment,
+    _vectorPropertyId: raw._vectorPropertyId
+  };
+}
+
+export function objectTypeAttributeToSyncMapping(
+  field: ObjectTypeAttributeField
+): InstanceSyncMappingField {
+  return {
+    key: createObjectTypeAttributeKey('sync-field'),
+    sourceColumnName: undefined,
+    sourceColumnComment: undefined,
+    sourceColumnType: undefined,
+    propertyID: field.propertyID,
+    propertyComment: field.propertyComment,
+    propertyType: field.propertyType,
+    isPrimary: field.isPrimary,
+    isVector: field._vectorizationOn ? 1 : 0
+  };
+}
+
+/** 属性映射行：将后端可能以字符串返回的 id 规范为整数 */
+export function normalizeAttributeFieldId(
+  field: AttributeField
+): AttributeField {
+  const raw = field.id as unknown;
+  if (raw === undefined || raw === null || raw === '') {
+    const { id: _omit, ...rest } = field;
+    return rest as AttributeField;
+  }
+  const n = Number(raw);
+  if (!Number.isFinite(n)) {
+    const { id: _omit, ...rest } = field;
+    return rest as AttributeField;
+  }
+  return { ...field, id: Math.trunc(n) };
+}
+
+/** 将接口返回的扁平列表合并为表单行：isVector=1 的项挂到 vectorSourceFieldName 对应基字段上 */
+export function mergeOntologyPhysicalPropertiesForForm(
+  list: CreateOntologyPhysicalProperty[]
+): AttributeField[] {
+  if (!list?.length) return [];
+  const vectorRows = list.filter((p) => p.isVector === 1);
+  const baseRows = list.filter((p) => p.isVector !== 1);
+  const vectorBySource = new Map(
+    vectorRows.map((v) => [String(v.vectorSourceFieldName ?? ''), v])
+  );
+  return baseRows.map((prop) => {
+    const vec = vectorBySource.get(String(prop.name ?? ''));
+    return normalizeAttributeFieldId({
+      ...prop,
+      isVector: 0,
+      vectorSourceFieldName: undefined,
+      _tableField: prop.name,
+      _attributeName: prop.comment,
+      _vectorizationOn: Boolean(vec && prop.name),
+      _vectorComment: vec?.comment,
+      _vectorPropertyId: vec?.id
+    });
+  });
+}
+
+/** 表单行拍平为接口列表：向量化配置拆成 isVector=1 的独立项 */
+export function flattenOntologyPhysicalPropertiesForSubmit(
+  fields: AttributeField[]
+): CreateOntologyPhysicalProperty[] {
+  const result: CreateOntologyPhysicalProperty[] = [];
+  for (const f of fields) {
+    const {
+      _tableField,
+      _attributeName,
+      _storedPublicPropertyId,
+      _vectorizationOn,
+      _vectorComment,
+      _vectorPropertyId,
+      ...rest
+    } = f;
+    const base: CreateOntologyPhysicalProperty = {
+      ...rest,
+      isVector: 0,
+      vectorSourceFieldName: undefined
+    };
+    result.push(base);
+
+    if (_vectorizationOn && f.isUse === 1) {
+      const vecName = `${f.name}${VECTOR_FIELD_SUFFIX}`;
+      const vecComment =
+        _vectorComment ?? `${f.comment ?? ''}${VECTOR_FIELD_SUFFIX}`;
+      const vec: CreateOntologyPhysicalProperty = {
+        name: vecName,
+        comment: vecComment,
+        columnType: 'vector',
+        isPrimary: 0,
+        isUse: 1,
+        isStoreAsPublic: 0,
+        publicPropertyID: 0,
+        isVector: 1,
+        vectorSourceFieldName: f.name
+      };
+      if (_vectorPropertyId !== undefined && _vectorPropertyId !== '') {
+        const vid = Number(_vectorPropertyId);
+        if (Number.isFinite(vid)) {
+          vec.id = Math.trunc(vid);
+        }
+      }
+      result.push(vec);
+    }
+  }
+  return result;
+}
+
+/**
+ * 字段类型规范化：
+ * - 当为主键且类型为 varchar(5000) / char(36) / varchar(500) 时，统一设为 varchar(500)
+ * - 当非主键且类型为上述几种之一时，统一设为 varchar(5000)
+ */
+export function normalizeColumnTypeForPrimary(
+  columnType: string,
+  isPrimary?: boolean
+) {
+  const lowerType = columnType.toString().toLowerCase();
+  if (
+    lowerType === 'varchar(5000)' ||
+    lowerType === 'char(36)' ||
+    lowerType === 'varchar(500)'
+  ) {
+    return isPrimary ? 'varchar(500)' : 'varchar(5000)';
+  }
+  return columnType;
+}

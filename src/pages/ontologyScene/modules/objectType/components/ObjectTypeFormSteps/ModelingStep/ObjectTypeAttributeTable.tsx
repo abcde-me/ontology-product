@@ -1,0 +1,328 @@
+import React, { useMemo, useState } from 'react';
+import {
+  Button,
+  Form,
+  Input,
+  Message,
+  Popover,
+  Radio,
+  Select,
+  Switch,
+  Table,
+  TableColumnProps
+} from '@arco-design/web-react';
+import { IconDelete, IconQuestionCircle } from '@arco-design/web-react/icon';
+import {
+  createOntologyPublicProperties,
+  deleteOntologyPublicProperties
+} from '@/api/ontologySceneLibrary/attributes';
+import { COLUMN_TYPE_OPTIONS } from '@/pages/ontologyScene/common/constants';
+import {
+  createObjectTypeAttributeKey,
+  getObjectTypeAttributeRowKey,
+  normalizeColumnTypeForPrimary
+} from '../../ObjectTypeFormUtils/attributeFields';
+import { ObjectTypeAttributeField } from '../../ObjectTypeFormUtils/types';
+
+const FormItem = Form.Item;
+
+interface ObjectTypeAttributeTableProps {
+  form: any;
+  attributeFields: ObjectTypeAttributeField[];
+  setAttributeFields: React.Dispatch<
+    React.SetStateAction<ObjectTypeAttributeField[]>
+  >;
+  fieldsLoading: boolean;
+  styles: Record<string, string>;
+}
+
+function createEmptyAttribute(): ObjectTypeAttributeField {
+  return {
+    key: createObjectTypeAttributeKey('manual-field'),
+    propertyID: '',
+    propertyComment: '',
+    propertyType: COLUMN_TYPE_OPTIONS[0]?.value || 'varchar(500)',
+    isPrimary: 0,
+    isStoreAsPublic: 0,
+    publicPropertyID: 0,
+    isVector: 0,
+    sourceColumnName: '',
+    sourceColumnComment: ''
+  };
+}
+
+export default function ObjectTypeAttributeTable({
+  form,
+  attributeFields,
+  setAttributeFields,
+  fieldsLoading,
+  styles
+}: ObjectTypeAttributeTableProps) {
+  const [storeAsPublicLoading, setStoreAsPublicLoading] = useState<
+    Record<string, boolean>
+  >({});
+
+  const syncFields = (nextFields: ObjectTypeAttributeField[]) => {
+    setAttributeFields(nextFields);
+    form.setFieldValue('objectTypeAttributes', nextFields);
+  };
+
+  const handleFieldChange = (
+    index: number,
+    updates: Partial<ObjectTypeAttributeField>
+  ) => {
+    const nextFields = attributeFields.map((field, currentIndex) =>
+      currentIndex === index ? { ...field, ...updates } : field
+    );
+    syncFields(nextFields);
+  };
+
+  const handlePrimaryChange = (index: number) => {
+    const nextFields: ObjectTypeAttributeField[] = attributeFields.map(
+      (field, currentIndex) => {
+        const isPrimary = currentIndex === index;
+        const nextIsPrimary: 1 | 0 = isPrimary ? 1 : 0;
+        return {
+          ...field,
+          isPrimary: nextIsPrimary,
+          propertyType: normalizeColumnTypeForPrimary(
+            field.propertyType,
+            isPrimary
+          )
+        };
+      }
+    );
+    syncFields(nextFields);
+  };
+
+  const handleAddRow = () => {
+    const nextFields = [...attributeFields, createEmptyAttribute()];
+    if (nextFields.length === 1) {
+      nextFields[0].isPrimary = 1;
+    }
+    syncFields(nextFields);
+  };
+
+  const handleDeleteRow = (index: number) => {
+    const current = attributeFields[index];
+    if (!current) return;
+    let nextFields = attributeFields.filter(
+      (_, currentIndex) => currentIndex !== index
+    );
+    if (current.isPrimary === 1 && nextFields.length > 0) {
+      nextFields = nextFields.map((field, currentIndex) => ({
+        ...field,
+        isPrimary: currentIndex === 0 ? 1 : 0
+      }));
+    }
+    syncFields(nextFields);
+  };
+
+  const handleStoreAsPublicChange = async (index: number, checked: boolean) => {
+    const field = attributeFields[index];
+    if (!field) return;
+    const rowKey = getObjectTypeAttributeRowKey(field);
+    setStoreAsPublicLoading((prev) => ({ ...prev, [rowKey]: true }));
+
+    try {
+      if (checked) {
+        if (
+          !field.propertyID ||
+          !field.propertyComment ||
+          !field.propertyType
+        ) {
+          Message.warning('请先填写属性id、属性名称和属性类型');
+          return;
+        }
+        const response = await createOntologyPublicProperties({
+          name: field.propertyID,
+          comment: field.propertyComment,
+          columnType: field.propertyType,
+          description: ''
+        });
+        if (response.status === 200 && response.code === '') {
+          handleFieldChange(index, {
+            isStoreAsPublic: 1,
+            _storedPublicPropertyId: response.data
+          });
+          Message.success('已存入公共属性库');
+        } else {
+          Message.error(response.message || '存入公共属性库失败');
+        }
+      } else if (field._storedPublicPropertyId) {
+        const response = await deleteOntologyPublicProperties({
+          id: field._storedPublicPropertyId
+        });
+        if (response.status === 200 && response.code === '') {
+          handleFieldChange(index, {
+            isStoreAsPublic: 0,
+            _storedPublicPropertyId: undefined
+          });
+          Message.success('已从公共属性库移除');
+        } else {
+          Message.error(response.message || '从公共属性库移除失败');
+        }
+      } else {
+        handleFieldChange(index, { isStoreAsPublic: 0 });
+      }
+    } catch (error) {
+      console.error('操作公共属性失败:', error);
+      Message.error(checked ? '存入公共属性库失败' : '从公共属性库移除失败');
+    } finally {
+      setStoreAsPublicLoading((prev) => ({ ...prev, [rowKey]: false }));
+    }
+  };
+
+  const columns = useMemo<TableColumnProps<ObjectTypeAttributeField>[]>(
+    () => [
+      {
+        title: (
+          <span className="inline-flex items-center gap-[4px]">
+            主键
+            <Popover content="选择作为对象类型主键的属性">
+              <IconQuestionCircle className="cursor-pointer text-[#86909C]" />
+            </Popover>
+          </span>
+        ),
+        dataIndex: 'isPrimary',
+        width: 90,
+        render: (_, __, index) => (
+          <Radio
+            checked={attributeFields[index]?.isPrimary === 1}
+            onChange={() => handlePrimaryChange(index)}
+          />
+        )
+      },
+      {
+        title: '属性id',
+        dataIndex: 'propertyID',
+        width: 260,
+        render: (value, _, index) => (
+          <Input
+            value={value}
+            placeholder="请输入属性id"
+            onChange={(propertyID) =>
+              handleFieldChange(index, {
+                propertyID,
+                sourceColumnName:
+                  attributeFields[index]?.sourceColumnName || propertyID
+              })
+            }
+          />
+        )
+      },
+      {
+        title: '属性名称',
+        dataIndex: 'propertyComment',
+        width: 300,
+        render: (value, _, index) => (
+          <Input
+            value={value}
+            placeholder="请输入属性名称"
+            onChange={(propertyComment) =>
+              handleFieldChange(index, {
+                propertyComment,
+                sourceColumnComment:
+                  attributeFields[index]?.sourceColumnComment || propertyComment
+              })
+            }
+          />
+        )
+      },
+      {
+        title: (
+          <span className="inline-flex items-center gap-[4px]">
+            存入公共属性
+            <Popover content="是否将当前属性存入公共属性库">
+              <IconQuestionCircle className="cursor-pointer text-[#86909C]" />
+            </Popover>
+          </span>
+        ),
+        dataIndex: 'isStoreAsPublic',
+        width: 140,
+        render: (_, record, index) => {
+          const rowKey = getObjectTypeAttributeRowKey(record);
+          return (
+            <Switch
+              size="small"
+              checked={record.isStoreAsPublic === 1}
+              loading={storeAsPublicLoading[rowKey]}
+              onChange={(checked) =>
+                handleStoreAsPublicChange(index, Boolean(checked))
+              }
+            />
+          );
+        }
+      },
+      {
+        title: '属性类型',
+        dataIndex: 'propertyType',
+        width: 220,
+        render: (value, _, index) => (
+          <Select
+            value={value}
+            options={COLUMN_TYPE_OPTIONS}
+            onChange={(propertyType) =>
+              handleFieldChange(index, { propertyType })
+            }
+          />
+        )
+      },
+      {
+        title: '操作',
+        dataIndex: 'operation',
+        width: 80,
+        render: (_, __, index) => (
+          <Button
+            type="text"
+            icon={<IconDelete />}
+            onClick={() => handleDeleteRow(index)}
+          />
+        )
+      }
+    ],
+    [attributeFields, storeAsPublicLoading]
+  );
+
+  return (
+    <>
+      <div className="my-[16px] flex items-center justify-between text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
+        <span>对象类型属性</span>
+        <Button type="text" onClick={handleAddRow}>
+          + 添加行
+        </Button>
+      </div>
+      <FormItem
+        className={styles['attribute-fields-form-item']}
+        field="objectTypeAttributes"
+        rules={[
+          {
+            required: true,
+            validator: (_value, callback) => {
+              if (!attributeFields.length) {
+                callback('请先添加对象类型属性');
+                return;
+              }
+              if (!attributeFields.some((field) => field.isPrimary === 1)) {
+                callback('至少需要一个主键属性');
+                return;
+              }
+              callback();
+            }
+          }
+        ]}
+      >
+        <Table
+          className={styles['attribute-mapping-table']}
+          loading={fieldsLoading}
+          scroll={{ x: true }}
+          columns={columns}
+          data={attributeFields}
+          rowKey={(record) => getObjectTypeAttributeRowKey(record)}
+          border={false}
+          pagination={false}
+        />
+      </FormItem>
+    </>
+  );
+}
