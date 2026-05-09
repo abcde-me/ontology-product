@@ -3,6 +3,9 @@ import { Button, Space } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
 import { DotStatus } from '@ceai-front/arco-material';
 import { ContentWithCopy } from '@/components/ContentWithCopy';
+import { PermissionWrapper } from '@/components/PermissionGuard/PermissionWrapper';
+import { DATA_SOURCE_PERMISSIONS } from '@/config/permissions';
+import dayjs from 'dayjs';
 import type { DataSourceItem } from '../types';
 import { DataSourceType, ConnectionStatus } from '../types';
 
@@ -79,7 +82,10 @@ export const useColumns = ({
       {
         title: '创建时间',
         dataIndex: 'createTime',
-        width: 180
+        width: 180,
+        render: (time: string) => {
+          return dayjs(time).format('YYYY-MM-DD HH:mm:ss');
+        }
       },
       {
         title: '操作',
@@ -98,23 +104,27 @@ export const useColumns = ({
               连接测试
             </Button>
             {onEdit && (
+              <PermissionWrapper permission={DATA_SOURCE_PERMISSIONS.MODIFY}>
+                <Button
+                  type="text"
+                  size="small"
+                  className="p-0"
+                  onClick={() => onEdit(record)}
+                >
+                  编辑
+                </Button>
+              </PermissionWrapper>
+            )}
+            <PermissionWrapper permission={DATA_SOURCE_PERMISSIONS.DELETE}>
               <Button
                 type="text"
                 size="small"
                 className="p-0"
-                onClick={() => onEdit(record)}
+                onClick={() => onDelete(record.id)}
               >
-                编辑
+                删除
               </Button>
-            )}
-            <Button
-              type="text"
-              size="small"
-              className="p-0"
-              onClick={() => onDelete(record.id)}
-            >
-              删除
-            </Button>
+            </PermissionWrapper>
           </Space>
         )
       }

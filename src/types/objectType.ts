@@ -347,6 +347,46 @@ export interface GetOntologyObjectTypeDetailRes
    * 同步状态
    */
   syncStatus: SyncStatus;
+  /**
+   * 数据源信息
+   */
+  sourceDataInfo?: {
+    queryMode?: string;
+    connectorId?: number;
+    connectorName?: string;
+    connectorType?: string;
+    connectorSubtype?: string;
+    databaseName?: string;
+    tableName?: string;
+    sql?: string;
+  };
+  /**
+   * 是否启用数据源同步
+   */
+  enableSyncSourceData?: boolean;
+  /**
+   * 同步策略信息
+   */
+  syncSourceDataStrategy?: {
+    sourceDataInfo?: {
+      queryMode?: string;
+      connectorId?: number;
+      connectorName?: string;
+      connectorType?: string;
+      connectorSubtype?: string;
+      databaseName?: string;
+      tableName?: string;
+      sql?: string;
+    };
+    mode?: string;
+    conflictStrategy?: string;
+    syncScope?: string;
+    pollFetchSize?: number;
+    parallelism?: number;
+    exceptionStrategy?: string;
+    jdbcSyncSqlFull?: string;
+    jdbcSyncSqlIncrement?: string;
+  };
 }
 
 export interface UploadOntologyCSVFileAndParseRes {
