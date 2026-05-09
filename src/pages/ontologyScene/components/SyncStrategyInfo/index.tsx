@@ -141,14 +141,14 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
         )}
       </div>
 
-      {/* 第二行：同步范围、批次同步数 */}
+      {/* 第二行：同步范围、单次拉取数量 */}
       <div className="mb-[12px] flex gap-[16px]">
         {renderField(
           '同步范围',
           getSyncScopeText(syncSourceDataStrategy.syncScope)
         )}
         {renderField(
-          '批次同步数',
+          '单次拉取数量',
           syncSourceDataStrategy.pollFetchSize?.toString()
         )}
       </div>

@@ -1,7 +1,6 @@
 import React, { useState, useCallback, ReactNode } from 'react';
 import { Spin } from '@arco-design/web-react';
-import ExpandIcon from '../../assets/expand.svg';
-import AsideIcon from '../../assets/aside.svg';
+import { IconDown, IconRight } from '@arco-design/web-react/icon';
 
 export interface CollapsibleSectionProps {
   /**
@@ -93,12 +92,12 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
     onExpandedChange?.(newExpanded);
   }, [disabled, expanded, isControlled, onExpandedChange]);
 
-  // 默认图标
+  // 默认图标 - 使用 Arco Design 的图标
   const defaultExpandIcon = (
-    <ExpandIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+    <IconDown className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
   );
   const defaultCollapseIcon = (
-    <AsideIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+    <IconRight className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
   );
 
   return (

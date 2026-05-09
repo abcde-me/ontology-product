@@ -39,20 +39,20 @@ function App() {
 
 ### Props
 
-| 属性               | 类型                          | 默认值  | 说明                       |
-| ------------------ | ----------------------------- | ------- | -------------------------- |
-| `title`            | `string`                      | -       | 标题文本（必填）           |
-| `defaultExpanded`  | `boolean`                     | `false` | 是否默认展开（非受控模式） |
-| `expanded`         | `boolean`                     | -       | 是否展开（受控模式）       |
-| `onExpandedChange` | `(expanded: boolean) => void` | -       | 展开状态变化回调           |
-| `children`         | `ReactNode`                   | -       | 内容区域（必填）           |
-| `loading`          | `boolean`                     | `false` | 是否显示加载状态           |
-| `expandIcon`       | `ReactNode`                   | -       | 自定义展开图标             |
-| `collapseIcon`     | `ReactNode`                   | -       | 自定义收起图标             |
-| `titleClassName`   | `string`                      | -       | 自定义标题样式类名         |
-| `className`        | `string`                      | -       | 自定义容器样式类名         |
-| `contentClassName` | `string`                      | -       | 自定义内容区域样式类名     |
-| `disabled`         | `boolean`                     | `false` | 是否禁用展开/收起功能      |
+| 属性               | 类型                          | 默认值          | 说明                           |
+| ------------------ | ----------------------------- | --------------- | ------------------------------ |
+| `title`            | `string`                      | -               | 标题文本（必填）               |
+| `defaultExpanded`  | `boolean`                     | `false`         | 是否默认展开（非受控模式）     |
+| `expanded`         | `boolean`                     | -               | 是否展开（受控模式）           |
+| `onExpandedChange` | `(expanded: boolean) => void` | -               | 展开状态变化回调               |
+| `children`         | `ReactNode`                   | -               | 内容区域（必填）               |
+| `loading`          | `boolean`                     | `false`         | 是否显示加载状态               |
+| `expandIcon`       | `ReactNode`                   | `<IconDown />`  | 自定义展开图标（展开状态显示） |
+| `collapseIcon`     | `ReactNode`                   | `<IconRight />` | 自定义收起图标（收起状态显示） |
+| `titleClassName`   | `string`                      | -               | 自定义标题样式类名             |
+| `className`        | `string`                      | -               | 自定义容器样式类名             |
+| `contentClassName` | `string`                      | -               | 自定义内容区域样式类名         |
+| `disabled`         | `boolean`                     | `false`         | 是否禁用展开/收起功能          |
 
 ## 示例
 
@@ -101,8 +101,9 @@ function App() {
 ## 注意事项
 
 1. **受控模式**：当同时提供 `expanded` 和 `onExpandedChange` 时，组件进入受控模式，`defaultExpanded` 将被忽略
-2. **图标依赖**：默认图标依赖项目中的 SVG 文件，可通过 `expandIcon` 和 `collapseIcon` 自定义
+2. **默认图标**：组件使用 `@arco-design/web-react/icon` 的 `IconDown` 和 `IconRight` 作为默认图标，无需额外依赖。可通过 `expandIcon` 和 `collapseIcon` 自定义
 3. **样式定制**：组件使用 Tailwind CSS 类名，确保项目已配置 Tailwind
+4. **独立性**：组件不依赖项目特定的 SVG 文件，可直接复用到其他项目
 
 ## License
 

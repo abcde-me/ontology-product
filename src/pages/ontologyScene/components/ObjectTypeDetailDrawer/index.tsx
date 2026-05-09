@@ -33,6 +33,8 @@ import type {
   SourceDataInfo,
   SyncSourceDataStrategy
 } from '@/pages/ontologyScene/components/CollapsibleSection/types';
+import ExpandIcon from '../../assets/expand.svg';
+import AsideIcon from '../../assets/aside.svg';
 
 import { getOntologyObjectTypeDetail } from '@/api/ontologySceneLibrary/objectType';
 import {
@@ -890,6 +892,12 @@ export default function ObjectTypeDetailDrawer({
           title="基本信息"
           defaultExpanded={true}
           loading={basicInfoLoading}
+          expandIcon={
+            <ExpandIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+          }
+          collapseIcon={
+            <AsideIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+          }
         >
           <div className="mb-[12px] flex gap-[16px]">
             <div className="flex w-[418px] gap-[8px]">
@@ -971,6 +979,12 @@ export default function ObjectTypeDetailDrawer({
           title="数据源"
           defaultExpanded={false}
           loading={basicInfoLoading}
+          expandIcon={
+            <ExpandIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+          }
+          collapseIcon={
+            <AsideIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+          }
         >
           <DataSourceInfo
             sourceType={basicInfo?.sourceType}
@@ -984,6 +998,12 @@ export default function ObjectTypeDetailDrawer({
           title="同步策略"
           defaultExpanded={false}
           loading={basicInfoLoading}
+          expandIcon={
+            <ExpandIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+          }
+          collapseIcon={
+            <AsideIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+          }
         >
           <SyncStrategyInfo
             enableSyncSourceData={basicInfo?.enableSyncSourceData}
