@@ -122,6 +122,12 @@ export default function OntologySceneObjectTypeEdit() {
                 parallelism: objectType.syncSourceDataStrategy.parallelism,
                 exceptionStrategy:
                   objectType.syncSourceDataStrategy.exceptionStrategy,
+                jdbcCheckpointField:
+                  objectType.syncSourceDataStrategy.jdbcCheckpointField,
+                jdbcIncrementalTimeField:
+                  objectType.syncSourceDataStrategy.jdbcIncrementalTimeField,
+                jdbcPollingIntervalSeconds:
+                  objectType.syncSourceDataStrategy.jdbcPollingIntervalSeconds,
                 jdbcSyncSqlFull:
                   objectType.syncSourceDataStrategy.jdbcSyncSqlFull,
                 jdbcSyncSqlIncrement:

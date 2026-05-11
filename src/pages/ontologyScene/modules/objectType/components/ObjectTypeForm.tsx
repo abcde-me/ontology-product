@@ -42,7 +42,8 @@ const DEFAULT_INSTANCE_SYNC_VALUES = {
   syncMode: 'BINLOG_CDC',
   conflictStrategy: 'KEEP_SOURCE',
   syncScope: 'FULL_THEN_INCREMENTAL',
-  pollFetchSize: 10,
+  jdbcPollingIntervalSeconds: 60,
+  pollFetchSize: 500,
   parallelism: 1,
   exceptionStrategy: 'STOP_ON_ERROR'
 };
@@ -54,7 +55,8 @@ const DEFAULT_SYNC_SOURCE_DATA_STRATEGY: SyncSourceDataStrategyFormState = {
   mode: 'BINLOG_CDC',
   conflictStrategy: 'KEEP_SOURCE',
   syncScope: 'FULL_THEN_INCREMENTAL',
-  pollFetchSize: 10,
+  jdbcPollingIntervalSeconds: 60,
+  pollFetchSize: 500,
   parallelism: 1,
   exceptionStrategy: 'STOP_ON_ERROR'
 };
@@ -317,22 +319,29 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     };
 
     const validateInstanceSync = async () => {
+      const syncSource = syncSourceDataStrategy.sourceDataInfo;
+      const isPollingMode = syncSourceDataStrategy.mode === 'JDBC_POLLING';
+      const isSqlPolling = isPollingMode && syncSource.queryMode === 'sql';
+      const validateFields = [
+        'syncMode',
+        'conflictStrategy',
+        'syncScope',
+        'exceptionStrategy',
+        'syncConnector',
+        'syncDatabaseTable',
+        'syncMappingFields'
+      ];
+
+      if (isPollingMode) {
+        validateFields.push('jdbcPollingIntervalSeconds', 'pollFetchSize');
+      }
+
       try {
-        await form.validate([
-          'syncMode',
-          'conflictStrategy',
-          'syncScope',
-          'pollFetchSize',
-          'exceptionStrategy',
-          'syncConnector',
-          'syncDatabaseTable',
-          'syncMappingFields'
-        ]);
+        await form.validate(validateFields);
       } catch (error) {
         return false;
       }
 
-      const syncSource = syncSourceDataStrategy.sourceDataInfo;
       if (
         !syncSource.connectorId ||
         (syncSource.queryMode !== 'sql' &&
@@ -340,6 +349,37 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       ) {
         Message.warning('请选择实例同步数据源');
         return false;
+      }
+
+      if (
+        isPollingMode &&
+        (!syncSourceDataStrategy.jdbcPollingIntervalSeconds ||
+          !syncSourceDataStrategy.pollFetchSize)
+      ) {
+        Message.warning('请完整填写轮询参数');
+        return false;
+      }
+
+      if (isSqlPolling) {
+        const needFullSql =
+          syncSourceDataStrategy.syncScope === 'FULL' ||
+          syncSourceDataStrategy.syncScope === 'FULL_THEN_INCREMENTAL';
+        const needIncrementSql =
+          syncSourceDataStrategy.syncScope === 'INCREMENTAL' ||
+          syncSourceDataStrategy.syncScope === 'FULL_THEN_INCREMENTAL';
+
+        if (needFullSql && !syncSourceDataStrategy.jdbcSyncSqlFull?.trim()) {
+          Message.warning('请输入全量SQL');
+          return false;
+        }
+
+        if (
+          needIncrementSql &&
+          !syncSourceDataStrategy.jdbcSyncSqlIncrement?.trim()
+        ) {
+          Message.warning('请输入增量SQL');
+          return false;
+        }
       }
 
       const hasMappedField = syncMappingFields.some(
