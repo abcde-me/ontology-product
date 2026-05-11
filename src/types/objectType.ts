@@ -265,7 +265,7 @@ export interface SyncSourceDataStrategy {
    */
   parallelism: number;
   /**
-   * 批次同步数
+   * 单次拉取数量
    */
   pollFetchSize: number;
   sourceDataInfo: SourceDataInfo;

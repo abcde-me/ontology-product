@@ -270,14 +270,14 @@ export default function InstanceSyncStep({
       <FormItem
         label={
           <span className="inline-flex items-center gap-[4px]">
-            批次同步数
-            <Popover content="每批次同步的实例数量">
+            单次拉取数量
+            <Popover content="单次从数据源拉取的最大实例数量">
               <IconQuestionCircle className="cursor-pointer text-[#86909C]" />
             </Popover>
           </span>
         }
         field="pollFetchSize"
-        rules={[{ required: true, message: '请输入批次同步数' }]}
+        rules={[{ required: true, message: '请输入单次拉取数量' }]}
       >
         <InputNumber
           min={1}
