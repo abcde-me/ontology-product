@@ -122,6 +122,14 @@ export interface ObjectType {
    * 修改人
    */
   updateUser?: string;
+  /**
+   * 是否启用数据源同步
+   */
+  enableSyncSourceData?: boolean;
+  /**
+   * 是否开启同步
+   */
+  syncEnabled?: boolean;
 }
 
 export interface ListOntologyObjectTypeRes {
