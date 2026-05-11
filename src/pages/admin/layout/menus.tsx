@@ -122,6 +122,13 @@ export const menus: MenuModel[] = [
         key: 'OntologySceneLibrary',
         path: '/tenant/compute/onto/ontologyScene/list',
         permission: ONTOLOGY_PERMISSIONS.LIST
+      },
+      {
+        title: 'AI本体工作台',
+        icon: <OntologyLibrary className={iconClass} />,
+        key: 'AIOntoWorkbench',
+        path: '/tenant/compute/onto/aiOntologyWorkbench',
+        permission: ONTOLOGY_PERMISSIONS.LIST
       }
     ]
   },
