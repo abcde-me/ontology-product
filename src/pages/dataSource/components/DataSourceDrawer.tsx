@@ -153,17 +153,7 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
             alignItems: 'center'
           }}
         >
-          {isEdit && (
-            <div>
-              <Button
-                type="outline"
-                loading={testLoading}
-                onClick={handleTestConnection}
-              >
-                连接测试
-              </Button>
-            </div>
-          )}
+          {isEdit && <div></div>}
           <Space>
             <Button onClick={handleCancel}>取消</Button>
             <Button
@@ -171,7 +161,7 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
               loading={submitLoading}
               onClick={handleSubmit}
             >
-              确定
+              测试并创建
             </Button>
           </Space>
         </div>
