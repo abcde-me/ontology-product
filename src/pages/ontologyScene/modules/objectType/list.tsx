@@ -7,7 +7,7 @@ import {
   TableColumnProps,
   Pagination,
   Message,
-  Modal,
+  Switch,
   Popover
 } from '@arco-design/web-react';
 import {
@@ -305,6 +305,12 @@ export default function OntologySceneObjectTypeList() {
           )}
         </div>
       )
+    },
+    {
+      title: '实例同步任务',
+      dataIndex: 'syncEnabled',
+      width: 200,
+      render: (_, record) => <div>1</div>
     },
     {
       title: '同步状态',
