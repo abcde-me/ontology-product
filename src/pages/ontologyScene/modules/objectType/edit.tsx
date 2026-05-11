@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { Message, Button, Spin } from '@arco-design/web-react';
 import ObjectTypeForm, {
   ObjectTypeFormData
@@ -14,12 +14,25 @@ import { DATA_SOURCE_TYPE } from '@/pages/ontologyScene/common/constants';
 
 import { IconLeft } from '@arco-design/web-react/icon';
 
+const getInitialStepFromSearch = (search: string) => {
+  const step = new URLSearchParams(search).get('step');
+  const parsedStep = step ? Number(step) : NaN;
+
+  if (!Number.isInteger(parsedStep) || parsedStep < 1 || parsedStep > 3) {
+    return undefined;
+  }
+
+  return parsedStep - 1;
+};
+
 export default function OntologySceneObjectTypeEdit() {
   const history = useHistory();
+  const location = useLocation();
   const { id: OSId, objectTypeId } = useParams<{
     id: string;
     objectTypeId: string;
   }>();
+  const initialStep = getInitialStepFromSearch(location.search);
   const [loading, setLoading] = useState(false);
   const [initialValues, setInitialValues] =
     useState<Partial<ObjectTypeFormData>>();
@@ -213,6 +226,7 @@ export default function OntologySceneObjectTypeEdit() {
                 <ObjectTypeForm
                   isEdit={true}
                   initialValues={initialValues}
+                  initialStep={initialStep}
                   onSubmit={handleSubmit}
                   onCancel={handleCancel}
                   loading={loading}

@@ -35,6 +35,9 @@ const BASIC_STEP = 0;
 const MODELING_STEP = 1;
 const INSTANCE_SYNC_STEP = 2;
 
+const clampStep = (step: number) =>
+  Math.min(INSTANCE_SYNC_STEP, Math.max(BASIC_STEP, step));
+
 const DEFAULT_INSTANCE_SYNC_VALUES = {
   syncMode: 'BINLOG_CDC',
   conflictStrategy: 'KEEP_SOURCE',
@@ -63,6 +66,7 @@ interface ObjectTypeFormProps {
   loading?: boolean;
   showFooter?: boolean;
   isEdit?: boolean;
+  initialStep?: number;
 }
 
 export interface ObjectTypeFormRef {
@@ -77,7 +81,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       onCancel,
       loading = false,
       showFooter = true,
-      isEdit = false
+      isEdit = false,
+      initialStep
     },
     ref
   ) => {
@@ -110,7 +115,9 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const [, setFileUploaded] = useState(false);
     const [isReUpload, setIsReUpload] = useState(false);
     const [initialFileList, setInitialFileList] = useState<any[]>([]);
-    const [currentStep, setCurrentStep] = useState(BASIC_STEP);
+    const [currentStep, setCurrentStep] = useState(() =>
+      clampStep(initialStep ?? BASIC_STEP)
+    );
 
     useEffect(() => {
       form.setFieldsValue(DEFAULT_INSTANCE_SYNC_VALUES);
