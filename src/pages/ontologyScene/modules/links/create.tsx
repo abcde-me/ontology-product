@@ -88,6 +88,8 @@ export default function OntologySceneLinksCreate() {
       conflictStrategy: strategy.conflictStrategy,
       syncScope: strategy.syncScope,
       pollFetchSize: strategy.pollFetchSize,
+      fullSyncBatchSize:
+        strategy.fullSyncBatchSize ?? strategy.pollFetchSize ?? 500,
       parallelism: strategy.parallelism || 1,
       exceptionStrategy: strategy.exceptionStrategy,
       jdbcCheckpointField: strategy.jdbcCheckpointField,

@@ -74,6 +74,8 @@ export default function OntologySceneLinksEdit() {
       conflictStrategy: strategy.conflictStrategy,
       syncScope: strategy.syncScope,
       pollFetchSize: strategy.pollFetchSize,
+      fullSyncBatchSize:
+        strategy.fullSyncBatchSize ?? strategy.pollFetchSize ?? 500,
       parallelism: strategy.parallelism || 1,
       exceptionStrategy: strategy.exceptionStrategy,
       jdbcCheckpointField: strategy.jdbcCheckpointField,
@@ -164,6 +166,10 @@ export default function OntologySceneLinksEdit() {
                   'FULL_THEN_INCREMENTAL',
                 pollFetchSize:
                   data.syncSourceDataStrategy?.pollFetchSize || 500,
+                fullSyncBatchSize:
+                  data.syncSourceDataStrategy?.fullSyncBatchSize ??
+                  data.syncSourceDataStrategy?.pollFetchSize ??
+                  500,
                 parallelism: data.syncSourceDataStrategy?.parallelism || 1,
                 exceptionStrategy:
                   data.syncSourceDataStrategy?.exceptionStrategy ||

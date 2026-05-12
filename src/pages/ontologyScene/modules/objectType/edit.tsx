@@ -19,6 +19,7 @@ const DEFAULT_SYNC_SOURCE_DATA_STRATEGY = {
   conflictStrategy: 'KEEP_SOURCE',
   syncScope: 'FULL_THEN_INCREMENTAL',
   pollFetchSize: 500,
+  fullSyncBatchSize: 500,
   parallelism: 1,
   exceptionStrategy: 'STOP_ON_ERROR',
   jdbcPollingIntervalSeconds: 60
@@ -140,6 +141,10 @@ export default function OntologySceneObjectTypeEdit() {
                   objectType.syncSourceDataStrategy.pollFetchSize ||
                   DEFAULT_SYNC_SOURCE_DATA_STRATEGY.pollFetchSize ||
                   0,
+                fullSyncBatchSize:
+                  objectType.syncSourceDataStrategy.fullSyncBatchSize ??
+                  objectType.syncSourceDataStrategy.pollFetchSize ??
+                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.fullSyncBatchSize,
                 parallelism:
                   objectType.syncSourceDataStrategy.parallelism ||
                   DEFAULT_SYNC_SOURCE_DATA_STRATEGY.parallelism ||
