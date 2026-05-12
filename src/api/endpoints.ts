@@ -15,7 +15,8 @@ const API_PREFIX = '/ceai';
 export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
-export const PrefixAimdp = API_PREFIX + '/ontology-manager/api/v1';
+export const PrefixAimdp = API_PREFIX + '/aimdp-manager/api/v1';
+export const PrefixAiAppforge = API_PREFIX + '/appforge/api/v1'; // ai-appforge (需要 /ceai 前缀)
 export const PrefixLabelService = API_PREFIX + '/label-service/api/v1';
 export const PrefixUserCenter = API_PREFIX + '/user-space/api/v1';
 export const ResourceEndpointsV2 = {
@@ -889,7 +890,19 @@ export const ModaForgeResourceEndpoints = {
   // 删除数据源
   DeleteConnectorApi: PrefixAimdp + '/DeleteConnector',
   // 测试数据源连接
-  TestConnectorApi: PrefixAimdp + '/TestConnector'
+  TestConnectorApi: PrefixAimdp + '/TestConnector',
+
+  // ===================== AI本体对话相关 =====================
+  // AI对话 - 使用 appforge 的接口
+  GetAIChatCompletionsApi: PrefixAiAppforge + '/CreateMessage',
+  // 历史会话列表
+  GetAIChatHistoryApi: PrefixAiAppforge + '/ListConversation',
+  // 重命名对话名称
+  RenameAIChatApi: PrefixAiAppforge + '/UpdateConversation',
+  // 删除会话
+  DeleteAIChatApi: PrefixAiAppforge + '/DeleteConversation',
+  // 当前会话
+  GetCurrentAIChatApi: PrefixAiAppforge + '/ListMessage'
 };
 
 /**

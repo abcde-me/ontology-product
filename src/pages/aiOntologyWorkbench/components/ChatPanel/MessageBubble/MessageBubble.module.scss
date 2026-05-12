@@ -1,0 +1,144 @@
+// 用户消息气泡（右侧）
+.userBubbleContainer {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.userBubble {
+  max-width: 70%;
+  background: rgba(24, 79, 242, 0.1);
+  border-radius: 8px;
+  padding: 12px 20px;
+}
+
+.userContent {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-1);
+  word-break: break-word;
+}
+
+.userFiles {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fileItem {
+  font-size: 12px;
+  color: var(--color-text-3);
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+}
+
+// AI 消息气泡（左侧）
+.aiBubbleContainer {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.aiAvatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+}
+
+.avatarIcon {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.aiBubble {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.aiContent {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-2);
+  word-break: break-word;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.errorMessage {
+  padding: 12px;
+  background: var(--color-danger-light-1);
+  border: 1px solid var(--color-danger-light-3);
+  border-radius: 8px;
+  color: var(--color-danger-6);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+// 加载指示器
+.loadingIndicator {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-text-4);
+  animation: dotPulse 1.4s infinite ease-in-out both;
+
+  &:nth-child(1) {
+    animation-delay: -0.32s;
+  }
+
+  &:nth-child(2) {
+    animation-delay: -0.16s;
+  }
+}
+
+@keyframes dotPulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// 连接线 - 思考和工具调用之间
+.connector {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  margin: -8px 0; // 减少上下间距
+}
+
+.connectorLine {
+  width: 14px;
+  height: 16px;
+  border-left: 1px solid var(--color-border-1, #c3c7d4);
+  flex-shrink: 0;
+}

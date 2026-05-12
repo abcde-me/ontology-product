@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { Spin } from '@arco-design/web-react';
 import { useAIWorkbenchStore } from './store';
 import { useOntologyManagement } from './hooks/useOntologyManagement';
-import { useSessionManagement } from './hooks/useSessionManagement';
 import SceneModal from '@/pages/ontologyScene/modules/list/components/SceneModal';
 import EmptyState from './components/EmptyState';
 import OntologySelector from './components/OntologySelector';
@@ -25,8 +24,6 @@ const AIOntoWorkbench: React.FC = () => {
     openCreateModal,
     closeCreateModal
   } = useOntologyManagement();
-
-  const { createNewSession, sendMessage } = useSessionManagement();
 
   // 初始化
   useEffect(() => {
@@ -87,12 +84,11 @@ const AIOntoWorkbench: React.FC = () => {
         <ResizableLayout
           leftContent={
             <ChatPanel
-              onNewSession={createNewSession}
-              onHistoryClick={() => {
-                // TODO: 打开历史会话列表
-                console.log('打开历史会话列表');
+              appId="app-0k38vxsv"
+              onConversationCreated={(conversationId) => {
+                console.log('会话创建:', conversationId);
+                // TODO: 保存会话 ID
               }}
-              onSendMessage={sendMessage}
             />
           }
           rightContent={<GraphPanel />}

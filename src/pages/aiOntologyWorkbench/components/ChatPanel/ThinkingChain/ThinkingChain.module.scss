@@ -1,0 +1,207 @@
+/**
+ * ThinkingChain 样式
+ * 参考 ai-appforge 和 x-main 的设计
+ */
+
+.thinkingChain {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+// ==================== 链头 ====================
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.headerText {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-3, #646c85);
+}
+
+.timeText {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-4);
+}
+
+.arrow {
+  flex-shrink: 0;
+  font-size: 16px;
+  color: var(--color-text-3);
+  transition: transform 0.2s ease;
+
+  &.arrowUp {
+    transform: rotate(180deg);
+  }
+
+  &.arrowDown {
+    transform: rotate(0deg);
+  }
+}
+
+// ==================== 步骤列表 ====================
+.stepsList {
+  display: flex;
+  flex-direction: column;
+  padding-left: 0;
+}
+
+// ==================== 节点 ====================
+.nodeContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.nodeRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-text-3, #646c85);
+}
+
+.nodeIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.loadingIcon {
+  font-size: 14px;
+  color: var(--color-primary-6);
+}
+
+.successIcon {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c3c7d4 0%, #0f131f 100%);
+}
+
+.nodeStatus {
+  flex: 1;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-3, #646c85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ==================== 节点内容 ====================
+.nodeContent {
+  display: flex;
+  padding: 8px 0; // py-2 = 8px
+}
+
+.nodeLine {
+  display: flex;
+  width: 14px;
+  flex-shrink: 0;
+  justify-content: center;
+}
+
+.lineBar {
+  width: 0;
+  height: 100%; // 关键：让竖线填满父容器高度
+  border-left: 1px solid var(--color-border-1, #c3c7d4);
+}
+
+.nodeContentBox {
+  flex: 1;
+  min-width: 0;
+  margin-left: 12px;
+}
+
+.contentCard {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-1, #dfe2eb);
+  background: white;
+  padding: 12px;
+  max-height: 164px; // 190px - padding - border
+  overflow-y: auto;
+
+  // 自定义滚动条
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #ebeef5;
+    border-radius: 20px;
+  }
+}
+
+.contentText {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-2, #292f42);
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  width: 100%;
+}
+
+.spacer {
+  height: 24px;
+}
+
+// ==================== Ontology 内容样式 ====================
+.ontologyContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ontologyTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-1);
+  margin-bottom: 4px;
+}
+
+.ontologySection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sectionLabel {
+  font-size: 12px;
+  color: var(--color-text-3);
+  font-weight: 500;
+}
+
+.codeBlock {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--color-text-2);
+  background: var(--color-fill-2, #f7f8fa);
+  padding: 8px;
+  border-radius: 4px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+}

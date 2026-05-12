@@ -25071,10 +25071,10 @@ use-context-selector@^2.0.0:
   resolved "http://npm.cestc.cn/use-context-selector/download/use-context-selector-2.0.0.tgz#3b5dafec7aa947c152d4f0aa7f250e99a205df3d"
   integrity sha1-O12v7HqpR8FS1PCqfyUOmaIF3z0=
 
-use-immer@^0.10.0:
-  version "0.10.0"
-  resolved "http://npm.cestc.cn/use-immer/download/use-immer-0.10.0.tgz#ed23afd424454604cb42bc112a455bddba894309"
-  integrity sha1-7SOv1CRFRgTLQrwRKkVb3bqJQwk=
+use-immer@^0.11.0:
+  version "0.11.0"
+  resolved "http://npm.cestc.cn/use-immer/download/use-immer-0.11.0.tgz#8dd46cbc913cbc3298e60b8f2d9f58d82fc22e08"
+  integrity sha1-jdRsvJE8vDKY5guPLZ9Y2C/CLgg=
 
 use-isomorphic-layout-effect@^1.1.1:
   version "1.2.1"

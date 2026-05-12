@@ -130,7 +130,7 @@
     "swr": "^2.2.5",
     "tailwind-merge": "^2.5.4",
     "use-context-selector": "^2.0.0",
-    "use-immer": "^0.10.0",
+    "use-immer": "^0.11.0",
     "use-sync-external-store": "^1.5.0",
     "uuid": "^10.0.0",
     "wujie-polyfill": "1.1.3",

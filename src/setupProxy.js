@@ -25,11 +25,11 @@ const addProxy = (options) => {
 };
 const targets = {
   test: 'http://110.154.34.22:38883',
-  dev: 'http://10.252.216.16:9070', // 临时改为与 ai-modaforge 相同的地址,用于测试集成
-  qa: 'http://10.252.216.13:9030',
+  dev: 'http://10.252.216.13:8080', // 统一使用 appforge 服务器，包含本体管理和对话接口
+  qa: 'http://10.252.216.13:8080', // 修改为与 dev 相同，统一使用 appforge 服务器
   prod: 'http://10.252.216.19:9040'
 };
-const currentTarget = targets['dev'];
+const currentTarget = targets['qa'];
 // https://create-react-app.dev/docs/proxying-api-requests-in-development/
 module.exports = function (app) {
   if (process.env.SINGLE_APP === 'true') {
