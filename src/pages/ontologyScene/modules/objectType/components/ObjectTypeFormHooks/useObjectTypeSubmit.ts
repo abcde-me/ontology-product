@@ -1,6 +1,8 @@
 import { Message } from '@arco-design/web-react';
 import {
   CreateOntologyObjectTypeReq,
+  CreateOntologyPhysicalProperty,
+  OntologyPhysicalPropertiesList,
   SourceDataInfo,
   SourceType,
   SyncSourceDataStrategy,
@@ -72,7 +74,7 @@ function buildPhysicalProperties(
   syncMappingFields: InstanceSyncMappingField[] | undefined,
   fallbackAttributeFields: AttributeField[],
   dataSource?: ObjectTypeDataSourceState
-) {
+): CreateOntologyPhysicalProperty[] | OntologyPhysicalPropertiesList[] {
   if (!objectTypeAttributes?.length) {
     return flattenOntologyPhysicalPropertiesForSubmit(fallbackAttributeFields);
   }
@@ -81,11 +83,14 @@ function buildPhysicalProperties(
     (syncMappingFields || []).map((field) => [field.propertyID, field])
   );
   const sourcePrimaryKey = (
-    syncMappingFields?.length ? syncMappingFields : objectTypeAttributes
-  )
-    .filter((field) => field.isPrimary === 1)
-    .map((field) => field.sourceColumnName || field.propertyID)
-    .filter(Boolean);
+    syncMappingFields?.length
+      ? syncMappingFields
+          .filter((field) => field.isPrimary === 1)
+          .map((field) => field.sourceColumnName || field.propertyID)
+      : objectTypeAttributes
+          .filter((field) => field.isPrimary === 1)
+          .map((field) => field.sourceColumnName || field.propertyID)
+  ).filter(Boolean);
   const result = objectTypeAttributes.map((field) => {
     const mapping = syncByPropertyID.get(field.propertyID);
     const sourceColumnName =
