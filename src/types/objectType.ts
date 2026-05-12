@@ -295,6 +295,18 @@ export interface SyncSourceDataStrategy {
   syncScope: string;
 }
 
+export interface OntologyObjectTypeDetailSourceDataInfo
+  extends Partial<SourceDataInfo> {
+  connectorName?: string;
+  connectorType?: string;
+  connectorSubtype?: string;
+}
+
+export interface OntologyObjectTypeDetailSyncSourceDataStrategy
+  extends Partial<Omit<SyncSourceDataStrategy, 'sourceDataInfo'>> {
+  sourceDataInfo?: OntologyObjectTypeDetailSourceDataInfo;
+}
+
 export interface CreateOntologyObjectTypeReq {
   /**
    * 对象类型id
@@ -361,7 +373,10 @@ export interface UpdateOntologyObjectTypeReq
 }
 
 export interface GetOntologyObjectTypeDetailRes
-  extends CreateOntologyObjectTypeReq {
+  extends Omit<
+    CreateOntologyObjectTypeReq,
+    'sourceDataInfo' | 'syncSourceDataStrategy'
+  > {
   id: number;
   /**
    * 同步状态
@@ -370,16 +385,7 @@ export interface GetOntologyObjectTypeDetailRes
   /**
    * 数据源信息
    */
-  sourceDataInfo?: {
-    queryMode?: string;
-    connectorId?: number;
-    connectorName?: string;
-    connectorType?: string;
-    connectorSubtype?: string;
-    databaseName?: string;
-    tableName?: string;
-    sql?: string;
-  };
+  sourceDataInfo?: OntologyObjectTypeDetailSourceDataInfo;
   /**
    * 是否启用数据源同步
    */
@@ -387,26 +393,7 @@ export interface GetOntologyObjectTypeDetailRes
   /**
    * 同步策略信息
    */
-  syncSourceDataStrategy?: {
-    sourceDataInfo?: {
-      queryMode?: string;
-      connectorId?: number;
-      connectorName?: string;
-      connectorType?: string;
-      connectorSubtype?: string;
-      databaseName?: string;
-      tableName?: string;
-      sql?: string;
-    };
-    mode?: string;
-    conflictStrategy?: string;
-    syncScope?: string;
-    pollFetchSize?: number;
-    parallelism?: number;
-    exceptionStrategy?: string;
-    jdbcSyncSqlFull?: string;
-    jdbcSyncSqlIncrement?: string;
-  };
+  syncSourceDataStrategy?: OntologyObjectTypeDetailSyncSourceDataStrategy;
 }
 
 export interface UploadOntologyCSVFileAndParseRes {

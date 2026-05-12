@@ -14,6 +14,16 @@ import { DATA_SOURCE_TYPE } from '@/pages/ontologyScene/common/constants';
 
 import { IconLeft } from '@arco-design/web-react/icon';
 
+const DEFAULT_SYNC_SOURCE_DATA_STRATEGY = {
+  mode: 'BINLOG_CDC',
+  conflictStrategy: 'KEEP_SOURCE',
+  syncScope: 'FULL_THEN_INCREMENTAL',
+  pollFetchSize: 500,
+  parallelism: 1,
+  exceptionStrategy: 'STOP_ON_ERROR',
+  jdbcPollingIntervalSeconds: 60
+};
+
 const getInitialStepFromSearch = (search: string) => {
   const step = new URLSearchParams(search).get('step');
   const parsedStep = step ? Number(step) : NaN;
@@ -114,20 +124,32 @@ export default function OntologySceneObjectTypeEdit() {
                       : 'selected',
                   sql: objectType.syncSourceDataStrategy.sourceDataInfo?.sql
                 },
-                mode: objectType.syncSourceDataStrategy.mode,
+                mode:
+                  objectType.syncSourceDataStrategy.mode ||
+                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.mode,
                 conflictStrategy:
-                  objectType.syncSourceDataStrategy.conflictStrategy,
-                syncScope: objectType.syncSourceDataStrategy.syncScope,
-                pollFetchSize: objectType.syncSourceDataStrategy.pollFetchSize,
-                parallelism: objectType.syncSourceDataStrategy.parallelism,
+                  objectType.syncSourceDataStrategy.conflictStrategy ||
+                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.conflictStrategy,
+                syncScope:
+                  objectType.syncSourceDataStrategy.syncScope ||
+                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.syncScope,
+                pollFetchSize:
+                  objectType.syncSourceDataStrategy.pollFetchSize ||
+                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.pollFetchSize,
+                parallelism:
+                  objectType.syncSourceDataStrategy.parallelism ||
+                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.parallelism,
                 exceptionStrategy:
-                  objectType.syncSourceDataStrategy.exceptionStrategy,
+                  objectType.syncSourceDataStrategy.exceptionStrategy ||
+                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.exceptionStrategy,
                 jdbcCheckpointField:
                   objectType.syncSourceDataStrategy.jdbcCheckpointField,
                 jdbcIncrementalTimeField:
                   objectType.syncSourceDataStrategy.jdbcIncrementalTimeField,
                 jdbcPollingIntervalSeconds:
-                  objectType.syncSourceDataStrategy.jdbcPollingIntervalSeconds,
+                  objectType.syncSourceDataStrategy
+                    .jdbcPollingIntervalSeconds ||
+                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.jdbcPollingIntervalSeconds,
                 jdbcSyncSqlFull:
                   objectType.syncSourceDataStrategy.jdbcSyncSqlFull,
                 jdbcSyncSqlIncrement:
