@@ -114,14 +114,15 @@ export default function OntologySceneObjectTypeEdit() {
                       : 'selected',
                   sql: objectType.syncSourceDataStrategy.sourceDataInfo?.sql
                 },
-                mode: objectType.syncSourceDataStrategy.mode,
+                mode: objectType.syncSourceDataStrategy.mode || '',
                 conflictStrategy:
-                  objectType.syncSourceDataStrategy.conflictStrategy,
-                syncScope: objectType.syncSourceDataStrategy.syncScope,
-                pollFetchSize: objectType.syncSourceDataStrategy.pollFetchSize,
-                parallelism: objectType.syncSourceDataStrategy.parallelism,
+                  objectType.syncSourceDataStrategy.conflictStrategy || '',
+                syncScope: objectType.syncSourceDataStrategy.syncScope || '',
+                pollFetchSize:
+                  objectType.syncSourceDataStrategy.pollFetchSize || 0,
+                parallelism: objectType.syncSourceDataStrategy.parallelism || 1,
                 exceptionStrategy:
-                  objectType.syncSourceDataStrategy.exceptionStrategy,
+                  objectType.syncSourceDataStrategy.exceptionStrategy || '',
                 jdbcCheckpointField:
                   objectType.syncSourceDataStrategy.jdbcCheckpointField,
                 jdbcIncrementalTimeField:

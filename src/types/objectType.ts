@@ -361,7 +361,10 @@ export interface UpdateOntologyObjectTypeReq
 }
 
 export interface GetOntologyObjectTypeDetailRes
-  extends CreateOntologyObjectTypeReq {
+  extends Omit<
+    CreateOntologyObjectTypeReq,
+    'sourceDataInfo' | 'syncSourceDataStrategy'
+  > {
   id: number;
   /**
    * 同步状态
@@ -404,6 +407,9 @@ export interface GetOntologyObjectTypeDetailRes
     pollFetchSize?: number;
     parallelism?: number;
     exceptionStrategy?: string;
+    jdbcCheckpointField?: string;
+    jdbcIncrementalTimeField?: string;
+    jdbcPollingIntervalSeconds?: number;
     jdbcSyncSqlFull?: string;
     jdbcSyncSqlIncrement?: string;
   };
