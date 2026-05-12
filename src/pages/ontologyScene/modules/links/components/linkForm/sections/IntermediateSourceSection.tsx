@@ -33,7 +33,7 @@ interface IntermediateSourceSectionProps {
   onDatabaseSourceTableSelected: (
     value: Required<
       Pick<SqlSourceDataInfo, 'connectorId' | 'databaseName' | 'tableName'>
-    >
+    > & { projectID: string }
   ) => void;
   onSqlColumnsParsed: (columns: string[]) => void;
   onSyncSourceDataStrategyChange: (
