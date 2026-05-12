@@ -35,7 +35,19 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
   const [form] = Form.useForm<DataSourceFormData>();
   const [submitLoading, setSubmitLoading] = useState(false);
   const [testLoading, setTestLoading] = useState(false);
+  const [passwordChanged, setPasswordChanged] = useState(false);
+  const [originalPassword, setOriginalPassword] = useState<string>(''); // 保存原始加密密码
   const isEdit = !!editingRecord;
+
+  // Base64 编码函数
+  const encodePassword = (password: string): string => {
+    try {
+      return btoa(password);
+    } catch (error) {
+      console.error('密码编码失败', error);
+      return password;
+    }
+  };
 
   useEffect(() => {
     if (visible && editingRecord) {
@@ -67,6 +79,9 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
         password = (editingRecord as any).config.password || '';
       }
 
+      // 保存原始加密密码，用于提交时如果未修改则传回
+      setOriginalPassword(password);
+
       form.setFieldsValue({
         name: editingRecord.name,
         dataSourceType: editingRecord.dataSourceType,
@@ -74,11 +89,17 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
         port: port || 3306,
         database: database || '',
         username: username || '',
-        password: password || ''
+        // 编辑模式下，密码显示为 ******，表示已加密
+        password: password ? '******' : ''
       });
+
+      // 重置密码修改状态
+      setPasswordChanged(false);
     } else if (visible && !editingRecord) {
       // 新增模式：重置表单
       form.resetFields();
+      setPasswordChanged(false);
+      setOriginalPassword('');
     }
   }, [visible, editingRecord, form]);
 
@@ -87,15 +108,40 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
       const values = await form.validate();
       setSubmitLoading(true);
 
+      // 处理密码加密
+      const submitData: Partial<DataSourceFormData> = (() => {
+        if (isEdit && !passwordChanged) {
+          // 编辑模式且密码未修改，传递原始加密密码
+          return {
+            ...values,
+            password: originalPassword
+          };
+        }
+
+        // 新增模式或密码已修改，进行 base64 编码
+        if (values.password && values.password !== '******') {
+          return {
+            ...values,
+            password: encodePassword(values.password)
+          };
+        }
+        return values;
+      })();
+
       if (isEdit && editingRecord) {
-        await updateDataSource(editingRecord.id, values);
+        await updateDataSource(
+          editingRecord.id,
+          submitData as DataSourceFormData
+        );
         Message.success('更新成功');
       } else {
-        await addDataSource(values);
+        await addDataSource(submitData as DataSourceFormData);
         Message.success('新增成功');
       }
 
       form.resetFields();
+      setPasswordChanged(false);
+      setOriginalPassword('');
       onSuccess();
       onClose();
     } catch (error: any) {
@@ -114,6 +160,8 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
 
   const handleCancel = () => {
     form.resetFields();
+    setPasswordChanged(false);
+    setOriginalPassword('');
     onClose();
   };
 
@@ -243,9 +291,32 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
           label="密码"
           field="password"
           required
-          rules={[{ required: true, message: '请输入密码' }]}
+          rules={[
+            { required: true, message: '请输入密码' },
+            {
+              validator: (value, callback) => {
+                // 编辑模式下，如果是 ******，表示未修改，允许通过
+                if (isEdit && value === '******' && !passwordChanged) {
+                  return callback();
+                }
+                // 其他情况正常验证
+                if (!value) {
+                  return callback('请输入密码');
+                }
+                return callback();
+              }
+            }
+          ]}
         >
-          <Input placeholder="请输入密码" />
+          <Input.Password
+            placeholder={isEdit ? '不修改请保持 ****** 不变' : '请输入密码'}
+            onChange={(value) => {
+              // 监听密码变化，如果用户修改了密码（不是 ******），标记为已修改
+              if (isEdit && value !== '******') {
+                setPasswordChanged(true);
+              }
+            }}
+          />
         </FormItem>
       </Form>
     </Drawer>

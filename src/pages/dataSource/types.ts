@@ -59,5 +59,5 @@ export interface DataSourceFormData {
   port: number;
   database?: string;
   username: string;
-  password: string;
+  password?: string; // 改为可选，编辑时如果不修改密码可以不传
 }
