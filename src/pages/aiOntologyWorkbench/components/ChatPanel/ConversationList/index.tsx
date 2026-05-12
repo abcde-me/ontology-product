@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Input, Spin, Empty, Tooltip, Modal } from '@arco-design/web-react';
 import { IconSearch, IconEdit, IconDelete } from '@arco-design/web-react/icon';
+import { useVirtualList } from 'ahooks';
 import { Conversation } from '@/hooks/chat/types';
 import styles from './ConversationList.module.scss';
 
@@ -13,9 +14,12 @@ interface ConversationListProps {
   onRename: (id: string, newTitle: string) => void;
 }
 
-interface GroupedConversations {
-  recent: Conversation[];
-  byMonth: Record<string, Conversation[]>;
+// 虚拟列表项类型
+interface VirtualListItem {
+  type: 'group-title' | 'conversation';
+  key: string;
+  data?: Conversation;
+  title?: string;
 }
 
 const ConversationList: React.FC<ConversationListProps> = ({
@@ -30,9 +34,11 @@ const ConversationList: React.FC<ConversationListProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // 分组会话：最近7天 + 按月份
-  const groupedConversations = useMemo((): GroupedConversations => {
+  // 分组会话：最近7天 + 按月份，并转换为虚拟列表数据
+  const virtualListData = useMemo((): VirtualListItem[] => {
     const now = Date.now();
     const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
 
@@ -48,7 +54,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
         recent.push(conv);
       } else {
         const date = new Date(conv.updatedAt);
-        const monthKey = `${date.getFullYear()} ${String(date.getMonth() + 1).padStart(2, '0')}`;
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
         if (!byMonth[monthKey]) {
           byMonth[monthKey] = [];
         }
@@ -62,8 +68,67 @@ const ConversationList: React.FC<ConversationListProps> = ({
       byMonth[key].sort((a, b) => b.updatedAt - a.updatedAt);
     });
 
-    return { recent, byMonth };
+    // 转换为虚拟列表数据
+    const items: VirtualListItem[] = [];
+
+    // 添加最近7天
+    if (recent.length > 0) {
+      items.push({
+        type: 'group-title',
+        key: 'recent-title',
+        title: '最近'
+      });
+      recent.forEach((conv) => {
+        items.push({
+          type: 'conversation',
+          key: conv.id,
+          data: conv
+        });
+      });
+    }
+
+    // 添加按月份分组
+    Object.keys(byMonth)
+      .sort()
+      .reverse()
+      .forEach((monthKey) => {
+        items.push({
+          type: 'group-title',
+          key: `month-${monthKey}`,
+          title: monthKey
+        });
+        byMonth[monthKey].forEach((conv) => {
+          items.push({
+            type: 'conversation',
+            key: conv.id,
+            data: conv
+          });
+        });
+      });
+
+    return items;
   }, [conversations, searchText]);
+
+  // 调试：打印虚拟列表数据
+  console.log('虚拟列表数据:', virtualListData);
+
+  // 使用虚拟列表
+  const [list] = useVirtualList(virtualListData, {
+    containerTarget: containerRef,
+    wrapperTarget: wrapperRef,
+    itemHeight: (index) => {
+      // 根据项类型返回不同的高度
+      const item = virtualListData[index];
+      if (item.type === 'group-title') {
+        return 30; // 分组标题高度
+      }
+      return 40; // 会话项高度
+    },
+    overscan: 5
+  });
+
+  // 调试：打印虚拟列表渲染项
+  console.log('虚拟列表渲染项:', list);
 
   const handleStartEdit = (conv: Conversation) => {
     setEditingId(conv.id);
@@ -74,11 +139,6 @@ const ConversationList: React.FC<ConversationListProps> = ({
     if (editingId && editingTitle.trim()) {
       onRename(editingId, editingTitle.trim());
     }
-    setEditingId(null);
-    setEditingTitle('');
-  };
-
-  const handleCancelEdit = () => {
     setEditingId(null);
     setEditingTitle('');
   };
@@ -104,69 +164,8 @@ const ConversationList: React.FC<ConversationListProps> = ({
     return `${month}-${day} ${hours}:${minutes}`;
   };
 
-  const renderConversationItem = (conv: Conversation) => {
-    const isEditing = editingId === conv.id;
-    const isHovered = hoveredId === conv.id;
-    const isActive = activeConversationId === conv.id;
-
-    return (
-      <div
-        key={conv.id}
-        className={`${styles.conversationItem} ${isActive ? styles.active : ''}`}
-        onMouseEnter={() => setHoveredId(conv.id)}
-        onMouseLeave={() => setHoveredId(null)}
-        onClick={() => !isEditing && onSelect(conv.id)}
-      >
-        {isEditing ? (
-          <Input
-            value={editingTitle}
-            onChange={setEditingTitle}
-            onPressEnter={handleSaveEdit}
-            onBlur={handleSaveEdit}
-            autoFocus
-            className={styles.editInput}
-          />
-        ) : (
-          <>
-            <div className={styles.conversationContent}>
-              <Tooltip content={conv.title}>
-                <span className={styles.title}>{conv.title}</span>
-              </Tooltip>
-              {!isHovered && (
-                <span className={styles.time}>
-                  {formatTime(conv.updatedAt)}
-                </span>
-              )}
-            </div>
-            {isHovered && (
-              <div className={styles.actions}>
-                <IconEdit
-                  className={styles.actionIcon}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleStartEdit(conv);
-                  }}
-                />
-                <IconDelete
-                  className={styles.actionIcon}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteClick(conv);
-                  }}
-                />
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    );
-  };
-
   const isEmpty = conversations.length === 0;
-  const isSearchEmpty =
-    searchText &&
-    groupedConversations.recent.length === 0 &&
-    Object.keys(groupedConversations.byMonth).length === 0;
+  const isSearchEmpty = searchText && virtualListData.length === 0;
 
   return (
     <div className={styles.conversationList}>
@@ -182,7 +181,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
       </div>
 
       {/* 内容区域 */}
-      <div className={styles.content}>
+      <div className={styles.content} ref={containerRef}>
         {loading ? (
           <div className={styles.loading}>
             <Spin />
@@ -192,32 +191,77 @@ const ConversationList: React.FC<ConversationListProps> = ({
             <Empty description="暂无数据" />
           </div>
         ) : (
-          <>
-            {/* 最近7天 */}
-            {groupedConversations.recent.length > 0 && (
-              <div className={styles.group}>
-                <div className={styles.groupTitle}>最近</div>
-                <div className={styles.groupContent}>
-                  {groupedConversations.recent.map(renderConversationItem)}
-                </div>
-              </div>
-            )}
+          <div ref={wrapperRef} className={styles.virtualWrapper}>
+            {list.map((item) => {
+              const virtualItem = item.data;
 
-            {/* 按月份分组 */}
-            {Object.keys(groupedConversations.byMonth)
-              .sort()
-              .reverse()
-              .map((monthKey) => (
-                <div key={monthKey} className={styles.group}>
-                  <div className={styles.groupTitle}>{monthKey}</div>
-                  <div className={styles.groupContent}>
-                    {groupedConversations.byMonth[monthKey].map(
-                      renderConversationItem
-                    )}
+              if (virtualItem.type === 'group-title') {
+                return (
+                  <div key={virtualItem.key} className={styles.groupTitle}>
+                    {virtualItem.title}
                   </div>
+                );
+              }
+
+              // 渲染会话项
+              const conv = virtualItem.data!;
+              const isEditing = editingId === conv.id;
+              const isHovered = hoveredId === conv.id;
+              const isActive = activeConversationId === conv.id;
+
+              return (
+                <div
+                  key={virtualItem.key}
+                  className={`${styles.conversationItem} ${isActive ? styles.active : ''}`}
+                  onMouseEnter={() => setHoveredId(conv.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  onClick={() => !isEditing && onSelect(conv.id)}
+                >
+                  {isEditing ? (
+                    <Input
+                      value={editingTitle}
+                      onChange={setEditingTitle}
+                      onPressEnter={handleSaveEdit}
+                      onBlur={handleSaveEdit}
+                      autoFocus
+                      className={styles.editInput}
+                    />
+                  ) : (
+                    <>
+                      <div className={styles.conversationContent}>
+                        <Tooltip content={conv.title}>
+                          <span className={styles.title}>{conv.title}</span>
+                        </Tooltip>
+                        {!isHovered && (
+                          <span className={styles.time}>
+                            {formatTime(conv.updatedAt)}
+                          </span>
+                        )}
+                      </div>
+                      {isHovered && (
+                        <div className={styles.actions}>
+                          <IconEdit
+                            className={styles.actionIcon}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStartEdit(conv);
+                            }}
+                          />
+                          <IconDelete
+                            className={styles.actionIcon}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteClick(conv);
+                            }}
+                          />
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
-              ))}
-          </>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>
