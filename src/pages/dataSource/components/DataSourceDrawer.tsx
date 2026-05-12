@@ -223,7 +223,12 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
             max={65535}
           />
         </FormItem>
-        <FormItem label="数据库名" field="database">
+        <FormItem
+          label="数据库名"
+          field="database"
+          required
+          rules={[{ required: true, message: '请输入数据库名' }]}
+        >
           <Input placeholder="请输入数据库名" />
         </FormItem>
         <FormItem
