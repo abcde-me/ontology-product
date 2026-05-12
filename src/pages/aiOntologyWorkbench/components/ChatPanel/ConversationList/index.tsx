@@ -109,9 +109,6 @@ const ConversationList: React.FC<ConversationListProps> = ({
     return items;
   }, [conversations, searchText]);
 
-  // 调试：打印虚拟列表数据
-  console.log('虚拟列表数据:', virtualListData);
-
   // 使用虚拟列表
   const [list] = useVirtualList(virtualListData, {
     containerTarget: containerRef,
@@ -126,9 +123,6 @@ const ConversationList: React.FC<ConversationListProps> = ({
     },
     overscan: 5
   });
-
-  // 调试：打印虚拟列表渲染项
-  console.log('虚拟列表渲染项:', list);
 
   const handleStartEdit = (conv: Conversation) => {
     setEditingId(conv.id);

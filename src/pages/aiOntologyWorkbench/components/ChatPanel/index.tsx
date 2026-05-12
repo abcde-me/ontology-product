@@ -5,6 +5,7 @@ import Header from './Header';
 import WelcomeView from './WelcomeView';
 import ChatView from './ChatView';
 import { useXChat, useXConversations } from '@/hooks/chat';
+import { useAIWorkbenchStore } from '../../store';
 
 interface PromptItem {
   id: string;
@@ -30,6 +31,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   conversationId,
   onConversationCreated
 }) => {
+  // 获取图谱状态管理
+  const { setGraphData } = useAIWorkbenchStore();
+
   // 使用会话管理 hook
   const {
     conversations,
@@ -141,6 +145,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     clearMessages();
     // 清空活跃会话 ID，下次发送消息时会创建新会话
     setActiveConversation(undefined);
+    // 清空图谱数据
+    setGraphData(null);
   };
 
   const handleSelectConversation = (id: string) => {
@@ -155,11 +161,12 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       projectId ? String(projectId) : undefined
     );
 
-    // 如果删除的是当前会话，清空消息列表
+    // 如果删除的是当前会话，清空消息列表和图谱数据
     if (isCurrentConversation) {
       clearMessages();
-      // TODO: 清空图谱数据
-      console.log('删除了当前会话，需要清空图谱数据');
+      // 清空图谱数据
+      setGraphData(null);
+      console.log('删除了当前会话，已清空消息列表和图谱数据');
     }
   };
 
