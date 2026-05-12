@@ -405,8 +405,8 @@ export interface UploadOntologyCSVFileAndParseRes {
 
 export interface ListConnectorsReq {
   name?: string;
-  page?: string;
-  page_size?: string;
+  page?: number;
+  page_size?: number;
   projectID?: string;
   sort?: 'asc' | 'desc' | string;
   sort_by?: 'create_time' | 'update_time' | string;
@@ -422,11 +422,21 @@ export interface SqlConnectorItem {
   [property: string]: any;
 }
 
-export type ListConnectorsRes = SqlConnectorItem[];
+export type ListConnectorsRes =
+  | SqlConnectorItem[]
+  | {
+      items: SqlConnectorItem[];
+      total?: number;
+      page?: number;
+      page_size?: number;
+      [property: string]: any;
+    };
 
 export interface ListSqlConnectorDBAndTablesReq {
+  /** 连接器 id */
   id: number;
-  projectID?: string;
+  /** 项目 id（鉴权） */
+  projectID: string;
 }
 
 export interface SqlConnectorTableItem {

@@ -38,6 +38,13 @@ const INSTANCE_SYNC_STEP = 2;
 const clampStep = (step: number) =>
   Math.min(INSTANCE_SYNC_STEP, Math.max(BASIC_STEP, step));
 
+type BasicInfoValues = Partial<
+  Pick<
+    ObjectTypeFormData,
+    'code' | 'name' | 'description' | 'icon' | 'ontologyModelID'
+  >
+>;
+
 const DEFAULT_INSTANCE_SYNC_VALUES = {
   syncMode: 'BINLOG_CDC',
   conflictStrategy: 'KEEP_SOURCE',
@@ -120,11 +127,27 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const [currentStep, setCurrentStep] = useState(() =>
       clampStep(initialStep ?? BASIC_STEP)
     );
+    const [basicInfoValues, setBasicInfoValues] = useState<BasicInfoValues>(
+      () => ({
+        code: initialValues?.code,
+        name: initialValues?.name,
+        description: initialValues?.description,
+        icon: initialValues?.icon,
+        ontologyModelID: initialValues?.ontologyModelID
+      })
+    );
 
     useEffect(() => {
       form.setFieldsValue(DEFAULT_INSTANCE_SYNC_VALUES);
 
       if (initialValues) {
+        setBasicInfoValues({
+          code: initialValues.code,
+          name: initialValues.name,
+          description: initialValues.description,
+          icon: initialValues.icon,
+          ontologyModelID: initialValues.ontologyModelID
+        });
         const formData = form.getFieldsValue();
 
         if (isEdit) {
@@ -256,6 +279,23 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const handleIconChange = (iconValue: string) => {
       setSelectedIcon(iconValue);
       form.setFieldValue('icon', iconValue);
+      setBasicInfoValues((prev) => ({
+        ...prev,
+        icon: iconValue
+      }));
+    };
+
+    const syncBasicInfoValues = () => {
+      setBasicInfoValues((prev) => ({
+        ...prev,
+        code: form.getFieldValue('code'),
+        name: form.getFieldValue('name'),
+        description: form.getFieldValue('description'),
+        icon: form.getFieldValue('icon') || selectedIcon,
+        ontologyModelID:
+          form.getFieldValue('ontologyModelID') ||
+          initialValues?.ontologyModelID
+      }));
     };
 
     const validateBasicInfo = async () => {
@@ -429,6 +469,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const handleNextStep = async () => {
       if (currentStep === BASIC_STEP) {
         if (await validateBasicInfo()) {
+          syncBasicInfoValues();
           setCurrentStep(MODELING_STEP);
         }
         return;
@@ -452,7 +493,10 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           return;
         }
 
-        const values = form.getFieldsValue();
+        const values = {
+          ...form.getFieldsValue(),
+          ...basicInfoValues
+        };
         const formData = buildObjectTypeFormData({
           values,
           selectedIcon,
@@ -483,7 +527,10 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           return;
         }
 
-        const values = form.getFieldsValue();
+        const values = {
+          ...form.getFieldsValue(),
+          ...basicInfoValues
+        };
         const formData = buildObjectTypeFormData({
           values,
           selectedIcon,

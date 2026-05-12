@@ -208,7 +208,7 @@ export function buildCreateObjectTypeRequest(
     originalDbName: data.originalDbName,
     originalTableName: data.originalTableName,
     sourceType: data.sourceType,
-    enableSyncSourceData: data.enableSyncSourceData,
+    enableSyncSourceData: data.enableSyncSourceData === true,
     sourceDataInfo: toSubmitSourceDataInfo(data.sourceDataInfo),
     syncSourceDataStrategy: buildSyncSourceDataStrategy(
       data.syncSourceDataStrategy

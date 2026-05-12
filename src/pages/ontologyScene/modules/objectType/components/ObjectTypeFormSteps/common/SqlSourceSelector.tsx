@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Button,
   Cascader,
@@ -16,6 +16,7 @@ import {
   listOntologyConnectors,
   listSqlConnectorDBAndTables
 } from '@/api/ontologySceneLibrary/objectType';
+import { useUserInfoStore } from '@/store/userInfoStore';
 import { SqlConnectorDatabaseItem, SqlConnectorItem } from '@/types/objectType';
 import { SqlSourceDataInfo } from '../../ObjectTypeFormUtils/types';
 
@@ -62,6 +63,16 @@ function filterCascaderOption(
   return [option.label, option.value]
     .filter((item) => item != null)
     .some((item) => String(item).toLowerCase().includes(q));
+}
+
+function normalizeConnectorList(data: any): SqlConnectorItem[] {
+  if (Array.isArray(data)) {
+    return data;
+  }
+  if (Array.isArray(data?.items)) {
+    return data.items;
+  }
+  return [];
 }
 
 function findKeywordAtTopLevel(sql: string, keyword: string, start = 0) {
@@ -215,6 +226,7 @@ export default function SqlSourceSelector({
   fieldPrefix,
   styles
 }: SqlSourceSelectorProps) {
+  const projectID = useUserInfoStore((state) => state.projectId?.[1]);
   const [connectors, setConnectors] = useState<SqlConnectorItem[]>([]);
   const [connectorsLoading, setConnectorsLoading] = useState(false);
   const [tablesLoading, setTablesLoading] = useState(false);
@@ -233,16 +245,16 @@ export default function SqlSourceSelector({
       setConnectorsLoading(true);
       try {
         const response = await listOntologyConnectors({
-          page: '1',
-          page_size: '1000',
+          page: 1,
+          page_size: 1000,
           type: 'sql',
-          subtype: ['mysql', 'dameng', 'postgresql'],
+          subtype: ['mysql', 'dameng', 'postgres'],
           status: ['succeed'],
           sort: 'desc',
           sort_by: 'create_time'
         });
         if (isSuccessResponse(response)) {
-          setConnectors(response.data || []);
+          setConnectors(normalizeConnectorList(response.data));
         } else {
           Message.error(response.message || '加载连接器列表失败');
         }
@@ -257,33 +269,42 @@ export default function SqlSourceSelector({
     loadConnectors();
   }, []);
 
-  useEffect(() => {
-    if (!value.connectorId) {
+  const fetchDatabaseTables = useCallback(async () => {
+    const rawId = value.connectorId;
+    const id = rawId === undefined || rawId === null ? NaN : Number(rawId);
+    if (!Number.isFinite(id)) {
+      setDatabases([]);
+      return;
+    }
+    if (!projectID) {
       setDatabases([]);
       return;
     }
 
-    const loadDatabases = async () => {
-      setTablesLoading(true);
-      try {
-        const response = await listSqlConnectorDBAndTables({
-          id: value.connectorId!
-        });
-        if (isSuccessResponse(response)) {
-          setDatabases(response.data || []);
-        } else {
-          Message.error(response.message || '加载数据库表失败');
-        }
-      } catch (error) {
-        console.error('加载数据库表失败:', error);
-        Message.error('加载数据库表失败');
-      } finally {
-        setTablesLoading(false);
+    setTablesLoading(true);
+    try {
+      const response = await listSqlConnectorDBAndTables({
+        id,
+        projectID
+      });
+      if (isSuccessResponse(response)) {
+        setDatabases(response.data || []);
+      } else {
+        Message.error(response.message || '加载数据库表失败');
+        setDatabases([]);
       }
-    };
+    } catch (error) {
+      console.error('加载数据库表失败:', error);
+      Message.error('加载数据库表失败');
+      setDatabases([]);
+    } finally {
+      setTablesLoading(false);
+    }
+  }, [projectID, value.connectorId]);
 
-    loadDatabases();
-  }, [value.connectorId]);
+  useEffect(() => {
+    void fetchDatabaseTables();
+  }, [fetchDatabaseTables]);
 
   const tableOptions = useMemo<CascaderOption[]>(
     () =>
@@ -401,12 +422,17 @@ export default function SqlSourceSelector({
   };
 
   const handleConnectorChange = (connectorId?: number | string) => {
-    const normalizedConnectorId =
-      connectorId === undefined || connectorId === null
-        ? undefined
+    const numeric =
+      connectorId === undefined || connectorId === null || connectorId === ''
+        ? NaN
         : Number(connectorId);
+    const normalizedConnectorId = Number.isFinite(numeric)
+      ? numeric
+      : undefined;
     const connector = connectors.find(
-      (item) => Number(item.id) === normalizedConnectorId
+      (item) =>
+        normalizedConnectorId !== undefined &&
+        Number(item.id) === normalizedConnectorId
     );
     const nextValue: SqlSourceDataInfo = {
       ...value,
