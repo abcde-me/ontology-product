@@ -219,7 +219,7 @@ export const addDataSource = async (
         host: data.host,
         port: String(data.port),
         user: data.username,
-        password: data.password,
+        password: data.password || '', // 提供默认值
         database: data.database
       }
     });
@@ -260,7 +260,7 @@ export const updateDataSource = async (
         host: data.host,
         port: String(data.port),
         user: data.username,
-        password: data.password,
+        password: data.password || '', // 提供默认值
         database: data.database
       }
     });
