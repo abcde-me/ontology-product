@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Button,
   Form,
@@ -13,9 +13,10 @@ import {
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import {
   connectorTestFinkSQL,
-  getSqlConnectorTableSchemaToTIDB,
-  mapOntologyObjectTypeColumns
+  getSqlConnectorTableSchemaToTIDB
 } from '@/api/ontologySceneLibrary/objectType';
+import { useUserInfoStore } from '@/store/userInfoStore';
+import type { GetSqlConnectorTableSchemaToTIDBRes } from '@/types/objectType';
 import {
   InstanceSyncMappingField,
   ObjectTypeAttributeField,
@@ -83,6 +84,25 @@ function validateSyncSql(sqlText: string): string | undefined {
   return undefined;
 }
 
+function normalizeSourceFieldsFromTiDBSchema(
+  data?: GetSqlConnectorTableSchemaToTIDBRes
+): SourceTableField[] {
+  const rawColumns = data?.columns;
+  const columns = Array.isArray(rawColumns)
+    ? rawColumns
+    : rawColumns
+      ? [rawColumns]
+      : [];
+
+  return columns
+    .map((column) => ({
+      fieldId: column.columnName,
+      fieldComment: column.columnComment || column.columnName,
+      fieldType: column.columnTypeTiDB || column.columnType
+    }))
+    .filter((field) => !!field.fieldId);
+}
+
 export default function InstanceSyncStep({
   form,
   objectTypeAttributes,
@@ -94,6 +114,7 @@ export default function InstanceSyncStep({
   setFieldsLoading,
   styles
 }: InstanceSyncStepProps) {
+  const currentProjectID = useUserInfoStore((state) => state.projectId?.[1]);
   const [sourceFields, setSourceFields] = useState<SourceTableField[]>([]);
   const [sqlTestLoading, setSqlTestLoading] = useState<
     Record<SyncSqlType, boolean>
@@ -112,6 +133,7 @@ export default function InstanceSyncStep({
       >
     >
   >({});
+  const loadedSchemaKeyRef = useRef('');
 
   useEffect(() => {
     setSyncMappingFields((prev) => {
@@ -160,74 +182,50 @@ export default function InstanceSyncStep({
     }
   };
 
-  const applyAutoMapping = async (fields: SourceTableField[]) => {
+  const applyAutoMapping = (fields: SourceTableField[]) => {
     if (!objectTypeAttributes.length || !fields.length) {
       return;
     }
 
-    try {
-      const response = await mapOntologyObjectTypeColumns({
-        objectTypeColumns: objectTypeAttributes.map(
-          (field) => field.propertyID
-        ),
-        sourceTableColumns: fields.map((field) => field.fieldId)
-      });
-      const relationList = isSuccessResponse(response)
-        ? response.data?.mapRelations || []
-        : [];
-      const relationMap = new Map(
-        relationList.map((relation) => [
-          relation.objectTypeColumnName,
-          relation.sourceTableColumnName
-        ])
-      );
-      const sourceFieldMap = new Map(
-        fields.map((field) => [field.fieldId, field])
-      );
-      const nextFields = objectTypeAttributes.map((attribute) => {
-        const sourceColumnName = relationMap.get(attribute.propertyID);
-        const sourceField = sourceColumnName
-          ? sourceFieldMap.get(sourceColumnName)
-          : undefined;
-        return {
-          ...objectTypeAttributeToSyncMapping(attribute),
-          sourceColumnName,
-          sourceColumnComment: sourceField?.fieldComment,
-          sourceColumnType: sourceField?.fieldType
-        };
-      });
-      setSyncMappingFields(nextFields);
-      form.setFieldValue('syncMappingFields', nextFields);
-    } catch (error) {
-      console.error('字段自动映射失败:', error);
-      Message.warning('字段自动映射失败，请手动选择表字段');
-    }
+    const sourceFieldMap = new Map(
+      fields.map((field) => [field.fieldId, field])
+    );
+    const nextFields = objectTypeAttributes.map((attribute) => {
+      const sourceField = sourceFieldMap.get(attribute.propertyID);
+      return {
+        ...objectTypeAttributeToSyncMapping(attribute),
+        sourceColumnName: sourceField?.fieldId,
+        sourceColumnComment: sourceField?.fieldComment,
+        sourceColumnType: sourceField?.fieldType,
+        sourceCoumnOriginName: sourceField?.fieldId
+      };
+    });
+    setSyncMappingFields(nextFields);
+    form.setFieldValue('syncMappingFields', nextFields);
   };
 
   const loadTableSchema = async ({
     connectorId,
     databaseName,
-    tableName
+    tableName,
+    projectID
   }: Required<
     Pick<SqlSourceDataInfo, 'connectorId' | 'databaseName' | 'tableName'>
-  >) => {
+  > & {
+    projectID: string;
+  }) => {
     setFieldsLoading(true);
     try {
       const response = await getSqlConnectorTableSchemaToTIDB({
         id: connectorId,
         database_name: databaseName,
-        table_name: tableName
+        table_name: tableName,
+        projectID
       });
       if (isSuccessResponse(response)) {
-        const fields: SourceTableField[] = (response.data || []).map(
-          (field) => ({
-            fieldId: field.field_id,
-            fieldComment: field.field_comment,
-            fieldType: field.field_type
-          })
-        );
+        const fields = normalizeSourceFieldsFromTiDBSchema(response.data);
         setSourceFields(fields);
-        await applyAutoMapping(fields);
+        applyAutoMapping(fields);
       } else {
         Message.error(response.message || '加载同步源表字段失败');
         setSourceFields([]);
@@ -241,7 +239,48 @@ export default function InstanceSyncStep({
     }
   };
 
-  const handleSqlColumnsParsed = async (columns: string[]) => {
+  useEffect(() => {
+    const sourceDataInfo = syncSourceDataStrategy.sourceDataInfo;
+    const {
+      connectorId,
+      databaseName,
+      tableName,
+      queryMode = 'selected'
+    } = sourceDataInfo;
+    const projectID = sourceDataInfo.projectID || currentProjectID;
+
+    if (
+      queryMode !== 'selected' ||
+      !connectorId ||
+      !databaseName ||
+      !tableName ||
+      !projectID
+    ) {
+      return;
+    }
+
+    const schemaKey = `${connectorId}/${projectID}/${databaseName}/${tableName}`;
+    if (loadedSchemaKeyRef.current === schemaKey) {
+      return;
+    }
+
+    loadedSchemaKeyRef.current = schemaKey;
+    void loadTableSchema({
+      connectorId,
+      databaseName,
+      tableName,
+      projectID
+    });
+  }, [
+    syncSourceDataStrategy.sourceDataInfo.connectorId,
+    syncSourceDataStrategy.sourceDataInfo.databaseName,
+    currentProjectID,
+    syncSourceDataStrategy.sourceDataInfo.projectID,
+    syncSourceDataStrategy.sourceDataInfo.queryMode,
+    syncSourceDataStrategy.sourceDataInfo.tableName
+  ]);
+
+  const handleSqlColumnsParsed = (columns: string[]) => {
     const trimmedColumns = columns
       .map((column) => column.trim())
       .filter((column) => !!column);
@@ -255,7 +294,7 @@ export default function InstanceSyncStep({
       fieldType: 'string'
     }));
     setSourceFields(fields);
-    await applyAutoMapping(fields);
+    applyAutoMapping(fields);
   };
 
   const currentQueryMode =

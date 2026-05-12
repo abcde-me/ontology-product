@@ -19,6 +19,16 @@ import ObjectTypeAttributeTable from './ObjectTypeAttributeTable';
 
 const FormItem = Form.Item;
 
+function getSchemaColumns(data: any): any[] {
+  if (Array.isArray(data)) {
+    return data;
+  }
+  if (Array.isArray(data?.columns)) {
+    return data.columns;
+  }
+  return [];
+}
+
 interface ModelingStepProps {
   form: any;
   initialCode?: string;
@@ -124,12 +134,13 @@ export default function ModelingStep({
         table_name: tableName
       });
       if (response.status === 200 && (response.code === '' || !response.code)) {
-        const fields = (response.data || []).map((field, index) =>
+        const fields = getSchemaColumns(response.data).map((field, index) =>
           sourceFieldToObjectTypeAttribute(
             {
-              fieldId: field.field_id,
-              fieldComment: field.field_comment,
-              fieldType: field.field_type
+              fieldId: field.field_id || field.columnName,
+              fieldComment:
+                field.field_comment || field.columnComment || field.columnName,
+              fieldType: field.field_type || field.columnType
             },
             index
           )

@@ -38,12 +38,20 @@ const INSTANCE_SYNC_STEP = 2;
 const clampStep = (step: number) =>
   Math.min(INSTANCE_SYNC_STEP, Math.max(BASIC_STEP, step));
 
+type BasicInfoValues = Partial<
+  Pick<
+    ObjectTypeFormData,
+    'code' | 'name' | 'description' | 'icon' | 'ontologyModelID'
+  >
+>;
+
 const DEFAULT_INSTANCE_SYNC_VALUES = {
   syncMode: 'BINLOG_CDC',
   conflictStrategy: 'KEEP_SOURCE',
   syncScope: 'FULL_THEN_INCREMENTAL',
   jdbcPollingIntervalSeconds: 60,
   pollFetchSize: 500,
+  fullSyncBatchSize: 500,
   parallelism: 1,
   exceptionStrategy: 'STOP_ON_ERROR'
 };
@@ -57,6 +65,7 @@ const DEFAULT_SYNC_SOURCE_DATA_STRATEGY: SyncSourceDataStrategyFormState = {
   syncScope: 'FULL_THEN_INCREMENTAL',
   jdbcPollingIntervalSeconds: 60,
   pollFetchSize: 500,
+  fullSyncBatchSize: 500,
   parallelism: 1,
   exceptionStrategy: 'STOP_ON_ERROR'
 };
@@ -120,11 +129,29 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const [currentStep, setCurrentStep] = useState(() =>
       clampStep(initialStep ?? BASIC_STEP)
     );
+    const [basicInfoValues, setBasicInfoValues] = useState<BasicInfoValues>(
+      () => ({
+        code: initialValues?.code,
+        name: initialValues?.name,
+        description: initialValues?.description,
+        icon: initialValues?.icon,
+        ontologyModelID: initialValues?.ontologyModelID
+      })
+    );
 
     useEffect(() => {
       form.setFieldsValue(DEFAULT_INSTANCE_SYNC_VALUES);
 
       if (initialValues) {
+        setBasicInfoValues((prev) => ({
+          code: isEdit ? initialValues.code : (initialValues.code ?? prev.code),
+          name: isEdit ? initialValues.name : (initialValues.name ?? prev.name),
+          description: isEdit
+            ? initialValues.description
+            : (initialValues.description ?? prev.description),
+          icon: isEdit ? initialValues.icon : (initialValues.icon ?? prev.icon),
+          ontologyModelID: initialValues.ontologyModelID ?? prev.ontologyModelID
+        }));
         const formData = form.getFieldsValue();
 
         if (isEdit) {
@@ -189,7 +216,10 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                 isPrimary: field.isPrimary,
                 isUse: 1,
                 isStoreAsPublic: field.isStoreAsPublic,
-                publicPropertyID: field.publicPropertyID || 0
+                publicPropertyID: field.publicPropertyID || 0,
+                sourceColumnName: field.sourceColumnName,
+                sourceColumnComment: field.sourceColumnComment,
+                sourceColumnType: field.sourceColumnType
               }))
             );
           } else {
@@ -256,6 +286,38 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const handleIconChange = (iconValue: string) => {
       setSelectedIcon(iconValue);
       form.setFieldValue('icon', iconValue);
+      setBasicInfoValues((prev) => ({
+        ...prev,
+        icon: iconValue
+      }));
+    };
+
+    const syncBasicInfoValues = () => {
+      setBasicInfoValues((prev) => ({
+        ...prev,
+        code: form.getFieldValue('code'),
+        name: form.getFieldValue('name'),
+        description: form.getFieldValue('description'),
+        icon: form.getFieldValue('icon') || selectedIcon,
+        ontologyModelID:
+          form.getFieldValue('ontologyModelID') ||
+          initialValues?.ontologyModelID
+      }));
+    };
+
+    const getSubmitValues = () => {
+      const formValues = form.getFieldsValue();
+      return {
+        ...formValues,
+        code: formValues.code ?? basicInfoValues.code,
+        name: formValues.name ?? basicInfoValues.name,
+        description: formValues.description ?? basicInfoValues.description,
+        icon: formValues.icon ?? basicInfoValues.icon,
+        ontologyModelID:
+          formValues.ontologyModelID ??
+          basicInfoValues.ontologyModelID ??
+          initialValues?.ontologyModelID
+      };
     };
 
     const validateBasicInfo = async () => {
@@ -426,9 +488,43 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       return true;
     };
 
+    const syncInstanceSourceFromModeling = () => {
+      if (
+        dataSource.type !== DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC ||
+        (modelingSourceDataInfo.queryMode || 'selected') !== 'selected' ||
+        !modelingSourceDataInfo.connectorId ||
+        !modelingSourceDataInfo.databaseName ||
+        !modelingSourceDataInfo.tableName
+      ) {
+        return;
+      }
+
+      setSyncSourceDataStrategy((prev) => ({
+        ...prev,
+        sourceDataInfo: {
+          connectorId: modelingSourceDataInfo.connectorId,
+          connectorName: modelingSourceDataInfo.connectorName,
+          connectorSubtype: modelingSourceDataInfo.connectorSubtype,
+          databaseName: modelingSourceDataInfo.databaseName,
+          tableName: modelingSourceDataInfo.tableName,
+          projectID: modelingSourceDataInfo.projectID,
+          queryMode: 'selected'
+        }
+      }));
+      form.setFieldsValue({
+        syncConnector: modelingSourceDataInfo.connectorId,
+        syncQueryMode: 'selected',
+        syncDatabaseTable: [
+          modelingSourceDataInfo.databaseName,
+          modelingSourceDataInfo.tableName
+        ]
+      });
+    };
+
     const handleNextStep = async () => {
       if (currentStep === BASIC_STEP) {
         if (await validateBasicInfo()) {
+          syncBasicInfoValues();
           setCurrentStep(MODELING_STEP);
         }
         return;
@@ -436,6 +532,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
 
       if (currentStep === MODELING_STEP) {
         if (await validateModeling()) {
+          syncInstanceSourceFromModeling();
           setCurrentStep(INSTANCE_SYNC_STEP);
         }
       }
@@ -452,7 +549,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           return;
         }
 
-        const values = form.getFieldsValue();
+        const values = getSubmitValues();
         const formData = buildObjectTypeFormData({
           values,
           selectedIcon,
@@ -483,7 +580,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           return;
         }
 
-        const values = form.getFieldsValue();
+        const values = getSubmitValues();
         const formData = buildObjectTypeFormData({
           values,
           selectedIcon,
