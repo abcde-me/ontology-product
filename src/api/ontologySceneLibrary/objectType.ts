@@ -133,6 +133,35 @@ export const getSqlConnectorTableSchemaToTIDB = async (
     .do();
 };
 
+export const connectorAnalyseFinkSQLColumns = async (params: {
+  id: number;
+  sql: string;
+}): Promise<
+  ApiRes<{
+    columns: string[];
+  }>
+> => {
+  return await UAPI.RES.ConnectorAnalyseFinkSQLColumnsApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};
+
+export const connectorTestFinkSQL = async (params: {
+  id: number;
+  sql: string;
+}): Promise<
+  ApiRes<{
+    status: string;
+    message?: string;
+  }>
+> => {
+  return await UAPI.RES.ConnectorTestFinkSQLApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};
+
 export const mapOntologyObjectTypeColumns = async (
   params: MapOntologyObjectTypeColumnsReq
 ): Promise<ApiRes<MapOntologyObjectTypeColumnsRes>> => {
