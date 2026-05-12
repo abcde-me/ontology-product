@@ -48,6 +48,43 @@ export default function OntologySceneLinksEdit() {
     return typeMap[formType] || LinkType.ONE_TO_ONE;
   };
 
+  const buildSourceDataInfo = (
+    source?: NonNullable<
+      LinkFormData['syncSourceDataStrategy']
+    >['sourceDataInfo']
+  ): UpdateOntologyLinkTypeReq['sourceDataInfo'] => {
+    if (!source?.connectorId) return undefined;
+    return {
+      connectorId: source.connectorId,
+      databaseName: source.databaseName,
+      tableName: source.tableName,
+      queryMode: source.queryMode || 'selected',
+      sql: source.sql
+    };
+  };
+
+  const buildSyncSourceDataStrategy = (
+    strategy?: LinkFormData['syncSourceDataStrategy']
+  ): UpdateOntologyLinkTypeReq['syncSourceDataStrategy'] => {
+    if (!strategy) return undefined;
+    const sourceDataInfo = buildSourceDataInfo(strategy.sourceDataInfo);
+    if (!sourceDataInfo) return undefined;
+    return {
+      mode: strategy.mode,
+      conflictStrategy: strategy.conflictStrategy,
+      syncScope: strategy.syncScope,
+      pollFetchSize: strategy.pollFetchSize,
+      parallelism: strategy.parallelism || 1,
+      exceptionStrategy: strategy.exceptionStrategy,
+      jdbcCheckpointField: strategy.jdbcCheckpointField,
+      jdbcIncrementalTimeField: strategy.jdbcIncrementalTimeField,
+      jdbcPollingIntervalSeconds: strategy.jdbcPollingIntervalSeconds,
+      jdbcSyncSqlFull: strategy.jdbcSyncSqlFull,
+      jdbcSyncSqlIncrement: strategy.jdbcSyncSqlIncrement,
+      sourceDataInfo
+    };
+  };
+
   useEffect(() => {
     const loadData = async () => {
       if (!linkId) {
@@ -81,18 +118,67 @@ export default function OntologySceneLinksEdit() {
 
           // 处理 N:N 类型的中间表
           if (data.type === LinkType.MANY_TO_MANY) {
+            const detailSourceDataInfo =
+              data.syncSourceDataStrategy?.sourceDataInfo ||
+              data.sourceDataInfo ||
+              (data.sourceType === 1
+                ? {
+                    databaseName: data.linkDBName,
+                    tableName: data.linkTableName,
+                    queryMode: 'selected'
+                  }
+                : undefined);
             const intermediateTable: any = {
-              type: data.sourceType === 1 ? 'data_lake_sync' : 'local_csv'
+              type: data.sourceType === 1 ? 'data_lake_sync' : 'local_csv',
+              sourceDataInfo: detailSourceDataInfo,
+              queryMode:
+                detailSourceDataInfo?.queryMode === 'sql' ? 'sql' : 'selected',
+              sql: detailSourceDataInfo?.sql
             };
 
             if (data.sourceType === 1) {
-              intermediateTable.database = data.linkDBName;
-              intermediateTable.table = data.linkTableName;
+              intermediateTable.database =
+                detailSourceDataInfo?.databaseName || data.linkDBName;
+              intermediateTable.table =
+                detailSourceDataInfo?.tableName || data.linkTableName;
             } else if (data.sourceType === 2) {
               intermediateTable.filePath = data.filePath;
             }
 
             formData.intermediateTable = intermediateTable;
+            if (data.sourceType === 1) {
+              formData.syncSourceDataStrategy = {
+                sourceDataInfo: {
+                  ...detailSourceDataInfo,
+                  queryMode:
+                    detailSourceDataInfo?.queryMode === 'sql'
+                      ? 'sql'
+                      : 'selected'
+                },
+                mode: data.syncSourceDataStrategy?.mode || 'BINLOG_CDC',
+                conflictStrategy:
+                  data.syncSourceDataStrategy?.conflictStrategy ||
+                  'KEEP_SOURCE',
+                syncScope:
+                  data.syncSourceDataStrategy?.syncScope ||
+                  'FULL_THEN_INCREMENTAL',
+                pollFetchSize:
+                  data.syncSourceDataStrategy?.pollFetchSize || 500,
+                parallelism: data.syncSourceDataStrategy?.parallelism || 1,
+                exceptionStrategy:
+                  data.syncSourceDataStrategy?.exceptionStrategy ||
+                  'STOP_ON_ERROR',
+                jdbcCheckpointField:
+                  data.syncSourceDataStrategy?.jdbcCheckpointField,
+                jdbcIncrementalTimeField:
+                  data.syncSourceDataStrategy?.jdbcIncrementalTimeField,
+                jdbcPollingIntervalSeconds:
+                  data.syncSourceDataStrategy?.jdbcPollingIntervalSeconds || 60,
+                jdbcSyncSqlFull: data.syncSourceDataStrategy?.jdbcSyncSqlFull,
+                jdbcSyncSqlIncrement:
+                  data.syncSourceDataStrategy?.jdbcSyncSqlIncrement
+              };
+            }
 
             // 处理源属性和目标属性 - 直接使用接口字段名
             if (data.linkSourceColumnName) {
@@ -168,10 +254,21 @@ export default function OntologySceneLinksEdit() {
           requestData.filePath = data.intermediateTable.filePath;
           requestData.isReUpload = data.isReUpload ? 1 : 0;
         } else if (data.intermediateTable.type === 'data_lake_sync') {
+          const sourceDataInfo = buildSourceDataInfo(
+            data.syncSourceDataStrategy?.sourceDataInfo ||
+              data.intermediateTable.sourceDataInfo
+          );
           requestData.sourceType = 1; // 来自iceberg
-          requestData.linkDbName = data.intermediateTable.database;
-          requestData.linkTableName = data.intermediateTable.table;
+          requestData.linkDbName =
+            sourceDataInfo?.databaseName || data.intermediateTable.database;
+          requestData.linkTableName =
+            sourceDataInfo?.tableName || data.intermediateTable.table;
           requestData.isReUpload = 0;
+          requestData.enableSyncSourceData = true;
+          requestData.sourceDataInfo = sourceDataInfo;
+          requestData.syncSourceDataStrategy = buildSyncSourceDataStrategy(
+            data.syncSourceDataStrategy
+          );
         }
 
         // 处理属性字段映射

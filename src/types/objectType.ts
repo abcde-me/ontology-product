@@ -257,6 +257,18 @@ export interface SyncSourceDataStrategy {
    */
   exceptionStrategy: string;
   /**
+   * 轮询-断点辅助列
+   */
+  jdbcCheckpointField?: string;
+  /**
+   * 轮询-增量时间列
+   */
+  jdbcIncrementalTimeField?: string;
+  /**
+   * 轮询-轮询间隔
+   */
+  jdbcPollingIntervalSeconds?: number;
+  /**
    * 轮询-全量sql
    */
   jdbcSyncSqlFull?: string;
@@ -273,7 +285,7 @@ export interface SyncSourceDataStrategy {
    */
   parallelism: number;
   /**
-   * 批次同步数
+   * 单次拉取数量
    */
   pollFetchSize: number;
   sourceDataInfo: SourceDataInfo;
