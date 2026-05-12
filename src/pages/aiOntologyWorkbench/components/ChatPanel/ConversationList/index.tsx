@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import { Input, Spin, Empty, Tooltip, Modal } from '@arco-design/web-react';
 import { IconSearch, IconEdit, IconDelete } from '@arco-design/web-react/icon';
 import { useVirtualList } from 'ahooks';
+import dayjs from 'dayjs';
 import { Conversation } from '@/hooks/chat/types';
 import styles from './ConversationList.module.scss';
 
@@ -150,12 +151,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
   };
 
   const formatTime = (timestamp: number) => {
-    const date = new Date(timestamp);
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${month}-${day} ${hours}:${minutes}`;
+    return dayjs(timestamp).format('MM-DD HH:mm');
   };
 
   const isEmpty = conversations.length === 0;
