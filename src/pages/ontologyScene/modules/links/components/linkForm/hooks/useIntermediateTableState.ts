@@ -7,7 +7,11 @@ import {
   listMetadataIcebergTable,
   listMetadataIcebergTiDBTable
 } from '@/api/ontologySceneLibrary/objectType';
-import { IcebergTableItem } from '@/types/objectType';
+import {
+  GetSqlConnectorTableSchemaToTIDBRes,
+  IcebergTableItem
+} from '@/types/objectType';
+import { useUserInfoStore } from '@/store/userInfoStore';
 import {
   DEFAULT_INTERMEDIATE_TABLE,
   DEFAULT_SYNC_SOURCE_DATA_STRATEGY
@@ -43,6 +47,25 @@ function isSuccessResponse(response: any): boolean {
   );
 }
 
+function normalizeSourceFieldsFromTiDBSchema(
+  data?: GetSqlConnectorTableSchemaToTIDBRes | null
+): SourceTableField[] {
+  const rawColumns = data?.columns;
+  const columns = Array.isArray(rawColumns)
+    ? rawColumns
+    : rawColumns
+      ? [rawColumns]
+      : [];
+
+  return columns
+    .map((column) => ({
+      fieldId: column.columnName,
+      fieldComment: column.columnComment || column.columnName,
+      fieldType: column.columnTypeTiDB || column.columnType
+    }))
+    .filter((field) => !!field.fieldId);
+}
+
 function sourceFieldsToAttributeFields(
   fields: SourceTableField[]
 ): AttributeField[] {
@@ -61,6 +84,7 @@ function sourceFieldsToAttributeFields(
 }
 
 export function useIntermediateTableState(form: any) {
+  const currentProjectID = useUserInfoStore((state) => state.projectId?.[1]);
   const [intermediateTable, setIntermediateTable] = useState<IntermediateTable>(
     DEFAULT_INTERMEDIATE_TABLE
   );
@@ -148,25 +172,26 @@ export function useIntermediateTableState(form: any) {
   const handleDatabaseSourceTableSelected = async ({
     connectorId,
     databaseName,
-    tableName
+    tableName,
+    projectID: projectIDFromEvent
   }: Required<
     Pick<SqlSourceDataInfo, 'connectorId' | 'databaseName' | 'tableName'>
-  >) => {
+  > & { projectID: string }) => {
+    const projectID = projectIDFromEvent || currentProjectID;
+    if (!projectID) {
+      Message.warning('缺少项目信息，无法加载数据表字段');
+      return;
+    }
     setFieldsLoading(true);
     try {
       const response = await getSqlConnectorTableSchemaToTIDB({
         id: connectorId,
         database_name: databaseName,
-        table_name: tableName
+        table_name: tableName,
+        projectID
       });
       if (isSuccessResponse(response)) {
-        const fields: SourceTableField[] = (response.data || []).map(
-          (field) => ({
-            fieldId: field.field_id,
-            fieldComment: field.field_comment,
-            fieldType: field.field_type
-          })
-        );
+        const fields = normalizeSourceFieldsFromTiDBSchema(response.data);
         applyDatabaseSourceFields(fields);
       } else {
         Message.error(response.message || '加载数据源字段失败');
