@@ -117,6 +117,9 @@ function buildSyncSourceDataStrategy(
     pollFetchSize: state.pollFetchSize,
     parallelism: state.parallelism,
     exceptionStrategy: state.exceptionStrategy,
+    jdbcCheckpointField: state.jdbcCheckpointField,
+    jdbcIncrementalTimeField: state.jdbcIncrementalTimeField,
+    jdbcPollingIntervalSeconds: state.jdbcPollingIntervalSeconds,
     jdbcSyncSqlFull: state.jdbcSyncSqlFull,
     jdbcSyncSqlIncrement: state.jdbcSyncSqlIncrement,
     sourceDataInfo

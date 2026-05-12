@@ -7,19 +7,17 @@ import {
   TableColumnProps,
   Pagination,
   Message,
-  Modal,
+  Switch,
   Popover
 } from '@arco-design/web-react';
 import {
   IconPlus,
-  IconSearch,
   IconRefresh,
   IconQuestionCircle
 } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
   DotStatus,
-  ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
 import useUrlState from '@ahooksjs/use-url-state';
@@ -165,16 +163,6 @@ export default function OntologySceneObjectTypeList() {
     setDetailDrawerVisible(true);
   };
 
-  // 处理链接点击
-  const handleLinkClick = (record: ObjectType) => {
-    handleViewDetail(record, 'links');
-  };
-
-  // 处理实例数量点击
-  const handleInstanceCountClick = (record: ObjectType) => {
-    handleViewDetail(record, 'instances');
-  };
-
   // 处理编辑
   const handleEdit = (record: ObjectType) => {
     if (!record.id) {
@@ -183,6 +171,17 @@ export default function OntologySceneObjectTypeList() {
     }
     history.push(
       `/tenant/compute/onto/ontologyScene/detail/${ontologyModelID}/objectType/edit/${record.id}`
+    );
+  };
+
+  // 处理配置实例同步
+  const handleConfigureSync = (record: ObjectType) => {
+    if (!record.id) {
+      Message.error('对象类型ID无效');
+      return;
+    }
+    history.push(
+      `/tenant/compute/onto/ontologyScene/detail/${ontologyModelID}/objectType/edit/${record.id}?step=3`
     );
   };
 
@@ -305,6 +304,30 @@ export default function OntologySceneObjectTypeList() {
           )}
         </div>
       )
+    },
+    {
+      title: '实例同步任务',
+      dataIndex: 'syncEnabled',
+      width: 200,
+      render: (_, record) => {
+        // 如果 enableSyncSourceData 为 false，显示"未配置 配置"
+        if (!record.enableSyncSourceData) {
+          return (
+            <div className="flex items-center gap-[4px]">
+              <span className="text-[#334155]">未配置</span>
+              <span
+                className="cursor-pointer text-[#184FF2] hover:underline"
+                onClick={() => handleConfigureSync(record)}
+              >
+                配置
+              </span>
+            </div>
+          );
+        }
+
+        // 如果 enableSyncSourceData 为 true，根据 syncEnabled 显示 Switch
+        return <Switch checked={record.syncEnabled} disabled size="small" />;
+      }
     },
     {
       title: '同步状态',

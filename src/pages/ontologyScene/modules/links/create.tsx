@@ -62,6 +62,43 @@ export default function OntologySceneLinksCreate() {
     return typeMap[formType] || LinkType.ONE_TO_ONE;
   };
 
+  const buildSourceDataInfo = (
+    source?: NonNullable<
+      LinkFormData['syncSourceDataStrategy']
+    >['sourceDataInfo']
+  ): CreateOntologyLinkTypeReq['sourceDataInfo'] => {
+    if (!source?.connectorId) return undefined;
+    return {
+      connectorId: source.connectorId,
+      databaseName: source.databaseName,
+      tableName: source.tableName,
+      queryMode: source.queryMode || 'selected',
+      sql: source.sql
+    };
+  };
+
+  const buildSyncSourceDataStrategy = (
+    strategy?: LinkFormData['syncSourceDataStrategy']
+  ): CreateOntologyLinkTypeReq['syncSourceDataStrategy'] => {
+    if (!strategy) return undefined;
+    const sourceDataInfo = buildSourceDataInfo(strategy.sourceDataInfo);
+    if (!sourceDataInfo) return undefined;
+    return {
+      mode: strategy.mode,
+      conflictStrategy: strategy.conflictStrategy,
+      syncScope: strategy.syncScope,
+      pollFetchSize: strategy.pollFetchSize,
+      parallelism: strategy.parallelism || 1,
+      exceptionStrategy: strategy.exceptionStrategy,
+      jdbcCheckpointField: strategy.jdbcCheckpointField,
+      jdbcIncrementalTimeField: strategy.jdbcIncrementalTimeField,
+      jdbcPollingIntervalSeconds: strategy.jdbcPollingIntervalSeconds,
+      jdbcSyncSqlFull: strategy.jdbcSyncSqlFull,
+      jdbcSyncSqlIncrement: strategy.jdbcSyncSqlIncrement,
+      sourceDataInfo
+    };
+  };
+
   const handleSubmit = async (data: LinkFormData) => {
     setLoading(true);
     try {
@@ -90,9 +127,20 @@ export default function OntologySceneLinksCreate() {
           requestData.sourceType = 2; // 文件上传
           requestData.filePath = data.intermediateTable.filePath;
         } else if (data.intermediateTable.type === 'data_lake_sync') {
+          const sourceDataInfo = buildSourceDataInfo(
+            data.syncSourceDataStrategy?.sourceDataInfo ||
+              data.intermediateTable.sourceDataInfo
+          );
           requestData.sourceType = 1; // 来自iceberg
-          requestData.linkDbName = data.intermediateTable.database;
-          requestData.linkTableName = data.intermediateTable.table;
+          requestData.linkDbName =
+            sourceDataInfo?.databaseName || data.intermediateTable.database;
+          requestData.linkTableName =
+            sourceDataInfo?.tableName || data.intermediateTable.table;
+          requestData.enableSyncSourceData = true;
+          requestData.sourceDataInfo = sourceDataInfo;
+          requestData.syncSourceDataStrategy = buildSyncSourceDataStrategy(
+            data.syncSourceDataStrategy
+          );
         }
 
         // 处理属性字段映射
