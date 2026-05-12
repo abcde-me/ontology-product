@@ -27,6 +27,7 @@ export const DEFAULT_SYNC_SOURCE_DATA_STRATEGY: SyncSourceDataStrategyFormState 
     syncScope: 'FULL_THEN_INCREMENTAL',
     jdbcPollingIntervalSeconds: 60,
     pollFetchSize: 500,
+    fullSyncBatchSize: 500,
     parallelism: 1,
     exceptionStrategy: 'STOP_ON_ERROR'
   };
