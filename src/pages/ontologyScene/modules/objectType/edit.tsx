@@ -126,22 +126,28 @@ export default function OntologySceneObjectTypeEdit() {
                 },
                 mode:
                   objectType.syncSourceDataStrategy.mode ||
-                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.mode,
+                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.mode ||
+                  '',
                 conflictStrategy:
                   objectType.syncSourceDataStrategy.conflictStrategy ||
-                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.conflictStrategy,
+                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.conflictStrategy ||
+                  '',
                 syncScope:
                   objectType.syncSourceDataStrategy.syncScope ||
-                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.syncScope,
+                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.syncScope ||
+                  '',
                 pollFetchSize:
                   objectType.syncSourceDataStrategy.pollFetchSize ||
-                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.pollFetchSize,
+                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.pollFetchSize ||
+                  0,
                 parallelism:
                   objectType.syncSourceDataStrategy.parallelism ||
-                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.parallelism,
+                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.parallelism ||
+                  1,
                 exceptionStrategy:
                   objectType.syncSourceDataStrategy.exceptionStrategy ||
-                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.exceptionStrategy,
+                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.exceptionStrategy ||
+                  '',
                 jdbcCheckpointField:
                   objectType.syncSourceDataStrategy.jdbcCheckpointField,
                 jdbcIncrementalTimeField:
