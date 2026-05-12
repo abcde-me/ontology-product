@@ -39,8 +39,6 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       setIntermediateTable,
       setSelectedDatabase,
       setSelectedTable,
-      cascaderOptions,
-      cascaderValue,
       setCascaderValue,
       attributeFields,
       setAttributeFields,
@@ -51,12 +49,16 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       setIsReUpload,
       initialFileList,
       setInitialFileList,
+      syncSourceDataStrategy,
+      setSyncSourceDataStrategy,
       getAttributeOptions,
       resetForLinkTypeChange,
-      handleCascaderLoadMore,
-      handleCascaderChange,
       handleIntermediateTableTypeChange,
-      handleLocalCsvFileChange
+      handleLocalCsvFileChange,
+      handleSyncSourceDataInfoChange,
+      handleDatabaseSourceTableSelected,
+      handleSqlColumnsParsed,
+      updateSyncSourceDataStrategy
     } = intermediateState;
 
     const {
@@ -89,7 +91,8 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       fileUploaded,
       attributeFields,
       sourcePrimaryAttribute,
-      isReUpload
+      isReUpload,
+      syncSourceDataStrategy
     });
 
     useEffect(() => {
@@ -102,7 +105,37 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
           targetObjectAttribute: initialValues.targetObjectAttribute,
           sourceAttribute: initialValues.sourceAttribute,
           targetAttribute: initialValues.targetAttribute,
-          attributeFields: initialValues.attributeFields || []
+          attributeFields: initialValues.attributeFields || [],
+          syncMode: initialValues.syncSourceDataStrategy?.mode,
+          conflictStrategy:
+            initialValues.syncSourceDataStrategy?.conflictStrategy,
+          syncScope: initialValues.syncSourceDataStrategy?.syncScope,
+          pollFetchSize: initialValues.syncSourceDataStrategy?.pollFetchSize,
+          parallelism: initialValues.syncSourceDataStrategy?.parallelism ?? 1,
+          exceptionStrategy:
+            initialValues.syncSourceDataStrategy?.exceptionStrategy,
+          jdbcCheckpointField:
+            initialValues.syncSourceDataStrategy?.jdbcCheckpointField,
+          jdbcIncrementalTimeField:
+            initialValues.syncSourceDataStrategy?.jdbcIncrementalTimeField,
+          jdbcPollingIntervalSeconds:
+            initialValues.syncSourceDataStrategy?.jdbcPollingIntervalSeconds,
+          jdbcSyncSqlFull:
+            initialValues.syncSourceDataStrategy?.jdbcSyncSqlFull,
+          jdbcSyncSqlIncrement:
+            initialValues.syncSourceDataStrategy?.jdbcSyncSqlIncrement,
+          linkSourceConnector:
+            initialValues.syncSourceDataStrategy?.sourceDataInfo?.connectorId,
+          linkSourceQueryMode:
+            initialValues.syncSourceDataStrategy?.sourceDataInfo?.queryMode,
+          linkSourceDatabaseTable:
+            initialValues.syncSourceDataStrategy?.sourceDataInfo
+              ?.databaseName &&
+            initialValues.syncSourceDataStrategy?.sourceDataInfo?.tableName
+              ? `${initialValues.syncSourceDataStrategy.sourceDataInfo.databaseName}/${initialValues.syncSourceDataStrategy.sourceDataInfo.tableName}`
+              : undefined,
+          linkSourceSql:
+            initialValues.syncSourceDataStrategy?.sourceDataInfo?.sql
         });
 
         if (initialValues.linkType) {
@@ -147,6 +180,21 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
           }
         }
 
+        if (initialValues.syncSourceDataStrategy) {
+          setSyncSourceDataStrategy({
+            ...initialValues.syncSourceDataStrategy,
+            sourceDataInfo: {
+              ...initialValues.syncSourceDataStrategy.sourceDataInfo,
+              queryMode:
+                initialValues.syncSourceDataStrategy.sourceDataInfo
+                  ?.queryMode === 'sql'
+                  ? 'sql'
+                  : 'selected'
+            },
+            parallelism: initialValues.syncSourceDataStrategy.parallelism ?? 1
+          });
+        }
+
         if (initialValues.attributeFields) {
           setAttributeFields(initialValues.attributeFields);
         }
@@ -164,7 +212,8 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       setInitialFileList,
       setIntermediateTable,
       setSelectedDatabase,
-      setSelectedTable
+      setSelectedTable,
+      setSyncSourceDataStrategy
     ]);
 
     const handleLinkTypeChange = (type: LinkType) => {
@@ -235,14 +284,17 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                   hasInitialId={!!initialValues?.id}
                   intermediateTable={intermediateTable}
                   initialFileList={initialFileList}
-                  cascaderValue={cascaderValue}
-                  cascaderOptions={cascaderOptions}
+                  syncSourceDataStrategy={syncSourceDataStrategy}
                   onIntermediateTableTypeChange={
                     handleIntermediateTableTypeChange
                   }
                   onLocalCsvFileChange={handleLocalCsvFileChange}
-                  onCascaderChange={handleCascaderChange}
-                  onCascaderLoadMore={handleCascaderLoadMore}
+                  onSyncSourceDataInfoChange={handleSyncSourceDataInfoChange}
+                  onDatabaseSourceTableSelected={
+                    handleDatabaseSourceTableSelected
+                  }
+                  onSqlColumnsParsed={handleSqlColumnsParsed}
+                  onSyncSourceDataStrategyChange={updateSyncSourceDataStrategy}
                 />
 
                 <RelationMappingSection

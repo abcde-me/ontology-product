@@ -8,6 +8,7 @@ import {
   PrimaryAttribute
 } from '../types';
 import { normalizeFieldTypeForPrimary } from '../utils/linkFormUtils';
+import { SyncSourceDataStrategyFormState } from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormUtils/types';
 
 interface UseLinkFormSubmitDataParams {
   form: any;
@@ -19,6 +20,7 @@ interface UseLinkFormSubmitDataParams {
   attributeFields: AttributeField[];
   sourcePrimaryAttribute: PrimaryAttribute | null;
   isReUpload: boolean;
+  syncSourceDataStrategy: SyncSourceDataStrategyFormState;
 }
 
 export function useLinkFormSubmitData({
@@ -30,7 +32,8 @@ export function useLinkFormSubmitData({
   fileUploaded,
   attributeFields,
   sourcePrimaryAttribute,
-  isReUpload
+  isReUpload,
+  syncSourceDataStrategy
 }: UseLinkFormSubmitDataParams) {
   const buildSubmitData = async (): Promise<LinkFormData | undefined> => {
     await form.validate();
@@ -61,8 +64,68 @@ export function useLinkFormSubmitData({
           return undefined;
         }
       } else if (intermediateTable.type === 'data_lake_sync') {
-        if (!intermediateTable.database || !intermediateTable.table) {
-          Message.warning('请选择数据库和表');
+        const syncSource = syncSourceDataStrategy.sourceDataInfo;
+        const isSqlMode = syncSource.queryMode === 'sql';
+        const isPollingMode = syncSourceDataStrategy.mode === 'JDBC_POLLING';
+
+        if (!syncSource.connectorId) {
+          Message.warning('请选择数据源链接');
+          return undefined;
+        }
+
+        if (!isSqlMode && (!syncSource.databaseName || !syncSource.tableName)) {
+          Message.warning('请选择数据表');
+          return undefined;
+        }
+
+        if (isSqlMode && !syncSource.sql?.trim()) {
+          Message.warning('请输入自定义SQL');
+          return undefined;
+        }
+
+        if (
+          isPollingMode &&
+          (!syncSourceDataStrategy.jdbcPollingIntervalSeconds ||
+            !syncSourceDataStrategy.pollFetchSize)
+        ) {
+          Message.warning('请完整填写轮询参数');
+          return undefined;
+        }
+
+        if (isPollingMode && isSqlMode) {
+          const needFullSql =
+            syncSourceDataStrategy.syncScope === 'FULL' ||
+            syncSourceDataStrategy.syncScope === 'FULL_THEN_INCREMENTAL';
+          const needIncrementSql =
+            syncSourceDataStrategy.syncScope === 'INCREMENTAL' ||
+            syncSourceDataStrategy.syncScope === 'FULL_THEN_INCREMENTAL';
+
+          if (needFullSql && !syncSourceDataStrategy.jdbcSyncSqlFull?.trim()) {
+            Message.warning('请输入全量SQL');
+            return undefined;
+          }
+
+          if (
+            needIncrementSql &&
+            !syncSourceDataStrategy.jdbcSyncSqlIncrement?.trim()
+          ) {
+            Message.warning('请输入增量SQL');
+            return undefined;
+          }
+        }
+
+        if (!syncSourceDataStrategy.conflictStrategy) {
+          Message.warning('请选择冲突策略');
+          return undefined;
+        }
+
+        if (!syncSourceDataStrategy.syncScope) {
+          Message.warning('请选择同步范围');
+          return undefined;
+        }
+
+        if (!syncSourceDataStrategy.exceptionStrategy) {
+          Message.warning('请选择异常策略');
           return undefined;
         }
       }
@@ -117,6 +180,11 @@ export function useLinkFormSubmitData({
       intermediateTable:
         linkType === LinkType.MANY_TO_MANY ? intermediateTable : undefined,
       attributeFields: processedAttributeFields,
+      syncSourceDataStrategy:
+        linkType === LinkType.MANY_TO_MANY &&
+        intermediateTable.type === 'data_lake_sync'
+          ? syncSourceDataStrategy
+          : undefined,
       isReUpload:
         linkType === LinkType.MANY_TO_MANY &&
         intermediateTable.type === 'local_csv'

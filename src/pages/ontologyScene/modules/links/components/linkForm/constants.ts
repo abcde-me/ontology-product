@@ -1,4 +1,5 @@
 import { LinkType } from '../../../../types/link';
+import { SyncSourceDataStrategyFormState } from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormUtils/types';
 
 export const LINK_TYPE_OPTIONS: LinkType[] = [
   LinkType.ONE_TO_ONE,
@@ -15,3 +16,17 @@ export const LINK_TYPE_DESCRIPTIONS: Record<LinkType, string> = {
 export const DEFAULT_INTERMEDIATE_TABLE = {
   type: 'local_csv' as const
 };
+
+export const DEFAULT_SYNC_SOURCE_DATA_STRATEGY: SyncSourceDataStrategyFormState =
+  {
+    sourceDataInfo: {
+      queryMode: 'selected'
+    },
+    mode: 'BINLOG_CDC',
+    conflictStrategy: 'KEEP_SOURCE',
+    syncScope: 'FULL_THEN_INCREMENTAL',
+    jdbcPollingIntervalSeconds: 60,
+    pollFetchSize: 500,
+    parallelism: 1,
+    exceptionStrategy: 'STOP_ON_ERROR'
+  };

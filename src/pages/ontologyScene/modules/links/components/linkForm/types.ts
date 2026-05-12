@@ -1,4 +1,8 @@
 import { LinkType } from '../../../../types/link';
+import {
+  SqlSourceDataInfo,
+  SyncSourceDataStrategyFormState
+} from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormUtils/types';
 
 export type IntermediateTableType = 'local_csv' | 'data_lake_sync';
 
@@ -14,8 +18,11 @@ export interface IntermediateTable {
   type: IntermediateTableType;
   file?: any;
   filePath?: string;
+  sourceDataInfo?: SqlSourceDataInfo;
   database?: string;
   table?: string;
+  sql?: string;
+  queryMode?: 'selected' | 'sql';
 }
 
 export interface LinkFormData {
@@ -32,6 +39,7 @@ export interface LinkFormData {
   linkSourceColumnName?: string;
   attributeFields: AttributeField[];
   isReUpload?: boolean;
+  syncSourceDataStrategy?: SyncSourceDataStrategyFormState;
 }
 
 export interface FileData {

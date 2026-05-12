@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react';
 import { Message } from '@arco-design/web-react';
 import { COLUMN_TYPE_OPTIONS } from '@/pages/ontologyScene/common/constants';
 import {
+  getSqlConnectorTableSchemaToTIDB,
   listMetadataIcebergDatabaseName,
   listMetadataIcebergTable,
   listMetadataIcebergTiDBTable
 } from '@/api/ontologySceneLibrary/objectType';
 import { IcebergTableItem } from '@/types/objectType';
-import { DEFAULT_INTERMEDIATE_TABLE } from '../constants';
+import {
+  DEFAULT_INTERMEDIATE_TABLE,
+  DEFAULT_SYNC_SOURCE_DATA_STRATEGY
+} from '../constants';
 import {
   AttributeField,
   CascaderOption,
@@ -16,6 +20,45 @@ import {
   IntermediateTableType
 } from '../types';
 import { normalizeFieldTypeForPrimary } from '../utils/linkFormUtils';
+import {
+  SqlSourceDataInfo,
+  SourceTableField,
+  SyncSourceDataStrategyFormState
+} from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormUtils/types';
+
+function createDefaultSyncSourceDataStrategy(): SyncSourceDataStrategyFormState {
+  return {
+    ...DEFAULT_SYNC_SOURCE_DATA_STRATEGY,
+    sourceDataInfo: {
+      ...DEFAULT_SYNC_SOURCE_DATA_STRATEGY.sourceDataInfo
+    }
+  };
+}
+
+function isSuccessResponse(response: any): boolean {
+  return (
+    response &&
+    (response.status === 200 || response.status === 0) &&
+    (response.code === '' || response.code === 0 || response.code === undefined)
+  );
+}
+
+function sourceFieldsToAttributeFields(
+  fields: SourceTableField[]
+): AttributeField[] {
+  return fields
+    .map((field, index) => ({
+      tableField: field.fieldId,
+      isUse: 1,
+      attributeName: field.fieldComment || field.fieldId,
+      fieldType: field.fieldType || COLUMN_TYPE_OPTIONS[0].value,
+      isPrimary: index === 0
+    }))
+    .map((field) => ({
+      ...field,
+      fieldType: normalizeFieldTypeForPrimary(field.fieldType, field.isPrimary)
+    }));
+}
 
 export function useIntermediateTableState(form: any) {
   const [intermediateTable, setIntermediateTable] = useState<IntermediateTable>(
@@ -38,6 +81,10 @@ export function useIntermediateTableState(form: any) {
   const [fileUploaded, setFileUploaded] = useState(false);
   const [isReUpload, setIsReUpload] = useState(false);
   const [initialFileList, setInitialFileList] = useState<any[]>([]);
+  const [syncSourceDataStrategy, setSyncSourceDataStrategy] =
+    useState<SyncSourceDataStrategyFormState>(
+      createDefaultSyncSourceDataStrategy
+    );
 
   const clearRelationFields = () => {
     form.setFieldValue('sourceAttribute', undefined);
@@ -57,9 +104,106 @@ export function useIntermediateTableState(form: any) {
 
   const resetForLinkTypeChange = () => {
     setIntermediateTable(DEFAULT_INTERMEDIATE_TABLE);
+    setSyncSourceDataStrategy(createDefaultSyncSourceDataStrategy());
     clearAttributeFields();
     setFileUploaded(false);
     setIsReUpload(false);
+  };
+
+  const syncIntermediateTableWithSource = (
+    sourceDataInfo: SqlSourceDataInfo
+  ) => {
+    setIntermediateTable((prev) => ({
+      ...prev,
+      type: 'data_lake_sync',
+      sourceDataInfo,
+      database: sourceDataInfo.databaseName,
+      table: sourceDataInfo.tableName,
+      queryMode: sourceDataInfo.queryMode || 'selected',
+      sql: sourceDataInfo.sql
+    }));
+  };
+
+  const handleSyncSourceDataInfoChange = (
+    sourceDataInfo: SqlSourceDataInfo
+  ) => {
+    setSyncSourceDataStrategy((prev) => ({
+      ...prev,
+      sourceDataInfo
+    }));
+    syncIntermediateTableWithSource(sourceDataInfo);
+    clearAttributeFields();
+    setFileUploaded(false);
+    clearRelationFields();
+  };
+
+  const applyDatabaseSourceFields = (fields: SourceTableField[]) => {
+    const nextFields = sourceFieldsToAttributeFields(fields);
+    setAttributeFields(nextFields);
+    form.setFieldValue('attributeFields', nextFields);
+    setFileUploaded(nextFields.length > 0);
+    clearRelationFields();
+  };
+
+  const handleDatabaseSourceTableSelected = async ({
+    connectorId,
+    databaseName,
+    tableName
+  }: Required<
+    Pick<SqlSourceDataInfo, 'connectorId' | 'databaseName' | 'tableName'>
+  >) => {
+    setFieldsLoading(true);
+    try {
+      const response = await getSqlConnectorTableSchemaToTIDB({
+        id: connectorId,
+        database_name: databaseName,
+        table_name: tableName
+      });
+      if (isSuccessResponse(response)) {
+        const fields: SourceTableField[] = (response.data || []).map(
+          (field) => ({
+            fieldId: field.field_id,
+            fieldComment: field.field_comment,
+            fieldType: field.field_type
+          })
+        );
+        applyDatabaseSourceFields(fields);
+      } else {
+        Message.error(response.message || '加载数据源字段失败');
+        clearAttributeFields();
+        setFileUploaded(false);
+        clearRelationFields();
+      }
+    } catch (error) {
+      console.error('加载数据源字段失败:', error);
+      Message.error('加载数据源字段失败');
+      clearAttributeFields();
+      setFileUploaded(false);
+      clearRelationFields();
+    } finally {
+      setFieldsLoading(false);
+    }
+  };
+
+  const handleSqlColumnsParsed = (columns: string[]) => {
+    const fields: SourceTableField[] = columns
+      .map((column) => column.trim())
+      .filter(Boolean)
+      .map((column) => ({
+        fieldId: column,
+        fieldComment: column,
+        fieldType: COLUMN_TYPE_OPTIONS[0].value
+      }));
+    applyDatabaseSourceFields(fields);
+  };
+
+  const updateSyncSourceDataStrategy = (
+    updates: Partial<SyncSourceDataStrategyFormState>
+  ) => {
+    setSyncSourceDataStrategy((prev) => ({
+      ...prev,
+      ...updates
+    }));
   };
 
   const loadDatabaseList = async () => {
@@ -268,8 +412,24 @@ export function useIntermediateTableState(form: any) {
       setSelectedTable(undefined);
       setCascaderValue([]);
       form.setFieldsValue({
-        databaseTable: undefined
+        databaseTable: undefined,
+        linkSourceConnector: undefined,
+        linkSourceDatabaseTable: undefined,
+        linkSourceQueryMode: undefined,
+        linkSourceSql: undefined,
+        syncMode: undefined,
+        conflictStrategy: undefined,
+        syncScope: undefined,
+        pollFetchSize: undefined,
+        parallelism: undefined,
+        exceptionStrategy: undefined,
+        jdbcCheckpointField: undefined,
+        jdbcIncrementalTimeField: undefined,
+        jdbcPollingIntervalSeconds: undefined,
+        jdbcSyncSqlFull: undefined,
+        jdbcSyncSqlIncrement: undefined
       });
+      setSyncSourceDataStrategy(createDefaultSyncSourceDataStrategy());
     }
 
     setIntermediateTable({
@@ -286,6 +446,18 @@ export function useIntermediateTableState(form: any) {
 
     if (type === 'data_lake_sync') {
       setInitialFileList([]);
+      const defaultStrategy = createDefaultSyncSourceDataStrategy();
+      setSyncSourceDataStrategy(defaultStrategy);
+      form.setFieldsValue({
+        syncMode: defaultStrategy.mode,
+        conflictStrategy: defaultStrategy.conflictStrategy,
+        syncScope: defaultStrategy.syncScope,
+        pollFetchSize: defaultStrategy.pollFetchSize,
+        parallelism: defaultStrategy.parallelism,
+        exceptionStrategy: defaultStrategy.exceptionStrategy,
+        jdbcPollingIntervalSeconds: defaultStrategy.jdbcPollingIntervalSeconds,
+        linkSourceQueryMode: defaultStrategy.sourceDataInfo.queryMode
+      });
       loadDatabaseList();
     }
   };
@@ -389,11 +561,17 @@ export function useIntermediateTableState(form: any) {
     setIsReUpload,
     initialFileList,
     setInitialFileList,
+    syncSourceDataStrategy,
+    setSyncSourceDataStrategy,
     getAttributeOptions,
     resetForLinkTypeChange,
     handleCascaderLoadMore,
     handleCascaderChange,
     handleIntermediateTableTypeChange,
-    handleLocalCsvFileChange
+    handleLocalCsvFileChange,
+    handleSyncSourceDataInfoChange,
+    handleDatabaseSourceTableSelected,
+    handleSqlColumnsParsed,
+    updateSyncSourceDataStrategy
   };
 }
