@@ -64,21 +64,54 @@ export default function InstanceSyncMappingTable({
       {
         title: '表字段',
         dataIndex: 'sourceColumnName',
-        width: 220,
-        render: (value, _, index) => (
+        width: 280,
+        render: (value, _record, index) => (
           <Select
+            showSearch
+            allowCreate
             value={value}
-            placeholder="请选择表字段"
+            placeholder="选择或输入表字段名"
             options={sourceFieldOptions}
-            onChange={(sourceColumnName) => {
+            filterOption={(inputValue, option) =>
+              String(option.props?.value ?? '')
+                .toLowerCase()
+                .includes(
+                  String(inputValue ?? '')
+                    .trim()
+                    .toLowerCase()
+                ) ||
+              String(option.props?.children ?? '')
+                .toLowerCase()
+                .includes(
+                  String(inputValue ?? '')
+                    .trim()
+                    .toLowerCase()
+                )
+            }
+            onChange={(next) => {
+              if (next === undefined || next === null || next === '') {
+                handleFieldChange(index, {
+                  sourceColumnName: undefined,
+                  sourceCoumnOriginName: undefined,
+                  sourceColumnComment: undefined,
+                  sourceColumnType: undefined
+                });
+                return;
+              }
+              const str = String(next);
               const sourceField = sourceFields.find(
-                (field) => field.fieldId === sourceColumnName
+                (field) => field.fieldId === str
               );
-              handleFieldChange(index, {
-                sourceColumnName,
-                sourceColumnComment: sourceField?.fieldComment,
-                sourceColumnType: sourceField?.fieldType
-              });
+              if (sourceField) {
+                handleFieldChange(index, {
+                  sourceColumnName: str,
+                  sourceCoumnOriginName: sourceField.fieldId,
+                  sourceColumnComment: sourceField.fieldComment,
+                  sourceColumnType: sourceField.fieldType
+                });
+              } else {
+                handleFieldChange(index, { sourceColumnName: str });
+              }
             }}
             allowClear
           />

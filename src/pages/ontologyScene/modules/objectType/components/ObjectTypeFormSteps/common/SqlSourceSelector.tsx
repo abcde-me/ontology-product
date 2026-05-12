@@ -37,7 +37,9 @@ interface SqlSourceSelectorProps {
   onTableSelected?: (
     value: Required<
       Pick<SqlSourceDataInfo, 'connectorId' | 'databaseName' | 'tableName'>
-    >
+    > & {
+      projectID: string;
+    }
   ) => void;
   onSqlColumnsParsed?: (columns: string[]) => void;
   fieldPrefix: string;
@@ -455,18 +457,20 @@ export default function SqlSourceSelector({
     const nextValue = {
       ...value,
       databaseName,
-      tableName
+      tableName,
+      projectID
     };
     onChange(nextValue);
     form.setFieldValue(
       `${fieldPrefix}DatabaseTable`,
-      databaseName && tableName ? `${databaseName}/${tableName}` : undefined
+      databaseName && tableName ? [databaseName, tableName] : undefined
     );
-    if (value.connectorId && databaseName && tableName) {
+    if (value.connectorId && databaseName && tableName && projectID) {
       onTableSelected?.({
         connectorId: value.connectorId,
         databaseName,
-        tableName
+        tableName,
+        projectID
       });
     }
   };

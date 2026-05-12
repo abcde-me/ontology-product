@@ -44,6 +44,7 @@ export function sourceFieldToObjectTypeAttribute(
     isVector: 0,
     sourceColumnName: field.fieldId,
     sourceColumnComment: field.fieldComment || field.fieldId,
+    sourceColumnType: field.fieldType,
     _vectorizationOn: false
   };
 }
@@ -75,6 +76,7 @@ interface LegacyAttributeLike {
   comment?: string;
   columnType?: string;
   propertyID?: string | number;
+  propertyName?: string;
   propertyComment?: string;
   propertyType?: string;
   isPrimary?: number;
@@ -83,6 +85,7 @@ interface LegacyAttributeLike {
   isVector?: number;
   sourceColumnName?: string;
   sourceColumnComment?: string;
+  sourceColumnType?: string;
   _storedPublicPropertyId?: number;
   _vectorizationOn?: boolean;
   _vectorComment?: string;
@@ -97,15 +100,21 @@ export function legacyFieldToObjectTypeAttribute(
 ): ObjectTypeAttributeField {
   const raw: LegacyAttributeLike = field;
   const propertyID =
-    raw.propertyID != null ? String(raw.propertyID) : raw.name || '';
+    raw.propertyName ??
+    raw.name ??
+    (raw.propertyID != null ? String(raw.propertyID) : '');
   const propertyComment =
     raw.propertyComment ?? raw.comment ?? propertyID ?? '';
   const propertyType = raw.propertyType ?? raw.columnType ?? '';
   const sourceColumnName = raw.sourceColumnName ?? raw.name ?? propertyID;
   const sourceColumnComment =
     raw.sourceColumnComment ?? raw.comment ?? propertyComment ?? '';
+  const backendPropertyID = Number(raw.propertyID);
   return {
     key: createObjectTypeAttributeKey('legacy-field'),
+    backendPropertyID: Number.isFinite(backendPropertyID)
+      ? Math.trunc(backendPropertyID)
+      : undefined,
     propertyID,
     propertyComment,
     propertyType,
@@ -115,6 +124,7 @@ export function legacyFieldToObjectTypeAttribute(
     isVector: raw.isVector === 1 ? 1 : 0,
     sourceColumnName,
     sourceColumnComment,
+    sourceColumnType: raw.sourceColumnType ?? propertyType,
     _storedPublicPropertyId: raw._storedPublicPropertyId,
     _vectorizationOn: raw._vectorizationOn,
     _vectorComment: raw._vectorComment,

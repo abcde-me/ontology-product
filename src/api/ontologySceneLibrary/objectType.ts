@@ -3,6 +3,8 @@ import {
   CreateOntologyPhysicalProperty,
   GetSqlConnectorTableSchemaReq,
   GetSqlConnectorTableSchemaRes,
+  GetSqlConnectorTableSchemaToTIDBReq,
+  GetSqlConnectorTableSchemaToTIDBRes,
   GetOntologyObjectTypeDetailRes,
   ListConnectorsReq,
   ListConnectorsRes,
@@ -125,8 +127,8 @@ export const getSqlConnectorTableSchema = async (
 };
 
 export const getSqlConnectorTableSchemaToTIDB = async (
-  params: GetSqlConnectorTableSchemaReq
-): Promise<ApiRes<GetSqlConnectorTableSchemaRes>> => {
+  params: GetSqlConnectorTableSchemaToTIDBReq
+): Promise<ApiRes<GetSqlConnectorTableSchemaToTIDBRes>> => {
   return await UAPI.RES.GetSqlConnectorTableSchemaToTIDBApi({})
     .post(params)
     .inRegion()
