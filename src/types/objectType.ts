@@ -349,7 +349,10 @@ export interface UpdateOntologyObjectTypeReq
 }
 
 export interface GetOntologyObjectTypeDetailRes
-  extends CreateOntologyObjectTypeReq {
+  extends Omit<
+    CreateOntologyObjectTypeReq,
+    'sourceDataInfo' | 'syncSourceDataStrategy'
+  > {
   id: number;
   /**
    * 同步状态
