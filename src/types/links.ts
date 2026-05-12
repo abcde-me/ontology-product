@@ -1,5 +1,9 @@
 import { LinkType, SyncStatus } from './graphApi';
-import { ObjectType } from './objectType';
+import {
+  ObjectType,
+  SourceDataInfo,
+  SyncSourceDataStrategy
+} from './objectType';
 
 export interface ListOntologyLinkTypeColumnReq {
   /**
@@ -179,6 +183,14 @@ export interface GetOntologyLinkTypeRes {
    * 来源类型 1 数据湖同步  2 本地CSV导入
    */
   sourceType?: number;
+  /**
+   * N:N 数据库来源信息
+   */
+  sourceDataInfo?: SourceDataInfo;
+  /**
+   * N:N 中间表同步策略
+   */
+  syncSourceDataStrategy?: SyncSourceDataStrategy;
   /**
    * 数据表名称
    */
@@ -392,6 +404,10 @@ export interface CreateOntologyLinkTypeReq {
   ontologyModelID: number;
   ontologyTableName?: string;
   /**
+   * 是否启用数据源同步
+   */
+  enableSyncSourceData?: boolean;
+  /**
    * 源对象类型ID
    */
   sourceObjectTypeID: number;
@@ -399,6 +415,14 @@ export interface CreateOntologyLinkTypeReq {
    * 来源类型 1 来自iceberg  2 文件上传
    */
   sourceType?: number;
+  /**
+   * N:N 数据库来源信息
+   */
+  sourceDataInfo?: SourceDataInfo;
+  /**
+   * N:N 中间表同步策略
+   */
+  syncSourceDataStrategy?: SyncSourceDataStrategy;
   /**
    * 目标对象类型ID
    */
