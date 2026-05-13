@@ -234,3 +234,37 @@ export const syncObjectTypeTask = async (params: {
 }): Promise<ApiRes<string>> => {
   return await UAPI.RES.SyncObjectTypeTaskApi({}).post(params).inRegion().do();
 };
+
+// 启动对象类型同步任务
+export const startSyncObjectTypeTask = async (params: {
+  id: number;
+  funnel_task_id: number;
+}): Promise<
+  ApiRes<{
+    data: {
+      succeed: string;
+    };
+  }>
+> => {
+  return await UAPI.RES.StartSyncObjectTypeTaskApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};
+
+// 暂停对象类型同步任务
+export const pauseSyncObjectTypeTask = async (params: {
+  id: number;
+  funnel_task_id: number;
+}): Promise<
+  ApiRes<{
+    data: {
+      succeed: string;
+    };
+  }>
+> => {
+  return await UAPI.RES.PauseSyncObjectTypeTaskApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};

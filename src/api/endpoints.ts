@@ -807,6 +807,10 @@ export const ModaForgeResourceEndpoints = {
   GetObjectTypeSyncTaskLogApi: PrefixAimdp + '/GetObjectTypeSyncTaskLog',
   // 同步对象类型任务
   SyncObjectTypeTaskApi: PrefixAimdp + '/SyncObjectTypeTask',
+  // 启动对象类型同步任务
+  StartSyncObjectTypeTaskApi: PrefixAimdp + '/StartSyncOntologyObjectType',
+  // 暂停对象类型同步任务
+  PauseSyncObjectTypeTaskApi: PrefixAimdp + '/PauseSyncOntologyObjectType',
 
   //属性
   // 获取公共属性列表
