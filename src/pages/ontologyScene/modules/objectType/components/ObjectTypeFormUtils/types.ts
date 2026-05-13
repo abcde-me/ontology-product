@@ -32,6 +32,7 @@ export interface SqlSourceDataInfo {
   connectorSubtype?: string;
   databaseName?: string;
   tableName?: string;
+  projectID?: string;
   queryMode: 'selected' | 'sql';
   sql?: string;
 }
@@ -44,6 +45,7 @@ export interface SourceTableField {
 
 export interface ObjectTypeAttributeField {
   key: string;
+  backendPropertyID?: number;
   propertyID: string;
   propertyComment: string;
   propertyType: string;
@@ -53,6 +55,7 @@ export interface ObjectTypeAttributeField {
   isVector?: 1 | 0;
   sourceColumnName: string;
   sourceColumnComment: string;
+  sourceColumnType?: string;
   _storedPublicPropertyId?: number;
   _vectorizationOn?: boolean;
   _vectorComment?: string;
@@ -64,6 +67,7 @@ export interface InstanceSyncMappingField {
   sourceColumnName?: string;
   sourceColumnComment?: string;
   sourceColumnType?: string;
+  sourceCoumnOriginName?: string;
   propertyID: string;
   propertyComment: string;
   propertyType: string;
@@ -90,6 +94,7 @@ export interface SyncSourceDataStrategyFormState {
   conflictStrategy: string;
   syncScope: string;
   pollFetchSize: number;
+  fullSyncBatchSize?: number;
   parallelism: number;
   exceptionStrategy: string;
   jdbcCheckpointField?: string;

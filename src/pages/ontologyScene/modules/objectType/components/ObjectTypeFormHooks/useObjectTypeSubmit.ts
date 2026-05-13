@@ -1,6 +1,8 @@
 import { Message } from '@arco-design/web-react';
 import {
   CreateOntologyObjectTypeReq,
+  CreateOntologyPhysicalProperty,
+  OntologyPhysicalPropertiesList,
   SourceDataInfo,
   SourceType,
   SyncSourceDataStrategy,
@@ -70,8 +72,9 @@ function dataSourceStateToSqlSourceDataInfo(
 function buildPhysicalProperties(
   objectTypeAttributes: ObjectTypeAttributeField[] | undefined,
   syncMappingFields: InstanceSyncMappingField[] | undefined,
-  fallbackAttributeFields: AttributeField[]
-) {
+  fallbackAttributeFields: AttributeField[],
+  dataSource?: ObjectTypeDataSourceState
+): CreateOntologyPhysicalProperty[] | OntologyPhysicalPropertiesList[] {
   if (!objectTypeAttributes?.length) {
     return flattenOntologyPhysicalPropertiesForSubmit(fallbackAttributeFields);
   }
@@ -79,21 +82,40 @@ function buildPhysicalProperties(
   const syncByPropertyID = new Map(
     (syncMappingFields || []).map((field) => [field.propertyID, field])
   );
+  const sourcePrimaryKey = (
+    syncMappingFields?.length
+      ? syncMappingFields
+          .filter((field) => field.isPrimary === 1)
+          .map((field) => field.sourceColumnName || field.propertyID)
+      : objectTypeAttributes
+          .filter((field) => field.isPrimary === 1)
+          .map((field) => field.sourceColumnName || field.propertyID)
+  ).filter(Boolean);
   const result = objectTypeAttributes.map((field) => {
     const mapping = syncByPropertyID.get(field.propertyID);
+    const sourceColumnName =
+      mapping?.sourceColumnName || field.sourceColumnName || field.propertyID;
+    const sourceCoumnOriginName =
+      mapping?.sourceCoumnOriginName || sourceColumnName;
+    const sourceColumnType =
+      mapping?.sourceColumnType || field.sourceColumnType;
     return {
-      propertyID: field.propertyID,
+      propertyID: field.backendPropertyID || 0,
+      propertyName: field.propertyID,
       propertyComment: field.propertyComment,
       propertyType: field.propertyType,
       isPrimary: field.isPrimary,
       isVector: mapping?.isVector ?? (field._vectorizationOn ? 1 : 0),
       publicPropertyID: field.publicPropertyID || 0,
-      sourceColumnName:
-        mapping?.sourceColumnName || field.sourceColumnName || field.propertyID,
+      sourceColumnName,
       sourceColumnComment:
         mapping?.sourceColumnComment ||
         field.sourceColumnComment ||
         field.propertyComment,
+      sourceColumnType: sourceColumnType || field.propertyType,
+      sourceCoumnOriginName,
+      sourceTableName: dataSource?.table || '',
+      sourcePrimaryKey,
       vectorSourceFieldName:
         (mapping?.isVector ?? (field._vectorizationOn ? 1 : 0)) === 1
           ? field.propertyID
@@ -110,18 +132,28 @@ function buildSyncSourceDataStrategy(
   if (!state) return undefined;
   const sourceDataInfo = toSubmitSourceDataInfo(state.sourceDataInfo);
   if (!sourceDataInfo) return undefined;
+  const syncStrategy = {
+    mode: state.mode || 'BINLOG_CDC',
+    conflictStrategy: state.conflictStrategy || 'KEEP_SOURCE',
+    syncScope: state.syncScope || 'FULL_THEN_INCREMENTAL',
+    pollFetchSize: state.pollFetchSize || 500,
+    fullSyncBatchSize: state.fullSyncBatchSize || state.pollFetchSize || 500,
+    parallelism: state.parallelism || 1,
+    exceptionStrategy: state.exceptionStrategy || 'STOP_ON_ERROR',
+    jdbcCheckpointField: state.jdbcCheckpointField,
+    jdbcIncrementalTimeField: state.jdbcIncrementalTimeField,
+    jdbcPollingIntervalSeconds: state.jdbcPollingIntervalSeconds,
+    jdbcSyncSqlFull: state.jdbcSyncSqlFull,
+    jdbcSyncSqlIncrement: state.jdbcSyncSqlIncrement
+  };
   return {
-    mode: state.mode,
-    conflictStrategy: state.conflictStrategy,
-    syncScope: state.syncScope,
-    pollFetchSize: state.pollFetchSize,
-    parallelism: state.parallelism,
-    exceptionStrategy: state.exceptionStrategy,
+    ...syncStrategy,
     jdbcCheckpointField: state.jdbcCheckpointField,
     jdbcIncrementalTimeField: state.jdbcIncrementalTimeField,
     jdbcPollingIntervalSeconds: state.jdbcPollingIntervalSeconds,
     jdbcSyncSqlFull: state.jdbcSyncSqlFull,
     jdbcSyncSqlIncrement: state.jdbcSyncSqlIncrement,
+    syncStrategy,
     sourceDataInfo
   };
 }
@@ -208,7 +240,7 @@ export function buildCreateObjectTypeRequest(
     originalDbName: data.originalDbName,
     originalTableName: data.originalTableName,
     sourceType: data.sourceType,
-    enableSyncSourceData: data.enableSyncSourceData,
+    enableSyncSourceData: data.enableSyncSourceData === true,
     sourceDataInfo: toSubmitSourceDataInfo(data.sourceDataInfo),
     syncSourceDataStrategy: buildSyncSourceDataStrategy(
       data.syncSourceDataStrategy
@@ -216,7 +248,8 @@ export function buildCreateObjectTypeRequest(
     ontologyPhysicalPropertiesList: buildPhysicalProperties(
       data.objectTypeAttributes,
       data.syncMappingFields,
-      data.ontologyPhysicalPropertiesList as AttributeField[]
+      data.ontologyPhysicalPropertiesList as AttributeField[],
+      data._dataSource
     )
   };
 }

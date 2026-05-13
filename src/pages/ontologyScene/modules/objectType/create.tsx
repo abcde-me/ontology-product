@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { Message, Button } from '@arco-design/web-react';
 import ObjectTypeForm, {
@@ -11,6 +11,13 @@ import { IconLeft } from '@arco-design/web-react/icon';
 export default function OntologySceneObjectTypeCreate() {
   const history = useHistory();
   const { id: OSId } = useParams<{ id: string }>();
+  const ontologyModelID = Number(OSId);
+  const initialValues = useMemo(
+    () => ({
+      ontologyModelID
+    }),
+    [ontologyModelID]
+  );
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (data: ObjectTypeFormData) => {
@@ -19,7 +26,7 @@ export default function OntologySceneObjectTypeCreate() {
       const response = await createOntologyObjectType(
         buildCreateObjectTypeRequest({
           ...data,
-          ontologyModelID: Number(OSId)
+          ontologyModelID
         })
       );
 
@@ -65,9 +72,7 @@ export default function OntologySceneObjectTypeCreate() {
       <div className="flex flex-1 flex-col overflow-hidden">
         <div className="overflow-y-auto pb-[65px]">
           <ObjectTypeForm
-            initialValues={{
-              ontologyModelID: Number(OSId)
-            }}
+            initialValues={initialValues}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             loading={loading}

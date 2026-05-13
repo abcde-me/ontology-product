@@ -130,6 +130,10 @@ export interface ObjectType {
    * 是否开启同步
    */
   syncEnabled?: boolean;
+  /**
+   * funnel服务同步任务id（下划线命名）
+   */
+  funnel_task_id?: number;
 }
 
 export interface ListOntologyObjectTypeRes {
@@ -222,9 +226,13 @@ export interface OntologyPhysicalPropertiesList {
    */
   propertyComment?: string;
   /**
-   * 属性id，对象类型ID
+   * 属性记录ID，创建时传0
    */
-  propertyID: string;
+  propertyID: number;
+  /**
+   * 属性业务id
+   */
+  propertyName: string;
   /**
    * 属性类型，示例：varchar(2000)
    */
@@ -238,16 +246,32 @@ export interface OntologyPhysicalPropertiesList {
    */
   sourceColumnComment: string;
   /**
+   * 数据源表字段类型
+   */
+  sourceColumnType?: string;
+  /**
    * 数据源表字段名
    */
   sourceColumnName: string;
+  /**
+   * 数据源原始字段名
+   */
+  sourceCoumnOriginName?: string;
+  /**
+   * 数据源表名
+   */
+  sourceTableName?: string;
+  /**
+   * 数据源主键
+   */
+  sourcePrimaryKey?: string[];
   /**
    * 向量源字段
    */
   vectorSourceFieldName?: string;
 }
 
-export interface SyncSourceDataStrategy {
+export interface SyncStrategy {
   /**
    * 冲突策略，保留数据源-"KEEP_SOURCE";保留目标表-"KEEP_TARGET"
    */
@@ -288,11 +312,34 @@ export interface SyncSourceDataStrategy {
    * 单次拉取数量
    */
   pollFetchSize: number;
-  sourceDataInfo: SourceDataInfo;
+  /**
+   * 全量同步批次大小
+   */
+  fullSyncBatchSize: number;
   /**
    * 同步范围，增量-"INCREMENTAL";全量-"FULL";全量+增量-"FULL_THEN_INCREMENTAL"
    */
   syncScope: string;
+}
+
+export interface SyncSourceDataStrategy extends SyncStrategy {
+  sourceDataInfo: SourceDataInfo;
+  /**
+   * 后端创建接口校验的同步策略结构
+   */
+  syncStrategy?: SyncStrategy;
+}
+
+export interface OntologyObjectTypeDetailSourceDataInfo
+  extends Partial<SourceDataInfo> {
+  connectorName?: string;
+  connectorType?: string;
+  connectorSubtype?: string;
+}
+
+export interface OntologyObjectTypeDetailSyncSourceDataStrategy
+  extends Partial<Omit<SyncSourceDataStrategy, 'sourceDataInfo'>> {
+  sourceDataInfo?: OntologyObjectTypeDetailSourceDataInfo;
 }
 
 export interface CreateOntologyObjectTypeReq {
@@ -373,16 +420,7 @@ export interface GetOntologyObjectTypeDetailRes
   /**
    * 数据源信息
    */
-  sourceDataInfo?: {
-    queryMode?: string;
-    connectorId?: number;
-    connectorName?: string;
-    connectorType?: string;
-    connectorSubtype?: string;
-    databaseName?: string;
-    tableName?: string;
-    sql?: string;
-  };
+  sourceDataInfo?: OntologyObjectTypeDetailSourceDataInfo;
   /**
    * 是否启用数据源同步
    */
@@ -405,6 +443,7 @@ export interface GetOntologyObjectTypeDetailRes
     conflictStrategy?: string;
     syncScope?: string;
     pollFetchSize?: number;
+    fullSyncBatchSize?: number;
     parallelism?: number;
     exceptionStrategy?: string;
     jdbcCheckpointField?: string;
@@ -412,6 +451,7 @@ export interface GetOntologyObjectTypeDetailRes
     jdbcPollingIntervalSeconds?: number;
     jdbcSyncSqlFull?: string;
     jdbcSyncSqlIncrement?: string;
+    syncStrategy?: Partial<SyncStrategy>;
   };
 }
 
@@ -424,8 +464,8 @@ export interface UploadOntologyCSVFileAndParseRes {
 
 export interface ListConnectorsReq {
   name?: string;
-  page?: string;
-  page_size?: string;
+  page?: number;
+  page_size?: number;
   projectID?: string;
   sort?: 'asc' | 'desc' | string;
   sort_by?: 'create_time' | 'update_time' | string;
@@ -441,11 +481,21 @@ export interface SqlConnectorItem {
   [property: string]: any;
 }
 
-export type ListConnectorsRes = SqlConnectorItem[];
+export type ListConnectorsRes =
+  | SqlConnectorItem[]
+  | {
+      items: SqlConnectorItem[];
+      total?: number;
+      page?: number;
+      page_size?: number;
+      [property: string]: any;
+    };
 
 export interface ListSqlConnectorDBAndTablesReq {
+  /** 连接器 id */
   id: number;
-  projectID?: string;
+  /** 项目 id（鉴权） */
+  projectID: string;
 }
 
 export interface SqlConnectorTableItem {
@@ -468,6 +518,18 @@ export interface GetSqlConnectorTableSchemaReq {
   table_name: string;
 }
 
+export interface GetSqlConnectorTableSchemaToTIDBReq {
+  /** 数据库名称 */
+  database_name: string;
+  /** 连接器 id */
+  id: number;
+  /** 项目 id（鉴权使用） */
+  projectID: string;
+  /** 数据表名称 */
+  table_name: string;
+  [property: string]: any;
+}
+
 export interface SqlConnectorSchemaField {
   field_comment: string;
   field_id: string;
@@ -476,6 +538,25 @@ export interface SqlConnectorSchemaField {
 }
 
 export type GetSqlConnectorTableSchemaRes = SqlConnectorSchemaField[];
+
+export interface SqlConnectorTiDBSchemaColumn {
+  /** 字段注释 */
+  columnComment: string;
+  /** 字段名 */
+  columnName: string;
+  /** 字段类型 */
+  columnType: string;
+  /** 字段类型（TIDB） */
+  columnTypeTiDB: string;
+  [property: string]: any;
+}
+
+export interface GetSqlConnectorTableSchemaToTIDBRes {
+  columns: SqlConnectorTiDBSchemaColumn[] | SqlConnectorTiDBSchemaColumn;
+  /** 主键 */
+  primaryKey: string[];
+  [property: string]: any;
+}
 
 export interface MapOntologyObjectTypeColumnsReq {
   objectTypeColumns: string[];

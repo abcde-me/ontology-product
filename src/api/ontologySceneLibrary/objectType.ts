@@ -3,6 +3,8 @@ import {
   CreateOntologyPhysicalProperty,
   GetSqlConnectorTableSchemaReq,
   GetSqlConnectorTableSchemaRes,
+  GetSqlConnectorTableSchemaToTIDBReq,
+  GetSqlConnectorTableSchemaToTIDBRes,
   GetOntologyObjectTypeDetailRes,
   ListConnectorsReq,
   ListConnectorsRes,
@@ -125,8 +127,8 @@ export const getSqlConnectorTableSchema = async (
 };
 
 export const getSqlConnectorTableSchemaToTIDB = async (
-  params: GetSqlConnectorTableSchemaReq
-): Promise<ApiRes<GetSqlConnectorTableSchemaRes>> => {
+  params: GetSqlConnectorTableSchemaToTIDBReq
+): Promise<ApiRes<GetSqlConnectorTableSchemaToTIDBRes>> => {
   return await UAPI.RES.GetSqlConnectorTableSchemaToTIDBApi({})
     .post(params)
     .inRegion()
@@ -231,4 +233,38 @@ export const syncObjectTypeTask = async (params: {
   id: number;
 }): Promise<ApiRes<string>> => {
   return await UAPI.RES.SyncObjectTypeTaskApi({}).post(params).inRegion().do();
+};
+
+// 启动对象类型同步任务
+export const startSyncObjectTypeTask = async (params: {
+  id: number;
+  funnel_task_id: number;
+}): Promise<
+  ApiRes<{
+    data: {
+      succeed: string;
+    };
+  }>
+> => {
+  return await UAPI.RES.StartSyncObjectTypeTaskApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};
+
+// 暂停对象类型同步任务
+export const pauseSyncObjectTypeTask = async (params: {
+  id: number;
+  funnel_task_id: number;
+}): Promise<
+  ApiRes<{
+    data: {
+      succeed: string;
+    };
+  }>
+> => {
+  return await UAPI.RES.PauseSyncObjectTypeTaskApi({})
+    .post(params)
+    .inRegion()
+    .do();
 };
