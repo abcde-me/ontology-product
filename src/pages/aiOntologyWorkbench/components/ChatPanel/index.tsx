@@ -13,7 +13,7 @@ interface PromptItem {
 }
 
 const PROMPT_LIST: PromptItem[] = [
-  { id: '1', value: '介绍下项目名称为：智慧医院集成平台项目 的项目签约方' },
+  { id: '1', value: '先获取本体场景列表，随后获取对象类型元数据信息' },
   { id: '2', value: '如何定义对象之间的关系？' },
   { id: '3', value: '为对象添加行为' }
 ];
@@ -21,6 +21,9 @@ const PROMPT_LIST: PromptItem[] = [
 interface ChatPanelProps {
   appId: string | number;
   projectId?: string | number;
+  appConfigId?: string | number;
+  channel?: string;
+  source?: 'published' | 'debugger';
   conversationId?: string;
   onConversationCreated?: (conversationId: string) => void;
 }
@@ -28,6 +31,9 @@ interface ChatPanelProps {
 const ChatPanel: React.FC<ChatPanelProps> = ({
   appId,
   projectId,
+  appConfigId,
+  channel,
+  source,
   conversationId,
   onConversationCreated
 }) => {
@@ -56,6 +62,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   } = useXChat({
     appId,
     projectId,
+    appConfigId,
+    channel,
+    source,
     conversationId: conversationId || activeConversationId || undefined,
     onConversationCreated: (newConversationId) => {
       setActiveConversation(newConversationId);
@@ -148,7 +157,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   };
 
   const handlePromptSelect = (params: { id: string; text: string }) => {
-    handleSend({ text: params.text, enableDeepThink: false });
+    handleSend({ text: params.text, enableDeepThink: true });
   };
 
   const handleNewSession = () => {

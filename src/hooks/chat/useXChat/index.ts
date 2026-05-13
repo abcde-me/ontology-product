@@ -37,6 +37,10 @@ const EVENT_TYPES = {
   THINKING: 'thinking',
   ONTOLOGY: 'ontology',
   ANSWER: 'answer',
+  HTTP: 'http',
+  WORKFLOW: 'workflow',
+  MCP: 'mcp',
+  KNOWLEDGE: 'knowledge',
   DONE: 'done',
   ERROR: 'error'
 } as const;
@@ -46,6 +50,9 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
     appId,
     conversationId: externalConversationId,
     projectId,
+    appConfigId,
+    channel = 'Preview', // 默认 Preview
+    source = 'debugger', // 默认 debugger
     onConversationCreated,
     onError
   } = config;
@@ -135,6 +142,8 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
       }
       // 处理 ontology 类型 - 作为思考步骤的一部分
       else if (type === EVENT_TYPES.ONTOLOGY) {
+        console.log('[useXChat] ontology event:', event);
+
         setMessages((draft) => {
           const lastIndex = draft.length - 1;
           if (lastIndex < 0) return;
@@ -154,8 +163,9 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
           if (typeof contentData === 'string') {
             try {
               contentData = JSON.parse(contentData);
+              console.log('[useXChat] parsed ontology content:', contentData);
             } catch (e) {
-              // ignore
+              console.log('[useXChat] failed to parse ontology content:', e);
             }
           }
 
@@ -168,6 +178,8 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
             done: event.done || false
           };
 
+          console.log('[useXChat] ontologyStep:', ontologyStep);
+
           if (stepIndex >= 0) {
             steps[stepIndex] = ontologyStep;
           } else {
@@ -177,7 +189,7 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
           lastMsg.status = 'streaming';
         });
       }
-      // 处理 answer 类型
+      // 处理 answer 类型 - 只处理正文内容
       else if (type === EVENT_TYPES.ANSWER) {
         setMessages((draft) => {
           const lastIndex = draft.length - 1;
@@ -185,6 +197,135 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
 
           const lastMsg = draft[lastIndex];
           lastMsg.content += event.content || '';
+          lastMsg.status = 'streaming';
+        });
+      }
+      // 处理工具调用类型 (http, workflow, mcp, knowledge)
+      else if (
+        type === EVENT_TYPES.HTTP ||
+        type === EVENT_TYPES.WORKFLOW ||
+        type === EVENT_TYPES.MCP ||
+        type === EVENT_TYPES.KNOWLEDGE
+      ) {
+        console.log('[useXChat] tool call event:', {
+          type: event.type,
+          chunk_id: event.chunk_id,
+          has_content: !!event.content,
+          content_type: typeof event.content,
+          has_tool_name: !!(event as any).tool_name,
+          has_arg: !!(event as any).arg,
+          has_response: !!(event as any).response,
+          done: event.done,
+          running_time: event.running_time
+        });
+
+        setMessages((draft) => {
+          const lastIndex = draft.length - 1;
+          if (lastIndex < 0) return;
+
+          const lastMsg = draft[lastIndex];
+          if (!lastMsg.thinkingSteps) {
+            lastMsg.thinkingSteps = [];
+          }
+
+          // 查找是否已存在相同 chunk_id 的步骤
+          const stepIndex = lastMsg.thinkingSteps.findIndex(
+            (s) => s.chunk_id === event.chunk_id
+          );
+
+          // 解析 content
+          // 注意：后端可能将数据放在 event.content 中，也可能直接放在 event 对象上
+          let contentData: any = event.content;
+
+          // 如果 content 是字符串，尝试解析
+          if (typeof contentData === 'string' && contentData) {
+            try {
+              contentData = JSON.parse(contentData);
+              console.log('[useXChat] parsed tool content from string:', {
+                tool_name: contentData.tool_name,
+                has_arg: !!contentData.arg,
+                has_response: !!contentData.response
+              });
+            } catch (e) {
+              console.log('[useXChat] content parse failed, keep as string');
+            }
+          }
+          // 如果 content 为空，但 event 对象上有 tool_name/arg/response，使用 event 对象
+          else if (!contentData && (event as any).tool_name) {
+            contentData = {
+              tool_name: (event as any).tool_name,
+              arg: (event as any).arg,
+              response: (event as any).response,
+              tool_call_id: (event as any).tool_call_id,
+              tool_id: (event as any).tool_id
+            };
+            console.log('[useXChat] using tool data from event object:', {
+              tool_name: contentData.tool_name,
+              has_arg: !!contentData.arg,
+              has_response: !!contentData.response
+            });
+          }
+
+          if (stepIndex >= 0) {
+            // 更新已存在的步骤
+            const existingStep = lastMsg.thinkingSteps[stepIndex];
+
+            console.log('[useXChat] updating existing step:', {
+              stepIndex,
+              old_content: existingStep.content,
+              new_content: contentData,
+              old_done: existingStep.done,
+              new_done: event.done
+            });
+
+            // 如果新事件有 content，更新 content
+            if (contentData !== undefined) {
+              existingStep.content = contentData;
+            }
+
+            // 更新其他字段
+            if (event.done !== undefined) {
+              existingStep.done = event.done;
+              existingStep.status = event.done ? 'success' : 'running';
+            }
+            if (event.running_time) {
+              existingStep.running_time = event.running_time;
+            }
+
+            console.log('[useXChat] updated tool step:', {
+              chunk_id: existingStep.chunk_id,
+              type: existingStep.type,
+              has_content: !!existingStep.content,
+              content_preview: existingStep.content
+                ? JSON.stringify(existingStep.content).substring(0, 100)
+                : 'null',
+              done: existingStep.done,
+              status: existingStep.status
+            });
+          } else {
+            // 创建新步骤
+            const toolStep: ThinkingStep = {
+              chunk_id: event.chunk_id || generateId(),
+              type: type,
+              content: contentData,
+              status: event.done ? 'success' : 'running',
+              running_time: event.running_time,
+              done: event.done || false
+            };
+
+            lastMsg.thinkingSteps.push(toolStep);
+            console.log('[useXChat] created new tool step:', {
+              chunk_id: toolStep.chunk_id,
+              type: toolStep.type,
+              has_content: !!toolStep.content,
+              content_preview: toolStep.content
+                ? JSON.stringify(toolStep.content).substring(0, 100)
+                : 'null',
+              done: toolStep.done,
+              status: toolStep.status
+            });
+          }
+
           lastMsg.status = 'streaming';
         });
       }
@@ -285,7 +426,7 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
   // ==================== 发送消息 ====================
   const sendMessage = useCallback(
     async (params: SendMessageParams) => {
-      const { text, files, enableDeepThink = false } = params;
+      const { text, files, enableDeepThink = true } = params;
 
       if (!text.trim()) {
         return;
@@ -339,14 +480,19 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
       // 构建请求体
       const requestBody = {
         responseMode: 'Streaming',
-        status: 'Published',
+        status: source === 'published' ? 'Published' : 'Unpublished',
+        channel,
         appID: String(appId),
+        appConfigID: appConfigId ? String(appConfigId) : undefined,
         projectID: projectId ? String(projectId) : undefined,
         conversationID: conversationIdRef.current || '', // 空字符串表示创建新会话
         enableDeepThink,
         query: text,
-        inputs: files ? { files } : undefined
+        inputs: files ? { files } : {}
       };
+
+      console.log('[useXChat] projectId 值:', projectId);
+      console.log('[useXChat] 请求体中的 projectID:', requestBody.projectID);
 
       // 构建请求头
       const tokenHeaders = getToken();
@@ -395,15 +541,28 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
             try {
               const event = parseJson<SSEEvent>(msg.data);
               if (event) {
-                console.log('[SSE Event]', {
-                  type: event.type,
-                  content:
-                    typeof event.content === 'string'
-                      ? event.content.substring(0, 20) + '...'
-                      : event.content,
-                  chunk_id: event.chunk_id,
-                  done: event.done
-                });
+                // 记录事件顺序
+                console.log(
+                  `[SSE Event Sequence] type: ${event.type}, chunk_id: ${event.chunk_id?.substring(0, 20)}...`
+                );
+
+                // 详细日志：显示所有事件
+                if (event.type === 'http') {
+                  console.log('[SSE Event - HTTP] Full event:', event);
+                  console.log('[SSE Event - HTTP] content:', event.content);
+                  console.log('[SSE Event - HTTP] chunk_id:', event.chunk_id);
+                  console.log('[SSE Event - HTTP] done:', event.done);
+                } else {
+                  console.log('[SSE Event]', {
+                    type: event.type,
+                    content:
+                      typeof event.content === 'string'
+                        ? event.content.substring(0, 20) + '...'
+                        : event.content,
+                    chunk_id: event.chunk_id,
+                    done: event.done
+                  });
+                }
 
                 messageQueueRef.current.push(event);
 

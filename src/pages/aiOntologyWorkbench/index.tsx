@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Spin } from '@arco-design/web-react';
 import { useAIWorkbenchStore } from './store';
 import { useOntologyManagement } from './hooks/useOntologyManagement';
+import { useUserInfoStore } from '@/store/userInfoStore';
 import SceneModal from '@/pages/ontologyScene/modules/list/components/SceneModal';
 import EmptyState from './components/EmptyState';
 import OntologySelector from './components/OntologySelector';
@@ -15,6 +16,9 @@ import ResizableLayout from './components/ResizableLayout';
 const AIOntoWorkbench: React.FC = () => {
   const { ontologyList, ontologyListLoading, currentOntology } =
     useAIWorkbenchStore();
+
+  // 从 userInfoStore 获取 projectId
+  const projectId = useUserInfoStore((state) => state.projectId);
 
   const {
     createModalVisible,
@@ -81,10 +85,20 @@ const AIOntoWorkbench: React.FC = () => {
 
       {/* 主内容区域 */}
       <div className="flex-1 overflow-hidden p-[24px] pb-[16px] pt-[0px]">
+        {console.log('[AIOntoWorkbench] currentOntology:', currentOntology)}
+        {console.log('[AIOntoWorkbench] projectId from store:', projectId)}
+        {console.log(
+          '[AIOntoWorkbench] projectId[1] (实际projectId):',
+          projectId?.[1]
+        )}
         <ResizableLayout
           leftContent={
             <ChatPanel
               appId="app-4th0ybq9"
+              appConfigId="appconfig-ab6gd12y"
+              projectId={projectId?.[1]}
+              channel="Preview"
+              source="debugger"
               onConversationCreated={(conversationId) => {
                 console.log('会话创建:', conversationId);
                 // TODO: 保存会话 ID

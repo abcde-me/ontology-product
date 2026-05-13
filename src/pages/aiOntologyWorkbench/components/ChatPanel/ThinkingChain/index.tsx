@@ -1,13 +1,26 @@
 /**
  * ThinkingChain - 深度思考组件
- * 通用的思维链组件，支持多种步骤类型
- * 参考 ai-appforge 的 ThinkChain 和 x-main 的 thought-chain
+ * 参考 ai-appforge 的 ThinkChain
  */
 import React, { useState, useEffect, memo } from 'react';
 import { IconDown } from '@arco-design/web-react/icon';
 import ThinkingChainNode from './ThinkingChainNode';
+import renderStepContent from './renderStepContent';
 import type { ThinkingChainProps } from './types';
 import styles from './ThinkingChain.module.scss';
+
+// 获取步骤类型文本
+const getStepTypeText = (type: string): string => {
+  const typeMap: Record<string, string> = {
+    thinking: '深度思考',
+    ontology: '本体工具调用',
+    knowledge: '知识库调用',
+    workflow: '工作流调用',
+    mcp: 'MCP调用',
+    http: '插件调用'
+  };
+  return typeMap[type] || '处理中';
+};
 
 const ThinkingChain: React.FC<ThinkingChainProps> = ({
   steps,
@@ -28,8 +41,6 @@ const ThinkingChain: React.FC<ThinkingChainProps> = ({
 
   if (!steps || steps.length === 0) return null;
 
-  // 按照接口返回的顺序显示，不进行前端排序
-  // 因为可能存在多次思考和多次工具调用，顺序为：思考 → 工具1 → 思考 → 工具2 → 正文
   const visibleSteps = steps;
 
   // 计算总用时
@@ -61,9 +72,14 @@ const ThinkingChain: React.FC<ThinkingChainProps> = ({
           {visibleSteps.map((step, index) => (
             <ThinkingChainNode
               key={step.chunk_id || index}
-              step={step}
+              type={step.type}
+              done={step.done}
+              runningTime={step.running_time}
               isLast={index === visibleSteps.length - 1}
-            />
+              typeText={getStepTypeText(step.type)}
+            >
+              {renderStepContent(step)}
+            </ThinkingChainNode>
           ))}
         </div>
       )}

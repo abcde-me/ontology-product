@@ -84,6 +84,9 @@ export interface UseChatConfig {
   appId: string | number;
   conversationId?: string | null; // null = 未初始化, undefined = 新建会话, string = 已有会话
   projectId?: string | number;
+  appConfigId?: string | number; // 应用配置ID
+  channel?: string; // 渠道（Preview/Production）
+  source?: 'published' | 'debugger'; // 来源（published/debugger）
   onConversationCreated?: (conversationId: string) => void;
   onError?: (error: Error) => void;
 }
