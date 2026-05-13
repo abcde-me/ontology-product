@@ -15,6 +15,7 @@ import {
   connectorTestFinkSQL,
   getSqlConnectorTableSchemaToTIDB
 } from '@/api/ontologySceneLibrary/objectType';
+import { mapOntologyObjectTypeColumns } from '@/api/ontologySceneLibrary/attributes';
 import type {
   ConnectorAnalyseFinkSqlColumnItem,
   GetSqlConnectorTableSchemaToTIDBRes
@@ -192,7 +193,7 @@ export default function InstanceSyncStep({
     }
   };
 
-  const applyAutoMapping = (fields: SourceTableField[]) => {
+  const applyAutoMapping = async (fields: SourceTableField[]) => {
     if (!objectTypeAttributes.length || !fields.length) {
       return;
     }
@@ -200,8 +201,49 @@ export default function InstanceSyncStep({
     const sourceFieldMap = new Map(
       fields.map((field) => [field.fieldId, field])
     );
+    const objectTypeColumns = objectTypeAttributes
+      .map((attribute) => attribute.propertyID)
+      .filter((propertyID): propertyID is string => !!propertyID);
+    const sourceTableColumns = fields
+      .map((field) => field.fieldId)
+      .filter((fieldId): fieldId is string => !!fieldId);
+
+    const relationMap = new Map<string, string>();
+    if (objectTypeColumns.length && sourceTableColumns.length) {
+      try {
+        const response = await mapOntologyObjectTypeColumns({
+          objectTypeColumns,
+          sourceTableColumns
+        });
+        if (
+          isSuccessResponse(response) &&
+          Array.isArray(response.data?.mapRelations)
+        ) {
+          response.data.mapRelations.forEach((relation) => {
+            if (
+              relation?.objectTypeColumnName &&
+              relation?.sourceTableColumnName
+            ) {
+              relationMap.set(
+                relation.objectTypeColumnName,
+                relation.sourceTableColumnName
+              );
+            }
+          });
+        } else {
+          Message.error(response?.message || '自动匹配字段映射失败');
+        }
+      } catch (error) {
+        console.error('自动匹配字段映射失败:', error);
+        Message.error('自动匹配字段映射失败');
+      }
+    }
+
     const nextFields = objectTypeAttributes.map((attribute) => {
-      const sourceField = sourceFieldMap.get(attribute.propertyID);
+      const mappedSourceFieldId = relationMap.get(attribute.propertyID);
+      const sourceField = mappedSourceFieldId
+        ? sourceFieldMap.get(mappedSourceFieldId)
+        : undefined;
       return {
         ...objectTypeAttributeToSyncMapping(attribute),
         sourceColumnName: sourceField?.fieldId,
@@ -235,7 +277,7 @@ export default function InstanceSyncStep({
       if (isSuccessResponse(response)) {
         const fields = normalizeSourceFieldsFromTiDBSchema(response.data);
         setSourceFields(fields);
-        applyAutoMapping(fields);
+        await applyAutoMapping(fields);
       } else {
         Message.error(response.message || '加载同步源表字段失败');
         setSourceFields([]);
@@ -299,7 +341,7 @@ export default function InstanceSyncStep({
     }
     const fields = finkSqlParsedColumnsToSourceTableFields(columns);
     setSourceFields(fields);
-    applyAutoMapping(fields);
+    void applyAutoMapping(fields);
   };
 
   const currentQueryMode =
