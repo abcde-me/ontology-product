@@ -115,7 +115,7 @@ export const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
           <SqlDetailModal
             visible={sqlModalVisible}
             onClose={() => setSqlModalVisible(false)}
-            title="SQL详情"
+            title="自定义SQL"
             sql={sourceDataInfo?.sql}
           />
         </>
