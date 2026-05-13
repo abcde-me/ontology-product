@@ -2,7 +2,7 @@
  * ThinkingChainNode - 思维链单个节点
  * 参考 ai-appforge 的 ThinkChainNode
  */
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { IconDown, IconLoading } from '@arco-design/web-react/icon';
 import { ThinkingStep } from '@/hooks/chat/types';
 import { STEP_TYPES } from './types.d';
@@ -110,12 +110,27 @@ const ThinkingChainNode: React.FC<ThinkingChainNodeProps> = ({
   // 进行中时默认展开，完成后自动收起
   const [expanded, setExpanded] = useState(!done);
 
+  // 内容容器的 ref，用于自动滚动
+  const contentRef = useRef<HTMLDivElement>(null);
+
   // 监听 done 状态变化，完成后自动收起
   useEffect(() => {
     if (done) {
       setExpanded(false);
     }
   }, [done]);
+
+  // 监听内容变化，自动滚动到底部（仅在展开且未完成时）
+  useEffect(() => {
+    if (expanded && !done && contentRef.current) {
+      const contentElement = contentRef.current.querySelector(
+        `.${styles.contentText}`
+      );
+      if (contentElement) {
+        contentElement.scrollTop = contentElement.scrollHeight;
+      }
+    }
+  }, [content, expanded, done]);
 
   const isLoading = !done && status === 'running';
   const typeText = getStepTypeText(type);
@@ -166,7 +181,7 @@ const ThinkingChainNode: React.FC<ThinkingChainNodeProps> = ({
           </div>
 
           {/* 右侧内容 */}
-          <div className={styles.nodeContentBox}>
+          <div className={styles.nodeContentBox} ref={contentRef}>
             {hasContent && expanded && renderStepContent(step)}
 
             {/* 无内容或未展开时的间距 */}

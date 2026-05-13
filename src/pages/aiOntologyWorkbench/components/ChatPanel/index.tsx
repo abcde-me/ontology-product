@@ -31,8 +31,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   conversationId,
   onConversationCreated
 }) => {
-  // 获取图谱状态管理
-  const { setGraphData } = useAIWorkbenchStore();
+  // 获取图谱状态管理和当前本体
+  const { setGraphData, currentOntology } = useAIWorkbenchStore();
 
   // 使用会话管理 hook
   const {
@@ -65,6 +65,17 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       Message.error(error.message || '发送失败');
     }
   });
+
+  // 监听本体切换，清空聊天和图谱
+  useEffect(() => {
+    // 清空消息列表
+    clearMessages();
+    // 清空活跃会话 ID
+    setActiveConversation(undefined);
+    // 清空图谱数据
+    setGraphData(null);
+    console.log('[ChatPanel] 本体切换，已清空聊天和图谱数据');
+  }, [currentOntology?.id]); // 只监听本体 ID 的变化
 
   // 组件挂载时加载会话列表
   useEffect(() => {

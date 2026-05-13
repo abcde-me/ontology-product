@@ -94,26 +94,6 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
     (event: SSEEvent) => {
       const { type } = event;
 
-      // 当类型从 thinking 切换到其他类型时，将最后一个 thinking 步骤标记为完成
-      if (
-        prevEventTypeRef.current === EVENT_TYPES.THINKING &&
-        type !== EVENT_TYPES.THINKING
-      ) {
-        setMessages((draft) => {
-          if (draft.length > 0) {
-            const lastChat = draft[draft.length - 1];
-            const steps = lastChat.thinkingSteps;
-            if (steps && steps.length > 0) {
-              const lastStep = steps[steps.length - 1];
-              if (lastStep.type === EVENT_TYPES.THINKING) {
-                lastStep.done = true;
-                lastStep.status = 'success';
-              }
-            }
-          }
-        });
-      }
-
       // 处理 thinking 类型
       if (type === EVENT_TYPES.THINKING) {
         setMessages((draft) => {
@@ -246,6 +226,17 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
           if (lastIndex >= 0) {
             draft[lastIndex].content = errorMsg;
             draft[lastIndex].status = 'error';
+
+            // 将所有未完成的思考步骤标记为失败
+            const steps = draft[lastIndex].thinkingSteps;
+            if (steps && steps.length > 0) {
+              steps.forEach((step) => {
+                if (!step.done) {
+                  step.done = true;
+                  step.status = 'error';
+                }
+              });
+            }
           }
         });
 

@@ -11,3 +11,13 @@
     display: none;
   }
 }
+
+/* 回到底部按钮 */
+.goBottomButton {
+  position: absolute;
+  bottom: 120px;
+  right: 32px;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 50%;
+}

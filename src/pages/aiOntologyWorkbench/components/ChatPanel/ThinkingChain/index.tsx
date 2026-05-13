@@ -28,30 +28,9 @@ const ThinkingChain: React.FC<ThinkingChainProps> = ({
 
   if (!steps || steps.length === 0) return null;
 
-  // 检查所有 thinking 类型的步骤是否都已完成
-  const thinkingSteps = steps.filter((s) => s.type === 'thinking');
-  const allThinkingDone =
-    thinkingSteps.length === 0 || thinkingSteps.every((s) => s.done);
-
-  // 过滤步骤：如果 thinking 未完成，隐藏非 thinking 类型的步骤
-  const visibleSteps = allThinkingDone
-    ? steps
-    : steps.filter((s) => s.type === 'thinking');
-
-  // 对可见步骤进行排序：thinking 类型在前，其他类型在后
-  const sortedSteps = [...visibleSteps].sort((a, b) => {
-    const typeOrder: Record<string, number> = {
-      thinking: 1,
-      ontology: 2,
-      knowledge: 3,
-      workflow: 4,
-      mcp: 5,
-      http: 6
-    };
-    const orderA = typeOrder[a.type] || 999;
-    const orderB = typeOrder[b.type] || 999;
-    return orderA - orderB;
-  });
+  // 按照接口返回的顺序显示，不进行前端排序
+  // 因为可能存在多次思考和多次工具调用，顺序为：思考 → 工具1 → 思考 → 工具2 → 正文
+  const visibleSteps = steps;
 
   // 计算总用时
   const totalTime = steps.reduce((acc, step) => {
@@ -79,11 +58,11 @@ const ThinkingChain: React.FC<ThinkingChainProps> = ({
       {/* 步骤列表 */}
       {expanded && (
         <div className={styles.stepsList}>
-          {sortedSteps.map((step, index) => (
+          {visibleSteps.map((step, index) => (
             <ThinkingChainNode
               key={step.chunk_id || index}
               step={step}
-              isLast={index === sortedSteps.length - 1}
+              isLast={index === visibleSteps.length - 1}
             />
           ))}
         </div>

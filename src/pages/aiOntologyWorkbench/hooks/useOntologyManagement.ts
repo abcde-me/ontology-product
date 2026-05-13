@@ -99,6 +99,10 @@ export const useOntologyManagement = () => {
               newOntology
             );
             setCurrentOntology(newOntology);
+
+            // 清空图谱数据
+            useAIWorkbenchStore.getState().setGraphData(null);
+            console.log('[useOntologyManagement] 已清空图谱数据');
           }
         } else {
           Message.error(res.message || '创建失败');

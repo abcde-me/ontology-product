@@ -84,7 +84,7 @@ const AIOntoWorkbench: React.FC = () => {
         <ResizableLayout
           leftContent={
             <ChatPanel
-              appId="app-0k38vxsv"
+              appId="app-4th0ybq9"
               onConversationCreated={(conversationId) => {
                 console.log('会话创建:', conversationId);
                 // TODO: 保存会话 ID
