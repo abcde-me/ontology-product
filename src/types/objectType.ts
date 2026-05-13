@@ -130,6 +130,10 @@ export interface ObjectType {
    * 是否开启同步
    */
   syncEnabled?: boolean;
+  /**
+   * funnel服务同步任务id（下划线命名）
+   */
+  funnel_task_id?: number;
 }
 
 export interface ListOntologyObjectTypeRes {

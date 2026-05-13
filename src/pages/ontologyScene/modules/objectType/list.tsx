@@ -30,7 +30,9 @@ import {
   listOntologyObjectType,
   deleteOntologyObjectType,
   syncObjectTypeTask,
-  getObjectTypeSyncLog
+  getObjectTypeSyncLog,
+  startSyncObjectTypeTask,
+  pauseSyncObjectTypeTask
 } from '@/api/ontologySceneLibrary/objectType';
 import { ObjectType, ListOntologyObjectTypeReq } from '@/types/objectType';
 import { SyncStatus } from '@/types/graphApi';
@@ -185,6 +187,52 @@ export default function OntologySceneObjectTypeList() {
     );
   };
 
+  // 处理同步任务开关（防抖处理）
+  const handleSyncToggle = debounce(
+    async (record: ObjectType, checked: boolean) => {
+      if (!record.id) {
+        Message.error('对象类型ID无效');
+        return;
+      }
+
+      if (!record.funnel_task_id) {
+        Message.error('同步任务ID无效');
+        return;
+      }
+
+      try {
+        const params = {
+          id: record.id,
+          funnel_task_id: record.funnel_task_id
+        };
+
+        // checked 为 true 表示要开启，调用启动接口
+        // checked 为 false 表示要关闭，调用暂停接口
+        const res = checked
+          ? await startSyncObjectTypeTask(params)
+          : await pauseSyncObjectTypeTask(params);
+
+        if (res.status === 200 && res.code === '') {
+          const succeed = res.data?.data?.succeed;
+          if (succeed === '1') {
+            Message.success(checked ? '启动同步成功' : '暂停同步成功');
+            // 刷新列表
+            refresh();
+          } else {
+            Message.error(checked ? '启动同步失败' : '暂停同步失败');
+          }
+        } else {
+          Message.error(
+            res.message || (checked ? '启动同步失败' : '暂停同步失败')
+          );
+        }
+      } catch (e) {
+        Message.error(checked ? '启动同步失败' : '暂停同步失败');
+      }
+    },
+    500
+  );
+
   // 处理删除
   const handleDelete = (record: ObjectType) => {
     OntoModal.confirm({
@@ -326,7 +374,13 @@ export default function OntologySceneObjectTypeList() {
         }
 
         // 如果 enableSyncSourceData 为 true，根据 syncEnabled 显示 Switch
-        return <Switch checked={record.syncEnabled} disabled size="small" />;
+        return (
+          <Switch
+            checked={record.syncEnabled}
+            size="small"
+            onChange={(checked) => handleSyncToggle(record, checked)}
+          />
+        );
       }
     },
     {
