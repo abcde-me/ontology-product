@@ -15,8 +15,11 @@ import {
   connectorTestFinkSQL,
   getSqlConnectorTableSchemaToTIDB
 } from '@/api/ontologySceneLibrary/objectType';
+import type {
+  ConnectorAnalyseFinkSqlColumnItem,
+  GetSqlConnectorTableSchemaToTIDBRes
+} from '@/types/objectType';
 import { useUserInfoStore } from '@/store/userInfoStore';
-import type { GetSqlConnectorTableSchemaToTIDBRes } from '@/types/objectType';
 import {
   InstanceSyncMappingField,
   ObjectTypeAttributeField,
@@ -24,7 +27,14 @@ import {
   SqlSourceDataInfo,
   SyncSourceDataStrategyFormState
 } from '../../ObjectTypeFormUtils/types';
-import { objectTypeAttributeToSyncMapping } from '../../ObjectTypeFormUtils/attributeFields';
+import {
+  finkSqlParsedColumnsToSourceTableFields,
+  objectTypeAttributeToSyncMapping
+} from '../../ObjectTypeFormUtils/attributeFields';
+import {
+  sqlSourceDataInfoToSourceDataInfoForTest,
+  syncFormStateToOntologyTestSyncStrategy
+} from '../../ObjectTypeFormUtils/ontologyTestFinkSQLPayload';
 import SqlSourceSelector from '../common/SqlSourceSelector';
 import InstanceSyncMappingTable from './InstanceSyncMappingTable';
 
@@ -280,19 +290,14 @@ export default function InstanceSyncStep({
     syncSourceDataStrategy.sourceDataInfo.tableName
   ]);
 
-  const handleSqlColumnsParsed = (columns: string[]) => {
-    const trimmedColumns = columns
-      .map((column) => column.trim())
-      .filter((column) => !!column);
-    if (!trimmedColumns.length) {
+  const handleSqlColumnsParsed = (
+    columns: ConnectorAnalyseFinkSqlColumnItem[]
+  ) => {
+    if (!columns.length) {
       setSourceFields([]);
       return;
     }
-    const fields: SourceTableField[] = trimmedColumns.map((column) => ({
-      fieldId: column,
-      fieldComment: column,
-      fieldType: 'string'
-    }));
+    const fields = finkSqlParsedColumnsToSourceTableFields(columns);
     setSourceFields(fields);
     applyAutoMapping(fields);
   };
@@ -317,12 +322,32 @@ export default function InstanceSyncStep({
       Message.warning('请先选择数据源链接');
       return;
     }
+    if (!currentProjectID) {
+      Message.warning('项目信息缺失，请重新登录后重试');
+      return;
+    }
+
+    const rawSourceDataInfo = sqlSourceDataInfoToSourceDataInfoForTest(
+      syncSourceDataStrategy.sourceDataInfo
+    );
+    if (!rawSourceDataInfo) {
+      Message.warning('请先选择数据源链接');
+      return;
+    }
+    const sourceDataInfo = {
+      ...rawSourceDataInfo,
+      sql: undefined
+    };
 
     setSqlTestLoading((prev) => ({ ...prev, [type]: true }));
     try {
       const response = await connectorTestFinkSQL({
-        id: connectorId,
-        sql: sql.trim()
+        projectID: currentProjectID,
+        sourceDataInfo,
+        taskType: 'TABLE_REALTIME_SYNC',
+        syncSourceDataStrategy: syncFormStateToOntologyTestSyncStrategy(
+          syncSourceDataStrategy
+        )
       });
       const passed =
         isSuccessResponse(response) && response.data?.status === 'succeed';
@@ -430,6 +455,8 @@ export default function InstanceSyncStep({
         onSqlColumnsParsed={handleSqlColumnsParsed}
         fieldPrefix="sync"
         styles={styles}
+        ontologySqlTestTaskType="TABLE_REALTIME_SYNC"
+        syncSourceDataStrategyForSqlTest={syncSourceDataStrategy}
       />
 
       <div className="my-[16px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">

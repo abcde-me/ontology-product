@@ -350,12 +350,21 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         return false;
       }
 
-      if (
-        dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC &&
-        (!dataSource.connectorId || !dataSource.database || !dataSource.table)
-      ) {
-        Message.warning('请选择数据源链接和数据表');
-        return false;
+      if (dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC) {
+        if (!dataSource.connectorId) {
+          Message.warning('请选择数据源链接');
+          return false;
+        }
+        const isModelingSqlMode = dataSource.queryMode === 'sql';
+        if (isModelingSqlMode) {
+          if (!String(dataSource.sql ?? '').trim()) {
+            Message.warning('请先输入自定义SQL');
+            return false;
+          }
+        } else if (!dataSource.database || !dataSource.table) {
+          Message.warning('请选择数据源链接和数据表');
+          return false;
+        }
       }
 
       if (objectTypeAttributes.length === 0) {

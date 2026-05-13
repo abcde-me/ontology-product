@@ -359,7 +359,7 @@ export const ModaForgeResourceEndpoints = {
   ConnectorAnalyseFinkSQLColumnsApi:
     PrefixAimdp + '/ConnectorAnalyseFinkSQLColumns',
   // 测试 Flink SQL
-  ConnectorTestFinkSQLApi: PrefixAimdp + '/ConnectorTestFinkSQL',
+  ConnectorTestFinkSQLApi: PrefixAimdp + '/OntologyTestFinkSQL',
   // 映射对象类型字段与数据源表字段
   MapOntologyObjectTypeColumnsApi:
     PrefixAimdp + '/MapOntologyObjectTypeColumns',
@@ -813,6 +813,8 @@ export const ModaForgeResourceEndpoints = {
   PauseSyncObjectTypeTaskApi: PrefixAimdp + '/PauseSyncOntologyObjectType',
 
   //属性
+  // 获取 TiDB 属性类型枚举
+  ListTiDBTypesApi: PrefixAimdp + '/ListTiDBTypes',
   // 获取公共属性列表
   ListOntologyPublicPropertiesApi:
     PrefixAimdp + '/ListOntologyPublicProperties',

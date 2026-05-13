@@ -3,13 +3,14 @@ import {
   Button,
   Cascader,
   Form,
-  Input,
   Message,
   Radio,
   Select,
   Space,
+  Table,
   Tooltip
 } from '@arco-design/web-react';
+import { IconDown } from '@arco-design/web-react/icon';
 import {
   connectorAnalyseFinkSQLColumns,
   connectorTestFinkSQL,
@@ -17,11 +18,22 @@ import {
   listSqlConnectorDBAndTables
 } from '@/api/ontologySceneLibrary/objectType';
 import { useUserInfoStore } from '@/store/userInfoStore';
-import { SqlConnectorDatabaseItem, SqlConnectorItem } from '@/types/objectType';
-import { SqlSourceDataInfo } from '../../ObjectTypeFormUtils/types';
+import {
+  ConnectorAnalyseFinkSqlColumnItem,
+  SqlConnectorDatabaseItem,
+  SqlConnectorItem
+} from '@/types/objectType';
+import { normalizeConnectorAnalyseFinkSqlColumns } from '../../ObjectTypeFormUtils/attributeFields';
+import {
+  SqlSourceDataInfo,
+  SyncSourceDataStrategyFormState
+} from '../../ObjectTypeFormUtils/types';
+import {
+  sqlSourceDataInfoToSourceDataInfoForTest,
+  syncFormStateToOntologyTestSyncStrategy
+} from '../../ObjectTypeFormUtils/ontologyTestFinkSQLPayload';
 
 const FormItem = Form.Item;
-const { TextArea } = Input;
 
 interface CascaderOption {
   label: string;
@@ -41,9 +53,13 @@ interface SqlSourceSelectorProps {
       projectID: string;
     }
   ) => void;
-  onSqlColumnsParsed?: (columns: string[]) => void;
+  onSqlColumnsParsed?: (columns: ConnectorAnalyseFinkSqlColumnItem[]) => void;
   fieldPrefix: string;
   styles: Record<string, string>;
+  /** OntologyTestFinkSQL.taskType，如 TABLE_REALTIME_SYNC / RELATION_REALTIME_SYNC */
+  ontologySqlTestTaskType: string;
+  /** 第三步 / 链接中间表同步时传入；建模第二步不传 */
+  syncSourceDataStrategyForSqlTest?: SyncSourceDataStrategyFormState;
 }
 
 function isSuccessResponse(response: any): boolean {
@@ -52,6 +68,17 @@ function isSuccessResponse(response: any): boolean {
     (response.status === 200 || response.stat === 0 || response.status === 0) &&
     (response.code === '' || response.code === undefined || response.code === 0)
   );
+}
+
+/** 从 OntologyTestFinkSQL 返回体中尽量提取列信息（字段名与解析接口对齐） */
+function extractTestFinkSqlResultColumns(
+  data: unknown
+): ConnectorAnalyseFinkSqlColumnItem[] | undefined {
+  if (!data || typeof data !== 'object') return undefined;
+  const d = data as Record<string, unknown>;
+  const raw = d.columns ?? d.columnList ?? d.fields;
+  if (!Array.isArray(raw) || raw.length === 0) return undefined;
+  return normalizeConnectorAnalyseFinkSqlColumns(raw);
 }
 
 function filterCascaderOption(
@@ -226,7 +253,9 @@ export default function SqlSourceSelector({
   onTableSelected,
   onSqlColumnsParsed,
   fieldPrefix,
-  styles
+  styles,
+  ontologySqlTestTaskType,
+  syncSourceDataStrategyForSqlTest
 }: SqlSourceSelectorProps) {
   const projectID = useUserInfoStore((state) => state.projectId?.[1]);
   const [connectors, setConnectors] = useState<SqlConnectorItem[]>([]);
@@ -239,8 +268,28 @@ export default function SqlSourceSelector({
     type: 'test' | 'parse';
     status: 'succeed' | 'failed';
     message: string;
-    columns?: string[];
+    columns?: ConnectorAnalyseFinkSqlColumnItem[];
   } | null>(null);
+  const [sqlOverlayExpanded, setSqlOverlayExpanded] = useState(true);
+
+  useEffect(() => {
+    if (sqlActionResult) {
+      setSqlOverlayExpanded(true);
+    }
+  }, [sqlActionResult]);
+
+  const parsedColumnTableColumns = useMemo(
+    () => [
+      { title: '字段名', dataIndex: 'columnName', width: 160 },
+      { title: '类型', dataIndex: 'columnType', width: 140 },
+      {
+        title: '来源表',
+        dataIndex: 'columnTable',
+        render: (v: string | undefined) => v || '-'
+      }
+    ],
+    []
+  );
 
   useEffect(() => {
     const loadConnectors = async () => {
@@ -348,15 +397,32 @@ export default function SqlSourceSelector({
       Message.warning(validation.message || 'SQL校验失败');
       return;
     }
-    if (!value.connectorId) {
+    const baseSourceDataInfo = sqlSourceDataInfoToSourceDataInfoForTest(value);
+    if (!baseSourceDataInfo) {
       Message.warning('请先选择数据源链接');
+      return;
+    }
+    if (!projectID) {
+      Message.warning('项目信息缺失，请重新登录后重试');
       return;
     }
     setTestLoading(true);
     try {
       const response = await connectorTestFinkSQL({
-        id: value.connectorId,
-        sql: trimmedSql
+        projectID,
+        sourceDataInfo: {
+          ...baseSourceDataInfo,
+          queryMode: 'sql',
+          sql: trimmedSql
+        },
+        taskType: ontologySqlTestTaskType,
+        ...(syncSourceDataStrategyForSqlTest
+          ? {
+              syncSourceDataStrategy: syncFormStateToOntologyTestSyncStrategy(
+                syncSourceDataStrategyForSqlTest
+              )
+            }
+          : {})
       });
       const passed =
         isSuccessResponse(response) && response.data?.status === 'succeed';
@@ -364,10 +430,14 @@ export default function SqlSourceSelector({
         response.data?.message ||
         response.message ||
         (passed ? '测试通过' : '测试失败');
+      const testColumns = extractTestFinkSqlResultColumns(response.data);
       setSqlActionResult({
         type: 'test',
         status: passed ? 'succeed' : 'failed',
-        message
+        message,
+        ...(testColumns && testColumns.length > 0
+          ? { columns: testColumns }
+          : {})
       });
     } catch (error) {
       console.error('测试 SQL 失败:', error);
@@ -398,7 +468,9 @@ export default function SqlSourceSelector({
         id: value.connectorId,
         sql: trimmedSql
       });
-      const columns = response.data?.columns || [];
+      const rawList = response.data?.columns;
+      const rawArray = Array.isArray(rawList) ? rawList : [];
+      const columns = normalizeConnectorAnalyseFinkSqlColumns(rawArray);
       const succeeded = isSuccessResponse(response);
       const message = response.message || (succeeded ? '解析成功' : '解析失败');
       setSqlActionResult({
@@ -522,9 +594,9 @@ export default function SqlSourceSelector({
 
       {currentQueryMode === 'sql' ? (
         <FormItem label=" " field={`${fieldPrefix}Sql`}>
-          <div className={styles['sql-editor-wrapper']}>
-            <div className={styles['sql-editor-toolbar']}>
-              <span className={styles['sql-editor-toolbar-title']}>
+          <div className={styles['sql-custom-sql-card']}>
+            <div className={styles['sql-custom-sql-toolbar']}>
+              <span className={styles['sql-custom-sql-toolbar-title']}>
                 自定义SQL
               </span>
               <Space size={8}>
@@ -560,43 +632,85 @@ export default function SqlSourceSelector({
                 </Tooltip>
               </Space>
             </div>
-            <TextArea
-              placeholder="请输入自定义SQL，例如 SELECT line_id,voltage_level,maint_org FROM ods_line_assets"
-              value={value.sql}
-              autoSize={{ minRows: 6 }}
-              onChange={(sql) => {
-                onChange({ ...value, sql });
-                setSqlActionResult(null);
-              }}
-            />
-            {sqlActionResult && (
-              <div className={styles['sql-action-result']}>
-                <div className={styles['sql-action-result-header']}>
-                  <span>
-                    {sqlActionResult.type === 'test' ? '测试结果' : '解析结果'}
-                  </span>
-                  <span
-                    className={
-                      sqlActionResult.status === 'succeed'
-                        ? styles['sql-action-result-success']
-                        : styles['sql-action-result-failed']
+            <div className={styles['sql-custom-sql-body']}>
+              <textarea
+                className={styles['sql-custom-sql-input']}
+                placeholder="请输入自定义SQL，例如 SELECT line_id,voltage_level,maint_org FROM ods_line_assets"
+                value={value.sql ?? ''}
+                spellCheck={false}
+                onChange={(e) => {
+                  onChange({ ...value, sql: e.target.value });
+                  setSqlActionResult(null);
+                  setSqlOverlayExpanded(true);
+                }}
+              />
+              {sqlActionResult && (
+                <div
+                  className={`${styles['sql-custom-sql-overlay']}${
+                    !sqlOverlayExpanded
+                      ? ` ${styles['sql-custom-sql-overlay--collapsed']}`
+                      : ''
+                  }`}
+                >
+                  <button
+                    type="button"
+                    className={styles['sql-custom-sql-overlay-header']}
+                    onClick={() =>
+                      setSqlOverlayExpanded((expanded) => !expanded)
                     }
                   >
-                    {sqlActionResult.status === 'succeed' ? '通过' : '失败'}
-                  </span>
+                    <span
+                      className={styles['sql-custom-sql-overlay-header-left']}
+                    >
+                      <IconDown
+                        className={`${styles['sql-custom-sql-overlay-chevron']}${
+                          !sqlOverlayExpanded
+                            ? ` ${styles['sql-custom-sql-overlay-chevron-collapsed']}`
+                            : ''
+                        }`}
+                      />
+                      <span className={styles['sql-custom-sql-overlay-title']}>
+                        {sqlActionResult.type === 'test'
+                          ? '测试结果'
+                          : '解析结果'}
+                      </span>
+                    </span>
+                    <span
+                      className={
+                        sqlActionResult.status === 'succeed'
+                          ? styles['sql-action-result-success']
+                          : styles['sql-action-result-failed']
+                      }
+                    >
+                      {sqlActionResult.status === 'succeed' ? '通过' : '失败'}
+                    </span>
+                  </button>
+                  {sqlOverlayExpanded && (
+                    <div className={styles['sql-custom-sql-overlay-body']}>
+                      {!!sqlActionResult.message && (
+                        <div
+                          className={`${styles['sql-action-result-message']} ${styles['sql-custom-sql-overlay-message']}`}
+                        >
+                          {sqlActionResult.message}
+                        </div>
+                      )}
+                      {sqlActionResult.status === 'succeed' &&
+                        (sqlActionResult.columns?.length ?? 0) > 0 && (
+                          <Table
+                            className={styles['sql-parse-result-table']}
+                            size="small"
+                            stripe
+                            pagination={false}
+                            rowKey="columnName"
+                            columns={parsedColumnTableColumns}
+                            data={sqlActionResult.columns}
+                          />
+                        )}
+                    </div>
+                  )}
                 </div>
-                <div className={styles['sql-action-result-message']}>
-                  {sqlActionResult.message}
-                </div>
-                {sqlActionResult.type === 'parse' && (
-                  <div className={styles['sql-action-result-columns']}>
-                    {(sqlActionResult.columns || []).length > 0
-                      ? (sqlActionResult.columns || []).join(', ')
-                      : '-'}
-                  </div>
-                )}
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </FormItem>
       ) : (

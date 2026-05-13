@@ -12,6 +12,7 @@ import FieldImportUpload from '@/pages/ontologyScene/components/FieldImportUploa
 import { PrefixAimdp } from '@/api/endpoints';
 import SqlSourceSelector from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormSteps/common/SqlSourceSelector';
 import { IntermediateTable, IntermediateTableType } from '../types';
+import type { ConnectorAnalyseFinkSqlColumnItem } from '@/types/objectType';
 import {
   SqlSourceDataInfo,
   SyncSourceDataStrategyFormState
@@ -35,7 +36,7 @@ interface IntermediateSourceSectionProps {
       Pick<SqlSourceDataInfo, 'connectorId' | 'databaseName' | 'tableName'>
     > & { projectID: string }
   ) => void;
-  onSqlColumnsParsed: (columns: string[]) => void;
+  onSqlColumnsParsed: (columns: ConnectorAnalyseFinkSqlColumnItem[]) => void;
   onSyncSourceDataStrategyChange: (
     updates: Partial<SyncSourceDataStrategyFormState>
   ) => void;
@@ -153,6 +154,8 @@ export default function IntermediateSourceSection({
             onSqlColumnsParsed={onSqlColumnsParsed}
             fieldPrefix="linkSource"
             styles={styles}
+            ontologySqlTestTaskType="RELATION_REALTIME_SYNC"
+            syncSourceDataStrategyForSqlTest={syncSourceDataStrategy}
           />
 
           <div className="my-[16px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
