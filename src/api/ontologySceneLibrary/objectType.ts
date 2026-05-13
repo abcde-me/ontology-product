@@ -20,6 +20,8 @@ import {
   ListOntologyObjectTypeReq,
   ListOntologyObjectTypeRes,
   ObjectType,
+  ConnectorAnalyseFinkSqlColumnItem,
+  OntologyTestFinkSQLReq,
   SourceType,
   UpdateOntologyObjectTypeReq,
   UploadOntologyCSVFileAndParseRes
@@ -140,7 +142,7 @@ export const connectorAnalyseFinkSQLColumns = async (params: {
   sql: string;
 }): Promise<
   ApiRes<{
-    columns: string[];
+    columns: ConnectorAnalyseFinkSqlColumnItem[];
   }>
 > => {
   return await UAPI.RES.ConnectorAnalyseFinkSQLColumnsApi({})
@@ -149,10 +151,9 @@ export const connectorAnalyseFinkSQLColumns = async (params: {
     .do();
 };
 
-export const connectorTestFinkSQL = async (params: {
-  id: number;
-  sql: string;
-}): Promise<
+export const connectorTestFinkSQL = async (
+  params: OntologyTestFinkSQLReq
+): Promise<
   ApiRes<{
     status: string;
     message?: string;

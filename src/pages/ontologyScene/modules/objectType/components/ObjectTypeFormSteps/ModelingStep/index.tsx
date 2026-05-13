@@ -8,12 +8,16 @@ import {
 } from '@/pages/ontologyScene/common/constants';
 import { PrefixAimdp } from '@/api/endpoints';
 import { getSqlConnectorTableSchema } from '@/api/ontologySceneLibrary/objectType';
+import type { ConnectorAnalyseFinkSqlColumnItem } from '@/types/objectType';
 import {
   ObjectTypeAttributeField,
   ObjectTypeDataSourceState,
   SqlSourceDataInfo
 } from '../../ObjectTypeFormUtils/types';
-import { sourceFieldToObjectTypeAttribute } from '../../ObjectTypeFormUtils/attributeFields';
+import {
+  finkSqlParsedColumnsToObjectTypeAttributes,
+  sourceFieldToObjectTypeAttribute
+} from '../../ObjectTypeFormUtils/attributeFields';
 import SqlSourceSelector from '../common/SqlSourceSelector';
 import ObjectTypeAttributeTable from './ObjectTypeAttributeTable';
 
@@ -160,6 +164,17 @@ export default function ModelingStep({
     }
   };
 
+  const handleSqlColumnsParsed = (
+    columns: ConnectorAnalyseFinkSqlColumnItem[]
+  ) => {
+    if (!columns.length) {
+      clearAttributes();
+      return;
+    }
+    syncAttributes(finkSqlParsedColumnsToObjectTypeAttributes(columns));
+    setFileUploaded(true);
+  };
+
   const handleDataSourceFileChange = (fileData: any) => {
     if (!fileData || (Array.isArray(fileData) && fileData.length === 0)) {
       return;
@@ -274,8 +289,10 @@ export default function ModelingStep({
           value={modelingSourceDataInfo}
           onChange={handleModelingSourceChange}
           onTableSelected={loadTableSchema}
+          onSqlColumnsParsed={handleSqlColumnsParsed}
           fieldPrefix="modeling"
           styles={styles}
+          ontologySqlTestTaskType="TABLE_REALTIME_SYNC"
         />
       )}
 

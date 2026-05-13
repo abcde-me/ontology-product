@@ -1,4 +1,5 @@
 import {
+  ConnectorAnalyseFinkSqlColumnItem,
   CreateOntologyPhysicalProperty,
   OntologyPhysicalPropertiesList
 } from '@/types/objectType';
@@ -47,6 +48,88 @@ export function sourceFieldToObjectTypeAttribute(
     sourceColumnType: field.fieldType,
     _vectorizationOn: false
   };
+}
+
+export function normalizeConnectorAnalyseFinkSqlColumns(
+  raw: unknown[]
+): ConnectorAnalyseFinkSqlColumnItem[] {
+  const out: ConnectorAnalyseFinkSqlColumnItem[] = [];
+  for (const item of raw) {
+    if (typeof item === 'string') {
+      const columnName = item.trim();
+      if (columnName) {
+        out.push({ columnName, columnType: 'STRING' });
+      }
+      continue;
+    }
+    if (!item || typeof item !== 'object') continue;
+    const o = item as Record<string, unknown>;
+    const columnName = String(o.columnName ?? o.column_name ?? '').trim();
+    if (!columnName) continue;
+    const origin =
+      o.columnOriginName != null
+        ? String(o.columnOriginName)
+        : o.CoumnOriginName != null
+          ? String(o.CoumnOriginName)
+          : undefined;
+    out.push({
+      columnName,
+      columnType: String(o.columnType ?? o.column_type ?? 'STRING'),
+      columnTable: o.columnTable != null ? String(o.columnTable) : undefined,
+      columnOriginName: origin,
+      CoumnOriginName:
+        o.CoumnOriginName != null ? String(o.CoumnOriginName) : undefined,
+      primaryKey: Array.isArray(o.primaryKey)
+        ? (o.primaryKey as unknown[]).map((p) => String(p))
+        : undefined
+    });
+  }
+  return out;
+}
+
+export function finkSqlParsedColumnToObjectTypeAttribute(
+  col: ConnectorAnalyseFinkSqlColumnItem,
+  _index: number
+): ObjectTypeAttributeField {
+  const fieldId = col.columnName;
+  const pkList = col.primaryKey ?? [];
+  const isPrimary = pkList.includes(fieldId) ? 1 : 0;
+  const fieldType = col.columnType || 'STRING';
+  const displayComment =
+    col.columnOriginName ?? col.CoumnOriginName ?? col.columnName;
+  const isPrimaryBool = isPrimary === 1;
+  return {
+    key: createObjectTypeAttributeKey('fink-sql-field'),
+    propertyID: fieldId,
+    propertyComment: displayComment,
+    propertyType: normalizeColumnTypeForPrimary(fieldType, isPrimaryBool),
+    isPrimary,
+    isStoreAsPublic: 0,
+    publicPropertyID: 0,
+    isVector: 0,
+    sourceColumnName: fieldId,
+    sourceColumnComment: displayComment,
+    sourceColumnType: fieldType,
+    _vectorizationOn: false
+  };
+}
+
+export function finkSqlParsedColumnsToObjectTypeAttributes(
+  columns: ConnectorAnalyseFinkSqlColumnItem[]
+): ObjectTypeAttributeField[] {
+  return columns.map((col, index) =>
+    finkSqlParsedColumnToObjectTypeAttribute(col, index)
+  );
+}
+
+export function finkSqlParsedColumnsToSourceTableFields(
+  columns: ConnectorAnalyseFinkSqlColumnItem[]
+): SourceTableField[] {
+  return columns.map((col) => ({
+    fieldId: col.columnName,
+    fieldComment: col.columnOriginName ?? col.CoumnOriginName ?? col.columnName,
+    fieldType: col.columnType || 'STRING'
+  }));
 }
 
 export function objectTypeAttributeToLegacyField(

@@ -9,7 +9,8 @@ import {
 } from '@/api/ontologySceneLibrary/objectType';
 import {
   GetSqlConnectorTableSchemaToTIDBRes,
-  IcebergTableItem
+  IcebergTableItem,
+  ConnectorAnalyseFinkSqlColumnItem
 } from '@/types/objectType';
 import { useUserInfoStore } from '@/store/userInfoStore';
 import {
@@ -29,6 +30,7 @@ import {
   SourceTableField,
   SyncSourceDataStrategyFormState
 } from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormUtils/types';
+import { finkSqlParsedColumnsToSourceTableFields } from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormUtils/attributeFields';
 
 function createDefaultSyncSourceDataStrategy(): SyncSourceDataStrategyFormState {
   return {
@@ -210,15 +212,10 @@ export function useIntermediateTableState(form: any) {
     }
   };
 
-  const handleSqlColumnsParsed = (columns: string[]) => {
-    const fields: SourceTableField[] = columns
-      .map((column) => column.trim())
-      .filter(Boolean)
-      .map((column) => ({
-        fieldId: column,
-        fieldComment: column,
-        fieldType: COLUMN_TYPE_OPTIONS[0].value
-      }));
+  const handleSqlColumnsParsed = (
+    columns: ConnectorAnalyseFinkSqlColumnItem[]
+  ) => {
+    const fields = finkSqlParsedColumnsToSourceTableFields(columns);
     applyDatabaseSourceFields(fields);
   };
 

@@ -8,6 +8,7 @@ import {
   Radio,
   Select,
   Space,
+  Table,
   Tooltip
 } from '@arco-design/web-react';
 import {
@@ -17,8 +18,21 @@ import {
   listSqlConnectorDBAndTables
 } from '@/api/ontologySceneLibrary/objectType';
 import { useUserInfoStore } from '@/store/userInfoStore';
-import { SqlConnectorDatabaseItem, SqlConnectorItem } from '@/types/objectType';
-import { SqlSourceDataInfo } from '../../ObjectTypeFormUtils/types';
+import {
+  ConnectorAnalyseFinkSqlColumnItem,
+  SqlConnectorDatabaseItem,
+  SqlConnectorItem
+} from '@/types/objectType';
+import CollapsibleSection from '@/pages/ontologyScene/components/CollapsibleSection';
+import { normalizeConnectorAnalyseFinkSqlColumns } from '../../ObjectTypeFormUtils/attributeFields';
+import {
+  SqlSourceDataInfo,
+  SyncSourceDataStrategyFormState
+} from '../../ObjectTypeFormUtils/types';
+import {
+  sqlSourceDataInfoToSourceDataInfoForTest,
+  syncFormStateToOntologyTestSyncStrategy
+} from '../../ObjectTypeFormUtils/ontologyTestFinkSQLPayload';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -41,9 +55,13 @@ interface SqlSourceSelectorProps {
       projectID: string;
     }
   ) => void;
-  onSqlColumnsParsed?: (columns: string[]) => void;
+  onSqlColumnsParsed?: (columns: ConnectorAnalyseFinkSqlColumnItem[]) => void;
   fieldPrefix: string;
   styles: Record<string, string>;
+  /** OntologyTestFinkSQL.taskType，如 TABLE_REALTIME_SYNC / RELATION_REALTIME_SYNC */
+  ontologySqlTestTaskType: string;
+  /** 第三步 / 链接中间表同步时传入；建模第二步不传 */
+  syncSourceDataStrategyForSqlTest?: SyncSourceDataStrategyFormState;
 }
 
 function isSuccessResponse(response: any): boolean {
@@ -226,7 +244,9 @@ export default function SqlSourceSelector({
   onTableSelected,
   onSqlColumnsParsed,
   fieldPrefix,
-  styles
+  styles,
+  ontologySqlTestTaskType,
+  syncSourceDataStrategyForSqlTest
 }: SqlSourceSelectorProps) {
   const projectID = useUserInfoStore((state) => state.projectId?.[1]);
   const [connectors, setConnectors] = useState<SqlConnectorItem[]>([]);
@@ -239,8 +259,22 @@ export default function SqlSourceSelector({
     type: 'test' | 'parse';
     status: 'succeed' | 'failed';
     message: string;
-    columns?: string[];
+    columns?: ConnectorAnalyseFinkSqlColumnItem[];
   } | null>(null);
+  const [parsePanelKey, setParsePanelKey] = useState(0);
+
+  const parsedColumnTableColumns = useMemo(
+    () => [
+      { title: '字段名', dataIndex: 'columnName', width: 160 },
+      { title: '类型', dataIndex: 'columnType', width: 140 },
+      {
+        title: '来源表',
+        dataIndex: 'columnTable',
+        render: (v: string | undefined) => v || '-'
+      }
+    ],
+    []
+  );
 
   useEffect(() => {
     const loadConnectors = async () => {
@@ -348,15 +382,32 @@ export default function SqlSourceSelector({
       Message.warning(validation.message || 'SQL校验失败');
       return;
     }
-    if (!value.connectorId) {
+    const baseSourceDataInfo = sqlSourceDataInfoToSourceDataInfoForTest(value);
+    if (!baseSourceDataInfo) {
       Message.warning('请先选择数据源链接');
+      return;
+    }
+    if (!projectID) {
+      Message.warning('项目信息缺失，请重新登录后重试');
       return;
     }
     setTestLoading(true);
     try {
       const response = await connectorTestFinkSQL({
-        id: value.connectorId,
-        sql: trimmedSql
+        projectID,
+        sourceDataInfo: {
+          ...baseSourceDataInfo,
+          queryMode: 'sql',
+          sql: trimmedSql
+        },
+        taskType: ontologySqlTestTaskType,
+        ...(syncSourceDataStrategyForSqlTest
+          ? {
+              syncSourceDataStrategy: syncFormStateToOntologyTestSyncStrategy(
+                syncSourceDataStrategyForSqlTest
+              )
+            }
+          : {})
       });
       const passed =
         isSuccessResponse(response) && response.data?.status === 'succeed';
@@ -398,7 +449,9 @@ export default function SqlSourceSelector({
         id: value.connectorId,
         sql: trimmedSql
       });
-      const columns = response.data?.columns || [];
+      const rawList = response.data?.columns;
+      const rawArray = Array.isArray(rawList) ? rawList : [];
+      const columns = normalizeConnectorAnalyseFinkSqlColumns(rawArray);
       const succeeded = isSuccessResponse(response);
       const message = response.message || (succeeded ? '解析成功' : '解析失败');
       setSqlActionResult({
@@ -408,6 +461,7 @@ export default function SqlSourceSelector({
         columns
       });
       if (succeeded) {
+        setParsePanelKey((k) => k + 1);
         onSqlColumnsParsed?.(columns);
       }
     } catch (error) {
@@ -588,13 +642,28 @@ export default function SqlSourceSelector({
                 <div className={styles['sql-action-result-message']}>
                   {sqlActionResult.message}
                 </div>
-                {sqlActionResult.type === 'parse' && (
-                  <div className={styles['sql-action-result-columns']}>
-                    {(sqlActionResult.columns || []).length > 0
-                      ? (sqlActionResult.columns || []).join(', ')
-                      : '-'}
-                  </div>
-                )}
+                {sqlActionResult.type === 'parse' &&
+                  sqlActionResult.status === 'succeed' &&
+                  (sqlActionResult.columns?.length ?? 0) > 0 && (
+                    <CollapsibleSection
+                      key={parsePanelKey}
+                      title="解析字段明细"
+                      defaultExpanded
+                      className={styles['sql-parse-result-section']}
+                      contentClassName={styles['sql-parse-result-section-body']}
+                    >
+                      <Table
+                        className={styles['sql-parse-result-table']}
+                        size="small"
+                        stripe
+                        pagination={false}
+                        rowKey="columnName"
+                        columns={parsedColumnTableColumns}
+                        data={sqlActionResult.columns}
+                        scroll={{ y: 220 }}
+                      />
+                    </CollapsibleSection>
+                  )}
               </div>
             )}
           </div>

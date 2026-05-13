@@ -137,8 +137,7 @@
   border: 1px solid var(--color-border-2);
   border-radius: 4px;
   background: var(--color-fill-1);
-  max-height: 200px;
-  overflow: auto;
+  overflow: visible;
 }
 
 .sql-action-result-header {
@@ -160,6 +159,21 @@
 .sql-action-result-message {
   white-space: pre-wrap;
   word-break: break-word;
+  max-height: 120px;
+  overflow: auto;
+}
+
+.sql-parse-result-section {
+  margin-top: 10px;
+}
+
+.sql-parse-result-section-body {
+  max-height: 280px;
+  overflow: auto;
+}
+
+.sql-parse-result-table {
+  margin-top: 0;
 }
 
 .sql-action-result-columns {
