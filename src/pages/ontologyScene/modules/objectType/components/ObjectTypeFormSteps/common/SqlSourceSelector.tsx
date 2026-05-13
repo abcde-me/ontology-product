@@ -3,7 +3,6 @@ import {
   Button,
   Cascader,
   Form,
-  Input,
   Message,
   Radio,
   Select,
@@ -11,6 +10,7 @@ import {
   Table,
   Tooltip
 } from '@arco-design/web-react';
+import { IconDown } from '@arco-design/web-react/icon';
 import {
   connectorAnalyseFinkSQLColumns,
   connectorTestFinkSQL,
@@ -23,7 +23,6 @@ import {
   SqlConnectorDatabaseItem,
   SqlConnectorItem
 } from '@/types/objectType';
-import CollapsibleSection from '@/pages/ontologyScene/components/CollapsibleSection';
 import { normalizeConnectorAnalyseFinkSqlColumns } from '../../ObjectTypeFormUtils/attributeFields';
 import {
   SqlSourceDataInfo,
@@ -35,7 +34,6 @@ import {
 } from '../../ObjectTypeFormUtils/ontologyTestFinkSQLPayload';
 
 const FormItem = Form.Item;
-const { TextArea } = Input;
 
 interface CascaderOption {
   label: string;
@@ -70,6 +68,17 @@ function isSuccessResponse(response: any): boolean {
     (response.status === 200 || response.stat === 0 || response.status === 0) &&
     (response.code === '' || response.code === undefined || response.code === 0)
   );
+}
+
+/** 从 OntologyTestFinkSQL 返回体中尽量提取列信息（字段名与解析接口对齐） */
+function extractTestFinkSqlResultColumns(
+  data: unknown
+): ConnectorAnalyseFinkSqlColumnItem[] | undefined {
+  if (!data || typeof data !== 'object') return undefined;
+  const d = data as Record<string, unknown>;
+  const raw = d.columns ?? d.columnList ?? d.fields;
+  if (!Array.isArray(raw) || raw.length === 0) return undefined;
+  return normalizeConnectorAnalyseFinkSqlColumns(raw);
 }
 
 function filterCascaderOption(
@@ -261,7 +270,13 @@ export default function SqlSourceSelector({
     message: string;
     columns?: ConnectorAnalyseFinkSqlColumnItem[];
   } | null>(null);
-  const [parsePanelKey, setParsePanelKey] = useState(0);
+  const [sqlOverlayExpanded, setSqlOverlayExpanded] = useState(true);
+
+  useEffect(() => {
+    if (sqlActionResult) {
+      setSqlOverlayExpanded(true);
+    }
+  }, [sqlActionResult]);
 
   const parsedColumnTableColumns = useMemo(
     () => [
@@ -415,10 +430,14 @@ export default function SqlSourceSelector({
         response.data?.message ||
         response.message ||
         (passed ? '测试通过' : '测试失败');
+      const testColumns = extractTestFinkSqlResultColumns(response.data);
       setSqlActionResult({
         type: 'test',
         status: passed ? 'succeed' : 'failed',
-        message
+        message,
+        ...(testColumns && testColumns.length > 0
+          ? { columns: testColumns }
+          : {})
       });
     } catch (error) {
       console.error('测试 SQL 失败:', error);
@@ -461,7 +480,6 @@ export default function SqlSourceSelector({
         columns
       });
       if (succeeded) {
-        setParsePanelKey((k) => k + 1);
         onSqlColumnsParsed?.(columns);
       }
     } catch (error) {
@@ -576,9 +594,9 @@ export default function SqlSourceSelector({
 
       {currentQueryMode === 'sql' ? (
         <FormItem label=" " field={`${fieldPrefix}Sql`}>
-          <div className={styles['sql-editor-wrapper']}>
-            <div className={styles['sql-editor-toolbar']}>
-              <span className={styles['sql-editor-toolbar-title']}>
+          <div className={styles['sql-custom-sql-card']}>
+            <div className={styles['sql-custom-sql-toolbar']}>
+              <span className={styles['sql-custom-sql-toolbar-title']}>
                 自定义SQL
               </span>
               <Space size={8}>
@@ -614,58 +632,85 @@ export default function SqlSourceSelector({
                 </Tooltip>
               </Space>
             </div>
-            <TextArea
-              placeholder="请输入自定义SQL，例如 SELECT line_id,voltage_level,maint_org FROM ods_line_assets"
-              value={value.sql}
-              autoSize={{ minRows: 6 }}
-              onChange={(sql) => {
-                onChange({ ...value, sql });
-                setSqlActionResult(null);
-              }}
-            />
-            {sqlActionResult && (
-              <div className={styles['sql-action-result']}>
-                <div className={styles['sql-action-result-header']}>
-                  <span>
-                    {sqlActionResult.type === 'test' ? '测试结果' : '解析结果'}
-                  </span>
-                  <span
-                    className={
-                      sqlActionResult.status === 'succeed'
-                        ? styles['sql-action-result-success']
-                        : styles['sql-action-result-failed']
+            <div className={styles['sql-custom-sql-body']}>
+              <textarea
+                className={styles['sql-custom-sql-input']}
+                placeholder="请输入自定义SQL，例如 SELECT line_id,voltage_level,maint_org FROM ods_line_assets"
+                value={value.sql ?? ''}
+                spellCheck={false}
+                onChange={(e) => {
+                  onChange({ ...value, sql: e.target.value });
+                  setSqlActionResult(null);
+                  setSqlOverlayExpanded(true);
+                }}
+              />
+              {sqlActionResult && (
+                <div
+                  className={`${styles['sql-custom-sql-overlay']}${
+                    !sqlOverlayExpanded
+                      ? ` ${styles['sql-custom-sql-overlay--collapsed']}`
+                      : ''
+                  }`}
+                >
+                  <button
+                    type="button"
+                    className={styles['sql-custom-sql-overlay-header']}
+                    onClick={() =>
+                      setSqlOverlayExpanded((expanded) => !expanded)
                     }
                   >
-                    {sqlActionResult.status === 'succeed' ? '通过' : '失败'}
-                  </span>
-                </div>
-                <div className={styles['sql-action-result-message']}>
-                  {sqlActionResult.message}
-                </div>
-                {sqlActionResult.type === 'parse' &&
-                  sqlActionResult.status === 'succeed' &&
-                  (sqlActionResult.columns?.length ?? 0) > 0 && (
-                    <CollapsibleSection
-                      key={parsePanelKey}
-                      title="解析字段明细"
-                      defaultExpanded
-                      className={styles['sql-parse-result-section']}
-                      contentClassName={styles['sql-parse-result-section-body']}
+                    <span
+                      className={styles['sql-custom-sql-overlay-header-left']}
                     >
-                      <Table
-                        className={styles['sql-parse-result-table']}
-                        size="small"
-                        stripe
-                        pagination={false}
-                        rowKey="columnName"
-                        columns={parsedColumnTableColumns}
-                        data={sqlActionResult.columns}
-                        scroll={{ y: 220 }}
+                      <IconDown
+                        className={`${styles['sql-custom-sql-overlay-chevron']}${
+                          !sqlOverlayExpanded
+                            ? ` ${styles['sql-custom-sql-overlay-chevron-collapsed']}`
+                            : ''
+                        }`}
                       />
-                    </CollapsibleSection>
+                      <span className={styles['sql-custom-sql-overlay-title']}>
+                        {sqlActionResult.type === 'test'
+                          ? '测试结果'
+                          : '解析结果'}
+                      </span>
+                    </span>
+                    <span
+                      className={
+                        sqlActionResult.status === 'succeed'
+                          ? styles['sql-action-result-success']
+                          : styles['sql-action-result-failed']
+                      }
+                    >
+                      {sqlActionResult.status === 'succeed' ? '通过' : '失败'}
+                    </span>
+                  </button>
+                  {sqlOverlayExpanded && (
+                    <div className={styles['sql-custom-sql-overlay-body']}>
+                      {!!sqlActionResult.message && (
+                        <div
+                          className={`${styles['sql-action-result-message']} ${styles['sql-custom-sql-overlay-message']}`}
+                        >
+                          {sqlActionResult.message}
+                        </div>
+                      )}
+                      {sqlActionResult.status === 'succeed' &&
+                        (sqlActionResult.columns?.length ?? 0) > 0 && (
+                          <Table
+                            className={styles['sql-parse-result-table']}
+                            size="small"
+                            stripe
+                            pagination={false}
+                            rowKey="columnName"
+                            columns={parsedColumnTableColumns}
+                            data={sqlActionResult.columns}
+                          />
+                        )}
+                    </div>
                   )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </FormItem>
       ) : (

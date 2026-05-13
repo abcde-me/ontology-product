@@ -157,6 +157,9 @@ export const connectorTestFinkSQL = async (
   ApiRes<{
     status: string;
     message?: string;
+    columns?: unknown[];
+    columnList?: unknown[];
+    fields?: unknown[];
   }>
 > => {
   return await UAPI.RES.ConnectorTestFinkSQLApi({})
