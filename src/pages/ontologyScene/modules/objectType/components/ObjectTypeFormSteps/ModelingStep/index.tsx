@@ -168,7 +168,8 @@ export default function ModelingStep({
               fieldType: field.field_type || field.columnType
             },
             index,
-            index === primaryColumnIndex
+            index === primaryColumnIndex,
+            tableName
           )
         );
         syncAttributes(fields);

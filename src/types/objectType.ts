@@ -182,6 +182,10 @@ export interface CreateOntologyPhysicalProperty {
    * 向量源字段
    */
   vectorSourceFieldName?: string;
+  /**
+   * 数据源表名
+   */
+  sourceTableName?: string;
 }
 
 export enum SourceType {

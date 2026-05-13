@@ -30,12 +30,14 @@ export function getObjectTypeAttributeRowKey(
 export function sourceFieldToObjectTypeAttribute(
   field: SourceTableField,
   index: number,
-  isPrimaryOverride?: boolean
+  isPrimaryOverride?: boolean,
+  sourceTableName?: string
 ): ObjectTypeAttributeField {
   const isPrimary =
     typeof isPrimaryOverride === 'boolean' ? isPrimaryOverride : index === 0;
   const propertyID = field.fieldId;
   const propertyComment = field.fieldComment || field.fieldId;
+  const trimmedTable = sourceTableName?.trim();
   return {
     key: createObjectTypeAttributeKey('schema-field'),
     propertyID,
@@ -48,6 +50,7 @@ export function sourceFieldToObjectTypeAttribute(
     sourceColumnName: field.fieldId,
     sourceColumnComment: field.fieldComment || field.fieldId,
     sourceColumnType: field.fieldType,
+    ...(trimmedTable ? { sourceTableName: trimmedTable } : {}),
     _vectorizationOn: false
   };
 }
@@ -77,7 +80,12 @@ export function normalizeConnectorAnalyseFinkSqlColumns(
     out.push({
       columnName,
       columnType: String(o.columnType ?? o.column_type ?? 'STRING'),
-      columnTable: o.columnTable != null ? String(o.columnTable) : undefined,
+      columnTable:
+        o.columnTable != null
+          ? String(o.columnTable)
+          : o.column_table != null
+            ? String(o.column_table)
+            : undefined,
       columnOriginName: origin,
       CoumnOriginName:
         o.CoumnOriginName != null ? String(o.CoumnOriginName) : undefined,
@@ -100,6 +108,7 @@ export function finkSqlParsedColumnToObjectTypeAttribute(
   const displayComment =
     col.columnOriginName ?? col.CoumnOriginName ?? col.columnName;
   const isPrimaryBool = isPrimary === 1;
+  const sqlSourceTable = col.columnTable?.trim();
   return {
     key: createObjectTypeAttributeKey('fink-sql-field'),
     propertyID: fieldId,
@@ -112,6 +121,7 @@ export function finkSqlParsedColumnToObjectTypeAttribute(
     sourceColumnName: fieldId,
     sourceColumnComment: displayComment,
     sourceColumnType: fieldType,
+    ...(sqlSourceTable ? { sourceTableName: sqlSourceTable } : {}),
     _vectorizationOn: false
   };
 }
@@ -147,6 +157,9 @@ export function objectTypeAttributeToLegacyField(
     publicPropertyID: field.publicPropertyID || 0,
     isVector: field.isVector,
     vectorSourceFieldName: undefined,
+    ...(field.sourceTableName?.trim()
+      ? { sourceTableName: field.sourceTableName.trim() }
+      : {}),
     _tableField: field.sourceColumnName || field.propertyID,
     _attributeName: field.propertyComment,
     _storedPublicPropertyId: field._storedPublicPropertyId,
@@ -171,6 +184,7 @@ interface LegacyAttributeLike {
   sourceColumnName?: string;
   sourceColumnComment?: string;
   sourceColumnType?: string;
+  sourceTableName?: string;
   _storedPublicPropertyId?: number;
   _vectorizationOn?: boolean;
   _vectorComment?: string;
@@ -195,6 +209,7 @@ export function legacyFieldToObjectTypeAttribute(
   const sourceColumnComment =
     raw.sourceColumnComment ?? raw.comment ?? propertyComment ?? '';
   const backendPropertyID = Number(raw.propertyID);
+  const legacySourceTable = raw.sourceTableName?.trim();
   return {
     key: createObjectTypeAttributeKey('legacy-field'),
     backendPropertyID: Number.isFinite(backendPropertyID)
@@ -210,6 +225,7 @@ export function legacyFieldToObjectTypeAttribute(
     sourceColumnName,
     sourceColumnComment,
     sourceColumnType: raw.sourceColumnType ?? propertyType,
+    ...(legacySourceTable ? { sourceTableName: legacySourceTable } : {}),
     _storedPublicPropertyId: raw._storedPublicPropertyId,
     _vectorizationOn: raw._vectorizationOn,
     _vectorComment: raw._vectorComment,
