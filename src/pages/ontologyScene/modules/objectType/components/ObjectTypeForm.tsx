@@ -219,7 +219,10 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                 publicPropertyID: field.publicPropertyID || 0,
                 sourceColumnName: field.sourceColumnName,
                 sourceColumnComment: field.sourceColumnComment,
-                sourceColumnType: field.sourceColumnType
+                sourceColumnType: field.sourceColumnType,
+                ...(field.sourceTableName?.trim()
+                  ? { sourceTableName: field.sourceTableName.trim() }
+                  : {})
               }))
             );
           } else {
