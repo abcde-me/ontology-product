@@ -29,9 +29,11 @@ export function getObjectTypeAttributeRowKey(
 
 export function sourceFieldToObjectTypeAttribute(
   field: SourceTableField,
-  index: number
+  index: number,
+  isPrimaryOverride?: boolean
 ): ObjectTypeAttributeField {
-  const isPrimary = index === 0;
+  const isPrimary =
+    typeof isPrimaryOverride === 'boolean' ? isPrimaryOverride : index === 0;
   const propertyID = field.fieldId;
   const propertyComment = field.fieldComment || field.fieldId;
   return {

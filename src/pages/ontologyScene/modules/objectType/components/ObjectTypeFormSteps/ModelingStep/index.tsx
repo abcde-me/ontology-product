@@ -138,7 +138,28 @@ export default function ModelingStep({
         table_name: tableName
       });
       if (response.status === 200 && (response.code === '' || !response.code)) {
-        const fields = getSchemaColumns(response.data).map((field, index) =>
+        const rawColumns = getSchemaColumns(response.data);
+        const primaryKeyList: string[] = Array.isArray(
+          (response.data as any)?.primaryKey
+        )
+          ? ((response.data as any).primaryKey as unknown[]).filter(
+              (item): item is string =>
+                typeof item === 'string' && item.length > 0
+            )
+          : [];
+        const hasPrimaryKeyInfo = primaryKeyList.length > 0;
+        const matchedPrimaryIndex = hasPrimaryKeyInfo
+          ? rawColumns.findIndex((field) =>
+              primaryKeyList.includes(field.field_id || field.columnName)
+            )
+          : -1;
+        const primaryColumnIndex = hasPrimaryKeyInfo
+          ? matchedPrimaryIndex >= 0
+            ? matchedPrimaryIndex
+            : 0
+          : 0;
+
+        const fields = rawColumns.map((field, index) =>
           sourceFieldToObjectTypeAttribute(
             {
               fieldId: field.field_id || field.columnName,
@@ -146,7 +167,8 @@ export default function ModelingStep({
                 field.field_comment || field.columnComment || field.columnName,
               fieldType: field.field_type || field.columnType
             },
-            index
+            index,
+            index === primaryColumnIndex
           )
         );
         syncAttributes(fields);

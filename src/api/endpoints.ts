@@ -809,6 +809,8 @@ export const ModaForgeResourceEndpoints = {
   SyncObjectTypeTaskApi: PrefixAimdp + '/SyncObjectTypeTask',
 
   //属性
+  // 获取 TiDB 属性类型枚举
+  ListTiDBTypesApi: PrefixAimdp + '/ListTiDBTypes',
   // 获取公共属性列表
   ListOntologyPublicPropertiesApi:
     PrefixAimdp + '/ListOntologyPublicProperties',

@@ -45,3 +45,7 @@ export const updateOntologyPublicProperties = async (
     .inRegion()
     .do();
 };
+
+export const listTiDBTypes = async (): Promise<ApiRes<{ types: string[] }>> => {
+  return await UAPI.RES.ListTiDBTypesApi({}).post({}).inRegion().do();
+};
