@@ -274,16 +274,26 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
   // ==================== 加载历史消息 ====================
   const loadHistoryMessages = useCallback(
     async (conversationID: string) => {
-      if (!conversationID || !appId || !getHistoryMessages) return;
+      console.log('[useXChat] loadHistoryMessages 被调用:', {
+        conversationID,
+        appId,
+        hasGetHistoryMessages: !!getHistoryMessages
+      });
+
+      if (!conversationID || !appId || !getHistoryMessages) {
+        console.log('[useXChat] loadHistoryMessages 条件不满足，跳过');
+        return;
+      }
 
       try {
         setIsLoading(true);
+        console.log('[useXChat] 开始调用 getHistoryMessages API');
         const response = await getHistoryMessages({
           appId: String(appId),
           conversationId: conversationID
         });
 
-        console.log('历史消息响应:', response);
+        console.log('[useXChat] 历史消息响应:', response);
 
         if (response?.data?.result) {
           const historyMessages: ChatMessage[] = [];
@@ -314,10 +324,12 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
           });
 
           setMessages(historyMessages);
-          console.log('解析后的历史消息:', historyMessages);
+          console.log('[useXChat] 解析后的历史消息:', historyMessages);
+        } else {
+          console.log('[useXChat] 响应中没有 result 数据');
         }
       } catch (error: any) {
-        console.error('加载历史消息失败:', error);
+        console.error('[useXChat] 加载历史消息失败:', error);
         Message.error(error.message || '加载历史消息失败');
       } finally {
         setIsLoading(false);
@@ -327,21 +339,35 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
   );
 
   // ==================== 监听 conversationId 变化 ====================
+  // 注意：这个 useEffect 只处理外部传入的 conversationId
+  // 如果 conversationId 是通过内部状态管理的，应该在外部手动调用 loadHistoryMessages
   useEffect(() => {
+    console.log('[useXChat] conversationId 变化:', {
+      externalConversationId,
+      conversationIdRefCurrent: conversationIdRef.current
+    });
+
     if (externalConversationId === null) {
+      console.log('[useXChat] conversationId 为 null，跳过');
       return;
     }
 
     if (externalConversationId === undefined) {
+      console.log('[useXChat] conversationId 为 undefined，清空 ref');
       conversationIdRef.current = '';
       return;
     }
 
+    // 只有当 conversationId 真正变化时才加载历史消息
     if (externalConversationId !== conversationIdRef.current) {
+      console.log(
+        '[useXChat] conversationId 变化，更新 ref 但不自动加载历史消息'
+      );
       conversationIdRef.current = externalConversationId;
-      loadHistoryMessages(externalConversationId);
+      // 注释掉自动加载，改为在外部手动调用
+      // loadHistoryMessages(externalConversationId);
     }
-  }, [externalConversationId, loadHistoryMessages]);
+  }, [externalConversationId]);
 
   // ==================== 清空消息 ====================
   const clearMessages = useCallback(() => {
@@ -389,6 +415,7 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
     stopGeneration,
     clearMessages,
     deleteMessage,
-    regenerateMessage
+    regenerateMessage,
+    loadHistoryMessages
   };
 };

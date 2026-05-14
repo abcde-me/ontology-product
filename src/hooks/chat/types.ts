@@ -139,6 +139,7 @@ export interface UseChatReturn {
   clearMessages: () => void;
   deleteMessage: (messageId: string) => void;
   regenerateMessage: (messageId: string) => Promise<void>;
+  loadHistoryMessages: (conversationId: string) => Promise<void>;
 }
 
 // ==================== 会话管理 ====================

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { UploadProps } from '@arco-design/web-react';
 import { Message } from '@arco-design/web-react';
 import Header from './Header';
@@ -47,6 +47,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   // 获取图谱状态管理和当前本体
   const { setGraphData, currentOntology } = useAIWorkbenchStore();
 
+  // 使用 ref 记录是否是初始加载
+  const isInitialMount = useRef(true);
+
   // 稳定 API 配置对象的引用，避免无限循环
   const conversationApiConfig = useMemo(
     () => ({
@@ -87,6 +90,48 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     []
   );
 
+  // 稳定 Chat API 配置对象的引用，避免无限循环
+  const chatApiConfig = useMemo(
+    () => ({
+      // 注入获取聊天 URL 的函数
+      getChatUrl: (appId: string) => getChatApiUrl(appId),
+      // 注入获取历史消息的函数
+      getHistoryMessages: async (params: {
+        appId: string;
+        conversationId: string;
+      }) => {
+        return await getConversationMessages({
+          appId: params.appId,
+          conversationID: params.conversationId
+        });
+      },
+      // 注入构建请求体的函数（可选，使用默认实现）
+      buildRequestBody: (params: {
+        appId: string;
+        conversationId: string;
+        query: string;
+        files?: any[];
+        enableDeepThink: boolean;
+        projectId?: string;
+        appConfigId?: string;
+        channel?: string;
+        source?: string;
+      }) => ({
+        responseMode: 'Streaming',
+        status: params.source === 'published' ? 'Published' : 'Unpublished',
+        channel: params.channel,
+        appID: params.appId,
+        appConfigID: params.appConfigId,
+        projectID: params.projectId,
+        conversationID: params.conversationId,
+        enableDeepThink: params.enableDeepThink,
+        query: params.query,
+        inputs: params.files ? { files: params.files } : {}
+      })
+    }),
+    []
+  );
+
   // 使用会话管理 hook，注入项目特定的 API
   const {
     conversations,
@@ -108,7 +153,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     isStreaming,
     sendMessage,
     stopGeneration,
-    clearMessages
+    clearMessages,
+    loadHistoryMessages
   } = useXChat({
     appId,
     projectId,
@@ -116,30 +162,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     channel,
     source,
     conversationId: conversationId || activeConversationId || undefined,
-    apiConfig: {
-      // 注入获取聊天 URL 的函数
-      getChatUrl: (appId) => getChatApiUrl(appId),
-      // 注入获取历史消息的函数
-      getHistoryMessages: async ({ appId, conversationId }) => {
-        return await getConversationMessages({
-          appId,
-          conversationID: conversationId
-        });
-      },
-      // 注入构建请求体的函数（可选，使用默认实现）
-      buildRequestBody: (params) => ({
-        responseMode: 'Streaming',
-        status: params.source === 'published' ? 'Published' : 'Unpublished',
-        channel: params.channel,
-        appID: params.appId,
-        appConfigID: params.appConfigId,
-        projectID: params.projectId,
-        conversationID: params.conversationId,
-        enableDeepThink: params.enableDeepThink,
-        query: params.query,
-        inputs: params.files ? { files: params.files } : {}
-      })
-    },
+    apiConfig: chatApiConfig,
     onConversationCreated: (newConversationId) => {
       setActiveConversation(newConversationId);
       onConversationCreated?.(newConversationId);
@@ -151,14 +174,24 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   // 监听本体切换，清空聊天和图谱
   useEffect(() => {
+    // 跳过初始加载
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      console.log('[ChatPanel] 初始加载，跳过本体切换逻辑');
+      return;
+    }
+
+    // 只在本体 ID 真正切换时才清空
+    if (!currentOntology?.id) return;
+
+    console.log('[ChatPanel] 本体切换，清空聊天和图谱数据');
     // 清空消息列表
     clearMessages();
-    // 清空活跃会话 ID
-    setActiveConversation(undefined);
+    // 清空活跃会话 ID（设置为 null，而不是 undefined）
+    setActiveConversation(null);
     // 清空图谱数据
     setGraphData(null);
-    console.log('[ChatPanel] 本体切换，已清空聊天和图谱数据');
-  }, [currentOntology?.id]); // 只监听本体 ID 的变化
+  }, [currentOntology?.id, clearMessages, setActiveConversation, setGraphData]);
 
   // 组件挂载时加载会话列表
   useEffect(() => {
@@ -172,12 +205,20 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   // 会话列表加载完成后，自动选择第一个会话（仅在初始加载时）
   useEffect(() => {
-    // 只在初始加载时（activeConversationId === null）自动选择第一个会话
+    console.log('[ChatPanel] 会话列表变化:', {
+      conversationsLength: conversations.length,
+      activeConversationId,
+      conversationId,
+      firstConversation: conversations[0]
+    });
+
+    // 只在初始加载时（activeConversationId 为 null 或 undefined）自动选择第一个会话
     if (
       !conversationId &&
-      activeConversationId === null &&
+      (activeConversationId === null || activeConversationId === undefined) &&
       conversations.length > 0
     ) {
+      console.log('[ChatPanel] 自动选择第一个会话:', conversations[0].id);
       setActiveConversation(conversations[0].id);
     }
   }, [
@@ -186,6 +227,29 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     activeConversationId,
     setActiveConversation
   ]);
+
+  // 监听 activeConversationId 变化，加载历史消息
+  useEffect(() => {
+    console.log('[ChatPanel] activeConversationId 变化:', {
+      conversationId,
+      activeConversationId,
+      type: typeof activeConversationId
+    });
+
+    // 如果有外部传入的 conversationId，不处理（由 useXChat 内部处理）
+    if (conversationId) {
+      console.log('[ChatPanel] 有外部 conversationId，跳过');
+      return;
+    }
+
+    // 如果 activeConversationId 是有效的会话 ID（不是 null 或 undefined），加载历史消息
+    if (activeConversationId && typeof activeConversationId === 'string') {
+      console.log('[ChatPanel] 加载会话历史消息:', activeConversationId);
+      loadHistoryMessages(activeConversationId);
+    } else {
+      console.log('[ChatPanel] activeConversationId 无效，不加载历史消息');
+    }
+  }, [activeConversationId, conversationId, loadHistoryMessages]);
 
   // 文件上传配置
   const uploaderProps: Partial<UploadProps> = {
