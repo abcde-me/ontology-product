@@ -157,6 +157,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const [currentStep, setCurrentStep] = useState(() =>
       clampStep(initialStep ?? BASIC_STEP)
     );
+    const secondaryStepsReadOnly = isEdit;
     const [basicInfoValues, setBasicInfoValues] = useState<BasicInfoValues>(
       () => ({
         code: initialValues?.code,
@@ -616,6 +617,10 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       }
 
       if (currentStep === MODELING_STEP) {
+        if (secondaryStepsReadOnly) {
+          setCurrentStep(INSTANCE_SYNC_STEP);
+          return;
+        }
         if (await validateModeling()) {
           syncInstanceSourceFromModeling();
           setCurrentStep(INSTANCE_SYNC_STEP);
@@ -645,6 +650,38 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           syncSourceDataStrategy,
           syncMappingFields,
           enableSyncSourceData: true,
+          isReUpload
+        });
+
+        if (!formData) {
+          return;
+        }
+
+        onSubmit(formData);
+      } catch (error) {
+        console.error('Form validation failed:', error);
+      }
+    };
+
+    const handleEditSaveFromBasicStep = async () => {
+      try {
+        const basicValid = await validateBasicInfo();
+        if (!basicValid) {
+          return;
+        }
+
+        syncBasicInfoValues();
+        const values = getSubmitValues();
+        const formData = buildObjectTypeFormData({
+          values,
+          selectedIcon,
+          initialOntologyModelID: initialValues?.ontologyModelID,
+          dataSource,
+          attributeFields,
+          objectTypeAttributes,
+          syncSourceDataStrategy,
+          syncMappingFields,
+          enableSyncSourceData: initialValues?.enableSyncSourceData === true,
           isReUpload
         });
 
@@ -690,7 +727,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     };
 
     React.useImperativeHandle(ref, () => ({
-      submit: handleSubmit
+      submit: isEdit ? handleEditSaveFromBasicStep : handleSubmit
     }));
 
     const renderBasicInfo = () => (
@@ -787,6 +824,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         initialFileList={initialFileList}
         setInitialFileList={setInitialFileList}
         styles={styles}
+        readOnly={secondaryStepsReadOnly}
       />
     );
 
@@ -801,6 +839,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         fieldsLoading={fieldsLoading}
         setFieldsLoading={setFieldsLoading}
         styles={styles}
+        readOnly={secondaryStepsReadOnly}
       />
     );
 
@@ -822,6 +861,54 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       const isInstanceSyncStep = currentStep === INSTANCE_SYNC_STEP;
       const skipText = isEdit ? '跳过第3步，直接保存' : '跳过第3步，直接创建';
       const submitText = isEdit ? '保存' : '确定';
+
+      if (isEdit) {
+        return (
+          <div className="absolute bottom-0 left-0 right-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">
+            <div className="flex justify-start gap-[8px]">
+              {isFirstStep && (
+                <>
+                  <Button
+                    type="primary"
+                    onClick={handleEditSaveFromBasicStep}
+                    loading={loading}
+                  >
+                    保存
+                  </Button>
+                  <Button onClick={handleNextStep} disabled={loading}>
+                    下一步
+                  </Button>
+                </>
+              )}
+
+              {isModelingStep && (
+                <>
+                  <Button
+                    type="primary"
+                    onClick={handleNextStep}
+                    disabled={loading}
+                  >
+                    下一步
+                  </Button>
+                  <Button onClick={handlePrevStep} disabled={loading}>
+                    上一步
+                  </Button>
+                </>
+              )}
+
+              {isInstanceSyncStep && (
+                <Button onClick={handlePrevStep} disabled={loading}>
+                  上一步
+                </Button>
+              )}
+
+              <Button onClick={onCancel} disabled={loading}>
+                取消
+              </Button>
+            </div>
+          </div>
+        );
+      }
 
       return (
         <div className="absolute bottom-0 left-0 right-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">

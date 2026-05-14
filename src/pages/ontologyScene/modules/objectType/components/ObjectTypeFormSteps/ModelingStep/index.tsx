@@ -55,6 +55,7 @@ interface ModelingStepProps {
   initialFileList: any[];
   setInitialFileList: React.Dispatch<React.SetStateAction<any[]>>;
   styles: Record<string, string>;
+  readOnly?: boolean;
 }
 
 export default function ModelingStep({
@@ -72,7 +73,8 @@ export default function ModelingStep({
   setIsReUpload,
   initialFileList,
   setInitialFileList,
-  styles
+  styles,
+  readOnly = false
 }: ModelingStepProps) {
   const syncAttributes = (fields: ObjectTypeAttributeField[]) => {
     setObjectTypeAttributes(fields);
@@ -253,6 +255,7 @@ export default function ModelingStep({
         <Radio.Group
           value={dataSource.type}
           onChange={handleDataSourceTypeChange}
+          disabled={readOnly}
         >
           <Radio value={DATA_SOURCE_TYPE.LOCAL_CSV}>本地CSV</Radio>
           <Radio value={DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC}>数据库/表</Radio>
@@ -283,6 +286,7 @@ export default function ModelingStep({
             maxSize={100}
             customAction={`${PrefixAimdp}/UploadOntologyEntityDataFile`}
             fileList={initialFileList}
+            disabled={readOnly}
             onFileChange={(file) => {
               if (
                 file === undefined ||
@@ -316,6 +320,7 @@ export default function ModelingStep({
           fieldPrefix="modeling"
           styles={styles}
           ontologySqlTestTaskType="TABLE_REALTIME_SYNC"
+          readOnly={readOnly}
         />
       )}
 
@@ -325,6 +330,7 @@ export default function ModelingStep({
         setAttributeFields={setObjectTypeAttributes}
         fieldsLoading={fieldsLoading}
         styles={styles}
+        readOnly={readOnly}
       />
     </>
   );

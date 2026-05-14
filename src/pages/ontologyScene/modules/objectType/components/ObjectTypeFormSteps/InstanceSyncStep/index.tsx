@@ -38,6 +38,7 @@ interface InstanceSyncStepProps {
   fieldsLoading: boolean;
   setFieldsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   styles: Record<string, string>;
+  readOnly?: boolean;
 }
 
 function isSuccessResponse(response: any): boolean {
@@ -76,7 +77,8 @@ export default function InstanceSyncStep({
   setSyncMappingFields,
   fieldsLoading,
   setFieldsLoading,
-  styles
+  styles,
+  readOnly = false
 }: InstanceSyncStepProps) {
   const currentProjectID = useUserInfoStore((state) => state.projectId?.[1]);
   const [sourceFields, setSourceFields] = useState<SourceTableField[]>([]);
@@ -213,7 +215,9 @@ export default function InstanceSyncStep({
       if (isSuccessResponse(response)) {
         const fields = normalizeSourceFieldsFromTiDBSchema(response.data);
         setSourceFields(fields);
-        await applyAutoMapping(fields);
+        if (!readOnly) {
+          await applyAutoMapping(fields);
+        }
       } else {
         Message.error(response.message || '加载同步源表字段失败');
         setSourceFields([]);
@@ -277,7 +281,9 @@ export default function InstanceSyncStep({
     }
     const fields = finkSqlParsedColumnsToSourceTableFields(columns);
     setSourceFields(fields);
-    void applyAutoMapping(fields);
+    if (!readOnly) {
+      void applyAutoMapping(fields);
+    }
   };
 
   return (
@@ -295,12 +301,14 @@ export default function InstanceSyncStep({
         styles={styles}
         ontologySqlTestTaskType="TABLE_REALTIME_SYNC"
         syncSourceDataStrategyForSqlTest={syncSourceDataStrategy}
+        readOnly={readOnly}
       />
 
       <SyncSourceDataStrategyFormSection
         styles={styles}
         syncSourceDataStrategy={syncSourceDataStrategy}
         onStrategyUpdate={updateStrategy}
+        readOnly={readOnly}
       />
 
       <InstanceSyncMappingTable
@@ -310,6 +318,7 @@ export default function InstanceSyncStep({
         sourceFields={sourceFields}
         loading={fieldsLoading}
         styles={styles}
+        readOnly={readOnly}
       />
     </>
   );
