@@ -35,8 +35,13 @@ const BASIC_STEP = 0;
 const MODELING_STEP = 1;
 const INSTANCE_SYNC_STEP = 2;
 
-const clampStep = (step: number) =>
-  Math.min(INSTANCE_SYNC_STEP, Math.max(BASIC_STEP, step));
+const clampStep = (step: number, maxStep: number) =>
+  Math.min(maxStep, Math.max(BASIC_STEP, step));
+
+const maxStepForDataSourceType = (type: DataSourceType | undefined) =>
+  type === DATA_SOURCE_TYPE.LOCAL_CSV ? MODELING_STEP : INSTANCE_SYNC_STEP;
+
+const CSV_FORM_STEPS = ['基本信息', '对象类型建模'] as const;
 
 type BasicInfoValues = Partial<
   Pick<
@@ -154,10 +159,16 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const [, setFileUploaded] = useState(false);
     const [isReUpload, setIsReUpload] = useState(false);
     const [initialFileList, setInitialFileList] = useState<any[]>([]);
-    const [currentStep, setCurrentStep] = useState(() =>
-      clampStep(initialStep ?? BASIC_STEP)
-    );
+    const [currentStep, setCurrentStep] = useState(() => {
+      const initialDsType =
+        initialValues?._dataSource?.type ?? DATA_SOURCE_TYPE.LOCAL_CSV;
+      return clampStep(
+        initialStep ?? BASIC_STEP,
+        maxStepForDataSourceType(initialDsType)
+      );
+    });
     const secondaryStepsReadOnly = isEdit;
+    const isLocalCsv = dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV;
     const [basicInfoValues, setBasicInfoValues] = useState<BasicInfoValues>(
       () => ({
         code: initialValues?.code,
@@ -352,6 +363,15 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         setSyncSourceDataStrategy(DEFAULT_SYNC_SOURCE_DATA_STRATEGY);
       }
     }, [initialValues, form, isEdit]);
+
+    useEffect(() => {
+      if (
+        dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV &&
+        currentStep === INSTANCE_SYNC_STEP
+      ) {
+        setCurrentStep(MODELING_STEP);
+      }
+    }, [dataSource.type, currentStep]);
 
     const handleIconChange = (iconValue: string) => {
       setSelectedIcon(iconValue);
@@ -617,6 +637,9 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       }
 
       if (currentStep === MODELING_STEP) {
+        if (dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV) {
+          return;
+        }
         if (secondaryStepsReadOnly) {
           setCurrentStep(INSTANCE_SYNC_STEP);
           return;
@@ -671,6 +694,43 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         }
 
         syncBasicInfoValues();
+        const values = getSubmitValues();
+        const formData = buildObjectTypeFormData({
+          values,
+          selectedIcon,
+          initialOntologyModelID: initialValues?.ontologyModelID,
+          dataSource,
+          attributeFields,
+          objectTypeAttributes,
+          syncSourceDataStrategy,
+          syncMappingFields,
+          enableSyncSourceData: initialValues?.enableSyncSourceData === true,
+          isReUpload
+        });
+
+        if (!formData) {
+          return;
+        }
+
+        onSubmit(formData);
+      } catch (error) {
+        console.error('Form validation failed:', error);
+      }
+    };
+
+    const handleEditSaveFromModelingWithoutSync = async () => {
+      try {
+        const basicValid = await validateBasicInfo();
+        if (!basicValid) {
+          return;
+        }
+
+        syncBasicInfoValues();
+        const modelingValid = await validateModeling();
+        if (!modelingValid) {
+          return;
+        }
+
         const values = getSubmitValues();
         const formData = buildObjectTypeFormData({
           values,
@@ -844,6 +904,13 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     );
 
     const renderStepContent = () => {
+      if (
+        dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV &&
+        currentStep === INSTANCE_SYNC_STEP
+      ) {
+        return renderModeling();
+      }
+
       if (currentStep === BASIC_STEP) {
         return renderBasicInfo();
       }
@@ -883,13 +950,23 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
 
               {isModelingStep && (
                 <>
-                  <Button
-                    type="primary"
-                    onClick={handleNextStep}
-                    disabled={loading}
-                  >
-                    下一步
-                  </Button>
+                  {isLocalCsv ? (
+                    <Button
+                      type="primary"
+                      onClick={handleEditSaveFromModelingWithoutSync}
+                      loading={loading}
+                    >
+                      保存
+                    </Button>
+                  ) : (
+                    <Button
+                      type="primary"
+                      onClick={handleNextStep}
+                      disabled={loading}
+                    >
+                      下一步
+                    </Button>
+                  )}
                   <Button onClick={handlePrevStep} disabled={loading}>
                     上一步
                   </Button>
@@ -925,22 +1002,34 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
 
             {isModelingStep && (
               <>
-                <Button
-                  type="primary"
-                  onClick={handleNextStep}
-                  disabled={loading}
-                >
-                  下一步
-                </Button>
+                {isLocalCsv ? (
+                  <Button
+                    type="primary"
+                    onClick={handleSkipInstanceSyncAndSubmit}
+                    loading={loading}
+                  >
+                    确认创建
+                  </Button>
+                ) : (
+                  <Button
+                    type="primary"
+                    onClick={handleNextStep}
+                    disabled={loading}
+                  >
+                    下一步
+                  </Button>
+                )}
                 <Button onClick={handlePrevStep} disabled={loading}>
                   上一步
                 </Button>
-                <Button
-                  onClick={handleSkipInstanceSyncAndSubmit}
-                  loading={loading}
-                >
-                  {skipText}
-                </Button>
+                {!isLocalCsv && (
+                  <Button
+                    onClick={handleSkipInstanceSyncAndSubmit}
+                    loading={loading}
+                  >
+                    {skipText}
+                  </Button>
+                )}
               </>
             )}
 
@@ -976,7 +1065,10 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           showFooter ? 'flex-1 pb-24' : ''
         )}
       >
-        <ObjectTypeFormSteps currentStep={currentStep} />
+        <ObjectTypeFormSteps
+          currentStep={currentStep}
+          steps={isLocalCsv ? [...CSV_FORM_STEPS] : undefined}
+        />
         <div className={showFooter ? 'flex-1' : ''}>
           <Form
             form={form}
