@@ -353,7 +353,7 @@ export interface OntologyTestFinkSQLReq {
 }
 
 export interface SyncSourceDataStrategy extends SyncStrategy {
-  sourceDataInfo: SourceDataInfo;
+  sourceDataInfo?: SourceDataInfo;
   /**
    * 后端创建接口校验的同步策略结构
    */
