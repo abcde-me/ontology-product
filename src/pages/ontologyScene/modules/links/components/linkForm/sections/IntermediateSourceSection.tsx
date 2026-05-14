@@ -245,7 +245,11 @@ export default function IntermediateSourceSection({
                   }
                 />
               </FormItem>
-              <FormItem label="增量时间列" field="jdbcIncrementalTimeField">
+              <FormItem
+                label="增量时间列"
+                field="jdbcIncrementalTimeField"
+                rules={[{ required: true, message: '请输入增量时间列' }]}
+              >
                 <Input
                   placeholder="如 update_time, last_modified"
                   value={syncSourceDataStrategy.jdbcIncrementalTimeField}
@@ -254,7 +258,11 @@ export default function IntermediateSourceSection({
                   }
                 />
               </FormItem>
-              <FormItem label="断点辅助列" field="jdbcCheckpointField">
+              <FormItem
+                label="断点辅助列"
+                field="jdbcCheckpointField"
+                rules={[{ required: true, message: '请输入断点辅助列' }]}
+              >
                 <Input
                   placeholder="如 id、主键或组合列名"
                   value={syncSourceDataStrategy.jdbcCheckpointField}

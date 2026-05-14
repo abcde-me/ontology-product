@@ -473,7 +473,12 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       ];
 
       if (isPollingMode) {
-        validateFields.push('jdbcPollingIntervalSeconds', 'pollFetchSize');
+        validateFields.push(
+          'jdbcPollingIntervalSeconds',
+          'pollFetchSize',
+          'jdbcIncrementalTimeField',
+          'jdbcCheckpointField'
+        );
       }
 
       try {
@@ -494,7 +499,9 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       if (
         isPollingMode &&
         (!syncSourceDataStrategy.jdbcPollingIntervalSeconds ||
-          !syncSourceDataStrategy.pollFetchSize)
+          !syncSourceDataStrategy.pollFetchSize ||
+          !syncSourceDataStrategy.jdbcIncrementalTimeField?.trim() ||
+          !syncSourceDataStrategy.jdbcCheckpointField?.trim())
       ) {
         Message.warning('请完整填写轮询参数');
         return false;
