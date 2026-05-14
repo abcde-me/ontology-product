@@ -31,7 +31,7 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
   ) => {
     return (
       <div className={`flex gap-[8px] ${width}`}>
-        <div className="flex w-[100px] flex-shrink-0 items-center gap-[4px] text-[14px] leading-[22px] text-[var(--color-text-4)]">
+        <div className="flex w-[110px] flex-shrink-0 items-center gap-[4px] text-[14px] leading-[22px] text-[var(--color-text-4)]">
           <span>{label}</span>
           {tooltip && (
             <Tooltip content={tooltip}>
@@ -121,23 +121,26 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
   const syncMode = syncSourceDataStrategy.mode;
   const isPollingMode =
     syncMode === SyncMode.JDBC_POLLING || syncMode === 'JDBC_POLLING';
+  const queryMode = syncSourceDataStrategy.sourceDataInfo?.queryMode;
+  const isSqlMode = queryMode === 'sql';
 
-  // 同步模式显示（轮询模式需要添加SQL详情链接）
-  const syncModeDisplay = isPollingMode ? (
-    <div className="flex items-center gap-[8px]">
-      <span className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
-        {getSyncModeText(syncMode)}
-      </span>
-      <span
-        className="cursor-pointer text-[14px] leading-[22px] text-[rgba(var(--primary-6))] hover:underline"
-        onClick={() => setSqlModalVisible(true)}
-      >
-        SQL详情
-      </span>
-    </div>
-  ) : (
-    getSyncModeText(syncMode)
-  );
+  // 同步模式显示（轮询模式且查询模式为sql时需要添加SQL详情链接）
+  const syncModeDisplay =
+    isPollingMode && isSqlMode ? (
+      <div className="flex items-center gap-[8px]">
+        <span className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
+          {getSyncModeText(syncMode)}
+        </span>
+        <span
+          className="cursor-pointer text-[14px] leading-[22px] text-[rgba(var(--primary-6))] hover:underline"
+          onClick={() => setSqlModalVisible(true)}
+        >
+          SQL详情
+        </span>
+      </div>
+    ) : (
+      getSyncModeText(syncMode)
+    );
 
   return (
     <>
@@ -253,8 +256,8 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
         </>
       )}
 
-      {/* SQL详情弹窗（仅轮询模式） */}
-      {isPollingMode && (
+      {/* SQL详情弹窗（仅轮询模式且查询模式为sql） */}
+      {isPollingMode && isSqlMode && (
         <SqlDetailModal
           visible={sqlModalVisible}
           onClose={() => setSqlModalVisible(false)}
