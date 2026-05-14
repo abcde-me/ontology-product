@@ -22,9 +22,11 @@ import {
 } from './ObjectTypeFormUtils/types';
 import {
   legacyFieldToObjectTypeAttribute,
-  mergeOntologyPhysicalPropertiesForForm
+  mergeOntologyPhysicalPropertiesForForm,
+  mergeOntologyPhysicalPropertiesListForForm
 } from './ObjectTypeFormUtils/attributeFields';
 import { buildObjectTypeFormData } from './ObjectTypeFormHooks/useObjectTypeSubmit';
+import type { OntologyPhysicalPropertiesList } from '@/types/objectType';
 
 export type { ObjectTypeFormData } from './ObjectTypeFormUtils/types';
 
@@ -282,8 +284,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             (field) => field.propertyID !== undefined
           );
           if (usesNewPropertyShape) {
-            const objectAttributes = propertyList.map((field) =>
-              legacyFieldToObjectTypeAttribute(field)
+            const objectAttributes = mergeOntologyPhysicalPropertiesListForForm(
+              propertyList as OntologyPhysicalPropertiesList[]
             );
             setObjectTypeAttributes(objectAttributes);
             setAttributeFields(

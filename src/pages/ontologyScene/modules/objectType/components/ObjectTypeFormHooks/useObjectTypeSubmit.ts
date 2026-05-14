@@ -13,6 +13,7 @@ import {
   OBJECT_TYPE_ICON_OPTIONS
 } from '@/pages/ontologyScene/common/constants';
 import {
+  VECTOR_FIELD_SUFFIX,
   flattenOntologyPhysicalPropertiesForSubmit,
   objectTypeAttributeToLegacyField
 } from '../ObjectTypeFormUtils/attributeFields';
@@ -102,7 +103,9 @@ function buildPhysicalProperties(
     }
     return '';
   };
-  const result = objectTypeAttributes.map((field) => {
+  const result: OntologyPhysicalPropertiesList[] = [];
+
+  for (const field of objectTypeAttributes) {
     const mapping = syncByPropertyID.get(field.propertyID);
     const sourceColumnName =
       mapping?.sourceColumnName || field.sourceColumnName || field.propertyID;
@@ -110,29 +113,62 @@ function buildPhysicalProperties(
       mapping?.sourceCoumnOriginName || sourceColumnName;
     const sourceColumnType =
       mapping?.sourceColumnType || field.sourceColumnType;
-    return {
+    const sourceTableName = resolveSourceTableName(field);
+    const sourceColumnComment =
+      mapping?.sourceColumnComment ||
+      field.sourceColumnComment ||
+      field.propertyComment;
+    const vectorizationOn =
+      (mapping?.isVector ?? (field._vectorizationOn ? 1 : 0)) === 1;
+
+    result.push({
       propertyID: field.backendPropertyID || 0,
       propertyName: field.propertyID,
       propertyComment: field.propertyComment,
       propertyType: field.propertyType,
       isPrimary: field.isPrimary,
-      isVector: mapping?.isVector ?? (field._vectorizationOn ? 1 : 0),
+      isVector: 0,
       publicPropertyID: field.publicPropertyID || 0,
       sourceColumnName,
-      sourceColumnComment:
-        mapping?.sourceColumnComment ||
-        field.sourceColumnComment ||
-        field.propertyComment,
+      sourceColumnComment,
       sourceColumnType: sourceColumnType || field.propertyType,
       sourceCoumnOriginName,
-      sourceTableName: resolveSourceTableName(field),
+      sourceTableName,
       sourcePrimaryKey,
-      vectorSourceFieldName:
-        (mapping?.isVector ?? (field._vectorizationOn ? 1 : 0)) === 1
-          ? field.propertyID
-          : ''
-    };
-  });
+      vectorSourceFieldName: ''
+    });
+
+    if (vectorizationOn) {
+      const vecName = `${field.propertyID}${VECTOR_FIELD_SUFFIX}`;
+      const vecComment =
+        field._vectorComment ??
+        `${field.propertyComment || ''}${VECTOR_FIELD_SUFFIX}`;
+      let vecBackendId = 0;
+      if (
+        field._vectorPropertyId !== undefined &&
+        field._vectorPropertyId !== ''
+      ) {
+        const n = Number(field._vectorPropertyId);
+        if (Number.isFinite(n)) vecBackendId = Math.trunc(n);
+      }
+      result.push({
+        propertyID: vecBackendId,
+        propertyName: vecName,
+        propertyComment: vecComment,
+        propertyType: 'vector',
+        isPrimary: 0,
+        isVector: 1,
+        publicPropertyID: 0,
+        sourceColumnName,
+        sourceColumnComment,
+        sourceColumnType: sourceColumnType || field.propertyType,
+        sourceCoumnOriginName,
+        sourceTableName,
+        sourcePrimaryKey,
+        vectorSourceFieldName: field.propertyID
+      });
+    }
+  }
 
   return result;
 }
