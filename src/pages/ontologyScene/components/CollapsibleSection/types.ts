@@ -72,6 +72,9 @@ export interface SyncSourceDataStrategy {
   pollFetchSize?: number;
   parallelism?: number;
   exceptionStrategy?: ExceptionStrategy | string;
+  jdbcCheckpointField?: string;
+  jdbcIncrementalTimeField?: string;
+  jdbcPollingIntervalSeconds?: number;
   jdbcSyncSqlFull?: string;
   jdbcSyncSqlIncrement?: string;
 }

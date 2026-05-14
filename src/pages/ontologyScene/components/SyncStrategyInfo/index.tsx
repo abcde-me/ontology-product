@@ -5,9 +5,9 @@ import {
   SyncMode,
   ConflictStrategy,
   SyncScope,
-  ExceptionStrategy,
-  SyncSourceDataStrategy
+  ExceptionStrategy
 } from '../CollapsibleSection/types';
+import { SyncSourceDataStrategy } from '@/types/objectType';
 
 interface SyncStrategyInfoProps {
   enableSyncSourceData?: boolean;
@@ -132,35 +132,99 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
 
   return (
     <>
-      {/* 第一行：同步模式、冲突策略 */}
-      <div className="mb-[12px] flex gap-[16px]">
-        {renderField('同步模式', syncModeDisplay)}
-        {renderField(
-          '冲突策略',
-          getConflictStrategyText(syncSourceDataStrategy.conflictStrategy)
-        )}
-      </div>
+      {/* CDC 模式 */}
+      {!isPollingMode && (
+        <>
+          {/* 第一行：同步模式、冲突策略 */}
+          <div className="mb-[12px] flex gap-[16px]">
+            {renderField('同步模式', syncModeDisplay)}
+            {renderField(
+              '冲突策略',
+              getConflictStrategyText(syncSourceDataStrategy.conflictStrategy)
+            )}
+          </div>
 
-      {/* 第二行：同步范围、单次拉取数量 */}
-      <div className="mb-[12px] flex gap-[16px]">
-        {renderField(
-          '同步范围',
-          getSyncScopeText(syncSourceDataStrategy.syncScope)
-        )}
-        {renderField(
-          '单次拉取数量',
-          syncSourceDataStrategy.pollFetchSize?.toString()
-        )}
-      </div>
+          {/* 第二行：同步范围、并行数 */}
+          <div className="mb-[12px] flex gap-[16px]">
+            {renderField(
+              '同步范围',
+              getSyncScopeText(syncSourceDataStrategy.syncScope)
+            )}
+            {renderField(
+              '并行数',
+              syncSourceDataStrategy.parallelism?.toString()
+            )}
+          </div>
 
-      {/* 第三行：并行数、异常策略 */}
-      <div className="flex gap-[16px]">
-        {renderField('并行数', syncSourceDataStrategy.parallelism?.toString())}
-        {renderField(
-          '异常策略',
-          getExceptionStrategyText(syncSourceDataStrategy.exceptionStrategy)
-        )}
-      </div>
+          {/* 第三行：异常策略 */}
+          <div className="flex gap-[16px]">
+            {renderField(
+              '异常策略',
+              getExceptionStrategyText(syncSourceDataStrategy.exceptionStrategy)
+            )}
+          </div>
+        </>
+      )}
+
+      {/* 轮询模式 */}
+      {isPollingMode && (
+        <>
+          {/* 第一行：同步模式、轮询间隔 */}
+          <div className="mb-[12px] flex gap-[16px]">
+            {renderField('同步模式', syncModeDisplay)}
+            {renderField(
+              '轮询间隔',
+              syncSourceDataStrategy.jdbcPollingIntervalSeconds
+                ? `${syncSourceDataStrategy.jdbcPollingIntervalSeconds}秒`
+                : undefined
+            )}
+          </div>
+
+          {/* 第二行：单次拉取数量、增量时间列 */}
+          <div className="mb-[12px] flex gap-[16px]">
+            {renderField(
+              '单次拉取数量',
+              syncSourceDataStrategy.pollFetchSize?.toString()
+            )}
+            {renderField(
+              '增量时间列',
+              syncSourceDataStrategy.jdbcIncrementalTimeField
+            )}
+          </div>
+
+          {/* 第三行：断点辅助列、冲突策略 */}
+          <div className="mb-[12px] flex gap-[16px]">
+            {renderField(
+              '断点辅助列',
+              syncSourceDataStrategy.jdbcCheckpointField
+            )}
+            {renderField(
+              '冲突策略',
+              getConflictStrategyText(syncSourceDataStrategy.conflictStrategy)
+            )}
+          </div>
+
+          {/* 第四行：同步范围、并行数 */}
+          <div className="mb-[12px] flex gap-[16px]">
+            {renderField(
+              '同步范围',
+              getSyncScopeText(syncSourceDataStrategy.syncScope)
+            )}
+            {renderField(
+              '并行数',
+              syncSourceDataStrategy.parallelism?.toString()
+            )}
+          </div>
+
+          {/* 第五行：异常策略 */}
+          <div className="flex gap-[16px]">
+            {renderField(
+              '异常策略',
+              getExceptionStrategyText(syncSourceDataStrategy.exceptionStrategy)
+            )}
+          </div>
+        </>
+      )}
 
       {/* SQL详情弹窗（仅轮询模式） */}
       {isPollingMode && (
