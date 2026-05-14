@@ -60,30 +60,16 @@ export const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
       </>
     );
   }
-
+  console.log(
+    'sourceType',
+    sourceType,
+    SourceType.DATABASE,
+    sourceType === SourceType.DATABASE
+  );
   // 数据库/表类型
   if (sourceType === SourceType.DATABASE) {
     const queryMode = sourceDataInfo?.queryMode;
-
-    // 选择数据表
-    if (queryMode === QueryMode.SELECTED || queryMode === 'selected') {
-      const tableDisplay =
-        sourceDataInfo?.databaseName && sourceDataInfo?.tableName
-          ? `${sourceDataInfo.databaseName}/${sourceDataInfo.tableName}`
-          : '-';
-
-      return (
-        <>
-          <div className="mb-[12px] flex gap-[16px]">
-            {renderField('数据来源', sourceDataInfo?.connectorName)}
-            {renderField('数据库', sourceDataInfo?.connectorSubtype)}
-          </div>
-          <div className="flex gap-[16px]">
-            {renderField('数据表', tableDisplay)}
-          </div>
-        </>
-      );
-    }
+    console.log('queryMode', queryMode, sourceDataInfo);
 
     // 自定义SQL
     if (queryMode === QueryMode.SQL || queryMode === 'sql') {
@@ -121,6 +107,24 @@ export const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
         </>
       );
     }
+
+    // 选择数据表（包括 queryMode 为 'selected' 或空字符串的情况）
+    const tableDisplay =
+      sourceDataInfo?.databaseName && sourceDataInfo?.tableName
+        ? `${sourceDataInfo.databaseName}/${sourceDataInfo.tableName}`
+        : '-';
+
+    return (
+      <>
+        <div className="mb-[12px] flex gap-[16px]">
+          {renderField('数据来源', sourceDataInfo?.connectorName)}
+          {renderField('数据库', sourceDataInfo?.connectorSubtype)}
+        </div>
+        <div className="flex gap-[16px]">
+          {renderField('数据表', tableDisplay)}
+        </div>
+      </>
+    );
   }
 
   // 默认显示 -

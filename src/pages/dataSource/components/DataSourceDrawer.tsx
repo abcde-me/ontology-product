@@ -133,10 +133,10 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
           editingRecord.id,
           submitData as DataSourceFormData
         );
-        Message.success('更新成功');
+        Message.success('数据源更新成功');
       } else {
         await addDataSource(submitData as DataSourceFormData);
-        Message.success('新增成功');
+        Message.success('数据源链接成功');
       }
 
       form.resetFields();

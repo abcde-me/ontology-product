@@ -593,42 +593,46 @@ export default function LinkDetailDrawer({
           </div>
         </CollapsibleSection>
 
-        {/* 数据源 */}
-        <CollapsibleSection
-          title="数据源"
-          defaultExpanded={false}
-          loading={basicInfoLoading}
-          expandIcon={
-            <ExpandIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
-          }
-          collapseIcon={
-            <AsideIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
-          }
-        >
-          <DataSourceInfo
-            sourceType={basicInfo?.sourceType}
-            sourceDataInfo={basicInfo?.sourceDataInfo}
-            filePath={basicInfo?.filePath}
-          />
-        </CollapsibleSection>
+        {/* 数据源 - 仅当 type === 3 时显示 */}
+        {displayData?.type === 3 && (
+          <CollapsibleSection
+            title="数据源"
+            defaultExpanded={false}
+            loading={basicInfoLoading}
+            expandIcon={
+              <ExpandIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+            }
+            collapseIcon={
+              <AsideIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+            }
+          >
+            <DataSourceInfo
+              sourceType={basicInfo?.sourceType}
+              sourceDataInfo={basicInfo?.syncSourceDataStrategy?.sourceDataInfo}
+              filePath={basicInfo?.filePath}
+            />
+          </CollapsibleSection>
+        )}
 
-        {/* 同步策略 */}
-        <CollapsibleSection
-          title="同步策略"
-          defaultExpanded={false}
-          loading={basicInfoLoading}
-          expandIcon={
-            <ExpandIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
-          }
-          collapseIcon={
-            <AsideIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
-          }
-        >
-          <SyncStrategyInfo
-            enableSyncSourceData={basicInfo?.enableSyncSourceData}
-            syncSourceDataStrategy={basicInfo?.syncSourceDataStrategy}
-          />
-        </CollapsibleSection>
+        {/* 同步策略 - 仅当 type === 3 时显示 */}
+        {displayData?.type === 3 && (
+          <CollapsibleSection
+            title="中间表同步策略"
+            defaultExpanded={false}
+            loading={basicInfoLoading}
+            expandIcon={
+              <ExpandIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+            }
+            collapseIcon={
+              <AsideIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
+            }
+          >
+            <SyncStrategyInfo
+              syncSourceDataStrategy={basicInfo?.syncSourceDataStrategy}
+              skipEnableCheck={true}
+            />
+          </CollapsibleSection>
+        )}
 
         {/* Tab 内容 */}
         <Tabs
