@@ -5,6 +5,22 @@ import {
   SyncSourceDataStrategy
 } from './objectType';
 
+/** CreateOntologyLinkType / UpdateOntologyLinkType 的同步策略*/
+export interface CreateOntologyLinkTypeSyncStrategy {
+  conflictStrategy: string;
+  exceptionStrategy: string;
+  jdbcCheckpointField?: string;
+  jdbcIncrementalTimeField?: string;
+  jdbcPollingIntervalSeconds?: number;
+  jdbcSyncSqlFull?: string;
+  jdbcSyncSqlIncrement?: string;
+  mode: string;
+  parallelism: number;
+  pollFetchSize: number;
+  syncScope: string;
+  sourceDataInfo: SourceDataInfo;
+}
+
 export interface ListOntologyLinkTypeColumnReq {
   /**
    * 搜索内容
@@ -192,6 +208,10 @@ export interface GetOntologyLinkTypeRes {
    */
   syncSourceDataStrategy?: SyncSourceDataStrategy;
   /**
+   * 是否启用数据源同步
+   */
+  enableSyncSourceData?: boolean;
+  /**
    * 数据表名称
    */
   linkTableName?: string;
@@ -291,46 +311,6 @@ export interface GetOntologyLinkTypeRes {
    * 修改人
    */
   updateUser?: string;
-  /**
-   * 数据源信息
-   */
-  sourceDataInfo?: {
-    queryMode?: string;
-    connectorId?: number;
-    connectorName?: string;
-    connectorType?: string;
-    connectorSubtype?: string;
-    databaseName?: string;
-    tableName?: string;
-    sql?: string;
-  };
-  /**
-   * 是否启用数据源同步
-   */
-  enableSyncSourceData?: boolean;
-  /**
-   * 同步策略信息
-   */
-  syncSourceDataStrategy?: {
-    sourceDataInfo?: {
-      queryMode?: string;
-      connectorId?: number;
-      connectorName?: string;
-      connectorType?: string;
-      connectorSubtype?: string;
-      databaseName?: string;
-      tableName?: string;
-      sql?: string;
-    };
-    mode?: string;
-    conflictStrategy?: string;
-    syncScope?: string;
-    pollFetchSize?: number;
-    parallelism?: number;
-    exceptionStrategy?: string;
-    jdbcSyncSqlFull?: string;
-    jdbcSyncSqlIncrement?: string;
-  };
 }
 
 export interface OntologyLinkTypeColumn {
@@ -351,9 +331,9 @@ export interface OntologyLinkTypeColumn {
    */
   isUse?: number;
   /**
-   * 表字段
+   * 链接类型ID（创建时可传 0；更新时传链接类型 id）
    */
-  linkTypeID?: string;
+  linkTypeID?: number;
   /**
    * 表字段
    */
@@ -420,9 +400,9 @@ export interface CreateOntologyLinkTypeReq {
    */
   sourceDataInfo?: SourceDataInfo;
   /**
-   * N:N 中间表同步策略
+   * N:N 中间表同步策略（写入接口与 OpenAPI New2 对齐）
    */
-  syncSourceDataStrategy?: SyncSourceDataStrategy;
+  syncSourceDataStrategy?: CreateOntologyLinkTypeSyncStrategy;
   /**
    * 目标对象类型ID
    */

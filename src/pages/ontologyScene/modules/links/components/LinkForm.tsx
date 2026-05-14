@@ -37,9 +37,6 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     const {
       intermediateTable,
       setIntermediateTable,
-      setSelectedDatabase,
-      setSelectedTable,
-      setCascaderValue,
       attributeFields,
       setAttributeFields,
       fieldsLoading,
@@ -132,7 +129,11 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             initialValues.syncSourceDataStrategy?.sourceDataInfo
               ?.databaseName &&
             initialValues.syncSourceDataStrategy?.sourceDataInfo?.tableName
-              ? `${initialValues.syncSourceDataStrategy.sourceDataInfo.databaseName}/${initialValues.syncSourceDataStrategy.sourceDataInfo.tableName}`
+              ? [
+                  initialValues.syncSourceDataStrategy.sourceDataInfo
+                    .databaseName,
+                  initialValues.syncSourceDataStrategy.sourceDataInfo.tableName
+                ]
               : undefined,
           linkSourceSql:
             initialValues.syncSourceDataStrategy?.sourceDataInfo?.sql
@@ -152,19 +153,6 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                 initialValues.intermediateTable.table)
             )
           );
-
-          if (
-            initialValues.intermediateTable.type === 'data_lake_sync' &&
-            initialValues.intermediateTable.database &&
-            initialValues.intermediateTable.table
-          ) {
-            setSelectedDatabase(initialValues.intermediateTable.database);
-            setSelectedTable(initialValues.intermediateTable.table);
-            setCascaderValue([
-              initialValues.intermediateTable.database,
-              initialValues.intermediateTable.table
-            ]);
-          }
 
           if (initialValues.intermediateTable.filePath) {
             const fileName =
@@ -207,12 +195,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       form,
       initialValues,
       setAttributeFields,
-      setCascaderValue,
       setFileUploaded,
       setInitialFileList,
       setIntermediateTable,
-      setSelectedDatabase,
-      setSelectedTable,
       setSyncSourceDataStrategy
     ]);
 

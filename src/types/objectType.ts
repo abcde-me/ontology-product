@@ -296,13 +296,13 @@ export interface SyncStrategy {
    */
   exceptionStrategy: string;
   /**
-   * 轮询-断点辅助列
+   * 轮询-断点辅助列（轮询模式下必填）
    */
-  jdbcCheckpointField?: string;
+  jdbcCheckpointField: string;
   /**
-   * 轮询-增量时间列
+   * 轮询-增量时间列（轮询模式下必填）
    */
-  jdbcIncrementalTimeField?: string;
+  jdbcIncrementalTimeField: string;
   /**
    * 轮询-轮询间隔
    */
