@@ -96,6 +96,7 @@ interface ObjectTypeAttributeTableProps {
   >;
   fieldsLoading: boolean;
   styles: Record<string, string>;
+  readOnly?: boolean;
 }
 
 function createEmptyAttribute(): ObjectTypeAttributeField {
@@ -119,7 +120,8 @@ export default function ObjectTypeAttributeTable({
   attributeFields,
   setAttributeFields,
   fieldsLoading,
-  styles
+  styles,
+  readOnly = false
 }: ObjectTypeAttributeTableProps) {
   const [storeAsPublicLoading, setStoreAsPublicLoading] = useState<
     Record<string, boolean>
@@ -271,6 +273,7 @@ export default function ObjectTypeAttributeTable({
   };
 
   const handleStoreAsPublicChange = async (index: number, checked: boolean) => {
+    if (readOnly) return;
     const field = attributeFields[index];
     if (!field) return;
     const rowKey = getObjectTypeAttributeRowKey(field);
@@ -341,6 +344,7 @@ export default function ObjectTypeAttributeTable({
         render: (_, __, index) => (
           <Radio
             checked={attributeFields[index]?.isPrimary === 1}
+            disabled={readOnly}
             onChange={() => handlePrimaryChange(index)}
           />
         )
@@ -353,6 +357,7 @@ export default function ObjectTypeAttributeTable({
           <Input
             value={value}
             placeholder="请输入属性id"
+            disabled={readOnly}
             onChange={(propertyID) =>
               handleFieldChange(index, {
                 propertyID,
@@ -371,6 +376,7 @@ export default function ObjectTypeAttributeTable({
           <Input
             value={value}
             placeholder="请输入属性名称"
+            disabled={readOnly}
             onChange={(propertyComment) =>
               handleFieldChange(index, {
                 propertyComment,
@@ -399,6 +405,7 @@ export default function ObjectTypeAttributeTable({
               size="small"
               checked={record.isStoreAsPublic === 1}
               loading={storeAsPublicLoading[rowKey]}
+              disabled={readOnly}
               onChange={(checked) =>
                 handleStoreAsPublicChange(index, Boolean(checked))
               }
@@ -423,6 +430,7 @@ export default function ObjectTypeAttributeTable({
                 placeholder="请选择属性类型"
                 options={propertyTypeOptions}
                 showSearch
+                disabled={readOnly}
                 onChange={(nextBase: string) => {
                   let nextLength: number | undefined;
                   if (isLengthRequiredType(nextBase)) {
@@ -448,6 +456,7 @@ export default function ObjectTypeAttributeTable({
                   max={maxLength}
                   step={1}
                   precision={0}
+                  disabled={readOnly}
                   placeholder={`1-${maxLength}`}
                   onChange={(nextLength) => {
                     let numeric: number | undefined;
@@ -478,6 +487,7 @@ export default function ObjectTypeAttributeTable({
           <Switch
             size="small"
             checked={Boolean(record._vectorizationOn)}
+            disabled={readOnly}
             onChange={(checked) =>
               handleVectorizationChange(index, Boolean(checked))
             }
@@ -492,6 +502,7 @@ export default function ObjectTypeAttributeTable({
           <Button
             type="text"
             icon={<IconDelete />}
+            disabled={readOnly}
             onClick={() => handleDeleteRow(index)}
           />
         )
@@ -501,7 +512,8 @@ export default function ObjectTypeAttributeTable({
       attributeFields,
       storeAsPublicLoading,
       propertyTypeOptions,
-      handleVectorizationChange
+      handleVectorizationChange,
+      readOnly
     ]
   );
 
@@ -544,6 +556,7 @@ export default function ObjectTypeAttributeTable({
                         ? '请输入向量属性名称'
                         : '请先填写属性id'
                     }
+                    disabled={readOnly}
                     onChange={(val) => handleVectorCommentChange(index, val)}
                   />
                 )
@@ -563,16 +576,18 @@ export default function ObjectTypeAttributeTable({
         </div>
       );
     },
-    [handleVectorCommentChange]
+    [handleVectorCommentChange, readOnly]
   );
 
   return (
     <>
       <div className="my-[16px] flex items-center justify-between text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
         <span>对象类型属性</span>
-        <Button type="text" onClick={handleAddRow}>
-          + 添加行
-        </Button>
+        {!readOnly && (
+          <Button type="text" onClick={handleAddRow}>
+            + 添加行
+          </Button>
+        )}
       </div>
       <FormItem
         className={styles['attribute-fields-form-item']}

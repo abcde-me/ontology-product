@@ -23,6 +23,7 @@ interface InstanceSyncMappingTableProps {
   sourceFields: SourceTableField[];
   loading: boolean;
   styles: Record<string, string>;
+  readOnly?: boolean;
 }
 
 export default function InstanceSyncMappingTable({
@@ -31,7 +32,8 @@ export default function InstanceSyncMappingTable({
   setMappingFields,
   sourceFields,
   loading,
-  styles
+  styles,
+  readOnly = false
 }: InstanceSyncMappingTableProps) {
   const syncFields = (nextFields: InstanceSyncMappingField[]) => {
     setMappingFields(nextFields);
@@ -89,6 +91,7 @@ export default function InstanceSyncMappingTable({
                 )
             }
             onChange={(next) => {
+              if (readOnly) return;
               if (next === undefined || next === null || next === '') {
                 handleFieldChange(index, {
                   sourceColumnName: undefined,
@@ -114,6 +117,7 @@ export default function InstanceSyncMappingTable({
               }
             }}
             allowClear
+            disabled={readOnly}
           />
         )
       },
@@ -154,18 +158,12 @@ export default function InstanceSyncMappingTable({
         title: '向量化',
         dataIndex: 'isVector',
         width: 100,
-        render: (_, record, index) => (
-          <Switch
-            size="small"
-            checked={record.isVector === 1}
-            onChange={(checked) =>
-              handleFieldChange(index, { isVector: checked ? 1 : 0 })
-            }
-          />
+        render: (_, record) => (
+          <Switch size="small" checked={record.isVector === 1} disabled />
         )
       }
     ],
-    [sourceFieldOptions, sourceFields, mappingFields]
+    [sourceFieldOptions, sourceFields, mappingFields, readOnly]
   );
 
   return (

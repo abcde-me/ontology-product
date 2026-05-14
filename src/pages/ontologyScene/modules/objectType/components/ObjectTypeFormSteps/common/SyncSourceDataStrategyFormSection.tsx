@@ -73,6 +73,7 @@ export interface SyncSourceDataStrategyFormSectionProps {
   incrementSqlPlaceholder?: string;
   /** connectorTestFinkSQL.taskType */
   sqlTestTaskType?: string;
+  readOnly?: boolean;
 }
 
 const DEFAULT_SYNC_MODE_POPOVER = '选择实例数据同步的触发方式';
@@ -86,7 +87,8 @@ export default function SyncSourceDataStrategyFormSection({
   pollFetchSizePopover = DEFAULT_POLL_FETCH_POPOVER,
   fullSqlPlaceholder = '请输入全量SQL，例如 SELECT line_id,voltage_level,maint_org FROM ods_line_assets',
   incrementSqlPlaceholder = '请输入增量SQL，例如 SELECT voltage_level FROM ods_line_assets WHERE voltage_level > 400',
-  sqlTestTaskType = 'TABLE_REALTIME_SYNC'
+  sqlTestTaskType = 'TABLE_REALTIME_SYNC',
+  readOnly = false
 }: SyncSourceDataStrategyFormSectionProps) {
   const currentProjectID = useUserInfoStore((state) => state.projectId?.[1]);
   const [sqlTestLoading, setSqlTestLoading] = useState<
@@ -113,6 +115,7 @@ export default function SyncSourceDataStrategyFormSection({
   const isSqlPolling = currentQueryMode === 'sql' && isPollingMode;
 
   const executeTestSyncSql = async (type: SyncSqlType) => {
+    if (readOnly) return;
     const sql =
       type === 'full'
         ? syncSourceDataStrategy.jdbcSyncSqlFull || ''
@@ -202,7 +205,7 @@ export default function SyncSourceDataStrategyFormSection({
                   type="text"
                   size="small"
                   loading={sqlTestLoading[type]}
-                  disabled={!canTest}
+                  disabled={readOnly || !canTest}
                   onClick={() => executeTestSyncSql(type)}
                 >
                   测试
@@ -214,7 +217,9 @@ export default function SyncSourceDataStrategyFormSection({
             placeholder={placeholder}
             value={value}
             autoSize={{ minRows: 6 }}
+            disabled={readOnly}
             onChange={(sql) => {
+              if (readOnly) return;
               onStrategyUpdate(
                 field === 'jdbcSyncSqlFull'
                   ? { jdbcSyncSqlFull: sql }
@@ -267,6 +272,7 @@ export default function SyncSourceDataStrategyFormSection({
         <Radio.Group
           value={syncSourceDataStrategy.mode}
           onChange={(mode) => onStrategyUpdate({ mode })}
+          disabled={readOnly}
         >
           <Radio value="BINLOG_CDC">CDC</Radio>
           <Radio value="JDBC_POLLING">轮询</Radio>
@@ -302,6 +308,7 @@ export default function SyncSourceDataStrategyFormSection({
                 min={1}
                 step={1}
                 value={syncSourceDataStrategy.jdbcPollingIntervalSeconds}
+                disabled={readOnly}
                 onChange={(jdbcPollingIntervalSeconds) =>
                   onStrategyUpdate({
                     jdbcPollingIntervalSeconds:
@@ -329,6 +336,7 @@ export default function SyncSourceDataStrategyFormSection({
               min={1}
               step={1}
               value={syncSourceDataStrategy.pollFetchSize}
+              disabled={readOnly}
               onChange={(pollFetchSize) =>
                 onStrategyUpdate({ pollFetchSize: Number(pollFetchSize) || 1 })
               }
@@ -343,6 +351,7 @@ export default function SyncSourceDataStrategyFormSection({
             <Input
               placeholder="如update_time, last_modified"
               value={syncSourceDataStrategy.jdbcIncrementalTimeField}
+              disabled={readOnly}
               onChange={(jdbcIncrementalTimeField) =>
                 onStrategyUpdate({ jdbcIncrementalTimeField })
               }
@@ -357,6 +366,7 @@ export default function SyncSourceDataStrategyFormSection({
             <Input
               placeholder="如id、主键或组合列名"
               value={syncSourceDataStrategy.jdbcCheckpointField}
+              disabled={readOnly}
               onChange={(jdbcCheckpointField) =>
                 onStrategyUpdate({ jdbcCheckpointField })
               }
@@ -375,6 +385,7 @@ export default function SyncSourceDataStrategyFormSection({
           onChange={(conflictStrategy) =>
             onStrategyUpdate({ conflictStrategy })
           }
+          disabled={readOnly}
         >
           <Radio value="KEEP_SOURCE">保留数据源</Radio>
           <Radio value="KEEP_TARGET">保留目标表</Radio>
@@ -389,6 +400,7 @@ export default function SyncSourceDataStrategyFormSection({
         <Radio.Group
           value={syncSourceDataStrategy.syncScope}
           onChange={(syncScope) => onStrategyUpdate({ syncScope })}
+          disabled={readOnly}
         >
           <Radio value="INCREMENTAL">增量</Radio>
           <Radio value="FULL">全量</Radio>
@@ -401,6 +413,7 @@ export default function SyncSourceDataStrategyFormSection({
           min={1}
           step={1}
           value={syncSourceDataStrategy.parallelism}
+          disabled={readOnly}
           onChange={(parallelism) =>
             onStrategyUpdate({ parallelism: Number(parallelism) || 1 })
           }
@@ -424,6 +437,7 @@ export default function SyncSourceDataStrategyFormSection({
           onChange={(exceptionStrategy) =>
             onStrategyUpdate({ exceptionStrategy })
           }
+          disabled={readOnly}
         >
           <Radio value="STOP_ON_ERROR">立即停止</Radio>
           <Radio value="LOG_ERROR_AND_CONTINUE">继续消费</Radio>
