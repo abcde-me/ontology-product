@@ -137,8 +137,7 @@
   border: 1px solid var(--color-border-2);
   border-radius: 4px;
   background: var(--color-fill-1);
-  max-height: 200px;
-  overflow: auto;
+  overflow: visible;
 }
 
 .sql-action-result-header {
@@ -160,11 +159,156 @@
 .sql-action-result-message {
   white-space: pre-wrap;
   word-break: break-word;
+  max-height: 120px;
+  overflow: auto;
+}
+
+.sql-parse-result-table {
+  margin-top: 0;
 }
 
 .sql-action-result-columns {
   margin-top: 8px;
   color: var(--color-text-2);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+// 自定义 SQL 固定卡片（仅 SqlSourceSelector 的 sql 模式）
+.sql-custom-sql-card {
+  box-sizing: border-box;
+  width: 640px;
+  max-width: 100%;
+  height: 234px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-2);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--color-bg-2);
+}
+
+.sql-custom-sql-toolbar {
+  flex: 0 0 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: #fff;
+}
+
+.sql-custom-sql-toolbar-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-1);
+}
+
+.sql-custom-sql-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sql-custom-sql-input {
+  box-sizing: border-box;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  margin: 0;
+  padding: 8px 12px;
+  border: none;
+  border-top: 1px solid var(--color-border-2);
+  border-radius: 0;
+  background: var(--color-bg-2);
+  color: var(--color-text-1);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+
+  &::placeholder {
+    color: var(--color-text-3);
+  }
+
+  &:focus {
+    box-shadow: inset 0 0 0 1px var(--color-primary-light-3);
+  }
+}
+
+.sql-custom-sql-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  max-height: 200px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-top: 1px solid var(--color-border-2);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.sql-custom-sql-overlay--collapsed {
+  max-height: none;
+}
+
+.sql-custom-sql-overlay-header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: var(--color-text-1);
+  cursor: pointer;
+  text-align: left;
+}
+
+.sql-custom-sql-overlay-header-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sql-custom-sql-overlay-title {
+  font-weight: 500;
+}
+
+.sql-custom-sql-overlay-chevron {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--color-text-2);
+  transition: transform 0.2s ease;
+}
+
+.sql-custom-sql-overlay-chevron-collapsed {
+  transform: rotate(-90deg);
+}
+
+.sql-custom-sql-overlay-body {
+  flex: 1;
+  min-height: 0;
+  padding: 0 12px 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sql-custom-sql-overlay-message {
+  max-height: none;
+  overflow: visible;
   white-space: pre-wrap;
   word-break: break-word;
 }

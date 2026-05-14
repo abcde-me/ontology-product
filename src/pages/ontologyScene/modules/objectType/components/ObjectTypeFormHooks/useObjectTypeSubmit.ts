@@ -91,6 +91,17 @@ function buildPhysicalProperties(
           .filter((field) => field.isPrimary === 1)
           .map((field) => field.sourceColumnName || field.propertyID)
   ).filter(Boolean);
+  const isSqlDirectorySource =
+    dataSource?.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC &&
+    dataSource?.queryMode === 'sql';
+  const resolveSourceTableName = (field: ObjectTypeAttributeField) => {
+    const fromField = field.sourceTableName?.trim();
+    if (fromField) return fromField;
+    if (!isSqlDirectorySource && dataSource?.table?.trim()) {
+      return dataSource.table.trim();
+    }
+    return '';
+  };
   const result = objectTypeAttributes.map((field) => {
     const mapping = syncByPropertyID.get(field.propertyID);
     const sourceColumnName =
@@ -114,7 +125,7 @@ function buildPhysicalProperties(
         field.propertyComment,
       sourceColumnType: sourceColumnType || field.propertyType,
       sourceCoumnOriginName,
-      sourceTableName: dataSource?.table || '',
+      sourceTableName: resolveSourceTableName(field),
       sourcePrimaryKey,
       vectorSourceFieldName:
         (mapping?.isVector ?? (field._vectorizationOn ? 1 : 0)) === 1
@@ -175,12 +186,21 @@ export function buildObjectTypeFormData({
     return null;
   }
 
-  if (
-    dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC &&
-    (!dataSource.database || !dataSource.table)
-  ) {
-    Message.warning('请选择数据库和表');
-    return null;
+  if (dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC) {
+    const isSqlMode = dataSource.queryMode === 'sql';
+    if (!dataSource.connectorId) {
+      Message.warning('请选择数据源链接');
+      return null;
+    }
+    if (isSqlMode) {
+      if (!String(dataSource.sql ?? '').trim()) {
+        Message.warning('请先输入自定义SQL');
+        return null;
+      }
+    } else if (!dataSource.database || !dataSource.table) {
+      Message.warning('请选择数据库和表');
+      return null;
+    }
   }
 
   if (!objectTypeAttributes?.length && attributeFields.length === 0) {

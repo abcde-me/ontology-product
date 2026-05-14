@@ -70,6 +70,34 @@ const DEFAULT_SYNC_SOURCE_DATA_STRATEGY: SyncSourceDataStrategyFormState = {
   exceptionStrategy: 'STOP_ON_ERROR'
 };
 
+/** Form.Item 绑定 field 时会用表单值覆盖子组件的 value，需与 SqlSourceDataInfo 一致才能回显 */
+function buildSqlSourceSelectorFormFields(
+  prefix: 'modeling' | 'sync',
+  info?: Partial<
+    Pick<
+      SqlSourceDataInfo,
+      'connectorId' | 'databaseName' | 'tableName' | 'queryMode' | 'sql'
+    >
+  >
+): Record<string, unknown> {
+  if (!info) {
+    return {};
+  }
+  const queryMode = info.queryMode === 'sql' ? 'sql' : 'selected';
+  const rawId = info.connectorId;
+  const numeric = rawId === undefined || rawId === null ? NaN : Number(rawId);
+  const connectorId = Number.isFinite(numeric) ? numeric : undefined;
+  return {
+    [`${prefix}Connector`]: connectorId,
+    [`${prefix}QueryMode`]: queryMode,
+    [`${prefix}DatabaseTable`]:
+      queryMode === 'selected' && info.databaseName && info.tableName
+        ? [info.databaseName, info.tableName]
+        : undefined,
+    [`${prefix}Sql`]: info.sql
+  };
+}
+
 interface ObjectTypeFormProps {
   initialValues?: Partial<ObjectTypeFormData>;
   onSubmit: (data: ObjectTypeFormData) => void;
@@ -154,6 +182,40 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         }));
         const formData = form.getFieldsValue();
 
+        const isDirectorySyncModeling =
+          initialValues._dataSource?.type ===
+          DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC;
+        const modelingSqlSourcePatch = isDirectorySyncModeling
+          ? buildSqlSourceSelectorFormFields(
+              'modeling',
+              initialValues.sourceDataInfo
+                ? {
+                    ...initialValues.sourceDataInfo,
+                    queryMode:
+                      initialValues.sourceDataInfo.queryMode === 'sql'
+                        ? 'sql'
+                        : 'selected'
+                  }
+                : {
+                    connectorId: initialValues._dataSource?.connectorId,
+                    databaseName: initialValues._dataSource?.database,
+                    tableName: initialValues._dataSource?.table,
+                    queryMode:
+                      initialValues._dataSource?.queryMode === 'sql'
+                        ? 'sql'
+                        : 'selected',
+                    sql: initialValues._dataSource?.sql
+                  }
+            )
+          : {};
+        const syncSqlSourcePatch = initialValues.syncSourceDataStrategy
+          ?.sourceDataInfo
+          ? buildSqlSourceSelectorFormFields(
+              'sync',
+              initialValues.syncSourceDataStrategy.sourceDataInfo
+            )
+          : {};
+
         if (isEdit) {
           form.setFieldsValue({
             ...formData,
@@ -162,7 +224,9 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             dataSourceType:
               initialValues._dataSource?.type || DATA_SOURCE_TYPE.LOCAL_CSV,
             database: initialValues._dataSource?.database,
-            table: initialValues._dataSource?.table
+            table: initialValues._dataSource?.table,
+            ...modelingSqlSourcePatch,
+            ...syncSqlSourcePatch
           });
         } else {
           form.setFieldsValue({
@@ -170,7 +234,9 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             ...DEFAULT_INSTANCE_SYNC_VALUES,
             ...initialValues,
             dataSourceType:
-              formData.dataSourceType || DATA_SOURCE_TYPE.LOCAL_CSV
+              formData.dataSourceType || DATA_SOURCE_TYPE.LOCAL_CSV,
+            ...modelingSqlSourcePatch,
+            ...syncSqlSourcePatch
           });
         }
 
@@ -219,7 +285,10 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                 publicPropertyID: field.publicPropertyID || 0,
                 sourceColumnName: field.sourceColumnName,
                 sourceColumnComment: field.sourceColumnComment,
-                sourceColumnType: field.sourceColumnType
+                sourceColumnType: field.sourceColumnType,
+                ...(field.sourceTableName?.trim()
+                  ? { sourceTableName: field.sourceTableName.trim() }
+                  : {})
               }))
             );
           } else {
@@ -350,12 +419,21 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         return false;
       }
 
-      if (
-        dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC &&
-        (!dataSource.connectorId || !dataSource.database || !dataSource.table)
-      ) {
-        Message.warning('请选择数据源链接和数据表');
-        return false;
+      if (dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC) {
+        if (!dataSource.connectorId) {
+          Message.warning('请选择数据源链接');
+          return false;
+        }
+        const isModelingSqlMode = dataSource.queryMode === 'sql';
+        if (isModelingSqlMode) {
+          if (!String(dataSource.sql ?? '').trim()) {
+            Message.warning('请先输入自定义SQL');
+            return false;
+          }
+        } else if (!dataSource.database || !dataSource.table) {
+          Message.warning('请选择数据源链接和数据表');
+          return false;
+        }
       }
 
       if (objectTypeAttributes.length === 0) {

@@ -45,3 +45,24 @@ export const updateOntologyPublicProperties = async (
     .inRegion()
     .do();
 };
+
+export const listTiDBTypes = async (): Promise<ApiRes<{ types: string[] }>> => {
+  return await UAPI.RES.ListTiDBTypesApi({}).post({}).inRegion().do();
+};
+
+export const mapOntologyObjectTypeColumns = async (params: {
+  objectTypeColumns: string[];
+  sourceTableColumns: string[];
+}): Promise<
+  ApiRes<{
+    mapRelations: {
+      objectTypeColumnName: string;
+      sourceTableColumnName: string;
+    }[];
+  }>
+> => {
+  return await UAPI.RES.MapOntologyObjectTypeColumnsApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};

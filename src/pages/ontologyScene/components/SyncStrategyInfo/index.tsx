@@ -167,7 +167,7 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
         <SqlDetailModal
           visible={sqlModalVisible}
           onClose={() => setSqlModalVisible(false)}
-          title="SQL详情"
+          title="轮询"
           fullSql={syncSourceDataStrategy.jdbcSyncSqlFull}
           incrementSql={syncSourceDataStrategy.jdbcSyncSqlIncrement}
         />

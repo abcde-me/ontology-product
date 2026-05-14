@@ -31,9 +31,6 @@ export const SqlDetailModal: React.FC<SqlDetailModalProps> = ({
         {/* 单个SQL */}
         {sql && (
           <div className="flex flex-col gap-[8px]">
-            <div className="text-[14px] font-[600] leading-[22px] text-[var(--color-text-1)]">
-              SQL语句
-            </div>
             <div className="max-h-[300px] overflow-auto rounded border border-[var(--color-border-2)] bg-[#f7f8fa] p-[12px]">
               <pre className="whitespace-pre-wrap break-words font-mono text-[12px] leading-[20px] text-[var(--color-text-1)]">
                 {sql || '-'}

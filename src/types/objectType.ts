@@ -182,6 +182,10 @@ export interface CreateOntologyPhysicalProperty {
    * 向量源字段
    */
   vectorSourceFieldName?: string;
+  /**
+   * 数据源表名
+   */
+  sourceTableName?: string;
 }
 
 export enum SourceType {
@@ -210,6 +214,17 @@ export interface SourceDataInfo {
    * 数据表名称
    */
   tableName?: string;
+}
+
+/** ConnectorAnalyseFinkSQLColumns 返回的单列结构 */
+export interface ConnectorAnalyseFinkSqlColumnItem {
+  columnName: string;
+  columnType: string;
+  columnTable?: string;
+  columnOriginName?: string;
+  CoumnOriginName?: string;
+  primaryKey?: string[];
+  [key: string]: unknown;
 }
 
 export interface OntologyPhysicalPropertiesList {
@@ -320,6 +335,21 @@ export interface SyncStrategy {
    * 同步范围，增量-"INCREMENTAL";全量-"FULL";全量+增量-"FULL_THEN_INCREMENTAL"
    */
   syncScope: string;
+}
+
+/** OntologyTestFinkSQL 请求体中的同步策略（不含嵌套 sourceDataInfo） */
+export type OntologyTestFinkSQLSyncStrategyPayload = Omit<
+  SyncStrategy,
+  'fullSyncBatchSize'
+> & {
+  fullSyncBatchSize?: number;
+};
+
+export interface OntologyTestFinkSQLReq {
+  projectID: string;
+  sourceDataInfo: SourceDataInfo;
+  taskType: string;
+  syncSourceDataStrategy?: OntologyTestFinkSQLSyncStrategyPayload;
 }
 
 export interface SyncSourceDataStrategy extends SyncStrategy {

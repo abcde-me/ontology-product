@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Button,
   Form,
   Input,
+  InputNumber,
   Message,
   Popover,
   Radio,
@@ -14,9 +15,9 @@ import {
 import { IconDelete, IconQuestionCircle } from '@arco-design/web-react/icon';
 import {
   createOntologyPublicProperties,
-  deleteOntologyPublicProperties
+  deleteOntologyPublicProperties,
+  listTiDBTypes
 } from '@/api/ontologySceneLibrary/attributes';
-import { COLUMN_TYPE_OPTIONS } from '@/pages/ontologyScene/common/constants';
 import {
   createObjectTypeAttributeKey,
   getObjectTypeAttributeRowKey,
@@ -25,6 +26,66 @@ import {
 import { ObjectTypeAttributeField } from '../../ObjectTypeFormUtils/types';
 
 const FormItem = Form.Item;
+
+const LENGTH_REQUIRED_TYPES = [
+  'char',
+  'varchar',
+  'binary',
+  'varbinary'
+] as const;
+type LengthRequiredType = (typeof LENGTH_REQUIRED_TYPES)[number];
+const LENGTH_MAX_MAP: Record<LengthRequiredType, number> = {
+  char: 255,
+  varchar: 16383,
+  binary: 255,
+  varbinary: 65535
+};
+
+function isLengthRequiredType(type: string): type is LengthRequiredType {
+  return (LENGTH_REQUIRED_TYPES as readonly string[]).includes(
+    (type || '').toLowerCase()
+  );
+}
+
+function parsePropertyType(propertyType: string | undefined): {
+  base: string;
+  length?: number;
+} {
+  if (!propertyType) {
+    return { base: '' };
+  }
+  const match = /^\s*([A-Za-z_][\w]*)\s*(?:\(\s*(\d+)\s*\))?\s*$/.exec(
+    propertyType
+  );
+  if (!match) {
+    return { base: propertyType };
+  }
+  const [, base, lengthStr] = match;
+  return {
+    base,
+    length: lengthStr ? Number(lengthStr) : undefined
+  };
+}
+
+function combinePropertyType(base: string, length?: number) {
+  if (!base) return '';
+  if (isLengthRequiredType(base)) {
+    return length ? `${base}(${length})` : base;
+  }
+  return base;
+}
+
+function isPropertyTypeComplete(propertyType: string | undefined) {
+  if (!propertyType) return false;
+  const { base, length } = parsePropertyType(propertyType);
+  if (!base) return false;
+  if (isLengthRequiredType(base)) {
+    if (!length) return false;
+    const max = LENGTH_MAX_MAP[base.toLowerCase() as LengthRequiredType];
+    return length >= 1 && length <= max;
+  }
+  return true;
+}
 
 interface ObjectTypeAttributeTableProps {
   form: any;
@@ -41,7 +102,7 @@ function createEmptyAttribute(): ObjectTypeAttributeField {
     key: createObjectTypeAttributeKey('manual-field'),
     propertyID: '',
     propertyComment: '',
-    propertyType: COLUMN_TYPE_OPTIONS[0]?.value || 'varchar(500)',
+    propertyType: '',
     isPrimary: 0,
     isStoreAsPublic: 0,
     publicPropertyID: 0,
@@ -61,6 +122,44 @@ export default function ObjectTypeAttributeTable({
   const [storeAsPublicLoading, setStoreAsPublicLoading] = useState<
     Record<string, boolean>
   >({});
+  const [propertyTypeOptions, setPropertyTypeOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
+
+  useEffect(() => {
+    let canceled = false;
+    listTiDBTypes()
+      .then((response) => {
+        if (canceled) return;
+        if (
+          response.status === 200 &&
+          (response.code === '' || !response.code) &&
+          Array.isArray(response.data?.types) &&
+          response.data.types.length > 0
+        ) {
+          setPropertyTypeOptions(
+            response.data.types.map((type) => ({ label: type, value: type }))
+          );
+        } else {
+          setPropertyTypeOptions([]);
+          if (!canceled) {
+            Message.warning(
+              response.message || '获取属性类型列表失败，请稍后重试'
+            );
+          }
+        }
+      })
+      .catch((error) => {
+        console.error('获取属性类型列表失败:', error);
+        if (!canceled) {
+          setPropertyTypeOptions([]);
+          Message.error('获取属性类型列表失败，请稍后重试');
+        }
+      });
+    return () => {
+      canceled = true;
+    };
+  }, []);
 
   const syncFields = (nextFields: ObjectTypeAttributeField[]) => {
     setAttributeFields(nextFields);
@@ -257,16 +356,66 @@ export default function ObjectTypeAttributeTable({
       {
         title: '属性类型',
         dataIndex: 'propertyType',
-        width: 220,
-        render: (value, _, index) => (
-          <Select
-            value={value}
-            options={COLUMN_TYPE_OPTIONS}
-            onChange={(propertyType) =>
-              handleFieldChange(index, { propertyType })
-            }
-          />
-        )
+        width: 320,
+        render: (value, _, index) => {
+          const { base, length } = parsePropertyType(value);
+          const lowerBase = (base || '').toLowerCase();
+          const needLength = isLengthRequiredType(lowerBase);
+          const maxLength = needLength ? LENGTH_MAX_MAP[lowerBase] : undefined;
+          return (
+            <div className="flex items-center gap-[8px]">
+              <Select
+                className="flex-1"
+                value={base || undefined}
+                placeholder="请选择属性类型"
+                options={propertyTypeOptions}
+                showSearch
+                onChange={(nextBase: string) => {
+                  let nextLength: number | undefined;
+                  if (isLengthRequiredType(nextBase)) {
+                    const max =
+                      LENGTH_MAX_MAP[
+                        nextBase.toLowerCase() as LengthRequiredType
+                      ];
+                    nextLength =
+                      length && length >= 1 && length <= max
+                        ? length
+                        : undefined;
+                  }
+                  handleFieldChange(index, {
+                    propertyType: combinePropertyType(nextBase, nextLength)
+                  });
+                }}
+              />
+              {needLength && (
+                <InputNumber
+                  style={{ width: 110 }}
+                  value={length}
+                  min={1}
+                  max={maxLength}
+                  step={1}
+                  precision={0}
+                  placeholder={`1-${maxLength}`}
+                  onChange={(nextLength) => {
+                    let numeric: number | undefined;
+                    if (
+                      typeof nextLength === 'number' &&
+                      !Number.isNaN(nextLength)
+                    ) {
+                      numeric = Math.min(
+                        maxLength!,
+                        Math.max(1, Math.floor(nextLength))
+                      );
+                    }
+                    handleFieldChange(index, {
+                      propertyType: combinePropertyType(base, numeric)
+                    });
+                  }}
+                />
+              )}
+            </div>
+          );
+        }
       },
       {
         title: '操作',
@@ -281,7 +430,7 @@ export default function ObjectTypeAttributeTable({
         )
       }
     ],
-    [attributeFields, storeAsPublicLoading]
+    [attributeFields, storeAsPublicLoading, propertyTypeOptions]
   );
 
   return (
@@ -305,6 +454,19 @@ export default function ObjectTypeAttributeTable({
               }
               if (!attributeFields.some((field) => field.isPrimary === 1)) {
                 callback('至少需要一个主键属性');
+                return;
+              }
+              const incompleteLength = attributeFields.some((field) => {
+                const { base } = parsePropertyType(field.propertyType);
+                return (
+                  isLengthRequiredType(base) &&
+                  !isPropertyTypeComplete(field.propertyType)
+                );
+              });
+              if (incompleteLength) {
+                callback(
+                  '请为 char/varchar/binary/varbinary 类型填写有效的长度'
+                );
                 return;
               }
               callback();
