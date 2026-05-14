@@ -291,6 +291,34 @@ export function mergeOntologyPhysicalPropertiesForForm(
   });
 }
 
+export function mergeOntologyPhysicalPropertiesListForForm(
+  list: OntologyPhysicalPropertiesList[]
+): ObjectTypeAttributeField[] {
+  if (!list?.length) return [];
+  const vectorRows = list.filter((p) => p.isVector === 1);
+  const baseRows = list.filter((p) => p.isVector !== 1);
+  const vectorBySource = new Map(
+    vectorRows.map((v) => [String(v.vectorSourceFieldName ?? '').trim(), v])
+  );
+  return baseRows.map((prop) => {
+    const baseName = String(prop.propertyName ?? '').trim();
+    const vec = baseName ? vectorBySource.get(baseName) : undefined;
+    const base = legacyFieldToObjectTypeAttribute(prop);
+    if (vec && baseName) {
+      return {
+        ...base,
+        _vectorizationOn: true,
+        _vectorComment: vec.propertyComment,
+        _vectorPropertyId: vec.propertyID
+      };
+    }
+    return {
+      ...base,
+      _vectorizationOn: false
+    };
+  });
+}
+
 /** 表单行拍平为接口列表：向量化配置拆成 isVector=1 的独立项 */
 export function flattenOntologyPhysicalPropertiesForSubmit(
   fields: AttributeField[]
