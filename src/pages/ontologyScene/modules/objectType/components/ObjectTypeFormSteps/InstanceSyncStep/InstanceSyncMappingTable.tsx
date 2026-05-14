@@ -154,14 +154,8 @@ export default function InstanceSyncMappingTable({
         title: '向量化',
         dataIndex: 'isVector',
         width: 100,
-        render: (_, record, index) => (
-          <Switch
-            size="small"
-            checked={record.isVector === 1}
-            onChange={(checked) =>
-              handleFieldChange(index, { isVector: checked ? 1 : 0 })
-            }
-          />
+        render: (_, record) => (
+          <Switch size="small" checked={record.isVector === 1} disabled />
         )
       }
     ],
