@@ -14,13 +14,25 @@ import QuestionIcon from '../../assets/question.svg';
 interface SyncStrategyInfoProps {
   enableSyncSourceData?: boolean;
   syncSourceDataStrategy?: SyncSourceDataStrategy;
+  /** 是否跳过 enableSyncSourceData 检查（用于链接详情等场景） */
+  skipEnableCheck?: boolean;
 }
 
 export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
   enableSyncSourceData,
-  syncSourceDataStrategy
+  syncSourceDataStrategy,
+  skipEnableCheck = false
 }) => {
   const [sqlModalVisible, setSqlModalVisible] = useState(false);
+
+  console.log(
+    'SyncStrategyInfo - enableSyncSourceData:',
+    enableSyncSourceData,
+    'syncSourceDataStrategy:',
+    syncSourceDataStrategy,
+    'skipEnableCheck:',
+    skipEnableCheck
+  );
 
   // 渲染字段行
   const renderField = (
@@ -58,8 +70,9 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
     );
   };
 
-  // 无同步策略
-  if (!enableSyncSourceData) {
+  // 未启用同步源数据（仅在不跳过检查时生效）
+  if (!skipEnableCheck && !enableSyncSourceData) {
+    console.log('SyncStrategyInfo - 未启用同步源数据');
     return (
       <div className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
         -
@@ -67,8 +80,9 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
     );
   }
 
-  // 有同步策略
+  // 无同步策略配置
   if (!syncSourceDataStrategy) {
+    console.log('SyncStrategyInfo - 无同步策略配置');
     return (
       <div className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
         -
@@ -123,6 +137,17 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
     syncMode === SyncMode.JDBC_POLLING || syncMode === 'JDBC_POLLING';
   const queryMode = syncSourceDataStrategy.sourceDataInfo?.queryMode;
   const isSqlMode = queryMode === 'sql';
+
+  console.log(
+    'SyncStrategyInfo - syncMode:',
+    syncMode,
+    'isPollingMode:',
+    isPollingMode,
+    'queryMode:',
+    queryMode,
+    'isSqlMode:',
+    isSqlMode
+  );
 
   // 同步模式显示（轮询模式且查询模式为sql时需要添加SQL详情链接）
   const syncModeDisplay =

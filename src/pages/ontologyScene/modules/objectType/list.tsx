@@ -471,7 +471,7 @@ export default function OntologySceneObjectTypeList() {
               <Tooltip
                 content={
                   isEditDisabled
-                    ? '同步任务运行中，无法编辑对象类型'
+                    ? '当前状态不支持编辑，停止后方可编辑'
                     : undefined
                 }
                 disabled={!isEditDisabled}
