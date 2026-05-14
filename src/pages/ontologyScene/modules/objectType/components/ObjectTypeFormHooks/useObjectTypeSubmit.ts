@@ -143,6 +143,8 @@ function buildSyncSourceDataStrategy(
   if (!state) return undefined;
   const sourceDataInfo = toSubmitSourceDataInfo(state.sourceDataInfo);
   if (!sourceDataInfo) return undefined;
+  const jdbcCheckpointField = state.jdbcCheckpointField ?? '';
+  const jdbcIncrementalTimeField = state.jdbcIncrementalTimeField ?? '';
   const syncStrategy = {
     mode: state.mode || 'BINLOG_CDC',
     conflictStrategy: state.conflictStrategy || 'KEEP_SOURCE',
@@ -151,16 +153,16 @@ function buildSyncSourceDataStrategy(
     fullSyncBatchSize: state.fullSyncBatchSize || state.pollFetchSize || 500,
     parallelism: state.parallelism || 1,
     exceptionStrategy: state.exceptionStrategy || 'STOP_ON_ERROR',
-    jdbcCheckpointField: state.jdbcCheckpointField,
-    jdbcIncrementalTimeField: state.jdbcIncrementalTimeField,
+    jdbcCheckpointField,
+    jdbcIncrementalTimeField,
     jdbcPollingIntervalSeconds: state.jdbcPollingIntervalSeconds,
     jdbcSyncSqlFull: state.jdbcSyncSqlFull,
     jdbcSyncSqlIncrement: state.jdbcSyncSqlIncrement
   };
   return {
     ...syncStrategy,
-    jdbcCheckpointField: state.jdbcCheckpointField,
-    jdbcIncrementalTimeField: state.jdbcIncrementalTimeField,
+    jdbcCheckpointField,
+    jdbcIncrementalTimeField,
     jdbcPollingIntervalSeconds: state.jdbcPollingIntervalSeconds,
     jdbcSyncSqlFull: state.jdbcSyncSqlFull,
     jdbcSyncSqlIncrement: state.jdbcSyncSqlIncrement,
