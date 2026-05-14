@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { UploadProps } from '@arco-design/web-react';
 import { Message } from '@arco-design/web-react';
 import Header from './Header';
@@ -6,6 +6,13 @@ import WelcomeView from './WelcomeView';
 import ChatView from './ChatView';
 import { useXChat, useXConversations } from '@/hooks/chat';
 import { useAIWorkbenchStore } from '../../store';
+import {
+  getChatApiUrl,
+  getConversationMessages,
+  getConversationList,
+  deleteConversation as deleteConversationApi,
+  renameConversation as renameConversationApi
+} from '@/api/aiOntologyWorkbench/chat';
 
 interface PromptItem {
   id: string;
@@ -40,7 +47,47 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   // 获取图谱状态管理和当前本体
   const { setGraphData, currentOntology } = useAIWorkbenchStore();
 
-  // 使用会话管理 hook
+  // 稳定 API 配置对象的引用，避免无限循环
+  const conversationApiConfig = useMemo(
+    () => ({
+      // 注入获取会话列表的函数
+      getConversationList: async (params: {
+        appId: string;
+        projectId?: string;
+        pageNo?: number;
+        pageSize?: number;
+      }) => {
+        return await getConversationList({
+          appId: params.appId,
+          projectId: params.projectId,
+          pageNo: params.pageNo,
+          pageSize: params.pageSize
+        });
+      },
+      // 注入删除会话的函数
+      deleteConversation: async (params: { id: string }) => {
+        return await deleteConversationApi({ id: params.id });
+      },
+      // 注入重命名会话的函数
+      renameConversation: async (params: { id: string; name: string }) => {
+        return await renameConversationApi({
+          id: params.id,
+          name: params.name
+        });
+      }
+    }),
+    []
+  );
+
+  const conversationShowMessage = useMemo(
+    () => ({
+      success: (msg: string) => Message.success(msg),
+      error: (msg: string) => Message.error(msg)
+    }),
+    []
+  );
+
+  // 使用会话管理 hook，注入项目特定的 API
   const {
     conversations,
     activeConversationId,
@@ -49,9 +96,12 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     deleteConversation,
     updateConversation,
     loadConversations
-  } = useXConversations();
+  } = useXConversations({
+    apiConfig: conversationApiConfig,
+    showMessage: conversationShowMessage
+  });
 
-  // 使用 useXChat hook
+  // 使用 useXChat hook，注入项目特定的 API
   const {
     messages,
     isLoading,
@@ -66,6 +116,30 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     channel,
     source,
     conversationId: conversationId || activeConversationId || undefined,
+    apiConfig: {
+      // 注入获取聊天 URL 的函数
+      getChatUrl: (appId) => getChatApiUrl(appId),
+      // 注入获取历史消息的函数
+      getHistoryMessages: async ({ appId, conversationId }) => {
+        return await getConversationMessages({
+          appId,
+          conversationID: conversationId
+        });
+      },
+      // 注入构建请求体的函数（可选，使用默认实现）
+      buildRequestBody: (params) => ({
+        responseMode: 'Streaming',
+        status: params.source === 'published' ? 'Published' : 'Unpublished',
+        channel: params.channel,
+        appID: params.appId,
+        appConfigID: params.appConfigId,
+        projectID: params.projectId,
+        conversationID: params.conversationId,
+        enableDeepThink: params.enableDeepThink,
+        query: params.query,
+        inputs: params.files ? { files: params.files } : {}
+      })
+    },
     onConversationCreated: (newConversationId) => {
       setActiveConversation(newConversationId);
       onConversationCreated?.(newConversationId);

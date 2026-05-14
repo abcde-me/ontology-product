@@ -11,7 +11,7 @@ export interface ThinkingStep {
   type: string;
   content: string;
   status?: 'running' | 'success' | 'error';
-  running_time?: string;
+  running_time?: number; // 统一使用 number
   done?: boolean;
   [key: string]: any;
 }
@@ -26,7 +26,7 @@ export interface ToolCall {
   input?: any;
   output?: any;
   status?: 'running' | 'success' | 'error';
-  running_time?: string;
+  running_time?: number; // 统一使用 number
   error?: string;
   done?: boolean;
   [key: string]: any;
@@ -74,12 +74,40 @@ export interface SSEEvent {
   conversation_id?: string;
   message_id?: string;
   error_detail?: string;
-  running_time?: string;
+  running_time?: number; // 统一使用 number，与 StreamEvent 保持一致
   done?: boolean;
   [key: string]: any;
 }
 
 // ==================== Hook 配置 ====================
+
+/**
+ * API 配置接口 - 用于依赖注入
+ */
+export interface ChatApiConfig {
+  /** 获取聊天 API URL */
+  getChatUrl: (appId: string) => string;
+
+  /** 获取历史消息（可选） */
+  getHistoryMessages?: (params: {
+    appId: string;
+    conversationId: string;
+  }) => Promise<any>;
+
+  /** 构建请求体（可选，如果不提供则使用默认实现） */
+  buildRequestBody?: (params: {
+    appId: string;
+    conversationId: string;
+    query: string;
+    files?: any[];
+    enableDeepThink: boolean;
+    projectId?: string;
+    appConfigId?: string;
+    channel?: string;
+    source?: string;
+  }) => Record<string, any>;
+}
+
 export interface UseChatConfig {
   appId: string | number;
   conversationId?: string | null; // null = 未初始化, undefined = 新建会话, string = 已有会话
@@ -87,6 +115,10 @@ export interface UseChatConfig {
   appConfigId?: string | number; // 应用配置ID
   channel?: string; // 渠道（Preview/Production）
   source?: 'published' | 'debugger'; // 来源（published/debugger）
+
+  /** API 配置（必需，用于依赖注入） */
+  apiConfig: ChatApiConfig;
+
   onConversationCreated?: (conversationId: string) => void;
   onError?: (error: Error) => void;
 }
@@ -119,9 +151,37 @@ export interface Conversation {
   lastMessage?: string;
 }
 
+/**
+ * 会话 API 配置接口 - 用于依赖注入
+ */
+export interface ConversationApiConfig {
+  /** 获取会话列表 */
+  getConversationList: (params: {
+    appId: string;
+    projectId?: string;
+    pageNo?: number;
+    pageSize?: number;
+  }) => Promise<any>;
+
+  /** 删除会话 */
+  deleteConversation: (params: { id: string }) => Promise<any>;
+
+  /** 重命名会话 */
+  renameConversation: (params: { id: string; name: string }) => Promise<any>;
+}
+
 export interface UseConversationsConfig {
   defaultConversations?: Conversation[];
   defaultActiveConversationId?: string;
+
+  /** API 配置（必需，用于依赖注入） */
+  apiConfig: ConversationApiConfig;
+
+  /** 消息提示函数（可选，用于依赖注入） */
+  showMessage?: {
+    success: (msg: string) => void;
+    error: (msg: string) => void;
+  };
 }
 
 export interface UseConversationsReturn {

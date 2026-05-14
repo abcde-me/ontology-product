@@ -1,32 +1,33 @@
 /**
- * useXConversations - 会话管理 Hook
+ * useXConversations - 会话管理 Hook（通用版本）
+ *
+ * 通过依赖注入实现通用化，可以抽离到 hooks 库
  */
 
 import { useState, useCallback } from 'react';
-import { Message } from '@arco-design/web-react';
 import {
   Conversation,
   UseConversationsConfig,
   UseConversationsReturn
 } from '../types';
 import { generateId } from '../utils';
-import {
-  getConversationList,
-  deleteConversation as deleteConversationApi,
-  renameConversation as renameConversationApi
-} from '@/api/aiOntologyWorkbench/chat';
 
 export const useXConversations = (
-  config: UseConversationsConfig = {}
+  config: UseConversationsConfig
 ): UseConversationsReturn => {
-  const { defaultConversations = [], defaultActiveConversationId } = config;
+  const {
+    defaultConversations = [],
+    defaultActiveConversationId,
+    apiConfig,
+    showMessage
+  } = config;
 
   // ==================== State ====================
   const [conversations, setConversations] =
     useState<Conversation[]>(defaultConversations);
   const [activeConversationId, setActiveConversationId] = useState<
     string | undefined | null
-  >(null); // null = 未初始化, undefined = 新建会话, string = 已有会话
+  >(defaultActiveConversationId ?? null); // null = 未初始化, undefined = 新建会话, string = 已有会话
   const [loading, setLoading] = useState(false);
 
   // ==================== 加载会话列表 ====================
@@ -34,14 +35,14 @@ export const useXConversations = (
     async (appId: string, projectId?: string) => {
       setLoading(true);
       try {
-        const response = await getConversationList({
+        const response = await apiConfig.getConversationList({
           appId,
           projectId,
           pageNo: 1,
           pageSize: 100 // 加载更多会话
         });
 
-        console.log('会话列表响应:', response);
+        console.log('[useXConversations] 会话列表响应:', response);
 
         if (response?.data?.result) {
           const list = response.data.result.map((item: any) => ({
@@ -53,16 +54,16 @@ export const useXConversations = (
             lastMessage: item.description
           }));
           setConversations(list);
-          console.log('解析后的会话列表:', list);
+          console.log('[useXConversations] 解析后的会话列表:', list);
         }
       } catch (error: any) {
-        console.error('加载会话列表失败:', error);
-        Message.error(error.message || '加载会话列表失败');
+        console.error('[useXConversations] 加载会话列表失败:', error);
+        showMessage?.error(error.message || '加载会话列表失败');
       } finally {
         setLoading(false);
       }
     },
-    []
+    [apiConfig, showMessage]
   );
 
   // ==================== 设置活跃会话 ====================
@@ -91,12 +92,10 @@ export const useXConversations = (
 
   // ==================== 删除会话 ====================
   const deleteConversation = useCallback(
-    async (id: string, projectId?: string) => {
+    async (id: string, _projectId?: string) => {
       try {
         // 调用删除 API
-        await deleteConversationApi({
-          id
-        });
+        await apiConfig.deleteConversation({ id });
 
         const isCurrentConversation = activeConversationId === id;
 
@@ -113,26 +112,26 @@ export const useXConversations = (
           return filtered;
         });
 
-        Message.success('删除成功');
+        showMessage?.success('删除成功');
 
         // 返回是否删除的是当前会话
         return isCurrentConversation;
       } catch (error: any) {
-        console.error('删除会话失败:', error);
-        Message.error(error.message || '删除失败');
+        console.error('[useXConversations] 删除会话失败:', error);
+        showMessage?.error(error.message || '删除失败');
         return false;
       }
     },
-    [activeConversationId]
+    [activeConversationId, apiConfig, showMessage]
   );
 
   // ==================== 更新会话 ====================
   const updateConversation = useCallback(
-    async (id: string, updates: Partial<Conversation>, projectId?: string) => {
+    async (id: string, updates: Partial<Conversation>, _projectId?: string) => {
       try {
         // 如果更新标题，调用重命名 API
         if (updates.title) {
-          await renameConversationApi({
+          await apiConfig.renameConversation({
             id,
             name: updates.title
           });
@@ -147,14 +146,14 @@ export const useXConversations = (
         );
 
         if (updates.title) {
-          Message.success('重命名成功');
+          showMessage?.success('重命名成功');
         }
       } catch (error: any) {
-        console.error('更新会话失败:', error);
-        Message.error(error.message || '更新失败');
+        console.error('[useXConversations] 更新会话失败:', error);
+        showMessage?.error(error.message || '更新失败');
       }
     },
-    []
+    [apiConfig, showMessage]
   );
 
   // ==================== 获取会话 ====================

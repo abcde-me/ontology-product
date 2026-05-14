@@ -13,7 +13,7 @@ interface ThinkingChainNodeProps {
   /** 是否已完成 */
   done?: boolean;
   /** 耗时（秒） */
-  runningTime?: string;
+  runningTime?: number;
   /** 是否为最后一个节点 */
   isLast?: boolean;
   /** 折叠内容 */
@@ -32,6 +32,14 @@ const ThinkingChainNode: React.FC<ThinkingChainNodeProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const isLoading = !done;
+
+  console.log('[ThinkingChainNode] props:', {
+    type,
+    done,
+    runningTime,
+    runningTime_type: typeof runningTime,
+    typeText
+  });
 
   /** 状态文案 */
   const statusText = isLoading

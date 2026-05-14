@@ -2,7 +2,7 @@
  * ThinkingChain - 深度思考组件
  * 参考 ai-appforge 的 ThinkChain
  */
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { IconDown } from '@arco-design/web-react/icon';
 import ThinkingChainNode from './ThinkingChainNode';
 import renderStepContent from './renderStepContent';
@@ -28,6 +28,7 @@ const ThinkingChain: React.FC<ThinkingChainProps> = ({
 }) => {
   // 默认展开，完成后自动收起
   const [expanded, setExpanded] = useState(true);
+  const stepsListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (allDone) {
@@ -39,15 +40,21 @@ const ThinkingChain: React.FC<ThinkingChainProps> = ({
     }
   }, [allDone]);
 
+  // 自动滚动到底部
+  useEffect(() => {
+    if (expanded && stepsListRef.current) {
+      stepsListRef.current.scrollTop = stepsListRef.current.scrollHeight;
+    }
+  }, [steps, expanded]);
+
   if (!steps || steps.length === 0) return null;
 
   const visibleSteps = steps;
 
   // 计算总用时
   const totalTime = steps.reduce((acc, step) => {
-    if (step.running_time) {
-      const time = parseFloat(step.running_time);
-      return acc + (isNaN(time) ? 0 : time);
+    if (step.running_time && typeof step.running_time === 'number') {
+      return acc + step.running_time;
     }
     return acc;
   }, 0);
@@ -68,7 +75,7 @@ const ThinkingChain: React.FC<ThinkingChainProps> = ({
 
       {/* 步骤列表 */}
       {expanded && (
-        <div className={styles.stepsList}>
+        <div className={styles.stepsList} ref={stepsListRef}>
           {visibleSteps.map((step, index) => (
             <ThinkingChainNode
               key={step.chunk_id || index}
