@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+  useState
+} from 'react';
 import { UploadProps } from '@arco-design/web-react';
 import { Message } from '@arco-design/web-react';
 import Header from './Header';
@@ -6,6 +12,7 @@ import WelcomeView from './WelcomeView';
 import ChatView from './ChatView';
 import { useXChat, useXConversations } from '@/hooks/chat';
 import { useAIWorkbenchStore } from '../../store';
+import { useMultipartUploader } from '@/hooks/chat/useMultipartUpload';
 import {
   getChatApiUrl,
   getConversationMessages,
@@ -47,6 +54,10 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   // 获取图谱状态管理和当前本体
   const { setGraphData, currentOntology } = useAIWorkbenchStore();
 
+  // 文件上传相关
+  const uploader = useMultipartUploader();
+  const [uploadFileList, setUploadFileList] = useState<any[]>([]);
+
   // 使用 ref 记录是否是初始加载
   const isInitialMount = useRef(true);
 
@@ -85,7 +96,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   const conversationShowMessage = useMemo(
     () => ({
       success: (msg: string) => Message.success(msg),
-      error: (msg: string) => Message.error(msg)
+      error: (msg: string) => Message.error(msg),
+      warning: (msg: string) => Message.warning(msg)
     }),
     []
   );
@@ -163,6 +175,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     source,
     conversationId: conversationId || activeConversationId || undefined,
     apiConfig: chatApiConfig,
+    showMessage: conversationShowMessage,
     onConversationCreated: (newConversationId) => {
       setActiveConversation(newConversationId);
       onConversationCreated?.(newConversationId);
@@ -196,12 +209,14 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   // 组件挂载时加载会话列表
   useEffect(() => {
     if (appId) {
+      console.log('[ChatPanel] 组件挂载，加载会话列表');
       loadConversations(
         String(appId),
         projectId ? String(projectId) : undefined
       );
     }
-  }, [appId, projectId, loadConversations]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appId, projectId]); // 只依赖 appId 和 projectId，不依赖 loadConversations
 
   // 会话列表加载完成后，自动选择第一个会话（仅在初始加载时）
   useEffect(() => {
@@ -252,10 +267,37 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   }, [activeConversationId, conversationId, loadHistoryMessages]);
 
   // 文件上传配置
-  const uploaderProps: Partial<UploadProps> = {
-    accept: '.pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif',
-    multiple: true
-  };
+  const uploaderProps: Partial<UploadProps> = useMemo(
+    () => ({
+      accept: '.pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif',
+      multiple: true,
+      customRequest: (option: any) => {
+        const { file, onProgress, onSuccess, onError } = option;
+
+        uploader.uploadFile({
+          file,
+          fileKey: file.uid,
+          uploadParams: {
+            projectID: projectId ? String(projectId) : undefined,
+            isInternal: false,
+            fileName: file.name
+          },
+          onProgress: (percent) => {
+            onProgress?.(percent, file);
+          },
+          onSuccess: (res) => {
+            onSuccess?.(res, file);
+          },
+          onError: (err) => {
+            Message.error(err?.message || '文件上传失败');
+            onError?.(err, file);
+          }
+        });
+      },
+      onChange: setUploadFileList
+    }),
+    [uploader, projectId]
+  );
 
   // 获取文件的函数
   const GetFile = async (params: { id: string }) => {
@@ -280,19 +322,33 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     });
   };
 
-  const handleSend = async (params: {
-    text: string;
-    files?: any[];
-    enableDeepThink: boolean;
-  }) => {
-    if (!params.text.trim()) return;
+  const handleSend = useCallback(
+    (params: { text: string; files?: any[]; enableDeepThink: boolean }) => {
+      const { text, files = [], enableDeepThink } = params;
 
-    await sendMessage({
-      text: params.text,
-      files: params.files,
-      enableDeepThink: params.enableDeepThink
-    });
-  };
+      // 过滤出已上传完成的文件
+      const uploadedFiles = files
+        .filter((file) => file.status === 'done')
+        .map((file) => ({
+          id: file.uid,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          url: file.response?.data?.objectURI || ''
+        }));
+
+      // 调用 sendMessage，传递对象参数
+      sendMessage({
+        text,
+        files: uploadedFiles,
+        enableDeepThink
+      });
+
+      // 发送后清空文件列表
+      setUploadFileList([]);
+    },
+    [sendMessage]
+  );
 
   const handlePromptSelect = (params: { id: string; text: string }) => {
     handleSend({ text: params.text, enableDeepThink: true });

@@ -148,3 +148,39 @@ export const getConversationMessages = async (params: {
 
   return response;
 };
+
+/**
+ * 创建分片上传
+ */
+export const createMultipartUpload = async (params: {
+  fileName?: string;
+  fsID?: string;
+  objectPath?: string;
+  projectID?: string;
+  partCount: number;
+  isInternal?: boolean;
+}) => {
+  const res = await UAPI.RES.UploadFileApi({}).post(params).inRegion().do();
+  if (res.code !== 'Success') {
+    throw new Error(res.message || '创建分片上传失败');
+  }
+  return res.data;
+};
+
+/**
+ * 完成分片上传
+ */
+export const completeMultipartUpload = async (params: {
+  fsID?: string;
+  objectURI?: string;
+  objectPath?: string;
+  projectID?: string;
+  parts?: { eTag: string; partNumber: number }[];
+  uploadID: string;
+}) => {
+  const response = await UAPI.RES.CompleteMultipartUploadApi({})
+    .post(params)
+    .inRegion()
+    .do();
+  return response;
+};

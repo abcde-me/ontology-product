@@ -119,6 +119,13 @@ export interface UseChatConfig {
   /** API 配置（必需，用于依赖注入） */
   apiConfig: ChatApiConfig;
 
+  /** 消息提示函数（可选，用于依赖注入） */
+  showMessage?: {
+    success: (msg: string) => void;
+    error: (msg: string) => void;
+    warning: (msg: string) => void;
+  };
+
   onConversationCreated?: (conversationId: string) => void;
   onError?: (error: Error) => void;
 }

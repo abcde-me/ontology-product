@@ -17,6 +17,7 @@ export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = API_PREFIX + '/ontology-manager/api/v1';
 export const PrefixAiAppforge = API_PREFIX + '/appforge/api/v1'; // ai-appforge (需要 /ceai 前缀)
+export const PrefixAiAppforgeFile = API_PREFIX + '/compute/api/v1/file';
 export const PrefixLabelService = API_PREFIX + '/label-service/api/v1';
 export const PrefixUserCenter = API_PREFIX + '/user-space/api/v1';
 export const ResourceEndpointsV2 = {
@@ -902,7 +903,10 @@ export const ModaForgeResourceEndpoints = {
   // 删除会话
   DeleteAIChatApi: PrefixAiAppforge + '/DeleteConversation',
   // 当前会话
-  GetCurrentAIChatApi: PrefixAiAppforge + '/ListMessage'
+  GetCurrentAIChatApi: PrefixAiAppforge + '/ListMessage',
+  // 文件上传
+  UploadFileApi: PrefixAiAppforgeFile + '/createMultipartUpload',
+  CompleteMultipartUploadApi: PrefixAiAppforgeFile + '/completeMultipartUpload'
 };
 
 /**

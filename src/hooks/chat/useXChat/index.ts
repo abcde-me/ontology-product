@@ -6,7 +6,6 @@
 
 import { useRef, useCallback, useEffect } from 'react';
 import { useImmer } from 'use-immer';
-import { Message } from '@arco-design/web-react';
 import {
   ChatMessage,
   SendMessageParams,
@@ -27,6 +26,7 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
     channel = 'Preview',
     source = 'debugger',
     apiConfig,
+    showMessage,
     onConversationCreated,
     onError
   } = config;
@@ -108,7 +108,7 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
       }
 
       if (isLoading || isStreaming) {
-        Message.warning('请等待当前消息完成');
+        showMessage?.warning('请等待当前消息完成');
         return;
       }
 
@@ -228,7 +228,7 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
       } catch (error: any) {
         if (error.name !== 'AbortError') {
           console.error('Send message error:', error);
-          Message.error(error.message || '发送失败');
+          showMessage?.error(error.message || '发送失败');
           onError?.(error);
         }
       }
@@ -330,12 +330,12 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
         }
       } catch (error: any) {
         console.error('[useXChat] 加载历史消息失败:', error);
-        Message.error(error.message || '加载历史消息失败');
+        showMessage?.error(error.message || '加载历史消息失败');
       } finally {
         setIsLoading(false);
       }
     },
-    [appId, getHistoryMessages, setMessages, setIsLoading]
+    [appId, getHistoryMessages, setMessages, setIsLoading, showMessage]
   );
 
   // ==================== 监听 conversationId 变化 ====================
