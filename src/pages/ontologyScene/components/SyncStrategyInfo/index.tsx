@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { GlobalTooltip } from '@ceai-front/arco-material';
+import { Tooltip } from '@arco-design/web-react';
 import { SqlDetailModal } from '../SqlDetailModal';
 import {
   SyncMode,
@@ -8,6 +9,7 @@ import {
   ExceptionStrategy
 } from '../CollapsibleSection/types';
 import { SyncSourceDataStrategy } from '@/types/objectType';
+import QuestionIcon from '../../assets/question.svg';
 
 interface SyncStrategyInfoProps {
   enableSyncSourceData?: boolean;
@@ -24,12 +26,19 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
   const renderField = (
     label: string,
     value: React.ReactNode,
-    width = 'w-[418px]'
+    width = 'w-[418px]',
+    tooltip?: string
   ) => {
     return (
       <div className={`flex gap-[8px] ${width}`}>
-        <div className="w-[100px] flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-4)]">
-          {label}：
+        <div className="flex w-[100px] flex-shrink-0 items-center gap-[4px] text-[14px] leading-[22px] text-[var(--color-text-4)]">
+          <span>{label}</span>
+          {tooltip && (
+            <Tooltip content={tooltip}>
+              <QuestionIcon className="cursor-pointer" />
+            </Tooltip>
+          )}
+          <span>：</span>
         </div>
         <div className="min-w-0 flex-1">
           {typeof value === 'string' ? (
@@ -137,7 +146,12 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
         <>
           {/* 第一行：同步模式、冲突策略 */}
           <div className="mb-[12px] flex gap-[16px]">
-            {renderField('同步模式', syncModeDisplay)}
+            {renderField(
+              '同步模式',
+              syncModeDisplay,
+              'w-[418px]',
+              'CDC模式通过监听数据库变更日志实时同步数据'
+            )}
             {renderField(
               '冲突策略',
               getConflictStrategyText(syncSourceDataStrategy.conflictStrategy)
@@ -160,7 +174,11 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
           <div className="flex gap-[16px]">
             {renderField(
               '异常策略',
-              getExceptionStrategyText(syncSourceDataStrategy.exceptionStrategy)
+              getExceptionStrategyText(
+                syncSourceDataStrategy.exceptionStrategy
+              ),
+              'w-[418px]',
+              '定义同步过程中遇到错误时的处理方式'
             )}
           </div>
         </>
@@ -171,7 +189,12 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
         <>
           {/* 第一行：同步模式、轮询间隔 */}
           <div className="mb-[12px] flex gap-[16px]">
-            {renderField('同步模式', syncModeDisplay)}
+            {renderField(
+              '同步模式',
+              syncModeDisplay,
+              'w-[418px]',
+              '轮询模式通过定时查询数据源获取数据变化'
+            )}
             {renderField(
               '轮询间隔',
               syncSourceDataStrategy.jdbcPollingIntervalSeconds
@@ -220,7 +243,11 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
           <div className="flex gap-[16px]">
             {renderField(
               '异常策略',
-              getExceptionStrategyText(syncSourceDataStrategy.exceptionStrategy)
+              getExceptionStrategyText(
+                syncSourceDataStrategy.exceptionStrategy
+              ),
+              'w-[418px]',
+              '定义同步过程中遇到错误时的处理方式'
             )}
           </div>
         </>
