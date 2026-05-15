@@ -1,0 +1,74 @@
+.ai-workflow {
+  :global(.react-flow) {
+    border-radius: 0px !important;
+  }
+
+  :global(.wk-node-panel-content-scroller-container) {
+    width: 600px !important;
+  }
+
+  :global(.react-flow__node) {
+    z-index: -1 !important;
+  }
+
+  // 隐藏节点默认的标题区域 - 尝试多种可能的类名
+  :global {
+    .wk-node-header,
+    .wk-node-title,
+    .wk-node-title-container,
+    .node-header,
+    .node-title,
+    [class*='node-header'],
+    [class*='node-title'] {
+      display: none !important;
+    }
+  }
+
+  // 确保节点内容区域占满整个节点
+  :global(.wk-node-content) {
+    padding: 0 !important;
+  }
+
+  // 如果节点有默认的容器，移除其内边距
+  :global(.react-flow__node-default) {
+    padding: 0 !important;
+  }
+}
+
+// 行为 Tooltip 的样式
+:global {
+  .arco-tooltip {
+    &.behavior-tooltip {
+      .arco-tooltip-content {
+        padding: 0 !important;
+        // 保留背景和阴影，让 BehaviorTooltip 的样式生效
+        // background: transparent !important;
+        // box-shadow: none !important;
+      }
+
+      // 保留箭头
+    }
+  }
+}
+
+.edge-style {
+  // 基础边的样式
+  :global(.react-flow__edge .react-flow__edge-path) {
+    stroke: #c3c7d4 !important;
+    stroke-dasharray: 4 4 !important;
+    stroke-linecap: round;
+    animation: edge-flow 2s linear infinite !important;
+  }
+}
+
+// 流动动画
+:global {
+  @keyframes edge-flow {
+    0% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: -15;
+    }
+  }
+}

@@ -1,0 +1,389 @@
+/**
+ * ThinkingChain 样式
+ * 参考 ai-appforge 和 x-main 的设计
+ */
+
+.thinkingChain {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+// ==================== 链头 ====================
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.headerText {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-3, #646c85);
+}
+
+.timeText {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-4);
+}
+
+.arrow {
+  flex-shrink: 0;
+  font-size: 16px;
+  color: var(--color-text-3);
+  transition: transform 0.2s ease;
+
+  &.arrowUp {
+    transform: rotate(180deg);
+  }
+
+  &.arrowDown {
+    transform: rotate(0deg);
+  }
+}
+
+// ==================== 步骤列表 ====================
+.stepsList {
+  display: flex;
+  flex-direction: column;
+  padding-left: 0;
+  max-height: 300px; // 限制最大高度
+  overflow-y: auto; // 允许滚动
+
+  // 自定义滚动条
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #ebeef5;
+    border-radius: 20px;
+  }
+}
+
+// ==================== 节点 ====================
+.nodeContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.nodeRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-text-3, #646c85);
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
+
+.nodeIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  position: relative;
+
+  // StepIcon 样式
+  svg {
+    width: 14px;
+    height: 14px;
+    color: var(--color-text-3, #646c85);
+  }
+}
+
+.loadingIcon {
+  font-size: 14px;
+  color: var(--color-primary-6);
+}
+
+.successIcon {
+  font-size: 14px;
+  color: var(--color-success-6, #00b42a);
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.nodeStatus {
+  flex: 1;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-3, #646c85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ==================== 节点内容 ====================
+.nodeContent {
+  display: flex;
+  padding: 8px 0; // py-2 = 8px
+}
+
+.nodeLine {
+  display: flex;
+  width: 14px;
+  flex-shrink: 0;
+  justify-content: center;
+}
+
+.lineBar {
+  width: 0;
+  height: 100%; // 关键：让竖线填满父容器高度
+  border-left: 1px solid var(--color-border-1, #c3c7d4);
+}
+
+.nodeContentBox {
+  flex: 1;
+  min-width: 0;
+  margin-left: 12px;
+}
+
+.contentCard {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-1, #dfe2eb);
+  background: white;
+  padding: 12px;
+  max-height: 164px; // 190px - padding - border
+  overflow: hidden; // 改为 hidden，让内部元素控制滚动
+  position: relative; // 为按钮定位
+
+  // 自定义滚动条
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #ebeef5;
+    border-radius: 20px;
+  }
+}
+
+.contentText {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-2, #292f42);
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  width: 100%;
+  max-height: 140px; // 164px - padding
+  overflow-y: auto; // 添加滚动
+
+  // 自定义滚动条
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #ebeef5;
+    border-radius: 20px;
+  }
+}
+
+.spacer {
+  height: 24px;
+}
+
+// ==================== Ontology 内容样式 ====================
+.ontologyContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ontologyTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-1);
+  margin-bottom: 4px;
+}
+
+.ontologySection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sectionLabel {
+  font-size: 12px;
+  color: var(--color-text-3);
+  font-weight: 500;
+}
+
+.codeBlock {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--color-text-2);
+  background: var(--color-fill-2, #f7f8fa);
+  padding: 8px;
+  border-radius: 4px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+}
+
+// ==================== Ontology TEXT 视图样式 ====================
+.ontologyTextView {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 16px;
+  overflow-y: auto;
+  max-height: 140px;
+
+  // 自定义滚动条
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #ebeef5;
+    border-radius: 20px;
+  }
+}
+
+.ontologyGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ontologyGroupTitle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ontologyTypeIcon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.ontologyTypeName {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--color-text-1, #23293b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ontologyEntities {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 6px;
+  border-left: 1px solid var(--color-border-2, #dfe2eb);
+  margin-left: 6px;
+  padding-left: 10px;
+}
+
+.ontologyEntity {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-1, #23293b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+
+  &:hover {
+    color: var(--color-primary-6);
+  }
+}
+
+// ==================== 步骤内容容器 ====================
+.stepContentContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.collapsibleContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.toolName {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-3, #646c85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+// ==================== 回到底部按钮 ====================
+.goBottomButton {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-bg-2, #f7f8fa);
+  border: 1px solid var(--color-border-2, #e5e6eb);
+  color: var(--color-text-2, #4e5969);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+
+  &:hover {
+    background: var(--color-bg-3, #ebeef5);
+    border-color: var(--color-border-3, #c9cdd4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+}

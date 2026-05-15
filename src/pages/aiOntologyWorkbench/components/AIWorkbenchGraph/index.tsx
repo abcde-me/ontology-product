@@ -1,0 +1,402 @@
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import {
+  AIWorflow,
+  AIWorkflowProvider,
+  GenerateNewNode
+} from '@ceai-front/workflow';
+import '@ceai-front/workflow/dist/es/ai-workflow.css';
+import { MyNode, MyNodeDefault } from './nodes';
+import {
+  getWorkflow,
+  createWorkflow,
+  updateWorkflow,
+  setDraft
+} from '@/pages/ontologyScene/modules/graph/common/api';
+import { getOntologyTopology } from '@/api/ontologySceneLibrary/graph';
+import dagre from '@dagrejs/dagre';
+import type { GetOntologyTopologyResponse } from '@/types/graphApi';
+import styles from './index.module.scss';
+import { CustomLabel } from './edges';
+import { Spin } from '@arco-design/web-react';
+import classNames from 'classnames';
+import { MarkerType } from 'reactflow';
+import { useAIWorkbenchGraphStore } from './store';
+import { useAIWorkbenchStore } from '../../store';
+import { useHistory } from 'react-router-dom';
+import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
+import BottomPanel from './panels/BottomPanel';
+import { ZoomInOut } from '@ceai-front/workflow';
+import { Space } from '@arco-design/web-react';
+import { useNodes, useNodesInitialized, useReactFlow } from 'reactflow';
+
+const NODE_WIDTH = 200;
+const NODE_HEIGHT = 56;
+
+// 自动适应视图组件
+function AutoFitView() {
+  const nodes = useNodes();
+  const nodesInitialized = useNodesInitialized();
+  const { fitView } = useReactFlow();
+  const hasFittedRef = React.useRef(false);
+
+  useEffect(() => {
+    if (!nodesInitialized || nodes.length === 0 || hasFittedRef.current) {
+      return;
+    }
+
+    hasFittedRef.current = true;
+
+    const frameId = window.requestAnimationFrame(() => {
+      fitView({
+        padding: 0.16,
+        minZoom: 0.3,
+        maxZoom: 1
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [fitView, nodes, nodesInitialized]);
+
+  return null;
+}
+
+// 子头部组件
+function CustomSubHeader() {
+  return (
+    <Space size="large">
+      <AutoFitView />
+      <ZoomInOut />
+    </Space>
+  );
+}
+
+// 使用 dagre 进行布局计算
+function layoutNodesWithDagre(
+  topologyData: GetOntologyTopologyResponse,
+  newNode: GenerateNewNode
+) {
+  const topologyNodes = topologyData.nodes ?? [];
+  const topologyEdges = topologyData.edges ?? [];
+
+  if (topologyNodes.length === 0) {
+    return { nodes: [], edges: [], draft: true };
+  }
+
+  const g = new dagre.graphlib.Graph();
+  g.setDefaultEdgeLabel(() => ({}));
+  g.setGraph({ rankdir: 'LR', nodesep: 60, ranksep: 280 });
+
+  const nodeIdMap = new Map<number, string>();
+  const workflowNodes: any[] = [];
+
+  // 创建所有节点
+  topologyNodes.forEach((topologyNode) => {
+    const nodeId = String(
+      topologyNode.id ?? topologyNode.code ?? topologyNode.name ?? Date.now()
+    );
+    if (topologyNode.id !== undefined) {
+      nodeIdMap.set(topologyNode.id, nodeId);
+    }
+
+    const { newNode: workflowNode } = newNode({
+      id: nodeId,
+      data: {
+        ...MyNodeDefault.defaultValue,
+        // @ts-expect-error - type field is required by workflow but not in defaultValue
+        type: 'default',
+        desc: topologyNode.description ?? '',
+        title: topologyNode.name || '未命名节点',
+        selected: false,
+        syncStatus: topologyNode.syncStatus,
+        code: topologyNode.code ?? '',
+        icon: topologyNode.icon ?? '',
+        id: topologyNode.id
+      },
+      position: { x: 0, y: 0 }
+    });
+
+    workflowNodes.push(workflowNode);
+    g.setNode(nodeId, { width: NODE_WIDTH, height: NODE_HEIGHT });
+  });
+
+  // 创建边
+  const workflowEdges = topologyEdges
+    .filter(
+      (topologyEdge) =>
+        topologyEdge.sourceId !== undefined &&
+        topologyEdge.targetId !== undefined
+    )
+    .map((topologyEdge) => {
+      const sourceId = nodeIdMap.get(topologyEdge.sourceId!);
+      const targetId = nodeIdMap.get(topologyEdge.targetId!);
+
+      if (sourceId && targetId) {
+        g.setEdge(sourceId, targetId);
+      }
+
+      return {
+        id: String(
+          topologyEdge.id ?? `${topologyEdge.sourceId}-${topologyEdge.targetId}`
+        ),
+        source: sourceId ?? String(topologyEdge.sourceId),
+        sourceHandle: 'source',
+        target: targetId ?? String(topologyEdge.targetId),
+        targetHandle: 'target',
+        type: 'custom-edge',
+        data: {
+          id: topologyEdge.id,
+          name: topologyEdge.name || '',
+          syncStatus: topologyEdge.syncStatus
+        }
+      };
+    });
+
+  // 执行布局
+  dagre.layout(g);
+
+  // 更新节点位置
+  const layoutedNodes = workflowNodes.map((node) => {
+    const nodeWithPos = g.node(node.id);
+    if (nodeWithPos) {
+      return {
+        ...node,
+        position: {
+          x: nodeWithPos.x - NODE_WIDTH / 2,
+          y: nodeWithPos.y - NODE_HEIGHT / 2
+        }
+      };
+    }
+    return node;
+  });
+
+  // 居中显示
+  if (layoutedNodes.length > 0) {
+    const minX = Math.min(...layoutedNodes.map((node) => node.position.x));
+    const maxX = Math.max(
+      ...layoutedNodes.map((node) => node.position.x + NODE_WIDTH)
+    );
+
+    const graphCenterX = (minX + maxX) / 2;
+    const canvasWidth =
+      typeof window !== 'undefined' ? window.innerWidth - 200 : 1720;
+    const canvasCenterX = canvasWidth / 2;
+    const centerOffsetX = canvasCenterX - graphCenterX;
+
+    const centeredNodes = layoutedNodes.map((node) => ({
+      ...node,
+      position: {
+        x: node.position.x + centerOffsetX,
+        y: node.position.y
+      }
+    }));
+
+    return {
+      nodes: centeredNodes,
+      edges: workflowEdges,
+      draft: true
+    };
+  }
+
+  return {
+    nodes: layoutedNodes,
+    edges: workflowEdges,
+    draft: true
+  };
+}
+
+// 创建节点配置
+const createNodesConfig = (
+  OSId: string,
+  history: ReturnType<typeof useHistory>
+) => [
+  {
+    type: 'default',
+    node: MyNode,
+    panel: () => null, // AI工作台使用底部面板，不需要右侧面板
+    nodeDefault: MyNodeDefault,
+    classification: 'ontology',
+    title: '', // 设置为空字符串，不显示标题
+    showDefaultSourceHandle: true,
+    showDefaultTargetHandle: true,
+    showNodeControl: false,
+    // 提供一个空的 iconRender，返回 null
+    iconRender: () => null
+  }
+];
+
+// 创建初始化工作流
+const createInitWorkflow = (
+  topologyData: GetOntologyTopologyResponse | null
+) => {
+  return (newNode: GenerateNewNode) => {
+    if (!topologyData) {
+      return {
+        nodes: [],
+        edges: [],
+        draft: true
+      };
+    }
+
+    return layoutNodesWithDagre(topologyData, newNode);
+  };
+};
+
+/**
+ * AI 工作台图谱组件
+ */
+export default function AIWorkbenchGraph() {
+  const [topologyData, setTopologyData] =
+    useState<GetOntologyTopologyResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0); // 用于强制刷新组件
+  const { openBottomPanel } = useAIWorkbenchGraphStore();
+  const { currentOntology } = useAIWorkbenchStore();
+  const history = useHistory();
+
+  // 从 store 中获取当前本体 ID
+  const OSId = currentOntology?.id?.toString() || '';
+
+  const nodesConfig = useMemo(
+    () => createNodesConfig(OSId, history),
+    [OSId, history]
+  );
+
+  // 监听本体切换，重新加载图谱数据
+  useEffect(() => {
+    console.log(
+      '[AIWorkbenchGraph] 本体切换，当前本体ID:',
+      currentOntology?.id
+    );
+
+    // 如果没有选中本体，不加载数据
+    if (!currentOntology?.id) {
+      setLoading(false);
+      setTopologyData(null);
+      setRefreshKey((prev) => prev + 1); // 强制刷新组件
+      return;
+    }
+
+    // 清理状态和缓存
+    setLoading(true);
+    setTopologyData(null);
+    setRefreshKey((prev) => prev + 1); // 强制刷新组件
+
+    // 清理工作流缓存
+    try {
+      setDraft(null);
+    } catch (error) {
+      console.warn('清理工作流缓存失败:', error);
+    }
+
+    console.log(
+      '[AIWorkbenchGraph] 开始加载本体拓扑数据，本体ID:',
+      currentOntology.id
+    );
+
+    getOntologyTopology({
+      id: Number(currentOntology.id)
+    })
+      .then((res) => {
+        console.log('[AIWorkbenchGraph] 获取拓扑数据响应:', res);
+        if (res.status === 200 && res.code === '' && res.data) {
+          console.log('[AIWorkbenchGraph] 设置新的拓扑数据:', res.data);
+          setTopologyData(res.data);
+        } else {
+          console.warn('[AIWorkbenchGraph] 获取拓扑数据失败:', res.message);
+          setTopologyData(null);
+        }
+      })
+      .catch((err) => {
+        console.error('获取本体拓扑数据失败:', err);
+        setTopologyData(null);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [currentOntology?.id]); // 依赖本体 ID，当本体切换时重新加载
+
+  const nodesReadonlyChecker = useCallback(() => {
+    return true;
+  }, []);
+
+  const initWorkflow = useCallback(createInitWorkflow(topologyData), [
+    topologyData
+  ]);
+
+  if (loading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <Spin block />
+      </div>
+    );
+  }
+
+  // 如果没有当前本体，显示空状态
+  if (!currentOntology?.id) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="mb-2 text-[14px] text-[var(--color-text-3)]">
+            请先选择一个本体
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative flex h-full w-full flex-col overflow-hidden bg-white">
+      <AIWorkflowProvider
+        key={`workflow-${currentOntology.id}-${refreshKey}`} // 使用refreshKey确保本体切换时重新创建
+        nodes={nodesConfig}
+        initWorkflow={initWorkflow}
+        nodesDraggableWhenReadonly
+        autoRefreshWhenTabVisible={false}
+        api={{
+          workflowNotExistedMarks: ['ResourceNotFound', '资源不存在'],
+          getWorkflow,
+          createWorkflow,
+          updateWorkflow
+        }}
+        nodesReadonlyChecker={nodesReadonlyChecker}
+        headerHeight={0}
+        edge={{
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            width: 14,
+            height: 14,
+            color: '#C3C7D4'
+          },
+          targetXOffset: -8,
+          labelRenderer: CustomLabel
+        }}
+        events={{
+          onNodeClick: (node) => {
+            // 阻止节点被选中（防止右侧面板打开）
+            if (node.data) {
+              node.data.selected = false;
+            }
+
+            const nodeData = node?.data as any;
+            openBottomPanel({
+              type: 'object',
+              id: nodeData?.id || node.id,
+              data: nodeData
+            });
+          }
+        }}
+        rightPanels={[]} // 禁用右侧面板
+        subHeader={{ fullyCustomSubheader: <CustomSubHeader /> }}
+      >
+        <AIWorflow
+          className={classNames(styles['ai-workflow'], styles['edge-style'])}
+        />
+      </AIWorkflowProvider>
+
+      {/* 底部面板 */}
+      <BottomPanel />
+    </div>
+  );
+}
