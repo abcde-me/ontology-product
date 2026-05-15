@@ -14,12 +14,14 @@ interface RelationMappingSectionProps {
   form: any;
   fileUploaded: boolean;
   attributeOptions: AttributeOption[];
+  readOnly?: boolean;
 }
 
 export default function RelationMappingSection({
   form,
   fileUploaded,
-  attributeOptions
+  attributeOptions,
+  readOnly = false
 }: RelationMappingSectionProps) {
   return (
     <FormItem
@@ -71,7 +73,7 @@ export default function RelationMappingSection({
             >
               <Select
                 placeholder={fileUploaded ? '请选择属性' : '请先上传中间表'}
-                disabled={!fileUploaded}
+                disabled={readOnly || !fileUploaded}
                 allowClear
               >
                 {attributeOptions.map((option) => (
@@ -114,7 +116,7 @@ export default function RelationMappingSection({
           >
             <Select
               placeholder={fileUploaded ? '请选择属性' : '请先上传中间表'}
-              disabled={!fileUploaded}
+              disabled={readOnly || !fileUploaded}
               allowClear
             >
               {attributeOptions.map((option) => (

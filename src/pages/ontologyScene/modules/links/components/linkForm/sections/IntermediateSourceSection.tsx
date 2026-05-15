@@ -35,6 +35,8 @@ interface IntermediateSourceSectionProps {
   onSyncSourceDataStrategyChange: (
     updates: Partial<SyncSourceDataStrategyFormState>
   ) => void;
+  /** N:N 仅改名称：中间表与同步策略只读 */
+  readOnly?: boolean;
 }
 
 export default function IntermediateSourceSection({
@@ -44,6 +46,7 @@ export default function IntermediateSourceSection({
   intermediateTable,
   initialFileList,
   syncSourceDataStrategy,
+  readOnly = false,
   onIntermediateTableTypeChange,
   onLocalCsvFileChange,
   onSyncSourceDataInfoChange,
@@ -54,6 +57,7 @@ export default function IntermediateSourceSection({
   const updateStrategy = (
     updates: Partial<SyncSourceDataStrategyFormState>
   ) => {
+    if (readOnly) return;
     onSyncSourceDataStrategyChange(updates);
     Object.entries(updates).forEach(([key, value]) => {
       const field =
@@ -92,6 +96,7 @@ export default function IntermediateSourceSection({
       >
         <div className="space-y-4">
           <Radio.Group
+            disabled={readOnly}
             value={intermediateTable.type}
             onChange={onIntermediateTableTypeChange}
           >
@@ -106,6 +111,7 @@ export default function IntermediateSourceSection({
                 accept=".csv"
                 fileType="csv"
                 maxSize={100}
+                disabled={readOnly}
                 customAction={`${PrefixAimdp}/UploadOntologyEntityDataFile`}
                 fileList={initialFileList}
                 onFileChange={(file) =>
@@ -135,6 +141,7 @@ export default function IntermediateSourceSection({
             styles={styles}
             ontologySqlTestTaskType="TABLE_REALTIME_SYNC"
             syncSourceDataStrategyForSqlTest={syncSourceDataStrategy}
+            readOnly={readOnly}
           />
 
           <SyncSourceDataStrategyFormSection
@@ -145,6 +152,7 @@ export default function IntermediateSourceSection({
             pollFetchSizePopover="单次从数据源拉取的最大行数"
             fullSqlPlaceholder="请输入全量SQL，例如 SELECT source_id,target_id FROM ods_link"
             incrementSqlPlaceholder="请输入增量SQL，例如 SELECT source_id,target_id FROM ods_link WHERE update_time > ?"
+            readOnly={readOnly}
           />
         </>
       )}

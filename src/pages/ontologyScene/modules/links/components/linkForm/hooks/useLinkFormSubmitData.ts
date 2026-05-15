@@ -21,6 +21,8 @@ interface UseLinkFormSubmitDataParams {
   sourcePrimaryAttribute: PrimaryAttribute | null;
   isReUpload: boolean;
   syncSourceDataStrategy: SyncSourceDataStrategyFormState;
+  initialValues?: Partial<LinkFormData>;
+  restrictManyToManyEditToNameOnly?: boolean;
 }
 
 export function useLinkFormSubmitData({
@@ -33,9 +35,42 @@ export function useLinkFormSubmitData({
   attributeFields,
   sourcePrimaryAttribute,
   isReUpload,
-  syncSourceDataStrategy
+  syncSourceDataStrategy,
+  initialValues,
+  restrictManyToManyEditToNameOnly
 }: UseLinkFormSubmitDataParams) {
   const buildSubmitData = async (): Promise<LinkFormData | undefined> => {
+    if (
+      restrictManyToManyEditToNameOnly &&
+      linkType === LinkType.MANY_TO_MANY &&
+      initialValues
+    ) {
+      await form.validate(['name']);
+      const values = form.getFieldsValue();
+      const base = initialValues;
+      if (base.sourceObjectType == null || base.targetObjectType == null) {
+        Message.warning('链接数据不完整，请刷新后重试');
+        return undefined;
+      }
+      const name = values.name ?? base.name ?? '';
+      return {
+        linkType: LinkType.MANY_TO_MANY,
+        name,
+        id: base.id ?? '',
+        sourceObjectType: base.sourceObjectType,
+        targetObjectType: base.targetObjectType,
+        targetObjectAttribute: base.targetObjectAttribute,
+        linkTargetColumnName: base.linkTargetColumnName,
+        linkSourceColumnName: base.linkSourceColumnName,
+        sourceAttribute: base.sourceAttribute,
+        targetAttribute: base.targetAttribute,
+        intermediateTable: base.intermediateTable,
+        attributeFields: base.attributeFields ?? [],
+        syncSourceDataStrategy: base.syncSourceDataStrategy,
+        isReUpload: base.isReUpload
+      };
+    }
+
     await form.validate();
 
     const values = form.getFieldsValue();
