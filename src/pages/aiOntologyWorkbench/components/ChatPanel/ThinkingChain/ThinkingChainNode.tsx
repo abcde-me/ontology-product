@@ -31,7 +31,6 @@ const ThinkingChainNode: React.FC<ThinkingChainNodeProps> = ({
   typeText
 }) => {
   const [open, setOpen] = useState(false);
-  const isLoading = !done;
 
   console.log('[ThinkingChainNode] props:', {
     type,
@@ -41,12 +40,20 @@ const ThinkingChainNode: React.FC<ThinkingChainNodeProps> = ({
     typeText
   });
 
-  /** 状态文案 */
-  const statusText = isLoading
-    ? `${typeText}中...`
-    : runningTime
-      ? `${typeText}成功，用时${runningTime}秒`
-      : `${typeText}完成`;
+  /** 状态文案 - 实时显示时间 */
+  const statusText = (() => {
+    if (!done) {
+      // 进行中：显示实时时间
+      return runningTime
+        ? `${typeText}中... ${runningTime.toFixed(1)}s`
+        : `${typeText}中...`;
+    } else {
+      // 已完成：显示最终时间
+      return runningTime
+        ? `${typeText}成功，用时${runningTime.toFixed(1)}s`
+        : `${typeText}完成`;
+    }
+  })();
 
   /** 是否有可折叠内容 */
   const hasContent = !!children;
@@ -58,9 +65,9 @@ const ThinkingChainNode: React.FC<ThinkingChainNodeProps> = ({
         className={`${styles.nodeRow} ${hasContent ? styles.clickable : ''}`}
         onClick={hasContent ? () => setOpen(!open) : undefined}
       >
-        {/* 类型图标 */}
+        {/* 类型图标 - 根据 done 状态显示 */}
         <div className={styles.nodeIcon}>
-          {isLoading ? (
+          {!done ? (
             <IconLoading className={styles.loadingIcon} spin />
           ) : (
             <StepIcon type={type} />

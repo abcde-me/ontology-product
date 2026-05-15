@@ -29,7 +29,7 @@ const ACTION_COLOR_MAP: Record<string, string> = {
 };
 
 export interface OntologyAction {
-  action: string;
+  action_type: string;
   code: string;
   name: string;
   toolName?: string;
@@ -44,7 +44,7 @@ const OntologyActionCard: React.FC<OntologyActionCardProps> = ({
   action,
   onLocate
 }) => {
-  const { action: actionType, name, code } = action;
+  const { action_type: actionType, name, code } = action;
 
   // 忽略 list 操作
   if (actionType === OntologyActionType.LIST) {

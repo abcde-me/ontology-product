@@ -12,6 +12,24 @@ const {
 } = ModaForgeResourceEndpoints;
 
 /**
+ * 创建本体 Agent
+ */
+export const createOntologyAgent = async (params: {
+  ontologyModelId: number;
+}) => {
+  const { ontologyModelId } = params;
+
+  const response = await UAPI.RES.CreateOntologyAgentApi({})
+    .post({
+      ontologyModelID: ontologyModelId
+    })
+    .inRegion()
+    .do();
+
+  return response;
+};
+
+/**
  * 创建消息请求参数
  */
 export interface CreateMessageParams {
@@ -76,14 +94,15 @@ export const getConversationList = async (params: {
   pageSize?: number;
   projectId?: string;
 }) => {
-  const { appId, pageNo = 1, pageSize = 20, projectId } = params;
+  const { appId, pageNo = 1, pageSize = 20 } = params;
+  // 注意：不传递 projectId，由 HTTP 拦截器统一添加
 
   const response = await UAPI.RES.GetAIChatHistoryApi({})
     .post({
       appId,
       pageNo,
-      pageSize,
-      projectId
+      pageSize
+      // 移除 projectId，由拦截器统一添加
     })
     .inRegion()
     .do();
@@ -135,6 +154,7 @@ export const getConversationMessages = async (params: {
   conversationID: string;
 }) => {
   const { appId, conversationID } = params;
+  // 注意：不传递 projectId，由 HTTP 拦截器统一添加
 
   const response = await UAPI.RES.GetCurrentAIChatApi({})
     .post({
@@ -142,6 +162,7 @@ export const getConversationMessages = async (params: {
       conversationID,
       fileIncluded: true,
       order: 'desc'
+      // 移除 projectId，由拦截器统一添加
     })
     .inRegion()
     .do();

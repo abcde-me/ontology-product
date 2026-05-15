@@ -48,7 +48,7 @@ export interface ChatMessage {
  * 本体操作
  */
 export interface OntologyAction {
-  action: string; // create, update, delete, get, list
+  action_type: string; // create, update, delete, get, list
   code: string;
   name: string;
   toolName?: string;

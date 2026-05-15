@@ -5,7 +5,9 @@ import {
   listOntologyModel,
   createOntologyModel
 } from '@/api/ontologySceneLibrary/ontologyScene';
+import { createOntologyAgent } from '@/api/aiOntologyWorkbench/chat';
 import type { SceneFormData } from '@/pages/ontologyScene/modules/list/components/SceneModal';
+import type { OntologScene } from '@/types/ontologySceneApi';
 
 /**
  * 本体管理 Hook
@@ -66,6 +68,59 @@ export const useOntologyManagement = () => {
       }
     },
     [setOntologyList, setOntologyListLoading, setCurrentOntology]
+  );
+
+  /**
+   * 检查并创建本体 Agent（如果需要）
+   */
+  const ensureOntologyAgent = useCallback(
+    async (ontology: OntologScene): Promise<string | undefined> => {
+      // 如果已经有 appID，直接返回
+      if (ontology.appID) {
+        console.log('[useOntologyManagement] 本体已有 appID:', ontology.appID);
+        return ontology.appID;
+      }
+
+      // 如果没有 appID，调用接口创建
+      console.log('[useOntologyManagement] 本体没有 appID，开始创建 Agent...', {
+        ontologyId: ontology.id,
+        ontologyName: ontology.name
+      });
+
+      try {
+        const res = await createOntologyAgent({
+          ontologyModelId: ontology.id!
+        });
+
+        console.log('[useOntologyManagement] createOntologyAgent 响应:', res);
+
+        if (res.status === 200 && res.code === '' && res.data?.app_id) {
+          const appID = res.data.app_id;
+          console.log('[useOntologyManagement] Agent 创建成功，appID:', appID);
+
+          // 刷新本体列表以获取最新的 appID
+          console.log('[useOntologyManagement] 开始刷新本体列表...');
+          await loadOntologyList();
+          console.log('[useOntologyManagement] 本体列表刷新完成');
+
+          return appID;
+        } else {
+          console.error('[useOntologyManagement] 创建 Agent 失败:', {
+            status: res.status,
+            code: res.code,
+            message: res.message,
+            data: res.data
+          });
+          Message.error(res.message || '创建 Agent 失败');
+          return undefined;
+        }
+      } catch (error) {
+        console.error('[useOntologyManagement] 创建 Agent 异常:', error);
+        Message.error('创建 Agent 失败');
+        return undefined;
+      }
+    },
+    [loadOntologyList]
   );
 
   /**
@@ -137,6 +192,7 @@ export const useOntologyManagement = () => {
     loadOntologyList,
     handleCreateOntology,
     openCreateModal,
-    closeCreateModal
+    closeCreateModal,
+    ensureOntologyAgent
   };
 };

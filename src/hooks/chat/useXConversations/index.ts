@@ -33,8 +33,14 @@ export const useXConversations = (
   // ==================== 加载会话列表 ====================
   const loadConversations = useCallback(
     async (appId: string, projectId?: string) => {
+      console.log('[useXConversations] loadConversations 被调用:', {
+        appId,
+        projectId
+      });
+
       setLoading(true);
       try {
+        console.log('[useXConversations] 开始调用 getConversationList API');
         const response = await apiConfig.getConversationList({
           appId,
           projectId,
@@ -43,9 +49,26 @@ export const useXConversations = (
         });
 
         console.log('[useXConversations] 会话列表响应:', response);
+        console.log('[useXConversations] response.data:', response?.data);
+        console.log(
+          '[useXConversations] response.data.result:',
+          response?.data?.result
+        );
+        console.log(
+          '[useXConversations] result 类型:',
+          typeof response?.data?.result
+        );
+        console.log(
+          '[useXConversations] result 是否为数组:',
+          Array.isArray(response?.data?.result)
+        );
 
         if (response?.data?.result) {
-          const list = response.data.result.map((item: any) => ({
+          const result = response.data.result;
+          console.log('[useXConversations] result 长度:', result.length);
+          console.log('[useXConversations] result 内容:', result);
+
+          const list = result.map((item: any) => ({
             id: item.id,
             title: item.name || '未命名会话',
             createdAt: new Date(item.createdAt).getTime(),
@@ -55,10 +78,15 @@ export const useXConversations = (
           }));
           setConversations(list);
           console.log('[useXConversations] 解析后的会话列表:', list);
+          console.log('[useXConversations] 会话数量:', list.length);
+        } else {
+          console.log('[useXConversations] 响应中没有 result 数据');
+          setConversations([]);
         }
       } catch (error: any) {
         console.error('[useXConversations] 加载会话列表失败:', error);
         showMessage?.error(error.message || '加载会话列表失败');
+        setConversations([]);
       } finally {
         setLoading(false);
       }

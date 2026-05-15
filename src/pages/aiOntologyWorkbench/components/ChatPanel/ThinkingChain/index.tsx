@@ -2,8 +2,7 @@
  * ThinkingChain - 深度思考组件
  * 参考 ai-appforge 的 ThinkChain
  */
-import React, { useState, useEffect, useRef, memo } from 'react';
-import { IconDown } from '@arco-design/web-react/icon';
+import React, { useEffect, useRef, memo } from 'react';
 import ThinkingChainNode from './ThinkingChainNode';
 import renderStepContent from './renderStepContent';
 import type { ThinkingChainProps } from './types';
@@ -26,70 +25,36 @@ const ThinkingChain: React.FC<ThinkingChainProps> = ({
   steps,
   allDone = false
 }) => {
-  // 默认展开，完成后自动收起
-  const [expanded, setExpanded] = useState(true);
   const stepsListRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (allDone) {
-      // 完成后立即收起
-      setExpanded(false);
-    } else {
-      // 进行中时保持展开
-      setExpanded(true);
-    }
-  }, [allDone]);
 
   // 自动滚动到底部
   useEffect(() => {
-    if (expanded && stepsListRef.current) {
+    if (stepsListRef.current) {
       stepsListRef.current.scrollTop = stepsListRef.current.scrollHeight;
     }
-  }, [steps, expanded]);
+  }, [steps]);
 
   if (!steps || steps.length === 0) return null;
 
   const visibleSteps = steps;
 
-  // 计算总用时
-  const totalTime = steps.reduce((acc, step) => {
-    if (step.running_time && typeof step.running_time === 'number') {
-      return acc + step.running_time;
-    }
-    return acc;
-  }, 0);
-
-  const headerText = allDone ? 'Agent执行完成' : 'Agent执行中...';
-  const timeText = totalTime > 0 ? `用时${totalTime.toFixed(1)}s` : '';
-
   return (
     <div className={styles.thinkingChain}>
-      {/* 链头 */}
-      <div className={styles.header} onClick={() => setExpanded(!expanded)}>
-        <span className={styles.headerText}>{headerText}</span>
-        {timeText && <span className={styles.timeText}>{timeText}</span>}
-        <IconDown
-          className={`${styles.arrow} ${expanded ? styles.arrowUp : styles.arrowDown}`}
-        />
+      {/* 步骤列表 - 始终展开，不显示头部 */}
+      <div className={styles.stepsList} ref={stepsListRef}>
+        {visibleSteps.map((step, index) => (
+          <ThinkingChainNode
+            key={step.chunk_id || index}
+            type={step.type}
+            done={step.done}
+            runningTime={step.running_time}
+            isLast={index === visibleSteps.length - 1}
+            typeText={getStepTypeText(step.type)}
+          >
+            {renderStepContent(step)}
+          </ThinkingChainNode>
+        ))}
       </div>
-
-      {/* 步骤列表 */}
-      {expanded && (
-        <div className={styles.stepsList} ref={stepsListRef}>
-          {visibleSteps.map((step, index) => (
-            <ThinkingChainNode
-              key={step.chunk_id || index}
-              type={step.type}
-              done={step.done}
-              runningTime={step.running_time}
-              isLast={index === visibleSteps.length - 1}
-              typeText={getStepTypeText(step.type)}
-            >
-              {renderStepContent(step)}
-            </ThinkingChainNode>
-          ))}
-        </div>
-      )}
     </div>
   );
 };

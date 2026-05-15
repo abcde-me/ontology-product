@@ -164,12 +164,12 @@ const extractOntologyAction = (response: any): any | null => {
 
     // 检查是否包含本体操作数据
     if (
-      responseData?.data?.action &&
+      responseData?.data?.action_type &&
       responseData?.data?.code &&
       responseData?.data?.name
     ) {
       const result = {
-        action: responseData.data.action,
+        action_type: responseData.data.action_type,
         code: responseData.data.code,
         name: responseData.data.name
       };
