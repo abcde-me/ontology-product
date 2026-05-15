@@ -39,6 +39,25 @@ export const STRATEGY_FORM_FIELD_MAP: Partial<
   jdbcSyncSqlIncrement: 'jdbcSyncSqlIncrement'
 };
 
+/** 将策略 state 写入 Form 字段，与 InstanceSyncStep.updateStrategy 一致 */
+export function syncStrategyStateToFormValues(
+  state: SyncSourceDataStrategyFormState
+): Record<string, unknown> {
+  const values: Record<string, unknown> = {};
+  (
+    Object.entries(STRATEGY_FORM_FIELD_MAP) as [
+      keyof SyncSourceDataStrategyFormState,
+      string
+    ][]
+  ).forEach(([stateKey, formKey]) => {
+    const value = state[stateKey];
+    if (value !== undefined) {
+      values[formKey] = value;
+    }
+  });
+  return values;
+}
+
 function isSuccessResponse(response: any): boolean {
   return (
     response &&
@@ -214,7 +233,7 @@ export default function SyncSourceDataStrategyFormSection({
     const overlayExpanded = sqlTestOverlayExpanded[type];
 
     return (
-      <FormItem key={field} label=" " field={field}>
+      <FormItem key={field} label=" ">
         <div className={styles['sql-custom-sql-card']}>
           <div className={styles['sql-custom-sql-toolbar']}>
             <span className={styles['sql-custom-sql-toolbar-title']}>
@@ -333,8 +352,7 @@ export default function SyncSourceDataStrategyFormSection({
             </Popover>
           </span>
         }
-        field="syncMode"
-        rules={[{ required: true, message: '请选择同步模式' }]}
+        required
       >
         <Radio.Group
           value={syncSourceDataStrategy.mode}
@@ -365,11 +383,7 @@ export default function SyncSourceDataStrategyFormSection({
 
       {isPollingMode && (
         <>
-          <FormItem
-            label="轮询间隔"
-            field="jdbcPollingIntervalSeconds"
-            rules={[{ required: true, message: '请输入轮询间隔' }]}
-          >
+          <FormItem label="轮询间隔" required>
             <Space size={8}>
               <InputNumber
                 min={1}
@@ -396,8 +410,7 @@ export default function SyncSourceDataStrategyFormSection({
                 </Popover>
               </span>
             }
-            field="pollFetchSize"
-            rules={[{ required: true, message: '请输入单次拉取数量' }]}
+            required
           >
             <InputNumber
               min={1}
@@ -410,11 +423,7 @@ export default function SyncSourceDataStrategyFormSection({
             />
           </FormItem>
 
-          <FormItem
-            label="增量时间列"
-            field="jdbcIncrementalTimeField"
-            rules={[{ required: true, message: '请输入增量时间列' }]}
-          >
+          <FormItem label="增量时间列" required>
             <Input
               placeholder="如update_time, last_modified"
               value={syncSourceDataStrategy.jdbcIncrementalTimeField}
@@ -425,11 +434,7 @@ export default function SyncSourceDataStrategyFormSection({
             />
           </FormItem>
 
-          <FormItem
-            label="断点辅助列"
-            field="jdbcCheckpointField"
-            rules={[{ required: true, message: '请输入断点辅助列' }]}
-          >
+          <FormItem label="断点辅助列" required>
             <Input
               placeholder="如id、主键或组合列名"
               value={syncSourceDataStrategy.jdbcCheckpointField}
@@ -442,11 +447,7 @@ export default function SyncSourceDataStrategyFormSection({
         </>
       )}
 
-      <FormItem
-        label="冲突策略"
-        field="conflictStrategy"
-        rules={[{ required: true, message: '请选择冲突策略' }]}
-      >
+      <FormItem label="冲突策略" required>
         <Radio.Group
           value={syncSourceDataStrategy.conflictStrategy}
           onChange={(conflictStrategy) =>
@@ -459,11 +460,7 @@ export default function SyncSourceDataStrategyFormSection({
         </Radio.Group>
       </FormItem>
 
-      <FormItem
-        label="同步范围"
-        field="syncScope"
-        rules={[{ required: true, message: '请选择同步范围' }]}
-      >
+      <FormItem label="同步范围" required>
         <Radio.Group
           value={syncSourceDataStrategy.syncScope}
           onChange={(syncScope) => onStrategyUpdate({ syncScope })}
@@ -475,7 +472,7 @@ export default function SyncSourceDataStrategyFormSection({
         </Radio.Group>
       </FormItem>
 
-      <FormItem label="并行数" field="parallelism">
+      <FormItem label="并行数">
         <InputNumber
           min={1}
           step={1}
@@ -496,8 +493,7 @@ export default function SyncSourceDataStrategyFormSection({
             </Popover>
           </span>
         }
-        field="exceptionStrategy"
-        rules={[{ required: true, message: '请选择异常策略' }]}
+        required
       >
         <Radio.Group
           value={syncSourceDataStrategy.exceptionStrategy}
