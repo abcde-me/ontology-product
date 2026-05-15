@@ -67,6 +67,8 @@ export interface LinkFormProps {
   onCancel: () => void;
   loading?: boolean;
   showFooter?: boolean;
+  /** 编辑页：已是 N:N 时仅允许修改链接名称，其余区块只读 */
+  restrictManyToManyEditToNameOnly?: boolean;
 }
 
 export interface LinkFormRef {
