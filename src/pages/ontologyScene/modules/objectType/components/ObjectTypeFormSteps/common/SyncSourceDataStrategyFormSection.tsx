@@ -104,7 +104,7 @@ export default function SyncSourceDataStrategyFormSection({
   syncModePopover = DEFAULT_SYNC_MODE_POPOVER,
   pollFetchSizePopover = DEFAULT_POLL_FETCH_POPOVER,
   fullSqlPlaceholder = '请输入全量SQL，例如 SELECT line_id,voltage_level,maint_org FROM ods_line_assets',
-  incrementSqlPlaceholder = '请输入增量SQL，例如 SELECT voltage_level FROM ods_line_assets WHERE voltage_level > 400',
+  incrementSqlPlaceholder = '增量 SQL 需要至少包含一个断点占位符：${last_update_time} 或 ${last_checkpoint_value}。使用 ${last_update_time} 时，请填写“增量时间列”；使用 ${last_checkpoint_value}时，请填写“断点辅助列”。${batch_size} 可选，通常写在 LIMIT ${batch_size} 中，用于控制单次拉取条数；如果使用 LIMIT ${batch_size}，建议同时写 ORDER BY，保证每轮拉取顺序稳定。推荐同时使用时间列和断点辅助列，例如：WHERE update_time > ${last_update_time} OR (update_time = ${last_update_time} AND id > ${last_checkpoint_value}) ORDER BY update_time, id LIMIT ${batch_size}。',
   sqlTestTaskType = 'TABLE_REALTIME_SYNC',
   readOnly = false
 }: SyncSourceDataStrategyFormSectionProps) {
