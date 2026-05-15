@@ -60,6 +60,13 @@ module.exports = function (app) {
           }
 
           return req.baseUrl + req.url;
+        },
+        on: {
+          proxyReq: (proxyReq, req, res) => {
+            // 重写 Origin 和 Referer，避免 418 错误
+            proxyReq.setHeader('Origin', currentTarget);
+            proxyReq.setHeader('Referer', currentTarget + '/');
+          }
         }
       })
     );

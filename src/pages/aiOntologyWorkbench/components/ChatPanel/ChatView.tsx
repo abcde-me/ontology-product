@@ -24,6 +24,7 @@ interface ChatViewProps {
   GetAudioText: (
     formData: FormData
   ) => Promise<{ data: { content: { text: string; type: string }[] } }>;
+  onLocateNode?: (code: string) => void;
 }
 
 const ChatView: React.FC<ChatViewProps> = ({
@@ -34,7 +35,8 @@ const ChatView: React.FC<ChatViewProps> = ({
   onStop,
   uploaderProps,
   GetFile,
-  GetAudioText
+  GetAudioText,
+  onLocateNode
 }) => {
   // 消息列表容器的 ref
   const messageListRef = useRef<HTMLDivElement>(null);
@@ -84,14 +86,14 @@ const ChatView: React.FC<ChatViewProps> = ({
         ref={messageListRef}
         className={`flex-1 overflow-y-auto p-5 ${styles.scrollbarHide}`}
       >
-        <MessageList messages={messages} />
+        <MessageList messages={messages} onLocateNode={onLocateNode} />
 
         {/* Loading 指示器 - 只在特定条件下显示 */}
         {shouldShowLoading && <LoadingIndicator />}
       </div>
 
-      {/* 回到底部按钮 */}
-      {showGoBottom && (
+      {/* 回到底部按钮 - 悬浮在消息列表和输入框之间 */}
+      {/* {showGoBottom && (
         <div className={styles.goBottomButton}>
           <Button
             type="primary"
@@ -100,7 +102,7 @@ const ChatView: React.FC<ChatViewProps> = ({
             onClick={() => forceScrollToBottom('smooth')}
           />
         </div>
-      )}
+      )} */}
 
       {/* Sender 组件 - 固定在底部 */}
       <div className="w-full flex-shrink-0 p-5">

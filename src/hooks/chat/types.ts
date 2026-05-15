@@ -41,6 +41,17 @@ export interface ChatMessage {
   files?: FileAttachment[];
   // AI 消息扩展字段
   thinkingSteps?: ThinkingStep[]; // 统一的步骤数组，包含 thinking、ontology 等所有类型
+  ontologyActions?: OntologyAction[]; // 本体操作列表
+}
+
+/**
+ * 本体操作
+ */
+export interface OntologyAction {
+  action: string; // create, update, delete, get, list
+  code: string;
+  name: string;
+  toolName?: string;
 }
 
 export type MessageStatus =

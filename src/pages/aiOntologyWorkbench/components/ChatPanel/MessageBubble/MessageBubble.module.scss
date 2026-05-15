@@ -81,6 +81,13 @@
   box-sizing: border-box;
 }
 
+.ontologyActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
 .errorMessage {
   padding: 12px;
   background: var(--color-danger-light-1);

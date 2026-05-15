@@ -40,6 +40,10 @@ interface ChatPanelProps {
   source?: 'published' | 'debugger';
   conversationId?: string;
   onConversationCreated?: (conversationId: string) => void;
+  /** 图谱刷新回调 */
+  onGraphRefresh?: () => void;
+  /** 节点定位回调 */
+  onLocateNode?: (code: string) => void;
 }
 
 const ChatPanel: React.FC<ChatPanelProps> = ({
@@ -49,7 +53,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   channel,
   source,
   conversationId,
-  onConversationCreated
+  onConversationCreated,
+  onGraphRefresh,
+  onLocateNode
 }) => {
   // 获取图谱状态管理和当前本体
   const { setGraphData, currentOntology } = useAIWorkbenchStore();
@@ -60,6 +66,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   // 使用 ref 记录是否是初始加载
   const isInitialMount = useRef(true);
+  // 使用 ref 记录是否是用户主动新建会话
+  const isUserNewSession = useRef(false);
 
   // 稳定 API 配置对象的引用，避免无限循环
   const conversationApiConfig = useMemo(
@@ -224,8 +232,15 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       conversationsLength: conversations.length,
       activeConversationId,
       conversationId,
-      firstConversation: conversations[0]
+      firstConversation: conversations[0],
+      isUserNewSession: isUserNewSession.current
     });
+
+    // 如果是用户主动新建会话，不自动选择
+    if (isUserNewSession.current) {
+      console.log('[ChatPanel] 用户主动新建会话，不自动选择');
+      return;
+    }
 
     // 只在初始加载时（activeConversationId 为 null 或 undefined）自动选择第一个会话
     if (
@@ -265,6 +280,56 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       console.log('[ChatPanel] activeConversationId 无效，不加载历史消息');
     }
   }, [activeConversationId, conversationId, loadHistoryMessages]);
+
+  // 监听消息变化，检查是否需要刷新图谱
+  useEffect(() => {
+    console.log('[ChatPanel] 消息变化，当前消息数量:', messages.length);
+
+    if (messages.length === 0) return;
+
+    const lastMessage = messages[messages.length - 1];
+    console.log('[ChatPanel] 最后一条消息:', {
+      type: lastMessage.type,
+      status: lastMessage.status,
+      hasOntologyActions: !!lastMessage.ontologyActions,
+      ontologyActionsCount: lastMessage.ontologyActions?.length || 0,
+      ontologyActions: lastMessage.ontologyActions
+    });
+
+    // 只处理 AI 消息且状态为 success
+    if (lastMessage.type !== 'assistant' || lastMessage.status !== 'success') {
+      console.log('[ChatPanel] 跳过：不是完成的 AI 消息');
+      return;
+    }
+
+    // 检查是否有本体操作
+    const ontologyActions = lastMessage.ontologyActions;
+    if (!ontologyActions || ontologyActions.length === 0) {
+      console.log('[ChatPanel] 跳过：没有本体操作');
+      return;
+    }
+
+    // 检查是否有非 get/list 操作
+    const hasModification = ontologyActions.some(
+      (action) =>
+        action.action !== 'get' &&
+        action.action !== 'list' &&
+        action.action !== 'GET' &&
+        action.action !== 'LIST'
+    );
+
+    console.log('[ChatPanel] 本体操作检查:', {
+      hasModification,
+      actions: ontologyActions.map((a) => a.action)
+    });
+
+    if (hasModification && onGraphRefresh) {
+      console.log('[ChatPanel] 检测到本体修改操作，触发图谱刷新');
+      onGraphRefresh();
+    } else if (!hasModification) {
+      console.log('[ChatPanel] 所有操作都是查询操作，不刷新图谱');
+    }
+  }, [messages, onGraphRefresh]);
 
   // 文件上传配置
   const uploaderProps: Partial<UploadProps> = useMemo(
@@ -326,6 +391,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     (params: { text: string; files?: any[]; enableDeepThink: boolean }) => {
       const { text, files = [], enableDeepThink } = params;
 
+      // 清除新建会话标记（用户开始发送消息）
+      isUserNewSession.current = false;
+
       // 过滤出已上传完成的文件
       const uploadedFiles = files
         .filter((file) => file.status === 'done')
@@ -355,6 +423,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   };
 
   const handleNewSession = () => {
+    console.log('[ChatPanel] 用户点击新建会话');
+    // 设置标记，表示这是用户主动新建会话
+    isUserNewSession.current = true;
     // 清空消息列表，显示欢迎页面
     clearMessages();
     // 清空活跃会话 ID，下次发送消息时会创建新会话
@@ -364,6 +435,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   };
 
   const handleSelectConversation = (id: string) => {
+    console.log('[ChatPanel] 用户选择会话:', id);
+    // 清除新建会话标记
+    isUserNewSession.current = false;
     setActiveConversation(id);
     // TODO: 加载选中会话的消息
     // 这里可能需要添加一个新的 API 来获取会话的历史消息
@@ -425,6 +499,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
             uploaderProps={uploaderProps}
             GetFile={GetFile}
             GetAudioText={GetAudioText}
+            onLocateNode={onLocateNode}
           />
         )}
       </div>

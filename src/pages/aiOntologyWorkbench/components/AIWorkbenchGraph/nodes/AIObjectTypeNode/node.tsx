@@ -9,9 +9,12 @@ import ActionIcon from '@/pages/aiOntologyWorkbench/assets/action.svg';
 import type { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 
 const Node = ({ id, data }) => {
-  const { openBottomPanel } = useAIWorkbenchGraphStore();
+  const { openBottomPanel, highlightedNodeCode } = useAIWorkbenchGraphStore();
   const { currentOntology } = useAIWorkbenchStore();
   const { totalCount, loadBehaviorList } = useBehaviorData();
+
+  // 判断当前节点是否被高亮
+  const isHighlighted = highlightedNodeCode === data.code;
 
   /**
    * 点击行为
@@ -41,8 +44,14 @@ const Node = ({ id, data }) => {
 
   return (
     <div
-      className="flex w-[200px] items-center gap-[8px] p-[16px] "
-      style={{ width: '200px' }}
+      className="flex w-[200px] items-center gap-[8px] p-[16px]"
+      style={{
+        width: '200px',
+        backgroundColor: isHighlighted ? '#e6f4ff' : 'transparent',
+        border: isHighlighted ? '2px solid #1890ff' : 'none',
+        borderRadius: isHighlighted ? '4px' : '0',
+        transition: 'all 0.3s ease'
+      }}
     >
       {/* 左侧：图标 + 名称 */}
       <div className="flex min-w-0 flex-1 items-center gap-[8px]">

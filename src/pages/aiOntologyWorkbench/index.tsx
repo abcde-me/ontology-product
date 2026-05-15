@@ -9,6 +9,7 @@ import OntologySelector from './components/OntologySelector';
 import ChatPanel from './components/ChatPanel';
 import GraphPanel from './components/GraphPanel';
 import ResizableLayout from './components/ResizableLayout';
+import { useAIWorkbenchGraphStore } from './components/AIWorkbenchGraph/store';
 
 /**
  * AI 本体工作台
@@ -28,6 +29,23 @@ const AIOntoWorkbench: React.FC = () => {
     openCreateModal,
     closeCreateModal
   } = useOntologyManagement();
+
+  // 图谱刷新 key
+  const [graphRefreshKey, setGraphRefreshKey] = React.useState(0);
+
+  // 图谱刷新回调
+  const handleGraphRefresh = React.useCallback(() => {
+    console.log('[AIOntoWorkbench] 触发图谱刷新');
+    setGraphRefreshKey((prev) => prev + 1);
+  }, []);
+
+  // 节点定位回调
+  const handleLocateNode = React.useCallback((code: string) => {
+    console.log('[AIOntoWorkbench] 定位节点，code:', code);
+    // 通过图谱 store 触发高亮
+    const { highlightNode } = useAIWorkbenchGraphStore.getState();
+    highlightNode(code);
+  }, []);
 
   // 初始化
   useEffect(() => {
@@ -94,7 +112,7 @@ const AIOntoWorkbench: React.FC = () => {
         <ResizableLayout
           leftContent={
             <ChatPanel
-              appId="app-4th0ybq9"
+              appId="app-j0euma2a"
               appConfigId="appconfig-ab6gd12y"
               projectId={projectId?.[1]}
               channel="Preview"
@@ -103,9 +121,11 @@ const AIOntoWorkbench: React.FC = () => {
                 console.log('会话创建:', conversationId);
                 // TODO: 保存会话 ID
               }}
+              onGraphRefresh={handleGraphRefresh}
+              onLocateNode={handleLocateNode}
             />
           }
-          rightContent={<GraphPanel />}
+          rightContent={<GraphPanel key={graphRefreshKey} />}
           defaultLeftWidth={400}
           minLeftWidth={300}
           maxLeftWidth={600}

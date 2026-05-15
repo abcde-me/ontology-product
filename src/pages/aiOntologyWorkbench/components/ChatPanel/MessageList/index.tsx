@@ -9,9 +9,13 @@ import styles from './MessageList.module.scss';
 
 interface MessageListProps {
   messages: ChatMessage[];
+  onLocateNode?: (code: string) => void;
 }
 
-const MessageList: React.FC<MessageListProps> = ({ messages }) => {
+const MessageList: React.FC<MessageListProps> = ({
+  messages,
+  onLocateNode
+}) => {
   if (!messages || messages.length === 0) {
     return null;
   }
@@ -20,7 +24,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages }) => {
     <div className={styles.messageList}>
       {messages.map((message) => (
         <div key={message.id} className={styles.messageItem}>
-          <MessageBubble message={message} />
+          <MessageBubble message={message} onLocateNode={onLocateNode} />
         </div>
       ))}
     </div>

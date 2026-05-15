@@ -16,7 +16,8 @@
 .goBottomButton {
   position: absolute;
   bottom: 120px;
-  right: 32px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   border-radius: 50%;

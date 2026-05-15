@@ -8,15 +8,19 @@ import { ChatMessage } from '@/hooks/chat/types';
 
 interface MessageBubbleProps {
   message: ChatMessage;
+  onLocateNode?: (code: string) => void;
 }
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
+const MessageBubble: React.FC<MessageBubbleProps> = ({
+  message,
+  onLocateNode
+}) => {
   if (message.type === 'user') {
     return <UserBubble content={message.content} files={message.files} />;
   }
 
   if (message.type === 'assistant') {
-    return <AIBubble message={message} />;
+    return <AIBubble message={message} onLocateNode={onLocateNode} />;
   }
 
   return null;

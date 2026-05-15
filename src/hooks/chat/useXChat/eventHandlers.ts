@@ -144,6 +144,51 @@ export const handleAnswerEvent = (
 };
 
 /**
+ * 从工具调用响应中提取本体操作信息
+ */
+const extractOntologyAction = (response: any): any | null => {
+  try {
+    let responseData = response;
+
+    console.log('[extractOntologyAction] 原始 response:', response);
+    console.log('[extractOntologyAction] response 类型:', typeof response);
+
+    // 如果 response 是字符串，尝试解析
+    if (typeof responseData === 'string') {
+      responseData = JSON.parse(responseData);
+      console.log(
+        '[extractOntologyAction] 解析后的 responseData:',
+        responseData
+      );
+    }
+
+    // 检查是否包含本体操作数据
+    if (
+      responseData?.data?.action &&
+      responseData?.data?.code &&
+      responseData?.data?.name
+    ) {
+      const result = {
+        action: responseData.data.action,
+        code: responseData.data.code,
+        name: responseData.data.name
+      };
+      console.log('[extractOntologyAction] 提取成功:', result);
+      return result;
+    }
+
+    console.log(
+      '[extractOntologyAction] 未找到本体操作数据，responseData.data:',
+      responseData?.data
+    );
+    return null;
+  } catch (e) {
+    console.log('[extractOntologyAction] 提取失败:', e);
+    return null;
+  }
+};
+
+/**
  * 处理工具调用事件 (http, workflow, mcp, knowledge)
  */
 export const handleToolCallEvent = (
@@ -210,6 +255,48 @@ export const handleToolCallEvent = (
         has_arg: !!contentData.arg,
         has_response: !!contentData.response
       });
+    }
+
+    // 提取本体操作信息（如果是 http 类型且有 response）
+    console.log('[handleToolCallEvent] 检查本体操作提取条件:', {
+      type,
+      done: event.done,
+      hasResponse: !!contentData?.response,
+      responseType: typeof contentData?.response
+    });
+
+    if (type === 'http' && contentData?.response) {
+      console.log(
+        '[handleToolCallEvent] 开始提取本体操作，response:',
+        contentData.response
+      );
+      const ontologyAction = extractOntologyAction(contentData.response);
+      if (ontologyAction) {
+        if (!lastMsg.ontologyActions) {
+          lastMsg.ontologyActions = [];
+        }
+        // 添加工具名称
+        ontologyAction.toolName = contentData.tool_name;
+        // 检查是否已存在相同的操作（根据 code 判断）
+        const existingIndex = lastMsg.ontologyActions.findIndex(
+          (a) => a.code === ontologyAction.code
+        );
+        if (existingIndex >= 0) {
+          lastMsg.ontologyActions[existingIndex] = ontologyAction;
+        } else {
+          lastMsg.ontologyActions.push(ontologyAction);
+        }
+        console.log(
+          '[handleToolCallEvent] 本体操作已添加到消息:',
+          ontologyAction
+        );
+        console.log(
+          '[handleToolCallEvent] 当前消息的所有本体操作:',
+          lastMsg.ontologyActions
+        );
+      } else {
+        console.log('[handleToolCallEvent] 未提取到本体操作');
+      }
     }
 
     if (stepIndex >= 0) {
