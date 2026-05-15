@@ -60,6 +60,7 @@ interface SqlSourceSelectorProps {
   ontologySqlTestTaskType: string;
   /** 第三步 / 链接中间表同步时传入；建模第二步不传 */
   syncSourceDataStrategyForSqlTest?: SyncSourceDataStrategyFormState;
+  readOnly?: boolean;
 }
 
 function isSuccessResponse(response: any): boolean {
@@ -255,7 +256,8 @@ export default function SqlSourceSelector({
   fieldPrefix,
   styles,
   ontologySqlTestTaskType,
-  syncSourceDataStrategyForSqlTest
+  syncSourceDataStrategyForSqlTest,
+  readOnly = false
 }: SqlSourceSelectorProps) {
   const projectID = useUserInfoStore((state) => state.projectId?.[1]);
   const [connectors, setConnectors] = useState<SqlConnectorItem[]>([]);
@@ -391,6 +393,7 @@ export default function SqlSourceSelector({
   }, [fieldPrefix, form, onChange, value]);
 
   const executeTestSql = async () => {
+    if (readOnly) return;
     if (!trimmedSql) return;
     const validation = validateCustomSql(trimmedSql);
     if (!validation.valid) {
@@ -452,6 +455,7 @@ export default function SqlSourceSelector({
   };
 
   const executeParseSqlColumns = async () => {
+    if (readOnly) return;
     if (!trimmedSql) return;
     const validation = validateCustomSql(trimmedSql);
     if (!validation.valid) {
@@ -566,6 +570,7 @@ export default function SqlSourceSelector({
             value: connector.id
           }))}
           allowClear
+          disabled={readOnly}
         />
       </FormItem>
 
@@ -586,6 +591,7 @@ export default function SqlSourceSelector({
               tableName: queryMode === 'sql' ? undefined : value.tableName
             })
           }
+          disabled={readOnly}
         >
           <Radio value="selected">选择数据表</Radio>
           <Radio value="sql">自定义SQL</Radio>
@@ -608,7 +614,7 @@ export default function SqlSourceSelector({
                       type="text"
                       size="small"
                       loading={testLoading}
-                      disabled={!canTriggerSqlAction}
+                      disabled={readOnly || !canTriggerSqlAction}
                       onClick={executeTestSql}
                     >
                       测试
@@ -623,7 +629,7 @@ export default function SqlSourceSelector({
                       type="text"
                       size="small"
                       loading={parseLoading}
-                      disabled={!canTriggerSqlAction}
+                      disabled={readOnly || !canTriggerSqlAction}
                       onClick={executeParseSqlColumns}
                     >
                       解析字段
@@ -638,7 +644,9 @@ export default function SqlSourceSelector({
                 placeholder="请输入自定义SQL，例如 SELECT line_id,voltage_level,maint_org FROM ods_line_assets"
                 value={value.sql ?? ''}
                 spellCheck={false}
+                readOnly={readOnly}
                 onChange={(e) => {
+                  if (readOnly) return;
                   onChange({ ...value, sql: e.target.value });
                   setSqlActionResult(null);
                   setSqlOverlayExpanded(true);
@@ -730,6 +738,7 @@ export default function SqlSourceSelector({
             filterOption={filterCascaderOption}
             allowClear
             showSearch
+            disabled={readOnly}
             dropdownMenuClassName={styles['object-type-cascader-dropdown']}
             renderFormat={(valueShow) => valueShow.join('/')}
           />

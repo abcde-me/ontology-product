@@ -8,7 +8,8 @@ import {
   Pagination,
   Message,
   Switch,
-  Popover
+  Popover,
+  Tooltip
 } from '@arco-design/web-react';
 import {
   IconPlus,
@@ -459,28 +460,46 @@ export default function OntologySceneObjectTypeList() {
       dataIndex: 'actions',
       width: 120,
       fixed: 'right',
-      render: (_, record) => (
-        <Space size={16}>
-          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.MODIFY}>
-            <Button
-              type="text"
-              className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
-              onClick={() => handleEdit(record)}
-            >
-              编辑
-            </Button>
-          </PermissionWrapper>
-          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.DELETE}>
-            <Button
-              type="text"
-              className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
-              onClick={() => handleDelete(record)}
-            >
-              删除
-            </Button>
-          </PermissionWrapper>
-        </Space>
-      )
+      render: (_, record) => {
+        // 当 enableSyncSourceData 和 syncEnabled 都为 true 时，禁用编辑按钮
+        const isEditDisabled =
+          record.enableSyncSourceData && record.syncEnabled;
+
+        return (
+          <Space size={16}>
+            <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.MODIFY}>
+              <Tooltip
+                content={
+                  isEditDisabled
+                    ? '当前状态不支持编辑，停止后方可编辑'
+                    : undefined
+                }
+                disabled={!isEditDisabled}
+              >
+                <span>
+                  <Button
+                    type="text"
+                    className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
+                    onClick={() => handleEdit(record)}
+                    disabled={isEditDisabled}
+                  >
+                    编辑
+                  </Button>
+                </span>
+              </Tooltip>
+            </PermissionWrapper>
+            <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.DELETE}>
+              <Button
+                type="text"
+                className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
+                onClick={() => handleDelete(record)}
+              >
+                删除
+              </Button>
+            </PermissionWrapper>
+          </Space>
+        );
+      }
     }
   ];
 

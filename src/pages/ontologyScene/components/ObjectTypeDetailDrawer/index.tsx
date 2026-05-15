@@ -29,10 +29,8 @@ import {
   NoDataCard,
   copyToClipboard
 } from '@ceai-front/arco-material';
-import type {
-  SourceDataInfo,
-  SyncSourceDataStrategy
-} from '@/pages/ontologyScene/components/CollapsibleSection/types';
+import type { SourceDataInfo } from '@/pages/ontologyScene/components/CollapsibleSection/types';
+import type { SyncSourceDataStrategy } from '@/types/objectType';
 import ExpandIcon from '../../assets/expand.svg';
 import AsideIcon from '../../assets/aside.svg';
 
@@ -158,6 +156,26 @@ const convertDetailResToDetailData = (
     sourceDataInfo: detailRes.sourceDataInfo,
     enableSyncSourceData: detailRes.enableSyncSourceData,
     syncSourceDataStrategy: detailRes.syncSourceDataStrategy
+      ? ({
+          sourceDataInfo: detailRes.syncSourceDataStrategy.sourceDataInfo,
+          mode: detailRes.syncSourceDataStrategy.mode,
+          conflictStrategy: detailRes.syncSourceDataStrategy.conflictStrategy,
+          syncScope: detailRes.syncSourceDataStrategy.syncScope,
+          pollFetchSize: detailRes.syncSourceDataStrategy.pollFetchSize,
+          fullSyncBatchSize: detailRes.syncSourceDataStrategy.fullSyncBatchSize,
+          parallelism: detailRes.syncSourceDataStrategy.parallelism,
+          exceptionStrategy: detailRes.syncSourceDataStrategy.exceptionStrategy,
+          jdbcCheckpointField:
+            detailRes.syncSourceDataStrategy.jdbcCheckpointField,
+          jdbcIncrementalTimeField:
+            detailRes.syncSourceDataStrategy.jdbcIncrementalTimeField,
+          jdbcPollingIntervalSeconds:
+            detailRes.syncSourceDataStrategy.jdbcPollingIntervalSeconds,
+          jdbcSyncSqlFull: detailRes.syncSourceDataStrategy.jdbcSyncSqlFull,
+          jdbcSyncSqlIncrement:
+            detailRes.syncSourceDataStrategy.jdbcSyncSqlIncrement
+        } as SyncSourceDataStrategy)
+      : undefined
   };
 };
 
@@ -988,7 +1006,7 @@ export default function ObjectTypeDetailDrawer({
         >
           <DataSourceInfo
             sourceType={basicInfo?.sourceType}
-            sourceDataInfo={basicInfo?.sourceDataInfo}
+            sourceDataInfo={basicInfo?.syncSourceDataStrategy?.sourceDataInfo}
             filePath={basicInfo?.filePath}
           />
         </CollapsibleSection>

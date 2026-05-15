@@ -109,7 +109,7 @@ export default function DataSourceManagement() {
     try {
       const result = await testConnection(id);
       if (result.success) {
-        Message.success(result.message);
+        Message.success('连接成功');
         // 连接测试成功后刷新列表，更新连接状态
         refresh();
       } else {

@@ -130,9 +130,8 @@ export const fetchDataSourceList = async (
     const backendTypes = params.dataSourceTypes.map(
       (type) => DataSourceTypeMap[type as DataSourceType]
     );
-    // 如果只有一个，传字符串；多个则传数组
-    apiParams.subtype =
-      backendTypes.length === 1 ? backendTypes[0] : backendTypes;
+    // 始终传数组
+    apiParams.subtype = backendTypes;
   }
 
   // 处理连接状态筛选（支持多选）
@@ -141,9 +140,8 @@ export const fetchDataSourceList = async (
     const backendStatuses = params.connectionStatuses.map((status) =>
       status === 'success' ? 'succeed' : 'failed'
     );
-    // 如果只有一个，传字符串；多个则传数组
-    apiParams.status =
-      backendStatuses.length === 1 ? backendStatuses[0] : backendStatuses;
+    // 始终传数组
+    apiParams.status = backendStatuses;
   }
 
   console.log('📤 请求参数:', apiParams);

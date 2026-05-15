@@ -4,14 +4,19 @@ import classNames from 'classnames';
 interface ObjectTypeFormStepsProps {
   currentStep: number;
   className?: string;
+  /** 未传时为三步（含实例同步）；CSV 等场景可传两步 */
+  steps?: string[];
 }
 
-const STEPS = ['基本信息', '对象类型建模', '实例同步'];
+const DEFAULT_STEPS = ['基本信息', '对象类型建模', '实例同步'];
 
 export default function ObjectTypeFormSteps({
   currentStep,
-  className
+  className,
+  steps: stepsProp
 }: ObjectTypeFormStepsProps) {
+  const steps = stepsProp ?? DEFAULT_STEPS;
+
   return (
     <div
       className={classNames(
@@ -19,12 +24,12 @@ export default function ObjectTypeFormSteps({
         className
       )}
     >
-      {STEPS.map((label, index) => {
+      {steps.map((label, index) => {
         const isCompleted = index < currentStep;
         const isActive = index === currentStep;
 
         return (
-          <React.Fragment key={label}>
+          <React.Fragment key={`${label}-${index}`}>
             <div className="flex items-center gap-[12px]">
               <div
                 className={classNames(
@@ -49,7 +54,7 @@ export default function ObjectTypeFormSteps({
                 {label}
               </span>
             </div>
-            {index < STEPS.length - 1 && (
+            {index < steps.length - 1 && (
               <div
                 className={classNames(
                   'mx-[16px] h-px flex-1',

@@ -16,6 +16,7 @@ interface FieldImportUploadProps {
   customAction?: string; // 自定义上传接口地址
   from?: 'object_type' | 'link_type';
   fileList?: any[]; // 初始文件列表
+  disabled?: boolean;
 }
 
 const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
@@ -26,7 +27,8 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
   maxSize = 50,
   customAction,
   from = 'object_type',
-  fileList: initialFileList = []
+  fileList: initialFileList = [],
+  disabled = false
 }) => {
   const [fileList, setFileList] = useState<any>(initialFileList);
   const projectId = useUserInfoStore((state) => state.projectId);
@@ -128,6 +130,9 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
   };
 
   const handleDownloadTemplate = async () => {
+    if (disabled) {
+      return;
+    }
     try {
       const res = await getTemplateFile({ file_name: from });
 
@@ -170,11 +175,17 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
   };
 
   const handleRemove = (file: any) => {
+    if (disabled) {
+      return false;
+    }
     setFileList([]);
     onFileChange([]);
   };
 
   const handleBeforeUpload = (file: any) => {
+    if (disabled) {
+      return false;
+    }
     if (!checkFile(file)) {
       return false;
     }
@@ -186,6 +197,7 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
     <div>
       <Upload
         drag
+        disabled={disabled}
         className="upload-file"
         accept={accept}
         fileList={fileList}

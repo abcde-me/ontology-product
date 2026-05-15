@@ -74,8 +74,6 @@ export default function OntologySceneLinksEdit() {
       conflictStrategy: strategy.conflictStrategy,
       syncScope: strategy.syncScope,
       pollFetchSize: strategy.pollFetchSize,
-      fullSyncBatchSize:
-        strategy.fullSyncBatchSize ?? strategy.pollFetchSize ?? 500,
       parallelism: strategy.parallelism || 1,
       exceptionStrategy: strategy.exceptionStrategy,
       jdbcCheckpointField: strategy.jdbcCheckpointField,
@@ -270,8 +268,6 @@ export default function OntologySceneLinksEdit() {
           requestData.linkTableName =
             sourceDataInfo?.tableName || data.intermediateTable.table;
           requestData.isReUpload = 0;
-          requestData.enableSyncSourceData = true;
-          requestData.sourceDataInfo = sourceDataInfo;
           requestData.syncSourceDataStrategy = buildSyncSourceDataStrategy(
             data.syncSourceDataStrategy
           );
@@ -286,7 +282,7 @@ export default function OntologySceneLinksEdit() {
               columnType: field.fieldType,
               isPrimary: field.isPrimary ? 1 : 0,
               isUse: field.isUse ? 1 : 0,
-              linkTypeID: linkId // 更新时需要
+              linkTypeID: Number(linkId)
             })
           );
         }

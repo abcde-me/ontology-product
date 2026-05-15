@@ -86,7 +86,9 @@ export function useLinkFormSubmitData({
         if (
           isPollingMode &&
           (!syncSourceDataStrategy.jdbcPollingIntervalSeconds ||
-            !syncSourceDataStrategy.pollFetchSize)
+            !syncSourceDataStrategy.pollFetchSize ||
+            !syncSourceDataStrategy.jdbcIncrementalTimeField?.trim() ||
+            !syncSourceDataStrategy.jdbcCheckpointField?.trim())
         ) {
           Message.warning('请完整填写轮询参数');
           return undefined;
