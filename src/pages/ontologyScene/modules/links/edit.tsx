@@ -248,6 +248,7 @@ export default function OntologySceneLinksEdit() {
         targetObjectTypeID: data.targetObjectType
       };
 
+      // N:N 仅改名称时 data 由 initialValues 与表单 name 合并，仍走下列分支以生成完整更新请求体
       // 如果是 N:N 类型，需要处理中间表相关字段
       if (
         data.linkType === FormLinkType.MANY_TO_MANY &&
@@ -360,6 +361,9 @@ export default function OntologySceneLinksEdit() {
                 onCancel={handleCancel}
                 loading={loading}
                 showFooter={false}
+                restrictManyToManyEditToNameOnly={
+                  initialValues?.linkType === FormLinkType.MANY_TO_MANY
+                }
               />
             </div>
             {/* 底部操作按钮 - 使用sticky */}

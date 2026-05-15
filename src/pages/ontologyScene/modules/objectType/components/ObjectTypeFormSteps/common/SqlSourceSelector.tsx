@@ -484,6 +484,7 @@ export default function SqlSourceSelector({
         columns
       });
       if (succeeded) {
+        Message.success('解析字段成功');
         onSqlColumnsParsed?.(columns);
       }
     } catch (error) {
@@ -622,7 +623,13 @@ export default function SqlSourceSelector({
                   </span>
                 </Tooltip>
                 <Tooltip
-                  content={!canTriggerSqlAction ? '请先输入自定义SQL' : ''}
+                  content={
+                    !canTriggerSqlAction
+                      ? '请先输入自定义SQL'
+                      : readOnly
+                        ? ''
+                        : '识别SQL中的字段，并填入实例同步映射表格中'
+                  }
                 >
                   <span>
                     <Button

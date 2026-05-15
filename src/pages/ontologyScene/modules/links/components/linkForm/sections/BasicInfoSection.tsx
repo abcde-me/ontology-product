@@ -38,6 +38,8 @@ interface BasicInfoSectionProps {
   targetObjectAttributeOptions: string[];
   targetPrimaryAttributeLoading: boolean;
   onLinkTypeChange: (type: LinkType) => void;
+  /** 编辑页 N:N 仅允许改名称：锁定链接类型与对象类型 */
+  nnNameOnlyEdit?: boolean;
 }
 
 export default function BasicInfoSection({
@@ -53,7 +55,8 @@ export default function BasicInfoSection({
   targetPrimaryAttributeName,
   targetObjectAttributeOptions,
   targetPrimaryAttributeLoading,
-  onLinkTypeChange
+  onLinkTypeChange,
+  nnNameOnlyEdit = false
 }: BasicInfoSectionProps) {
   return (
     <>
@@ -66,12 +69,19 @@ export default function BasicInfoSection({
             <div
               key={type}
               className={classNames(
-                'relative flex-1 cursor-pointer rounded-[4px] border-[1px] p-[16px] transition-all',
+                'relative flex-1 rounded-[4px] border-[1px] p-[16px] transition-all',
+                nnNameOnlyEdit ? 'cursor-default' : 'cursor-pointer',
                 linkType === type
                   ? 'border-[#165DFF] bg-[#E8F3FF]'
-                  : 'border-[#E5E6EB] bg-white hover:border-[#165DFF]'
+                  : classNames(
+                      'border-[#E5E6EB] bg-white',
+                      !nnNameOnlyEdit && 'hover:border-[#165DFF]'
+                    )
               )}
-              onClick={() => onLinkTypeChange(type)}
+              onClick={() => {
+                if (nnNameOnlyEdit) return;
+                onLinkTypeChange(type);
+              }}
             >
               {linkType === type && (
                 <LinkCheckIcon className="absolute right-0 top-0" />
@@ -181,6 +191,7 @@ export default function BasicInfoSection({
                 ontologyModelID={ontologyModelID}
                 label="源对象类型"
                 value={sourceObjectType}
+                disabled={nnNameOnlyEdit}
                 onChange={(val) => {
                   form.setFieldValue('sourceObjectType', val);
                   if (!val) {
@@ -217,6 +228,7 @@ export default function BasicInfoSection({
                 ontologyModelID={ontologyModelID}
                 label="目标对象类型"
                 value={targetObjectType}
+                disabled={nnNameOnlyEdit}
                 onChange={(val) => {
                   form.setFieldValue('targetObjectType', val);
                 }}
@@ -254,6 +266,7 @@ export default function BasicInfoSection({
                   <ObjectTypeSelect
                     ontologyModelID={ontologyModelID}
                     value={targetObjectType}
+                    disabled={nnNameOnlyEdit}
                     onChange={(val) => {
                       form.setFieldValue('targetObjectType', val);
                       form.setFieldValue('targetObjectAttribute', undefined);
@@ -287,7 +300,9 @@ export default function BasicInfoSection({
                         : '请先选择对象类型'
                     }
                     disabled={
-                      !targetObjectType || targetPrimaryAttributeLoading
+                      nnNameOnlyEdit ||
+                      !targetObjectType ||
+                      targetPrimaryAttributeLoading
                     }
                     allowClear
                     style={{ width: '50%' }}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   Form,
@@ -10,7 +10,7 @@ import {
   Space,
   Tooltip
 } from '@arco-design/web-react';
-import { IconQuestionCircle } from '@arco-design/web-react/icon';
+import { IconDown, IconQuestionCircle } from '@arco-design/web-react/icon';
 import { connectorTestFinkSQL } from '@/api/ontologySceneLibrary/objectType';
 import { useUserInfoStore } from '@/store/userInfoStore';
 import { SyncSourceDataStrategyFormState } from '../../ObjectTypeFormUtils/types';
@@ -20,7 +20,6 @@ import {
 } from '../../ObjectTypeFormUtils/ontologyTestFinkSQLPayload';
 
 const FormItem = Form.Item;
-const { TextArea } = Input;
 
 type SyncSqlType = 'full' | 'increment';
 
@@ -108,6 +107,24 @@ export default function SyncSourceDataStrategyFormSection({
       >
     >
   >({});
+  const [sqlTestOverlayExpanded, setSqlTestOverlayExpanded] = useState<
+    Record<SyncSqlType, boolean>
+  >({
+    full: true,
+    increment: true
+  });
+
+  useEffect(() => {
+    if (sqlTestResult.full) {
+      setSqlTestOverlayExpanded((prev) => ({ ...prev, full: true }));
+    }
+  }, [sqlTestResult.full]);
+
+  useEffect(() => {
+    if (sqlTestResult.increment) {
+      setSqlTestOverlayExpanded((prev) => ({ ...prev, increment: true }));
+    }
+  }, [sqlTestResult.increment]);
 
   const currentQueryMode =
     syncSourceDataStrategy.sourceDataInfo.queryMode || 'selected';
@@ -194,59 +211,109 @@ export default function SyncSourceDataStrategyFormSection({
     const result = sqlTestResult[type];
     const canTest = !!value.trim();
 
+    const overlayExpanded = sqlTestOverlayExpanded[type];
+
     return (
       <FormItem key={field} label=" " field={field}>
-        <div className={styles['sql-editor-wrapper']}>
-          <div className={styles['sql-editor-toolbar']}>
-            <span className={styles['sql-editor-toolbar-title']}>{title}</span>
-            <Tooltip content={!canTest ? `请先输入${title}` : ''}>
-              <span>
-                <Button
-                  type="text"
-                  size="small"
-                  loading={sqlTestLoading[type]}
-                  disabled={readOnly || !canTest}
-                  onClick={() => executeTestSyncSql(type)}
-                >
-                  测试
-                </Button>
-              </span>
-            </Tooltip>
+        <div className={styles['sql-custom-sql-card']}>
+          <div className={styles['sql-custom-sql-toolbar']}>
+            <span className={styles['sql-custom-sql-toolbar-title']}>
+              {title}
+            </span>
+            <Space size={8}>
+              <Tooltip content={!canTest ? `请先输入${title}` : ''}>
+                <span>
+                  <Button
+                    type="text"
+                    size="small"
+                    loading={sqlTestLoading[type]}
+                    disabled={readOnly || !canTest}
+                    onClick={() => executeTestSyncSql(type)}
+                  >
+                    测试
+                  </Button>
+                </span>
+              </Tooltip>
+            </Space>
           </div>
-          <TextArea
-            placeholder={placeholder}
-            value={value}
-            autoSize={{ minRows: 6 }}
-            disabled={readOnly}
-            onChange={(sql) => {
-              if (readOnly) return;
-              onStrategyUpdate(
-                field === 'jdbcSyncSqlFull'
-                  ? { jdbcSyncSqlFull: sql }
-                  : { jdbcSyncSqlIncrement: sql }
-              );
-              setSqlTestResult((prev) => ({ ...prev, [type]: undefined }));
-            }}
-          />
-          {result && (
-            <div className={styles['sql-action-result']}>
-              <div className={styles['sql-action-result-header']}>
-                <span>测试结果</span>
-                <span
-                  className={
-                    result.status === 'succeed'
-                      ? styles['sql-action-result-success']
-                      : styles['sql-action-result-failed']
+          <div className={styles['sql-custom-sql-body']}>
+            <textarea
+              className={styles['sql-custom-sql-input']}
+              placeholder={placeholder}
+              value={value}
+              spellCheck={false}
+              readOnly={readOnly}
+              onChange={(e) => {
+                if (readOnly) return;
+                const sql = e.target.value;
+                onStrategyUpdate(
+                  field === 'jdbcSyncSqlFull'
+                    ? { jdbcSyncSqlFull: sql }
+                    : { jdbcSyncSqlIncrement: sql }
+                );
+                setSqlTestResult((prev) => ({ ...prev, [type]: undefined }));
+                setSqlTestOverlayExpanded((prev) => ({
+                  ...prev,
+                  [type]: true
+                }));
+              }}
+            />
+            {result && (
+              <div
+                className={`${styles['sql-custom-sql-overlay']}${
+                  !overlayExpanded
+                    ? ` ${styles['sql-custom-sql-overlay--collapsed']}`
+                    : ''
+                }`}
+              >
+                <button
+                  type="button"
+                  className={styles['sql-custom-sql-overlay-header']}
+                  onClick={() =>
+                    setSqlTestOverlayExpanded((prev) => ({
+                      ...prev,
+                      [type]: !prev[type]
+                    }))
                   }
                 >
-                  {result.status === 'succeed' ? '通过' : '失败'}
-                </span>
+                  <span
+                    className={styles['sql-custom-sql-overlay-header-left']}
+                  >
+                    <IconDown
+                      className={`${styles['sql-custom-sql-overlay-chevron']}${
+                        !overlayExpanded
+                          ? ` ${styles['sql-custom-sql-overlay-chevron-collapsed']}`
+                          : ''
+                      }`}
+                    />
+                    <span className={styles['sql-custom-sql-overlay-title']}>
+                      测试结果
+                    </span>
+                  </span>
+                  <span
+                    className={
+                      result.status === 'succeed'
+                        ? styles['sql-action-result-success']
+                        : styles['sql-action-result-failed']
+                    }
+                  >
+                    {result.status === 'succeed' ? '通过' : '失败'}
+                  </span>
+                </button>
+                {overlayExpanded && (
+                  <div className={styles['sql-custom-sql-overlay-body']}>
+                    {!!result.message && (
+                      <div
+                        className={`${styles['sql-action-result-message']} ${styles['sql-custom-sql-overlay-message']}`}
+                      >
+                        {result.message}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-              <div className={styles['sql-action-result-message']}>
-                {result.message}
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </FormItem>
     );

@@ -819,23 +819,30 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           field="code"
           rules={[
             { required: true, message: '请输入id' },
-            {
-              validator: (value, callback) => {
-                if (!value) {
-                  callback();
-                  return;
-                }
-                if (!/^[a-zA-Z]/.test(value)) {
-                  callback('首字符必须为英文字母');
-                  return;
-                }
-                if (!/^[a-zA-Z0-9]+$/.test(value)) {
-                  callback('仅允许英文字母与数字(不允许下划线及特殊符号)');
-                  return;
-                }
-                callback();
-              }
-            }
+            // 编辑且 code 不可改：沿用后端历史编码，不做字母数字格式校验
+            ...(isEdit && initialValues?.code
+              ? []
+              : [
+                  {
+                    validator: (value, callback) => {
+                      if (!value) {
+                        callback();
+                        return;
+                      }
+                      if (!/^[a-zA-Z]/.test(value)) {
+                        callback('首字符必须为英文字母');
+                        return;
+                      }
+                      if (!/^[a-zA-Z0-9]+$/.test(value)) {
+                        callback(
+                          '仅允许英文字母与数字(不允许下划线及特殊符号)'
+                        );
+                        return;
+                      }
+                      callback();
+                    }
+                  }
+                ])
           ]}
           extra={
             <div className="text-[12px] text-[var(--color-text-4)]">

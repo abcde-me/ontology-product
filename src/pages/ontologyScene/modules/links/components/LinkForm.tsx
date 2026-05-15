@@ -22,7 +22,14 @@ export type {
 
 const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
   (
-    { initialValues, onSubmit, onCancel, loading = false, showFooter = true },
+    {
+      initialValues,
+      onSubmit,
+      onCancel,
+      loading = false,
+      showFooter = true,
+      restrictManyToManyEditToNameOnly = false
+    },
     ref
   ) => {
     const [form] = Form.useForm();
@@ -72,11 +79,15 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       linkType
     });
 
+    const nnNameOnlyEdit =
+      restrictManyToManyEditToNameOnly && linkType === LinkType.MANY_TO_MANY;
+
     const attributeColumns = useAttributeFieldColumns({
       form,
       attributeFields,
       setAttributeFields,
-      intermediateTable
+      intermediateTable,
+      readOnly: nnNameOnlyEdit
     });
 
     const { buildSubmitData } = useLinkFormSubmitData({
@@ -89,7 +100,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       attributeFields,
       sourcePrimaryAttribute,
       isReUpload,
-      syncSourceDataStrategy
+      syncSourceDataStrategy,
+      initialValues,
+      restrictManyToManyEditToNameOnly
     });
 
     useEffect(() => {
@@ -259,6 +272,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
               targetObjectAttributeOptions={targetObjectAttributeOptions}
               targetPrimaryAttributeLoading={targetPrimaryAttributeLoading}
               onLinkTypeChange={handleLinkTypeChange}
+              nnNameOnlyEdit={nnNameOnlyEdit}
             />
 
             {linkType === LinkType.MANY_TO_MANY && (
@@ -270,6 +284,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                   intermediateTable={intermediateTable}
                   initialFileList={initialFileList}
                   syncSourceDataStrategy={syncSourceDataStrategy}
+                  readOnly={nnNameOnlyEdit}
                   onIntermediateTableTypeChange={
                     handleIntermediateTableTypeChange
                   }
@@ -286,6 +301,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                   form={form}
                   fileUploaded={fileUploaded}
                   attributeOptions={getAttributeOptions()}
+                  readOnly={nnNameOnlyEdit}
                 />
 
                 <AttributeMappingSection

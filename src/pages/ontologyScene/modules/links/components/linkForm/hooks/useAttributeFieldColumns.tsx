@@ -21,18 +21,21 @@ interface UseAttributeFieldColumnsParams {
   attributeFields: AttributeField[];
   setAttributeFields: React.Dispatch<React.SetStateAction<AttributeField[]>>;
   intermediateTable: IntermediateTable;
+  readOnly?: boolean;
 }
 
 export function useAttributeFieldColumns({
   form,
   attributeFields,
   setAttributeFields,
-  intermediateTable
+  intermediateTable,
+  readOnly = false
 }: UseAttributeFieldColumnsParams) {
   const handleFieldChange = (
     index: number,
     updates: Partial<AttributeField>
   ) => {
+    if (readOnly) return;
     const newFields = [...attributeFields];
     newFields[index] = { ...newFields[index], ...updates };
     setAttributeFields(newFields);
@@ -40,6 +43,7 @@ export function useAttributeFieldColumns({
   };
 
   const handleSelectAll = (checked: boolean) => {
+    if (readOnly) return;
     const newFields = attributeFields.map((field) => ({
       ...field,
       isUse: checked ? 1 : 0
@@ -49,6 +53,7 @@ export function useAttributeFieldColumns({
   };
 
   const handlePrimaryKeyChange = (index: number) => {
+    if (readOnly) return;
     const newFields: AttributeField[] = attributeFields.map((field, i) => {
       const isPrimary = i === index;
       let fieldType = field.fieldType;
@@ -78,6 +83,7 @@ export function useAttributeFieldColumns({
         <div className="flex items-center gap-[12px]">
           <Checkbox
             className="pointer-events-auto mr-[12px]"
+            disabled={readOnly}
             checked={allSelected}
             indeterminate={someSelected && !allSelected}
             onChange={(checked) => handleSelectAll(!!checked)}
@@ -88,7 +94,9 @@ export function useAttributeFieldColumns({
       width: 60,
       render: (_, record, index) => (
         <Checkbox
-          disabled={record.isPrimary === true && record.isUse === 1}
+          disabled={
+            readOnly || (record.isPrimary === true && record.isUse === 1)
+          }
           checked={record.isUse === 1}
           onChange={(checked) =>
             handleFieldChange(index, { isUse: checked ? 1 : 0 })
@@ -115,6 +123,7 @@ export function useAttributeFieldColumns({
       width: 84,
       render: (_, record, index) => (
         <Radio
+          disabled={readOnly}
           checked={record.isPrimary === true}
           onChange={() => handlePrimaryKeyChange(index)}
         />
@@ -128,6 +137,7 @@ export function useAttributeFieldColumns({
         <Input
           value={value}
           className="w-full"
+          readOnly={readOnly}
           onChange={(val) => handleFieldChange(index, { attributeName: val })}
           placeholder="请输入属性名称"
         />
@@ -140,7 +150,7 @@ export function useAttributeFieldColumns({
       render: (value, record, index) => {
         const rowNotSelected = record.isUse !== 1;
         const isDataLakeSync = intermediateTable.type === 'data_lake_sync';
-        const rowDisabled = rowNotSelected || isDataLakeSync;
+        const rowDisabled = readOnly || rowNotSelected || isDataLakeSync;
         const selectPopoverContent = rowNotSelected
           ? '请先勾选字段'
           : '数据湖同步时字段类型与源表一致，不可修改';
