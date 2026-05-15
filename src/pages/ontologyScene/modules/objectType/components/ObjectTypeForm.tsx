@@ -11,6 +11,7 @@ import ObjectTypeIconSelector from './ObjectTypeIconSelector';
 import ModelingStep from './ObjectTypeFormSteps/ModelingStep';
 import InstanceSyncStep from './ObjectTypeFormSteps/InstanceSyncStep';
 import { syncStrategyStateToFormValues } from './ObjectTypeFormSteps/common/SyncSourceDataStrategyFormSection';
+import { syncScopeRequiresIncrementalPollingFields } from './ObjectTypeFormUtils/syncScopeRequiresIncrementalPollingFields';
 import ObjectTypeFormSteps from './ObjectTypeFormSteps/ObjectTypeFormSteps';
 import {
   AttributeField,
@@ -564,11 +565,18 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       if (
         isPollingMode &&
         (!syncSourceDataStrategy.jdbcPollingIntervalSeconds ||
-          !syncSourceDataStrategy.pollFetchSize ||
-          !syncSourceDataStrategy.jdbcIncrementalTimeField?.trim() ||
-          !syncSourceDataStrategy.jdbcCheckpointField?.trim())
+          !syncSourceDataStrategy.pollFetchSize)
       ) {
         Message.warning('请完整填写轮询参数');
+        return false;
+      }
+
+      if (
+        syncScopeRequiresIncrementalPollingFields(syncSourceDataStrategy) &&
+        (!syncSourceDataStrategy.jdbcIncrementalTimeField?.trim() ||
+          !syncSourceDataStrategy.jdbcCheckpointField?.trim())
+      ) {
+        Message.warning('请填写增量时间列和断点辅助列');
         return false;
       }
 

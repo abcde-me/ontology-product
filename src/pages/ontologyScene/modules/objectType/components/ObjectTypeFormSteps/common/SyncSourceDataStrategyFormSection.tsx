@@ -18,6 +18,7 @@ import {
   sqlSourceDataInfoToSourceDataInfoForTest,
   syncFormStateToOntologyTestSyncStrategy
 } from '../../ObjectTypeFormUtils/ontologyTestFinkSQLPayload';
+import { syncScopeRequiresIncrementalPollingFields } from '../../ObjectTypeFormUtils/syncScopeRequiresIncrementalPollingFields';
 
 const FormItem = Form.Item;
 
@@ -149,6 +150,8 @@ export default function SyncSourceDataStrategyFormSection({
     syncSourceDataStrategy.sourceDataInfo.queryMode || 'selected';
   const isPollingMode = syncSourceDataStrategy.mode === 'JDBC_POLLING';
   const isSqlPolling = currentQueryMode === 'sql' && isPollingMode;
+  const incrementalPollingFieldsRequired =
+    syncScopeRequiresIncrementalPollingFields(syncSourceDataStrategy);
 
   const executeTestSyncSql = async (type: SyncSqlType) => {
     if (readOnly) return;
@@ -224,7 +227,8 @@ export default function SyncSourceDataStrategyFormSection({
     type: SyncSqlType,
     title: string,
     field: 'jdbcSyncSqlFull' | 'jdbcSyncSqlIncrement',
-    placeholder: string
+    placeholder: string,
+    required = false
   ) => {
     const value = syncSourceDataStrategy[field] || '';
     const result = sqlTestResult[type];
@@ -233,7 +237,7 @@ export default function SyncSourceDataStrategyFormSection({
     const overlayExpanded = sqlTestOverlayExpanded[type];
 
     return (
-      <FormItem key={field} label=" ">
+      <FormItem key={field} label=" " required={required}>
         <div className={styles['sql-custom-sql-card']}>
           <div className={styles['sql-custom-sql-toolbar']}>
             <span className={styles['sql-custom-sql-toolbar-title']}>
@@ -376,7 +380,8 @@ export default function SyncSourceDataStrategyFormSection({
             'increment',
             '增量SQL',
             'jdbcSyncSqlIncrement',
-            incrementSqlPlaceholder
+            incrementSqlPlaceholder,
+            incrementalPollingFieldsRequired
           )}
         </>
       )}
@@ -423,7 +428,10 @@ export default function SyncSourceDataStrategyFormSection({
             />
           </FormItem>
 
-          <FormItem label="增量时间列" required>
+          <FormItem
+            label="增量时间列"
+            required={incrementalPollingFieldsRequired}
+          >
             <Input
               placeholder="如update_time, last_modified"
               value={syncSourceDataStrategy.jdbcIncrementalTimeField}
@@ -434,7 +442,10 @@ export default function SyncSourceDataStrategyFormSection({
             />
           </FormItem>
 
-          <FormItem label="断点辅助列" required>
+          <FormItem
+            label="断点辅助列"
+            required={incrementalPollingFieldsRequired}
+          >
             <Input
               placeholder="如id、主键或组合列名"
               value={syncSourceDataStrategy.jdbcCheckpointField}
