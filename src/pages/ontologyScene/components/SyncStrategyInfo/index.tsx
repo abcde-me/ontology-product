@@ -178,7 +178,7 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
               '同步模式',
               syncModeDisplay,
               'w-[418px]',
-              'CDC模式通过监听数据库变更日志实时同步数据'
+              '监听数据库变更日志，实时捕获增删改'
             )}
             {renderField(
               '冲突策略',
@@ -206,7 +206,7 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
                 syncSourceDataStrategy.exceptionStrategy
               ),
               'w-[418px]',
-              '定义同步过程中遇到错误时的处理方式'
+              '立即停止：出现异常后任务停止，等待人工处理。继续同步：异常数据记录日志，任务继续处理后续数据。'
             )}
           </div>
         </>
@@ -221,7 +221,7 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
               '同步模式',
               syncModeDisplay,
               'w-[418px]',
-              '轮询模式通过定时查询数据源获取数据变化'
+              '定时执行查询，按配置条件分批拉取数据'
             )}
             {renderField(
               '轮询间隔',
@@ -275,7 +275,7 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
                 syncSourceDataStrategy.exceptionStrategy
               ),
               'w-[418px]',
-              '定义同步过程中遇到错误时的处理方式'
+              '立即停止：出现异常后任务停止，等待人工处理。继续同步：异常数据记录日志，任务继续处理后续数据。'
             )}
           </div>
         </>
