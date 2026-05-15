@@ -929,7 +929,9 @@ export const ModaForgeResourceEndpoints = {
   GetCurrentAIChatApi: PrefixAiAppforge + '/ListMessage',
   // 文件上传
   UploadFileApi: PrefixAiAppforgeFile + '/createMultipartUpload',
-  CompleteMultipartUploadApi: PrefixAiAppforgeFile + '/completeMultipartUpload'
+  CompleteMultipartUploadApi: PrefixAiAppforgeFile + '/completeMultipartUpload',
+  // 创建本体agent
+  CreateOntologyAgentApi: PrefixAimdp + '/CreateOntologyAgent'
 };
 
 /**

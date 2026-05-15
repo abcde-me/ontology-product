@@ -185,7 +185,15 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     apiConfig: chatApiConfig,
     showMessage: conversationShowMessage,
     onConversationCreated: (newConversationId) => {
+      console.log('[ChatPanel] 新会话创建:', newConversationId);
+      // 设置为活跃会话
       setActiveConversation(newConversationId);
+      // 重新加载会话列表，以便在列表中显示新会话
+      loadConversations(
+        String(appId),
+        projectId ? String(projectId) : undefined
+      );
+      // 调用外部回调
       onConversationCreated?.(newConversationId);
     },
     onError: (error) => {
@@ -216,12 +224,20 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   // 组件挂载时加载会话列表
   useEffect(() => {
+    console.log('[ChatPanel] 组件挂载 useEffect 触发:', {
+      appId,
+      projectId,
+      hasAppId: !!appId
+    });
+
     if (appId) {
-      console.log('[ChatPanel] 组件挂载，加载会话列表');
+      console.log('[ChatPanel] 开始加载会话列表');
       loadConversations(
         String(appId),
         projectId ? String(projectId) : undefined
       );
+    } else {
+      console.log('[ChatPanel] appId 不存在，跳过加载会话列表');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appId, projectId]); // 只依赖 appId 和 projectId，不依赖 loadConversations
@@ -260,10 +276,12 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   // 监听 activeConversationId 变化，加载历史消息
   useEffect(() => {
-    console.log('[ChatPanel] activeConversationId 变化:', {
+    console.log('[ChatPanel] activeConversationId 变化 useEffect 触发:', {
       conversationId,
       activeConversationId,
-      type: typeof activeConversationId
+      type: typeof activeConversationId,
+      appId,
+      hasLoadHistoryMessages: !!loadHistoryMessages
     });
 
     // 如果有外部传入的 conversationId，不处理（由 useXChat 内部处理）
@@ -273,13 +291,33 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     }
 
     // 如果 activeConversationId 是有效的会话 ID（不是 null 或 undefined），加载历史消息
-    if (activeConversationId && typeof activeConversationId === 'string') {
-      console.log('[ChatPanel] 加载会话历史消息:', activeConversationId);
-      loadHistoryMessages(activeConversationId);
+    if (
+      activeConversationId &&
+      typeof activeConversationId === 'string' &&
+      appId
+    ) {
+      console.log('[ChatPanel] 满足条件，准备加载会话历史消息:', {
+        activeConversationId,
+        appId
+      });
+
+      // 使用 setTimeout 确保在下一个事件循环中执行，避免时序问题
+      const timer = setTimeout(() => {
+        console.log('[ChatPanel] 开始调用 loadHistoryMessages');
+        loadHistoryMessages(activeConversationId);
+      }, 0);
+
+      return () => clearTimeout(timer);
     } else {
-      console.log('[ChatPanel] activeConversationId 无效，不加载历史消息');
+      console.log('[ChatPanel] 不加载历史消息，原因:', {
+        hasActiveConversationId: !!activeConversationId,
+        activeConversationIdValue: activeConversationId,
+        isString: typeof activeConversationId === 'string',
+        hasAppId: !!appId,
+        appIdValue: appId
+      });
     }
-  }, [activeConversationId, conversationId, loadHistoryMessages]);
+  }, [activeConversationId, conversationId, loadHistoryMessages, appId]);
 
   // 监听消息变化，检查是否需要刷新图谱
   useEffect(() => {
@@ -312,15 +350,15 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     // 检查是否有非 get/list 操作
     const hasModification = ontologyActions.some(
       (action) =>
-        action.action !== 'get' &&
-        action.action !== 'list' &&
-        action.action !== 'GET' &&
-        action.action !== 'LIST'
+        action.action_type !== 'get' &&
+        action.action_type !== 'list' &&
+        action.action_type !== 'GET' &&
+        action.action_type !== 'LIST'
     );
 
     console.log('[ChatPanel] 本体操作检查:', {
       hasModification,
-      actions: ontologyActions.map((a) => a.action)
+      actions: ontologyActions.map((a) => a.action_type)
     });
 
     if (hasModification && onGraphRefresh) {

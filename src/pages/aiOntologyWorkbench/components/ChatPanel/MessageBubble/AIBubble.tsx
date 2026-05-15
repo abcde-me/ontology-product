@@ -31,9 +31,7 @@ const AIBubble: React.FC<AIBubbleProps> = ({ message, onLocateNode }) => {
 
   return (
     <div className={styles.aiBubbleContainer}>
-      <div className={styles.aiAvatar}>
-        <div className={styles.avatarIcon}>AI</div>
-      </div>
+      {/* 移除 AI 头像 */}
       <div className={styles.aiBubble}>
         {/* 思维链 - 包含所有步骤（thinking、ontology 等） */}
         {hasThinkingSteps && (

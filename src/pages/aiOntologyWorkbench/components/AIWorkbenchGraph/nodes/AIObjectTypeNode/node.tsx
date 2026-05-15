@@ -12,6 +12,7 @@ const Node = ({ id, data }) => {
   const { openBottomPanel, highlightedNodeCode } = useAIWorkbenchGraphStore();
   const { currentOntology } = useAIWorkbenchStore();
   const { totalCount, loadBehaviorList } = useBehaviorData();
+  const [hasLoadedBehaviors, setHasLoadedBehaviors] = useState(false);
 
   // 判断当前节点是否被高亮
   const isHighlighted = highlightedNodeCode === data.code;
@@ -28,13 +29,15 @@ const Node = ({ id, data }) => {
   };
 
   /**
-   * 加载行为数量
+   * 鼠标悬停时加载行为数据（懒加载）
    */
-  useEffect(() => {
-    if (data.id && currentOntology?.id) {
+  const handleBehaviorHover = () => {
+    if (!hasLoadedBehaviors && data.id && currentOntology?.id) {
+      console.log('[Node] 懒加载行为数据，objectId:', data.id);
       loadBehaviorList(data.id, Number(currentOntology.id));
+      setHasLoadedBehaviors(true);
     }
-  }, [data.id, currentOntology?.id, loadBehaviorList]);
+  };
 
   // 获取对象类型图标
   const iconItem = OBJECT_TYPE_ICON_OPTIONS.find(
@@ -92,7 +95,10 @@ const Node = ({ id, data }) => {
         position="top"
         className="behavior-tooltip"
       >
-        <div className="flex cursor-pointer items-center gap-[4px]">
+        <div
+          className="flex cursor-pointer items-center gap-[4px]"
+          onMouseEnter={handleBehaviorHover}
+        >
           <ActionIcon className="h-[16px] w-[16px] flex-shrink-0" />
           <span className="text-[12px] leading-[18px] text-[#184FF2]">
             {totalCount}

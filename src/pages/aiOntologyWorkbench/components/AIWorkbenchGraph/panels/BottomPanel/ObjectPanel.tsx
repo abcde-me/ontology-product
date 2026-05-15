@@ -196,6 +196,8 @@ function ObjectPanel({ objectId }: ObjectPanelProps) {
 
   useEffect(() => {
     if (objectId) {
+      console.log('[ObjectPanel] objectId 变化，重新加载数据:', objectId);
+
       // 重置状态
       setBasicInfo(null);
       setInstancesData([]);
@@ -224,7 +226,8 @@ function ObjectPanel({ objectId }: ObjectPanelProps) {
       loadAttributes(1, defaultPageSize);
       loadBehaviors(1, defaultPageSize);
     }
-  }, [objectId, loadBasicInfo, loadInstances, loadAttributes, loadBehaviors]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [objectId]); // 只依赖 objectId，避免无限循环
 
   const handleCopy = async (value: string) => {
     const result = await copyToClipboard(value);

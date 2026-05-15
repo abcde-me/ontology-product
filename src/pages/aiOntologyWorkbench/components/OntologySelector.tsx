@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Dropdown, Spin } from '@arco-design/web-react';
-import { IconDown, IconSettings, IconPlus } from '@arco-design/web-react/icon';
+import { IconDown, IconPlus } from '@arco-design/web-react/icon';
 import { useInfiniteScroll } from 'ahooks';
 import { useAIWorkbenchStore } from '../store';
 import SceneModal from '@/pages/ontologyScene/modules/list/components/SceneModal';
@@ -24,7 +24,8 @@ const OntologySelector: React.FC = () => {
     createLoading,
     handleCreateOntology,
     openCreateModal,
-    closeCreateModal
+    closeCreateModal,
+    ensureOntologyAgent
   } = useOntologyManagement();
 
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -100,9 +101,15 @@ const OntologySelector: React.FC = () => {
   /**
    * 切换本体
    */
-  const handleSelectOntology = (ontology: OntologScene) => {
-    setCurrentOntology(ontology);
+  const handleSelectOntology = async (ontology: OntologScene) => {
+    console.log('[OntologySelector] 选择本体:', ontology.id, ontology.name);
     setDropdownVisible(false);
+
+    // 检查并创建 Agent（如果需要）
+    await ensureOntologyAgent(ontology);
+
+    // 设置当前本体
+    setCurrentOntology(ontology);
   };
 
   /**
