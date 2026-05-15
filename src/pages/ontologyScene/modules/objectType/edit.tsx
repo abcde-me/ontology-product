@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { Message, Button, Spin } from '@arco-design/web-react';
 import ObjectTypeForm, {
@@ -9,21 +9,9 @@ import {
   updateOntologyObjectType
 } from '@/api/ontologySceneLibrary/objectType';
 import { buildUpdateObjectTypeRequest } from './components/ObjectTypeFormHooks/useObjectTypeSubmit';
-import { SourceType } from '@/types/objectType';
-import { DATA_SOURCE_TYPE } from '@/pages/ontologyScene/common/constants';
+import { mapObjectTypeDetailToFormData } from './mapObjectTypeDetailToFormData';
 
 import { IconLeft } from '@arco-design/web-react/icon';
-
-const DEFAULT_SYNC_SOURCE_DATA_STRATEGY = {
-  mode: 'BINLOG_CDC',
-  conflictStrategy: 'KEEP_SOURCE',
-  syncScope: 'FULL_THEN_INCREMENTAL',
-  pollFetchSize: 500,
-  fullSyncBatchSize: 500,
-  parallelism: 1,
-  exceptionStrategy: 'STOP_ON_ERROR',
-  jdbcPollingIntervalSeconds: 60
-};
 
 const getInitialStepFromSearch = (search: string) => {
   const step = new URLSearchParams(search).get('step');
@@ -73,122 +61,7 @@ export default function OntologySceneObjectTypeEdit() {
           return;
         }
 
-        const objectType = detailRes.data;
-
-        // 根据 sourceType 确定数据源类型
-        const dataSourceType =
-          objectType.sourceType === SourceType.FILE_UPLOAD
-            ? DATA_SOURCE_TYPE.LOCAL_CSV
-            : DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC;
-
-        // 转换为表单数据格式
-        const formData: Partial<ObjectTypeFormData> = {
-          code: objectType.code || '',
-          name: objectType.name || '',
-          description: objectType.description,
-          icon: objectType.icon || '',
-          ontologyModelID: objectType.ontologyModelID || 0,
-          filePath: objectType.filePath,
-          originalDbName: objectType.originalDbName || '',
-          originalTableName: objectType.originalTableName || '',
-          sourceType: objectType.sourceType,
-          ontologyPhysicalPropertiesList:
-            objectType.ontologyPhysicalPropertiesList || [],
-          sourceDataInfo: objectType.sourceDataInfo
-            ? {
-                connectorId: objectType.sourceDataInfo.connectorId,
-                databaseName: objectType.sourceDataInfo.databaseName,
-                tableName: objectType.sourceDataInfo.tableName,
-                queryMode:
-                  objectType.sourceDataInfo.queryMode === 'sql'
-                    ? 'sql'
-                    : 'selected',
-                sql: objectType.sourceDataInfo.sql
-              }
-            : undefined,
-          enableSyncSourceData: objectType.enableSyncSourceData,
-          syncSourceDataStrategy: objectType.syncSourceDataStrategy
-            ? {
-                sourceDataInfo: {
-                  connectorId:
-                    objectType.syncSourceDataStrategy.sourceDataInfo
-                      ?.connectorId,
-                  databaseName:
-                    objectType.syncSourceDataStrategy.sourceDataInfo
-                      ?.databaseName,
-                  tableName:
-                    objectType.syncSourceDataStrategy.sourceDataInfo?.tableName,
-                  queryMode:
-                    objectType.syncSourceDataStrategy.sourceDataInfo
-                      ?.queryMode === 'sql'
-                      ? 'sql'
-                      : 'selected',
-                  sql: objectType.syncSourceDataStrategy.sourceDataInfo?.sql
-                },
-                mode:
-                  objectType.syncSourceDataStrategy.mode ||
-                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.mode ||
-                  '',
-                conflictStrategy:
-                  objectType.syncSourceDataStrategy.conflictStrategy ||
-                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.conflictStrategy ||
-                  '',
-                syncScope:
-                  objectType.syncSourceDataStrategy.syncScope ||
-                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.syncScope ||
-                  '',
-                pollFetchSize:
-                  objectType.syncSourceDataStrategy.pollFetchSize ||
-                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.pollFetchSize ||
-                  0,
-                fullSyncBatchSize:
-                  objectType.syncSourceDataStrategy.fullSyncBatchSize ??
-                  objectType.syncSourceDataStrategy.pollFetchSize ??
-                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.fullSyncBatchSize,
-                parallelism:
-                  objectType.syncSourceDataStrategy.parallelism ||
-                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.parallelism ||
-                  1,
-                exceptionStrategy:
-                  objectType.syncSourceDataStrategy.exceptionStrategy ||
-                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.exceptionStrategy ||
-                  '',
-                jdbcCheckpointField:
-                  objectType.syncSourceDataStrategy.jdbcCheckpointField,
-                jdbcIncrementalTimeField:
-                  objectType.syncSourceDataStrategy.jdbcIncrementalTimeField,
-                jdbcPollingIntervalSeconds:
-                  objectType.syncSourceDataStrategy
-                    .jdbcPollingIntervalSeconds ||
-                  DEFAULT_SYNC_SOURCE_DATA_STRATEGY.jdbcPollingIntervalSeconds,
-                jdbcSyncSqlFull:
-                  objectType.syncSourceDataStrategy.jdbcSyncSqlFull,
-                jdbcSyncSqlIncrement:
-                  objectType.syncSourceDataStrategy.jdbcSyncSqlIncrement
-              }
-            : undefined,
-          _dataSource: {
-            type: dataSourceType,
-            connectorId: objectType.sourceDataInfo?.connectorId,
-            database:
-              dataSourceType === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC
-                ? objectType.sourceDataInfo?.databaseName ||
-                  objectType.originalDbName
-                : undefined,
-            table:
-              dataSourceType === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC
-                ? objectType.sourceDataInfo?.tableName ||
-                  objectType.originalTableName
-                : undefined,
-            queryMode:
-              objectType.sourceDataInfo?.queryMode === 'sql'
-                ? 'sql'
-                : 'selected',
-            sql: objectType.sourceDataInfo?.sql
-          }
-        };
-
-        setInitialValues(formData);
+        setInitialValues(mapObjectTypeDetailToFormData(detailRes.data));
       } catch (error) {
         console.error('加载数据失败:', error);
         Message.error('加载数据失败，请重试');
@@ -246,6 +119,26 @@ export default function OntologySceneObjectTypeEdit() {
     );
   };
 
+  /** 分步切换后重新拉取详情，用服务端数据覆盖本地，避免回显与 Form 状态不对 */
+  const refetchDetailAfterStepChange = useCallback(
+    async (_stepIndex: number) => {
+      if (!objectTypeId) return;
+      const objectTypeIdNum = parseInt(objectTypeId, 10);
+      if (isNaN(objectTypeIdNum)) return;
+      try {
+        const detailRes = await getOntologyObjectTypeDetail({
+          id: objectTypeIdNum
+        });
+        if (detailRes.status === 200 && detailRes.data) {
+          setInitialValues(mapObjectTypeDetailToFormData(detailRes.data));
+        }
+      } catch (error) {
+        console.error('刷新对象类型详情失败', error);
+      }
+    },
+    [objectTypeId]
+  );
+
   return (
     <>
       {initialValues ? (
@@ -268,6 +161,7 @@ export default function OntologySceneObjectTypeEdit() {
                   initialStep={initialStep}
                   onSubmit={handleSubmit}
                   onCancel={handleCancel}
+                  onStepChange={refetchDetailAfterStepChange}
                   loading={loading}
                 />
               )}

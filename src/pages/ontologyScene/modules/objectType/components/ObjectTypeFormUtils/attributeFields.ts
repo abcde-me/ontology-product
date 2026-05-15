@@ -184,6 +184,7 @@ interface LegacyAttributeLike {
   sourceColumnName?: string;
   sourceColumnComment?: string;
   sourceColumnType?: string;
+  sourceCoumnOriginName?: string;
   sourceTableName?: string;
   _storedPublicPropertyId?: number;
   _vectorizationOn?: boolean;
@@ -225,6 +226,9 @@ export function legacyFieldToObjectTypeAttribute(
     sourceColumnName,
     sourceColumnComment,
     sourceColumnType: raw.sourceColumnType ?? propertyType,
+    ...(raw.sourceCoumnOriginName
+      ? { sourceCoumnOriginName: raw.sourceCoumnOriginName }
+      : {}),
     ...(legacySourceTable ? { sourceTableName: legacySourceTable } : {}),
     _storedPublicPropertyId: raw._storedPublicPropertyId,
     _vectorizationOn: raw._vectorizationOn,
@@ -236,16 +240,18 @@ export function legacyFieldToObjectTypeAttribute(
 export function objectTypeAttributeToSyncMapping(
   field: ObjectTypeAttributeField
 ): InstanceSyncMappingField {
+  const name = field.sourceColumnName?.trim();
   return {
     key: createObjectTypeAttributeKey('sync-field'),
-    sourceColumnName: undefined,
-    sourceColumnComment: undefined,
-    sourceColumnType: undefined,
+    sourceColumnName: name || undefined,
+    sourceColumnComment: field.sourceColumnComment,
+    sourceColumnType: field.sourceColumnType,
+    sourceCoumnOriginName: field.sourceCoumnOriginName,
     propertyID: field.propertyID,
     propertyComment: field.propertyComment,
     propertyType: field.propertyType,
     isPrimary: field.isPrimary,
-    isVector: field._vectorizationOn ? 1 : 0
+    isVector: field.isVector === 1 ? 1 : field._vectorizationOn ? 1 : 0
   };
 }
 

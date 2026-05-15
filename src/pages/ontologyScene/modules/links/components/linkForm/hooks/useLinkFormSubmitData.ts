@@ -9,6 +9,7 @@ import {
 } from '../types';
 import { normalizeFieldTypeForPrimary } from '../utils/linkFormUtils';
 import { SyncSourceDataStrategyFormState } from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormUtils/types';
+import { syncScopeRequiresIncrementalPollingFields } from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormUtils/syncScopeRequiresIncrementalPollingFields';
 
 interface UseLinkFormSubmitDataParams {
   form: any;
@@ -121,11 +122,18 @@ export function useLinkFormSubmitData({
         if (
           isPollingMode &&
           (!syncSourceDataStrategy.jdbcPollingIntervalSeconds ||
-            !syncSourceDataStrategy.pollFetchSize ||
-            !syncSourceDataStrategy.jdbcIncrementalTimeField?.trim() ||
-            !syncSourceDataStrategy.jdbcCheckpointField?.trim())
+            !syncSourceDataStrategy.pollFetchSize)
         ) {
           Message.warning('请完整填写轮询参数');
+          return undefined;
+        }
+
+        if (
+          syncScopeRequiresIncrementalPollingFields(syncSourceDataStrategy) &&
+          (!syncSourceDataStrategy.jdbcIncrementalTimeField?.trim() ||
+            !syncSourceDataStrategy.jdbcCheckpointField?.trim())
+        ) {
+          Message.warning('请填写增量时间列和断点辅助列');
           return undefined;
         }
 

@@ -56,6 +56,7 @@ export interface ObjectTypeAttributeField {
   sourceColumnName: string;
   sourceColumnComment: string;
   sourceColumnType?: string;
+  sourceCoumnOriginName?: string;
   /** 提交时写入 ontologyPhysicalPropertiesList.sourceTableName（选表=表名；自定义 SQL=解析 columnTable） */
   sourceTableName?: string;
   _storedPublicPropertyId?: number;

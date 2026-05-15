@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Form, Input, Button, Message } from '@arco-design/web-react';
 import classNames from 'classnames';
 import styles from './ObjectTypeForm.module.scss';
@@ -10,6 +10,8 @@ import {
 import ObjectTypeIconSelector from './ObjectTypeIconSelector';
 import ModelingStep from './ObjectTypeFormSteps/ModelingStep';
 import InstanceSyncStep from './ObjectTypeFormSteps/InstanceSyncStep';
+import { syncStrategyStateToFormValues } from './ObjectTypeFormSteps/common/SyncSourceDataStrategyFormSection';
+import { syncScopeRequiresIncrementalPollingFields } from './ObjectTypeFormUtils/syncScopeRequiresIncrementalPollingFields';
 import ObjectTypeFormSteps from './ObjectTypeFormSteps/ObjectTypeFormSteps';
 import {
   AttributeField,
@@ -77,6 +79,26 @@ const DEFAULT_SYNC_SOURCE_DATA_STRATEGY: SyncSourceDataStrategyFormState = {
   exceptionStrategy: 'STOP_ON_ERROR'
 };
 
+/** 与详情接口对齐的合并结果；用于首次 state 与 useEffect，避免子步骤后 mount 时仍停留在默认 CDC */
+function mergeSyncStrategyFromInitialValues(
+  initial: Partial<ObjectTypeFormData> | undefined
+): SyncSourceDataStrategyFormState | undefined {
+  if (!initial?.syncSourceDataStrategy) {
+    return undefined;
+  }
+  const initialSyncSourceDataInfo =
+    initial.syncSourceDataStrategy.sourceDataInfo;
+  return {
+    ...DEFAULT_SYNC_SOURCE_DATA_STRATEGY,
+    ...initial.syncSourceDataStrategy,
+    sourceDataInfo: {
+      ...(initialSyncSourceDataInfo || { queryMode: 'selected' }),
+      queryMode:
+        initialSyncSourceDataInfo?.queryMode === 'sql' ? 'sql' : 'selected'
+    }
+  };
+}
+
 /** Form.Item 绑定 field 时会用表单值覆盖子组件的 value，需与 SqlSourceDataInfo 一致才能回显 */
 function buildSqlSourceSelectorFormFields(
   prefix: 'modeling' | 'sync',
@@ -113,6 +135,8 @@ interface ObjectTypeFormProps {
   showFooter?: boolean;
   isEdit?: boolean;
   initialStep?: number;
+  /** 编辑态下一步/上一步后调用，可在此重新请求 GetOntologyObjectType 刷新 initialValues */
+  onStepChange?: (stepIndex: number) => void | Promise<void>;
 }
 
 export interface ObjectTypeFormRef {
@@ -128,7 +152,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       loading = false,
       showFooter = true,
       isEdit = false,
-      initialStep
+      initialStep,
+      onStepChange
     },
     ref
   ) => {
@@ -152,7 +177,9 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     >([]);
     const [syncSourceDataStrategy, setSyncSourceDataStrategy] =
       useState<SyncSourceDataStrategyFormState>(
-        DEFAULT_SYNC_SOURCE_DATA_STRATEGY
+        () =>
+          mergeSyncStrategyFromInitialValues(initialValues) ??
+          DEFAULT_SYNC_SOURCE_DATA_STRATEGY
       );
     const [syncMappingFields, setSyncMappingFields] = useState<
       InstanceSyncMappingField[]
@@ -230,6 +257,13 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             )
           : {};
 
+        /** 与下方 setSyncSourceDataStrategy 使用同一合并结果，且必须在同一次/最后一次 setFieldsValue 中写入，避免 Arco Form 未吃到分步更新的策略字段 */
+        const mergedSyncStrategyForForm =
+          mergeSyncStrategyFromInitialValues(initialValues);
+        const syncStrategyFormPatch = mergedSyncStrategyForForm
+          ? syncStrategyStateToFormValues(mergedSyncStrategyForForm)
+          : {};
+
         if (isEdit) {
           form.setFieldsValue({
             ...formData,
@@ -240,7 +274,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             database: initialValues._dataSource?.database,
             table: initialValues._dataSource?.table,
             ...modelingSqlSourcePatch,
-            ...syncSqlSourcePatch
+            ...syncSqlSourcePatch,
+            ...syncStrategyFormPatch
           });
         } else {
           form.setFieldsValue({
@@ -250,7 +285,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             dataSourceType:
               formData.dataSourceType || DATA_SOURCE_TYPE.LOCAL_CSV,
             ...modelingSqlSourcePatch,
-            ...syncSqlSourcePatch
+            ...syncSqlSourcePatch,
+            ...syncStrategyFormPatch
           });
         }
 
@@ -317,20 +353,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             );
           }
         }
-        if (initialValues.syncSourceDataStrategy) {
-          const initialSyncSourceDataInfo =
-            initialValues.syncSourceDataStrategy.sourceDataInfo;
-          setSyncSourceDataStrategy({
-            ...DEFAULT_SYNC_SOURCE_DATA_STRATEGY,
-            ...initialValues.syncSourceDataStrategy,
-            sourceDataInfo: {
-              ...initialSyncSourceDataInfo,
-              queryMode:
-                initialSyncSourceDataInfo?.queryMode === 'sql'
-                  ? 'sql'
-                  : 'selected'
-            }
-          });
+        if (mergedSyncStrategyForForm) {
+          setSyncSourceDataStrategy(mergedSyncStrategyForForm);
         }
         if (initialValues.syncMappingFields) {
           setSyncMappingFields(initialValues.syncMappingFields);
@@ -374,6 +398,19 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         setCurrentStep(MODELING_STEP);
       }
     }, [dataSource.type, currentStep]);
+
+    /** 编辑态：任意方式切换 currentStep 后刷新详情（比仅在点击里 await 更稳妥，避免遗漏分支） */
+    const skipStepChangeRefetchRef = useRef(true);
+    useEffect(() => {
+      if (!isEdit || !onStepChange) {
+        return;
+      }
+      if (skipStepChangeRefetchRef.current) {
+        skipStepChangeRefetchRef.current = false;
+        return;
+      }
+      void onStepChange(currentStep);
+    }, [currentStep, onStepChange, isEdit]);
 
     const handleIconChange = (iconValue: string) => {
       setSelectedIcon(iconValue);
@@ -485,24 +522,30 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       const syncSource = syncSourceDataStrategy.sourceDataInfo;
       const isPollingMode = syncSourceDataStrategy.mode === 'JDBC_POLLING';
       const isSqlPolling = isPollingMode && syncSource.queryMode === 'sql';
+      const s = syncSourceDataStrategy;
+
+      if (!s.mode) {
+        Message.warning('请选择同步模式');
+        return false;
+      }
+      if (!s.conflictStrategy) {
+        Message.warning('请选择冲突策略');
+        return false;
+      }
+      if (!s.syncScope) {
+        Message.warning('请选择同步范围');
+        return false;
+      }
+      if (!s.exceptionStrategy) {
+        Message.warning('请选择异常策略');
+        return false;
+      }
+
       const validateFields = [
-        'syncMode',
-        'conflictStrategy',
-        'syncScope',
-        'exceptionStrategy',
         'syncConnector',
         'syncDatabaseTable',
         'syncMappingFields'
       ];
-
-      if (isPollingMode) {
-        validateFields.push(
-          'jdbcPollingIntervalSeconds',
-          'pollFetchSize',
-          'jdbcIncrementalTimeField',
-          'jdbcCheckpointField'
-        );
-      }
 
       try {
         await form.validate(validateFields);
@@ -522,11 +565,18 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       if (
         isPollingMode &&
         (!syncSourceDataStrategy.jdbcPollingIntervalSeconds ||
-          !syncSourceDataStrategy.pollFetchSize ||
-          !syncSourceDataStrategy.jdbcIncrementalTimeField?.trim() ||
-          !syncSourceDataStrategy.jdbcCheckpointField?.trim())
+          !syncSourceDataStrategy.pollFetchSize)
       ) {
         Message.warning('请完整填写轮询参数');
+        return false;
+      }
+
+      if (
+        syncScopeRequiresIncrementalPollingFields(syncSourceDataStrategy) &&
+        (!syncSourceDataStrategy.jdbcIncrementalTimeField?.trim() ||
+          !syncSourceDataStrategy.jdbcCheckpointField?.trim())
+      ) {
+        Message.warning('请填写增量时间列和断点辅助列');
         return false;
       }
 
