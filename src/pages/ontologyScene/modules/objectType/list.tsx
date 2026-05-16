@@ -65,6 +65,9 @@ export default function OntologySceneObjectTypeList() {
     null
   );
   const [currentTaskName, setCurrentTaskName] = useState<string>('');
+  const [switchLoadingIds, setSwitchLoadingIds] = useState<Set<number>>(
+    new Set()
+  );
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
@@ -201,6 +204,9 @@ export default function OntologySceneObjectTypeList() {
         return;
       }
 
+      // 添加 loading 状态
+      setSwitchLoadingIds((prev) => new Set(prev).add(record.id));
+
       try {
         const params = {
           id: record.id,
@@ -214,21 +220,35 @@ export default function OntologySceneObjectTypeList() {
           : await pauseSyncObjectTypeTask(params);
 
         if (res.status === 200 && res.code === '') {
-          const succeed = res.data?.data?.succeed;
+          const succeed =
+            res?.data?.succeed || (res as any)?.data?.data?.succeed;
           if (succeed === '1') {
             Message.success(checked ? '启动同步成功' : '暂停同步成功');
-            // 刷新列表
+            // 刷新列表以获取最新状态
             refresh();
           } else {
             Message.error(checked ? '启动同步失败' : '暂停同步失败');
+            // 失败时也刷新列表，恢复原状态
+            refresh();
           }
         } else {
           Message.error(
             res.message || (checked ? '启动同步失败' : '暂停同步失败')
           );
+          // 失败时刷新列表，恢复原状态
+          refresh();
         }
       } catch (e) {
         Message.error(checked ? '启动同步失败' : '暂停同步失败');
+        // 失败时刷新列表，恢复原状态
+        refresh();
+      } finally {
+        // 移除 loading 状态
+        setSwitchLoadingIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(record.id);
+          return newSet;
+        });
       }
     },
     500
@@ -359,6 +379,11 @@ export default function OntologySceneObjectTypeList() {
       dataIndex: 'syncEnabled',
       width: 200,
       render: (_, record) => {
+        // 如果 sourceType 为 2（文件上传），显示 -
+        if (record.sourceType === 2) {
+          return <span>-</span>;
+        }
+
         // 如果 enableSyncSourceData 为 false，显示"未配置 配置"
         if (!record.enableSyncSourceData) {
           return (
@@ -379,6 +404,7 @@ export default function OntologySceneObjectTypeList() {
           <Switch
             checked={record.syncEnabled}
             size="small"
+            loading={switchLoadingIds.has(record.id)}
             onChange={(checked) => handleSyncToggle(record, checked)}
           />
         );

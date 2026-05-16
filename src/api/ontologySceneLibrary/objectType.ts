@@ -245,9 +245,7 @@ export const startSyncObjectTypeTask = async (params: {
   funnel_task_id: number;
 }): Promise<
   ApiRes<{
-    data: {
-      succeed: string;
-    };
+    succeed: string;
   }>
 > => {
   return await UAPI.RES.StartSyncObjectTypeTaskApi({})
@@ -262,9 +260,7 @@ export const pauseSyncObjectTypeTask = async (params: {
   funnel_task_id: number;
 }): Promise<
   ApiRes<{
-    data: {
-      succeed: string;
-    };
+    succeed: string;
   }>
 > => {
   return await UAPI.RES.PauseSyncObjectTypeTaskApi({})
