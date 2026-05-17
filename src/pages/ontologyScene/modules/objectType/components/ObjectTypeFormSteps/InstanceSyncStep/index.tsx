@@ -2,10 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Message } from '@arco-design/web-react';
 import { getSqlConnectorTableSchemaToTIDB } from '@/api/ontologySceneLibrary/objectType';
 import { mapOntologyObjectTypeColumns } from '@/api/ontologySceneLibrary/attributes';
-import type {
-  ConnectorAnalyseFinkSqlColumnItem,
-  GetSqlConnectorTableSchemaToTIDBRes
-} from '@/types/objectType';
+import type { ConnectorAnalyseFinkSqlColumnItem } from '@/types/objectType';
 import { useUserInfoStore } from '@/store/userInfoStore';
 import {
   InstanceSyncMappingField,
@@ -18,6 +15,10 @@ import {
   finkSqlParsedColumnsToSourceTableFields,
   objectTypeAttributeToSyncMapping
 } from '../../ObjectTypeFormUtils/attributeFields';
+import {
+  isOntologyApiSuccessResponse,
+  normalizeSourceFieldsFromTiDBSchema
+} from '../../ObjectTypeFormUtils/sqlConnectorTiDBSchema';
 import SqlSourceSelector from '../common/SqlSourceSelector';
 import SyncSourceDataStrategyFormSection, {
   STRATEGY_FORM_FIELD_MAP
@@ -39,33 +40,6 @@ interface InstanceSyncStepProps {
   setFieldsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   styles: Record<string, string>;
   readOnly?: boolean;
-}
-
-function isSuccessResponse(response: any): boolean {
-  return (
-    response &&
-    (response.status === 200 || response.status === 0) &&
-    (response.code === '' || response.code === 0 || response.code === undefined)
-  );
-}
-
-function normalizeSourceFieldsFromTiDBSchema(
-  data?: GetSqlConnectorTableSchemaToTIDBRes
-): SourceTableField[] {
-  const rawColumns = data?.columns;
-  const columns = Array.isArray(rawColumns)
-    ? rawColumns
-    : rawColumns
-      ? [rawColumns]
-      : [];
-
-  return columns
-    .map((column) => ({
-      fieldId: column.columnName,
-      fieldComment: column.columnComment || column.columnName,
-      fieldType: column.columnTypeTiDB || column.columnType
-    }))
-    .filter((field) => !!field.fieldId);
 }
 
 export default function InstanceSyncStep({
@@ -154,7 +128,7 @@ export default function InstanceSyncStep({
           sourceTableColumns
         });
         if (
-          isSuccessResponse(response) &&
+          isOntologyApiSuccessResponse(response) &&
           Array.isArray(response.data?.mapRelations)
         ) {
           response.data.mapRelations.forEach((relation) => {
@@ -212,7 +186,7 @@ export default function InstanceSyncStep({
         table_name: tableName,
         projectID
       });
-      if (isSuccessResponse(response)) {
+      if (isOntologyApiSuccessResponse(response)) {
         const fields = normalizeSourceFieldsFromTiDBSchema(response.data);
         setSourceFields(fields);
         if (!readOnly) {

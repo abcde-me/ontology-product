@@ -4,10 +4,8 @@ import { Message, Button } from '@arco-design/web-react';
 import LinkForm, { LinkFormData, LinkFormRef } from './components/LinkForm';
 import { createOntologyLinkType } from '@/api/ontologySceneLibrary/links';
 import { LinkType } from '@/types/graphApi';
-import {
-  CreateOntologyLinkTypeReq,
-  OntologyLinkTypeColumn
-} from '@/types/links';
+import { CreateOntologyLinkTypeReq } from '@/types/links';
+import { buildOntologyLinkTypeColumnList } from './components/linkForm/utils/linkAttributeFields';
 import { LinkType as FormLinkType } from '../../types/link';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
 import { ProButton } from '@ceai-front/arco-material';
@@ -141,18 +139,9 @@ export default function OntologySceneLinksCreate() {
           );
         }
 
-        // 处理属性字段映射
         if (data.attributeFields && data.attributeFields.length > 0) {
-          requestData.ontologyLinkTypeColumnList = data.attributeFields.map(
-            (field): OntologyLinkTypeColumn => ({
-              name: field.tableField,
-              comment: field.attributeName,
-              columnType: field.fieldType,
-              isPrimary: field.isPrimary ? 1 : 0,
-              isUse: field.isUse ? 1 : 0,
-              linkTypeID: 0
-            })
-          );
+          requestData.ontologyLinkTypeColumnList =
+            buildOntologyLinkTypeColumnList(data, 0);
         }
 
         // 处理源属性和目标属性
