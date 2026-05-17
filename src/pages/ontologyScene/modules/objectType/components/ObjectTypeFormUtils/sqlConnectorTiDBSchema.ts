@@ -60,10 +60,11 @@ export function normalizeSourceFieldsFromTiDBSchema(
 export function getPrimaryKeyListFromTiDBSchema(
   data?: GetSqlConnectorTableSchemaToTIDBRes | null
 ): string[] {
-  if (!Array.isArray(data?.primaryKey)) {
+  const primaryKey = data?.primaryKey;
+  if (!Array.isArray(primaryKey)) {
     return [];
   }
-  return data.primaryKey.filter(
+  return primaryKey.filter(
     (item): item is string => typeof item === 'string' && item.length > 0
   );
 }
