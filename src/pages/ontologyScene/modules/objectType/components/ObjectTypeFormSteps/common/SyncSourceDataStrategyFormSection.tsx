@@ -193,7 +193,8 @@ export default function SyncSourceDataStrategyFormSection({
         sourceDataInfo,
         taskType: sqlTestTaskType,
         syncSourceDataStrategy: syncFormStateToOntologyTestSyncStrategy(
-          syncSourceDataStrategy
+          syncSourceDataStrategy,
+          sourceDataInfo
         )
       });
       const passed =

@@ -400,7 +400,11 @@ export default function SqlSourceSelector({
       Message.warning(validation.message || 'SQL校验失败');
       return;
     }
-    const baseSourceDataInfo = sqlSourceDataInfoToSourceDataInfoForTest(value);
+    const sourceForTest = syncSourceDataStrategyForSqlTest
+      ? syncSourceDataStrategyForSqlTest.sourceDataInfo
+      : value;
+    const baseSourceDataInfo =
+      sqlSourceDataInfoToSourceDataInfoForTest(sourceForTest);
     if (!baseSourceDataInfo) {
       Message.warning('请先选择数据源链接');
       return;
@@ -409,20 +413,22 @@ export default function SqlSourceSelector({
       Message.warning('项目信息缺失，请重新登录后重试');
       return;
     }
+    const testSourceDataInfo = {
+      ...baseSourceDataInfo,
+      queryMode: 'sql' as const,
+      sql: trimmedSql
+    };
     setTestLoading(true);
     try {
       const response = await connectorTestFinkSQL({
         projectID,
-        sourceDataInfo: {
-          ...baseSourceDataInfo,
-          queryMode: 'sql',
-          sql: trimmedSql
-        },
+        sourceDataInfo: testSourceDataInfo,
         taskType: ontologySqlTestTaskType,
         ...(syncSourceDataStrategyForSqlTest
           ? {
               syncSourceDataStrategy: syncFormStateToOntologyTestSyncStrategy(
-                syncSourceDataStrategyForSqlTest
+                syncSourceDataStrategyForSqlTest,
+                testSourceDataInfo
               )
             }
           : {})

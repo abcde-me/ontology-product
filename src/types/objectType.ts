@@ -333,12 +333,13 @@ export interface SyncStrategy {
   syncScope: string;
 }
 
-/** OntologyTestFinkSQL 请求体中的同步策略（不含嵌套 sourceDataInfo） */
+/** OntologyTestFinkSQL 请求体中的同步策略；含 sourceDataInfo 时与创建/更新同步接口结构对齐 */
 export type OntologyTestFinkSQLSyncStrategyPayload = Omit<
   SyncStrategy,
   'fullSyncBatchSize'
 > & {
   fullSyncBatchSize?: number;
+  sourceDataInfo?: SourceDataInfo;
 };
 
 export interface OntologyTestFinkSQLReq {
