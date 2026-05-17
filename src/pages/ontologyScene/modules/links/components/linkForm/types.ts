@@ -12,6 +12,11 @@ export interface AttributeField {
   attributeName: string;
   fieldType: string;
   isPrimary?: boolean;
+  sourceColumnName?: string;
+  sourceColumnComment?: string;
+  sourceColumnType?: string;
+  sourceCoumnOriginName?: string;
+  sourceTableName?: string;
 }
 
 export interface IntermediateTable {

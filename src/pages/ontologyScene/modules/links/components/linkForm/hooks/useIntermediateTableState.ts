@@ -14,17 +14,22 @@ import {
   IntermediateTable,
   IntermediateTableType
 } from '../types';
-import { normalizeFieldTypeForPrimary } from '../utils/linkFormUtils';
 import {
+  ObjectTypeAttributeField,
   SqlSourceDataInfo,
-  SourceTableField,
   SyncSourceDataStrategyFormState
 } from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormUtils/types';
-import { finkSqlParsedColumnsToSourceTableFields } from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormUtils/attributeFields';
 import {
+  finkSqlParsedColumnsToObjectTypeAttributes,
+  sourceFieldToObjectTypeAttribute
+} from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormUtils/attributeFields';
+import {
+  getPrimaryKeyListFromTiDBSchema,
   isOntologyApiSuccessResponse,
-  normalizeSourceFieldsFromTiDBSchema
+  normalizeSourceFieldsFromTiDBSchema,
+  resolvePrimaryColumnIndex
 } from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormUtils/sqlConnectorTiDBSchema';
+import { objectTypeAttributeToLinkAttribute } from '../utils/linkAttributeFields';
 
 function createDefaultSyncSourceDataStrategy(): SyncSourceDataStrategyFormState {
   return {
@@ -33,23 +38,6 @@ function createDefaultSyncSourceDataStrategy(): SyncSourceDataStrategyFormState 
       ...DEFAULT_SYNC_SOURCE_DATA_STRATEGY.sourceDataInfo
     }
   };
-}
-
-function sourceFieldsToAttributeFields(
-  fields: SourceTableField[]
-): AttributeField[] {
-  return fields
-    .map((field, index) => ({
-      tableField: field.fieldId,
-      isUse: 1,
-      attributeName: field.fieldComment || field.fieldId,
-      fieldType: field.fieldType || COLUMN_TYPE_OPTIONS[0].value,
-      isPrimary: index === 0
-    }))
-    .map((field) => ({
-      ...field,
-      fieldType: normalizeFieldTypeForPrimary(field.fieldType, field.isPrimary)
-    }));
 }
 
 export function useIntermediateTableState(form: any) {
@@ -118,8 +106,8 @@ export function useIntermediateTableState(form: any) {
     clearRelationFields();
   };
 
-  const applyDatabaseSourceFields = (fields: SourceTableField[]) => {
-    const nextFields = sourceFieldsToAttributeFields(fields);
+  const applyObjectTypeAttributes = (attrs: ObjectTypeAttributeField[]) => {
+    const nextFields = attrs.map(objectTypeAttributeToLinkAttribute);
     setAttributeFields(nextFields);
     form.setFieldValue('attributeFields', nextFields);
     setFileUploaded(nextFields.length > 0);
@@ -148,8 +136,24 @@ export function useIntermediateTableState(form: any) {
         projectID
       });
       if (isOntologyApiSuccessResponse(response)) {
-        const fields = normalizeSourceFieldsFromTiDBSchema(response.data);
-        applyDatabaseSourceFields(fields);
+        const sourceFields = normalizeSourceFieldsFromTiDBSchema(
+          response.data,
+          { fieldTypeFromTiDBOnly: true }
+        );
+        const primaryKeyList = getPrimaryKeyListFromTiDBSchema(response.data);
+        const primaryColumnIndex = resolvePrimaryColumnIndex(
+          sourceFields,
+          primaryKeyList
+        );
+        const attrs = sourceFields.map((field, index) =>
+          sourceFieldToObjectTypeAttribute(
+            field,
+            index,
+            index === primaryColumnIndex,
+            tableName
+          )
+        );
+        applyObjectTypeAttributes(attrs);
       } else {
         Message.error(response.message || '加载数据源字段失败');
         clearAttributeFields();
@@ -170,8 +174,8 @@ export function useIntermediateTableState(form: any) {
   const handleSqlColumnsParsed = (
     columns: ConnectorAnalyseFinkSqlColumnItem[]
   ) => {
-    const fields = finkSqlParsedColumnsToSourceTableFields(columns);
-    applyDatabaseSourceFields(fields);
+    const attrs = finkSqlParsedColumnsToObjectTypeAttributes(columns);
+    applyObjectTypeAttributes(attrs);
   };
 
   const updateSyncSourceDataStrategy = (
@@ -272,18 +276,17 @@ export function useIntermediateTableState(form: any) {
         filePath: path
       });
 
-      const fields: AttributeField[] = columnList.map((column, index) => ({
-        tableField: column,
-        isUse: 1,
-        attributeName: commentList[index] || column,
-        fieldType: typeList[index] || COLUMN_TYPE_OPTIONS[0].value,
-        isPrimary: index === 0
-      }));
-
-      setAttributeFields(fields);
-      form.setFieldValue('attributeFields', fields);
-      setFileUploaded(true);
-      clearRelationFields();
+      const attrs = columnList.map((column: string, index: number) =>
+        sourceFieldToObjectTypeAttribute(
+          {
+            fieldId: column,
+            fieldComment: commentList[index] || column,
+            fieldType: typeList[index] || COLUMN_TYPE_OPTIONS[0].value
+          },
+          index
+        )
+      );
+      applyObjectTypeAttributes(attrs);
     }
   };
 
