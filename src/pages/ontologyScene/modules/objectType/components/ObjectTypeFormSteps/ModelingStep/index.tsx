@@ -7,7 +7,7 @@ import {
   DataSourceType
 } from '@/pages/ontologyScene/common/constants';
 import { PrefixAimdp } from '@/api/endpoints';
-import { getSqlConnectorTableSchema } from '@/api/ontologySceneLibrary/objectType';
+import { getSqlConnectorTableSchemaToTIDB } from '@/api/ontologySceneLibrary/objectType';
 import type { ConnectorAnalyseFinkSqlColumnItem } from '@/types/objectType';
 import {
   ObjectTypeAttributeField,
@@ -18,20 +18,16 @@ import {
   finkSqlParsedColumnsToObjectTypeAttributes,
   sourceFieldToObjectTypeAttribute
 } from '../../ObjectTypeFormUtils/attributeFields';
+import {
+  getPrimaryKeyListFromTiDBSchema,
+  isOntologyApiSuccessResponse,
+  normalizeSourceFieldsFromTiDBSchema,
+  resolvePrimaryColumnIndex
+} from '../../ObjectTypeFormUtils/sqlConnectorTiDBSchema';
 import SqlSourceSelector from '../common/SqlSourceSelector';
 import ObjectTypeAttributeTable from './ObjectTypeAttributeTable';
 
 const FormItem = Form.Item;
-
-function getSchemaColumns(data: any): any[] {
-  if (Array.isArray(data)) {
-    return data;
-  }
-  if (Array.isArray(data?.columns)) {
-    return data.columns;
-  }
-  return [];
-}
 
 interface ModelingStepProps {
   form: any;
@@ -128,47 +124,41 @@ export default function ModelingStep({
   const loadTableSchema = async ({
     connectorId,
     databaseName,
-    tableName
+    tableName,
+    projectID
   }: Required<
     Pick<SqlSourceDataInfo, 'connectorId' | 'databaseName' | 'tableName'>
-  >) => {
+  > & {
+    projectID: string;
+  }) => {
+    if (!projectID) {
+      Message.warning('缺少项目信息，无法加载数据表字段');
+      return;
+    }
     setFieldsLoading(true);
     try {
-      const response = await getSqlConnectorTableSchema({
+      const response = await getSqlConnectorTableSchemaToTIDB({
         id: connectorId,
         database_name: databaseName,
-        table_name: tableName
+        table_name: tableName,
+        projectID
       });
-      if (response.status === 200 && (response.code === '' || !response.code)) {
-        const rawColumns = getSchemaColumns(response.data);
-        const primaryKeyList: string[] = Array.isArray(
-          (response.data as any)?.primaryKey
-        )
-          ? ((response.data as any).primaryKey as unknown[]).filter(
-              (item): item is string =>
-                typeof item === 'string' && item.length > 0
-            )
-          : [];
-        const hasPrimaryKeyInfo = primaryKeyList.length > 0;
-        const matchedPrimaryIndex = hasPrimaryKeyInfo
-          ? rawColumns.findIndex((field) =>
-              primaryKeyList.includes(field.field_id || field.columnName)
-            )
-          : -1;
-        const primaryColumnIndex = hasPrimaryKeyInfo
-          ? matchedPrimaryIndex >= 0
-            ? matchedPrimaryIndex
-            : 0
-          : 0;
+      if (isOntologyApiSuccessResponse(response)) {
+        const sourceFields = normalizeSourceFieldsFromTiDBSchema(
+          response.data,
+          {
+            fieldTypeFromTiDBOnly: true
+          }
+        );
+        const primaryKeyList = getPrimaryKeyListFromTiDBSchema(response.data);
+        const primaryColumnIndex = resolvePrimaryColumnIndex(
+          sourceFields,
+          primaryKeyList
+        );
 
-        const fields = rawColumns.map((field, index) =>
+        const fields = sourceFields.map((field, index) =>
           sourceFieldToObjectTypeAttribute(
-            {
-              fieldId: field.field_id || field.columnName,
-              fieldComment:
-                field.field_comment || field.columnComment || field.columnName,
-              fieldType: field.field_type || field.columnType
-            },
+            field,
             index,
             index === primaryColumnIndex,
             tableName

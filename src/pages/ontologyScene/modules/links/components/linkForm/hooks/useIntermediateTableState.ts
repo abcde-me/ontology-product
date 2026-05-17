@@ -2,10 +2,7 @@ import { useState } from 'react';
 import { Message } from '@arco-design/web-react';
 import { COLUMN_TYPE_OPTIONS } from '@/pages/ontologyScene/common/constants';
 import { getSqlConnectorTableSchemaToTIDB } from '@/api/ontologySceneLibrary/objectType';
-import {
-  GetSqlConnectorTableSchemaToTIDBRes,
-  ConnectorAnalyseFinkSqlColumnItem
-} from '@/types/objectType';
+import { ConnectorAnalyseFinkSqlColumnItem } from '@/types/objectType';
 import { useUserInfoStore } from '@/store/userInfoStore';
 import {
   DEFAULT_INTERMEDIATE_TABLE,
@@ -24,6 +21,10 @@ import {
   SyncSourceDataStrategyFormState
 } from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormUtils/types';
 import { finkSqlParsedColumnsToSourceTableFields } from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormUtils/attributeFields';
+import {
+  isOntologyApiSuccessResponse,
+  normalizeSourceFieldsFromTiDBSchema
+} from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormUtils/sqlConnectorTiDBSchema';
 
 function createDefaultSyncSourceDataStrategy(): SyncSourceDataStrategyFormState {
   return {
@@ -32,33 +33,6 @@ function createDefaultSyncSourceDataStrategy(): SyncSourceDataStrategyFormState 
       ...DEFAULT_SYNC_SOURCE_DATA_STRATEGY.sourceDataInfo
     }
   };
-}
-
-function isSuccessResponse(response: any): boolean {
-  return (
-    response &&
-    (response.status === 200 || response.status === 0) &&
-    (response.code === '' || response.code === 0 || response.code === undefined)
-  );
-}
-
-function normalizeSourceFieldsFromTiDBSchema(
-  data?: GetSqlConnectorTableSchemaToTIDBRes | null
-): SourceTableField[] {
-  const rawColumns = data?.columns;
-  const columns = Array.isArray(rawColumns)
-    ? rawColumns
-    : rawColumns
-      ? [rawColumns]
-      : [];
-
-  return columns
-    .map((column) => ({
-      fieldId: column.columnName,
-      fieldComment: column.columnComment || column.columnName,
-      fieldType: column.columnTypeTiDB || column.columnType
-    }))
-    .filter((field) => !!field.fieldId);
 }
 
 function sourceFieldsToAttributeFields(
@@ -173,7 +147,7 @@ export function useIntermediateTableState(form: any) {
         table_name: tableName,
         projectID
       });
-      if (isSuccessResponse(response)) {
+      if (isOntologyApiSuccessResponse(response)) {
         const fields = normalizeSourceFieldsFromTiDBSchema(response.data);
         applyDatabaseSourceFields(fields);
       } else {

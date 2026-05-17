@@ -573,7 +573,9 @@ export interface SqlConnectorTiDBSchemaColumn {
   /** 字段类型 */
   columnType: string;
   /** 字段类型（TIDB） */
-  columnTypeTiDB: string;
+  columnTypeTiDB?: string;
+  /** 后端历史拼写：colunmTypeTiDB */
+  colunmTypeTiDB?: string;
   [property: string]: any;
 }
 
