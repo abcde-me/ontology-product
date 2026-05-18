@@ -35,10 +35,10 @@ export default function OntologySceneObjectTypeEdit() {
     objectTypeId: string;
   }>();
   const initialStep = getInitialStepFromSearch(location.search);
+  const allowInstanceSyncEdit =
+    getInitialStepFromSearch(location.search) === INSTANCE_SYNC_STEP_INDEX;
   /** 进入时是否为「配置实例同步」（?step=3），固化后不受页内切步影响 */
-  const enteredForInstanceSyncRef = useRef(
-    getInitialStepFromSearch(location.search) === INSTANCE_SYNC_STEP_INDEX
-  );
+  const enteredForInstanceSyncRef = useRef(allowInstanceSyncEdit);
   const [loading, setLoading] = useState(false);
   const [initialValues, setInitialValues] =
     useState<Partial<ObjectTypeFormData>>();
@@ -170,6 +170,7 @@ export default function OntologySceneObjectTypeEdit() {
                   isEdit={true}
                   initialValues={initialValues}
                   initialStep={initialStep}
+                  allowInstanceSyncEdit={allowInstanceSyncEdit}
                   onSubmit={handleSubmit}
                   onCancel={handleCancel}
                   onStepChange={refetchDetailAfterStepChange}
