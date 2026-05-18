@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { Message, Button, Spin } from '@arco-design/web-react';
 import ObjectTypeForm, {
@@ -24,6 +24,9 @@ const getInitialStepFromSearch = (search: string) => {
   return parsedStep - 1;
 };
 
+/** 实例同步为第 3 步，对应 initialStep === 2 */
+const INSTANCE_SYNC_STEP_INDEX = 2;
+
 export default function OntologySceneObjectTypeEdit() {
   const history = useHistory();
   const location = useLocation();
@@ -32,6 +35,10 @@ export default function OntologySceneObjectTypeEdit() {
     objectTypeId: string;
   }>();
   const initialStep = getInitialStepFromSearch(location.search);
+  /** 进入时是否为「配置实例同步」（?step=3），固化后不受页内切步影响 */
+  const enteredForInstanceSyncRef = useRef(
+    getInitialStepFromSearch(location.search) === INSTANCE_SYNC_STEP_INDEX
+  );
   const [loading, setLoading] = useState(false);
   const [initialValues, setInitialValues] =
     useState<Partial<ObjectTypeFormData>>();
@@ -86,8 +93,12 @@ export default function OntologySceneObjectTypeEdit() {
 
     setLoading(true);
     try {
+      const submitData = enteredForInstanceSyncRef.current
+        ? data
+        : { ...data, enableSyncSourceData: false };
+
       const res = await updateOntologyObjectType(
-        buildUpdateObjectTypeRequest(objectTypeIdNum, data)
+        buildUpdateObjectTypeRequest(objectTypeIdNum, submitData)
       );
 
       if (res.status !== 200) {
