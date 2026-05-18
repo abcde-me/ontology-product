@@ -338,6 +338,30 @@ export interface OntologyLinkTypeColumn {
    * 表字段
    */
   name: string;
+  /**
+   * 数据源表字段注释
+   */
+  sourceColumnComment?: string;
+  /**
+   * 数据源表字段类型
+   */
+  sourceColumnType?: string;
+  /**
+   * 数据源表字段名
+   */
+  sourceColumnName?: string;
+  /**
+   * 数据源原始字段名
+   */
+  sourceCoumnOriginName?: string;
+  /**
+   * 数据源表名
+   */
+  sourceTableName?: string;
+  /**
+   * 数据源主键
+   */
+  sourcePrimaryKey?: string[];
 }
 
 export interface CreateOntologyLinkTypeReq {

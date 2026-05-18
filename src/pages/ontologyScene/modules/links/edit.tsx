@@ -9,9 +9,12 @@ import {
 import { LinkType } from '@/types/graphApi';
 import {
   GetOntologyLinkTypeRes,
-  UpdateOntologyLinkTypeReq,
-  OntologyLinkTypeColumn
+  UpdateOntologyLinkTypeReq
 } from '@/types/links';
+import {
+  buildOntologyLinkTypeColumnList,
+  linkColumnToAttributeField
+} from './components/linkForm/utils/linkAttributeFields';
 import { LinkType as FormLinkType } from '../../types/link';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
 import { ProButton } from '@ceai-front/arco-material';
@@ -198,13 +201,7 @@ export default function OntologySceneLinksEdit() {
               data.ontologyLinkTypeColumnList.length > 0
             ) {
               formData.attributeFields = data.ontologyLinkTypeColumnList.map(
-                (column) => ({
-                  tableField: column.name || '',
-                  isUse: column.isUse ? 1 : 0,
-                  attributeName: column.comment || column.name || '',
-                  fieldType: column.columnType || 'STRING',
-                  isPrimary: column.isPrimary === 1
-                })
+                linkColumnToAttributeField
               );
             }
           }
@@ -274,18 +271,9 @@ export default function OntologySceneLinksEdit() {
           );
         }
 
-        // 处理属性字段映射
         if (data.attributeFields && data.attributeFields.length > 0) {
-          requestData.ontologyLinkTypeColumnList = data.attributeFields.map(
-            (field): OntologyLinkTypeColumn => ({
-              name: field.tableField,
-              comment: field.attributeName,
-              columnType: field.fieldType,
-              isPrimary: field.isPrimary ? 1 : 0,
-              isUse: field.isUse ? 1 : 0,
-              linkTypeID: Number(linkId)
-            })
-          );
+          requestData.ontologyLinkTypeColumnList =
+            buildOntologyLinkTypeColumnList(data, Number(linkId));
         }
 
         // 处理源属性和目标属性

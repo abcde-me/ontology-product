@@ -21,7 +21,8 @@ export function sqlSourceDataInfoToSourceDataInfoForTest(
 }
 
 export function syncFormStateToOntologyTestSyncStrategy(
-  state: SyncSourceDataStrategyFormState
+  state: SyncSourceDataStrategyFormState,
+  sourceDataInfo?: SourceDataInfo
 ): OntologyTestFinkSQLSyncStrategyPayload {
   const pollFetchSize = state.pollFetchSize || 500;
   return {
@@ -36,6 +37,7 @@ export function syncFormStateToOntologyTestSyncStrategy(
     jdbcPollingIntervalSeconds: state.jdbcPollingIntervalSeconds,
     jdbcSyncSqlFull: state.jdbcSyncSqlFull,
     jdbcSyncSqlIncrement: state.jdbcSyncSqlIncrement,
-    fullSyncBatchSize: state.fullSyncBatchSize ?? pollFetchSize
+    fullSyncBatchSize: state.fullSyncBatchSize ?? pollFetchSize,
+    ...(sourceDataInfo ? { sourceDataInfo } : {})
   };
 }

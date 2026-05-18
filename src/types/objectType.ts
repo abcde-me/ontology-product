@@ -337,12 +337,13 @@ export interface SyncStrategy {
   syncScope: string;
 }
 
-/** OntologyTestFinkSQL 请求体中的同步策略（不含嵌套 sourceDataInfo） */
+/** OntologyTestFinkSQL 请求体中的同步策略；含 sourceDataInfo 时与创建/更新同步接口结构对齐 */
 export type OntologyTestFinkSQLSyncStrategyPayload = Omit<
   SyncStrategy,
   'fullSyncBatchSize'
 > & {
   fullSyncBatchSize?: number;
+  sourceDataInfo?: SourceDataInfo;
 };
 
 export interface OntologyTestFinkSQLReq {
@@ -577,7 +578,9 @@ export interface SqlConnectorTiDBSchemaColumn {
   /** 字段类型 */
   columnType: string;
   /** 字段类型（TIDB） */
-  columnTypeTiDB: string;
+  columnTypeTiDB?: string;
+  /** 后端历史拼写：colunmTypeTiDB */
+  colunmTypeTiDB?: string;
   [property: string]: any;
 }
 

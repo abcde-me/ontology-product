@@ -18,6 +18,7 @@ import {
   sqlSourceDataInfoToSourceDataInfoForTest,
   syncFormStateToOntologyTestSyncStrategy
 } from '../../ObjectTypeFormUtils/ontologyTestFinkSQLPayload';
+import { syncScopeRequiresIncrementalPollingFields } from '../../ObjectTypeFormUtils/syncScopeRequiresIncrementalPollingFields';
 
 const FormItem = Form.Item;
 
@@ -38,6 +39,25 @@ export const STRATEGY_FORM_FIELD_MAP: Partial<
   jdbcSyncSqlFull: 'jdbcSyncSqlFull',
   jdbcSyncSqlIncrement: 'jdbcSyncSqlIncrement'
 };
+
+/** 将策略 state 写入 Form 字段，与 InstanceSyncStep.updateStrategy 一致 */
+export function syncStrategyStateToFormValues(
+  state: SyncSourceDataStrategyFormState
+): Record<string, unknown> {
+  const values: Record<string, unknown> = {};
+  (
+    Object.entries(STRATEGY_FORM_FIELD_MAP) as [
+      keyof SyncSourceDataStrategyFormState,
+      string
+    ][]
+  ).forEach(([stateKey, formKey]) => {
+    const value = state[stateKey];
+    if (value !== undefined) {
+      values[formKey] = value;
+    }
+  });
+  return values;
+}
 
 function isSuccessResponse(response: any): boolean {
   return (
@@ -85,7 +105,7 @@ export default function SyncSourceDataStrategyFormSection({
   syncModePopover = DEFAULT_SYNC_MODE_POPOVER,
   pollFetchSizePopover = DEFAULT_POLL_FETCH_POPOVER,
   fullSqlPlaceholder = '请输入全量SQL，例如 SELECT line_id,voltage_level,maint_org FROM ods_line_assets',
-  incrementSqlPlaceholder = '请输入增量SQL，例如 SELECT voltage_level FROM ods_line_assets WHERE voltage_level > 400',
+  incrementSqlPlaceholder = '增量 SQL 需要至少包含一个断点占位符：${last_update_time} 或 ${last_checkpoint_value}。使用 ${last_update_time} 时，请填写“增量时间列”；使用 ${last_checkpoint_value}时，请填写“断点辅助列”。${batch_size} 可选，通常写在 LIMIT ${batch_size} 中，用于控制单次拉取条数；如果使用 LIMIT ${batch_size}，建议同时写 ORDER BY，保证每轮拉取顺序稳定。推荐同时使用时间列和断点辅助列，例如：WHERE update_time > ${last_update_time} OR (update_time = ${last_update_time} AND id > ${last_checkpoint_value}) ORDER BY update_time, id LIMIT ${batch_size}。',
   sqlTestTaskType = 'TABLE_REALTIME_SYNC',
   readOnly = false
 }: SyncSourceDataStrategyFormSectionProps) {
@@ -130,6 +150,8 @@ export default function SyncSourceDataStrategyFormSection({
     syncSourceDataStrategy.sourceDataInfo.queryMode || 'selected';
   const isPollingMode = syncSourceDataStrategy.mode === 'JDBC_POLLING';
   const isSqlPolling = currentQueryMode === 'sql' && isPollingMode;
+  const incrementalPollingFieldsRequired =
+    syncScopeRequiresIncrementalPollingFields(syncSourceDataStrategy);
 
   const executeTestSyncSql = async (type: SyncSqlType) => {
     if (readOnly) return;
@@ -171,7 +193,8 @@ export default function SyncSourceDataStrategyFormSection({
         sourceDataInfo,
         taskType: sqlTestTaskType,
         syncSourceDataStrategy: syncFormStateToOntologyTestSyncStrategy(
-          syncSourceDataStrategy
+          syncSourceDataStrategy,
+          sourceDataInfo
         )
       });
       const passed =
@@ -205,7 +228,8 @@ export default function SyncSourceDataStrategyFormSection({
     type: SyncSqlType,
     title: string,
     field: 'jdbcSyncSqlFull' | 'jdbcSyncSqlIncrement',
-    placeholder: string
+    placeholder: string,
+    required = false
   ) => {
     const value = syncSourceDataStrategy[field] || '';
     const result = sqlTestResult[type];
@@ -214,7 +238,7 @@ export default function SyncSourceDataStrategyFormSection({
     const overlayExpanded = sqlTestOverlayExpanded[type];
 
     return (
-      <FormItem key={field} label=" " field={field}>
+      <FormItem key={field} label=" " required={required}>
         <div className={styles['sql-custom-sql-card']}>
           <div className={styles['sql-custom-sql-toolbar']}>
             <span className={styles['sql-custom-sql-toolbar-title']}>
@@ -333,8 +357,7 @@ export default function SyncSourceDataStrategyFormSection({
             </Popover>
           </span>
         }
-        field="syncMode"
-        rules={[{ required: true, message: '请选择同步模式' }]}
+        required
       >
         <Radio.Group
           value={syncSourceDataStrategy.mode}
@@ -358,18 +381,15 @@ export default function SyncSourceDataStrategyFormSection({
             'increment',
             '增量SQL',
             'jdbcSyncSqlIncrement',
-            incrementSqlPlaceholder
+            incrementSqlPlaceholder,
+            incrementalPollingFieldsRequired
           )}
         </>
       )}
 
       {isPollingMode && (
         <>
-          <FormItem
-            label="轮询间隔"
-            field="jdbcPollingIntervalSeconds"
-            rules={[{ required: true, message: '请输入轮询间隔' }]}
-          >
+          <FormItem label="轮询间隔" required>
             <Space size={8}>
               <InputNumber
                 min={1}
@@ -396,8 +416,7 @@ export default function SyncSourceDataStrategyFormSection({
                 </Popover>
               </span>
             }
-            field="pollFetchSize"
-            rules={[{ required: true, message: '请输入单次拉取数量' }]}
+            required
           >
             <InputNumber
               min={1}
@@ -412,8 +431,7 @@ export default function SyncSourceDataStrategyFormSection({
 
           <FormItem
             label="增量时间列"
-            field="jdbcIncrementalTimeField"
-            rules={[{ required: true, message: '请输入增量时间列' }]}
+            required={incrementalPollingFieldsRequired}
           >
             <Input
               placeholder="如update_time, last_modified"
@@ -427,8 +445,7 @@ export default function SyncSourceDataStrategyFormSection({
 
           <FormItem
             label="断点辅助列"
-            field="jdbcCheckpointField"
-            rules={[{ required: true, message: '请输入断点辅助列' }]}
+            required={incrementalPollingFieldsRequired}
           >
             <Input
               placeholder="如id、主键或组合列名"
@@ -442,11 +459,7 @@ export default function SyncSourceDataStrategyFormSection({
         </>
       )}
 
-      <FormItem
-        label="冲突策略"
-        field="conflictStrategy"
-        rules={[{ required: true, message: '请选择冲突策略' }]}
-      >
+      <FormItem label="冲突策略" required>
         <Radio.Group
           value={syncSourceDataStrategy.conflictStrategy}
           onChange={(conflictStrategy) =>
@@ -459,11 +472,7 @@ export default function SyncSourceDataStrategyFormSection({
         </Radio.Group>
       </FormItem>
 
-      <FormItem
-        label="同步范围"
-        field="syncScope"
-        rules={[{ required: true, message: '请选择同步范围' }]}
-      >
+      <FormItem label="同步范围" required>
         <Radio.Group
           value={syncSourceDataStrategy.syncScope}
           onChange={(syncScope) => onStrategyUpdate({ syncScope })}
@@ -475,7 +484,7 @@ export default function SyncSourceDataStrategyFormSection({
         </Radio.Group>
       </FormItem>
 
-      <FormItem label="并行数" field="parallelism">
+      <FormItem label="并行数">
         <InputNumber
           min={1}
           step={1}
@@ -496,8 +505,7 @@ export default function SyncSourceDataStrategyFormSection({
             </Popover>
           </span>
         }
-        field="exceptionStrategy"
-        rules={[{ required: true, message: '请选择异常策略' }]}
+        required
       >
         <Radio.Group
           value={syncSourceDataStrategy.exceptionStrategy}
