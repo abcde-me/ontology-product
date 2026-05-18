@@ -13,6 +13,7 @@ import {
   DATA_SOURCE_PERMISSIONS
 } from '@/config/permissions';
 import OntologyLibrary from '@/assets/sider/ontology-library.svg';
+import AIOntoWorkbench from '@/assets/sider/ai-onto-workbench.svg';
 import OrganMenu from '@/assets/sider/organmenu.svg';
 import LabelMenu from '@/assets/label-menu.svg';
 import MemberMenu from '@/assets/sider/membermenu.svg';
@@ -125,7 +126,7 @@ export const menus: MenuModel[] = [
       },
       {
         title: 'AI本体工作台',
-        icon: <OntologyLibrary className={iconClass} />,
+        icon: <AIOntoWorkbench className={iconClass} />,
         key: 'AIOntoWorkbench',
         path: '/tenant/compute/onto/aiOntologyWorkbench',
         permission: ONTOLOGY_PERMISSIONS.LIST

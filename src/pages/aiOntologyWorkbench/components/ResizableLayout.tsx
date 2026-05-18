@@ -86,32 +86,25 @@ const ResizableLayout: React.FC<ResizableLayoutProps> = ({
 
   return (
     <div ref={containerRef} className="flex h-full w-full overflow-hidden">
-      {/* 左侧面板 */}
+      {/* 左侧面板 - 聊天面板 */}
       <div
-        className="flex-shrink-0 overflow-hidden rounded-[12px] bg-white shadow-[0px_4px_8px_0px_rgba(0,0,0,0.04)]"
+        className="flex-shrink-0 overflow-hidden"
         style={{ width: `${leftWidth}px` }}
       >
         {leftContent}
       </div>
 
-      {/* 间距 - 8px，包含拖拽条 */}
-      <div className="relative w-[8px] flex-shrink-0">
-        {/* 拖拽分隔条 - 在间距中间 */}
-        <div
-          className="group absolute left-[3px] top-0 h-full w-[2px] cursor-col-resize bg-transparent"
-          onMouseDown={handleMouseDown}
-        >
-          {/* 拖拽热区 - 覆盖整个 8px 区域 */}
-          <div className="absolute left-[-3px] top-0 h-full w-[8px]" />
-          {/* Hover 提示线 */}
-          <div className="absolute left-0 top-0 h-full w-[2px] bg-[rgb(var(--primary-6))] opacity-0 transition-opacity group-hover:opacity-100" />
-        </div>
+      {/* 拖拽分隔条 - 紧贴左侧面板 */}
+      <div
+        className="group relative w-[2px] flex-shrink-0 cursor-col-resize bg-transparent hover:bg-[rgb(var(--primary-6))]"
+        onMouseDown={handleMouseDown}
+      >
+        {/* 拖拽热区 - 扩大点击区域 */}
+        <div className="absolute left-[-3px] top-0 h-full w-[8px]" />
       </div>
 
-      {/* 右侧面板 */}
-      <div className="flex-1 overflow-hidden rounded-[12px] bg-white shadow-[0px_4px_8px_0px_rgba(0,0,0,0.04)]">
-        {rightContent}
-      </div>
+      {/* 右侧面板 - 图谱 */}
+      <div className="flex-1 overflow-hidden">{rightContent}</div>
     </div>
   );
 };

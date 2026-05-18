@@ -511,7 +511,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   const showWelcome = messages.length === 0;
 
   return (
-    <div className="flex h-full w-full flex-col bg-white">
+    <div className="flex h-full w-full flex-col border-r border-solid border-[#dfe2eb] bg-white">
       <Header
         conversations={conversations}
         activeConversationId={activeConversationId}

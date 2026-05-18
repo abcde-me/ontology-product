@@ -191,17 +191,17 @@ const AIOntoWorkbench: React.FC = () => {
 
   // 有数据状态
   return (
-    <div className="flex h-full w-full flex-col bg-[#f8f9fc]">
+    <div className="flex h-full w-full flex-col bg-white">
       {/* 顶部工具栏 */}
       <div
-        className="flex h-[56px] items-center px-[24px]"
+        className="flex h-[56px] items-center border-b border-solid border-[#dfe2eb] px-[24px]"
         style={{ filter: 'drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.08))' }}
       >
         <OntologySelector />
       </div>
 
       {/* 主内容区域 */}
-      <div className="flex-1 overflow-hidden p-[24px] pb-[16px] pt-[0px]">
+      <div className="flex flex-1 overflow-hidden">
         {console.log('[AIOntoWorkbench] currentOntology:', currentOntology)}
         {console.log('[AIOntoWorkbench] projectId from store:', projectId)}
         {console.log(
@@ -247,8 +247,8 @@ const AIOntoWorkbench: React.FC = () => {
           }
           rightContent={<GraphPanel key={graphRefreshKey} />}
           defaultLeftWidth={400}
-          minLeftWidth={300}
-          maxLeftWidth={600}
+          minLeftWidth={400}
+          maxLeftWidth={500}
         />
       </div>
     </div>

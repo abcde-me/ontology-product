@@ -41,18 +41,8 @@ const GraphPanel: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden">
-      {/* 顶部标题栏 */}
-      <div className="flex h-[48px] flex-shrink-0 items-center bg-white pl-[24px]">
-        <span className="text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
-          本体图谱
-        </span>
-      </div>
-
-      {/* 图谱内容区域 */}
-      <div className="flex-1 overflow-hidden bg-[#f8f9fc]">
-        {renderContent()}
-      </div>
+    <div className="relative h-full w-full overflow-hidden bg-[#f8f9fc]">
+      {renderContent()}
     </div>
   );
 };

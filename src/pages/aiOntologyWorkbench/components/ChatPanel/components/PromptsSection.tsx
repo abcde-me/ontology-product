@@ -1,5 +1,5 @@
 import React from 'react';
-import { Prompts } from '@ceai-front/chat';
+import Prompts from './Prompts';
 import { PromptItem } from '../types';
 
 interface PromptsSectionProps {

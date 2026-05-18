@@ -26,7 +26,7 @@ const hideSidebarPaths = [
   '/tenant/compute/onto/ragDetail',
   '/tenant/compute/onto/ontologyScene/detail'
 ];
-const collapseSidebarPaths = [];
+const collapseSidebarPaths = ['/tenant/compute/onto/aiOntologyWorkbench'];
 
 export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
   const { createPermissionFilter } = usePermission();
