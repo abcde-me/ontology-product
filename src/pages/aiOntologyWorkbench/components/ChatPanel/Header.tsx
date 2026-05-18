@@ -43,17 +43,17 @@ const Header: React.FC<HeaderProps> = ({
   );
 
   return (
-    <div className="flex h-[56px] items-center justify-between border-b border-[#E5E6EB] px-6 py-3">
+    <div className="flex items-center justify-between px-[20px] py-[12px]">
       <h3 className="text-[16px] font-medium leading-[24px] text-[#0f172a]">
         本体智能助手
       </h3>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-[16px]">
         <Tooltip content="新建会话">
           <div
-            className="flex h-4 w-4 cursor-pointer items-center justify-center"
+            className="flex size-[16px] cursor-pointer items-center justify-center"
             onClick={onNewSession}
           >
-            <PlusIcon className="h-4 w-4" />
+            <PlusIcon className="size-[16px]" />
           </div>
         </Tooltip>
         <Dropdown
@@ -64,8 +64,8 @@ const Header: React.FC<HeaderProps> = ({
           onVisibleChange={setDropdownVisible}
         >
           <Tooltip content="历史会话">
-            <div className="flex h-4 w-4 cursor-pointer items-center justify-center">
-              <ConversationsIcon className="h-4 w-4" />
+            <div className="flex size-[16px] cursor-pointer items-center justify-center">
+              <ConversationsIcon className="size-[16px]" />
             </div>
           </Tooltip>
         </Dropdown>

@@ -34,8 +34,8 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({
     <div className="flex h-full flex-col">
       {/* 内容区域 - 可滚动，隐藏滚动条 */}
       <div className={`flex-1 overflow-y-auto ${styles.scrollbarHide}`}>
-        <div className="flex min-h-full flex-col items-center justify-center px-5 py-8">
-          <div className="flex w-full max-w-[600px] flex-col items-center gap-6">
+        <div className="flex min-h-full flex-col items-center justify-center px-[20px] py-8">
+          <div className="flex w-full flex-col items-center gap-6">
             <WelcomeSection />
             <Introduction />
             <PromptsSection prompts={prompts} onSelect={onPromptSelect} />
@@ -44,7 +44,7 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({
       </div>
 
       {/* Sender 组件 - 固定在底部 */}
-      <div className="w-full flex-shrink-0 p-5">
+      <div className="w-full flex-shrink-0 px-[20px] pb-[8px]">
         <Sender
           placeholder="您好，有什么可以帮您？"
           onSend={onSend}

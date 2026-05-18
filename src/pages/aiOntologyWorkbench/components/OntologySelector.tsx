@@ -177,14 +177,14 @@ const OntologySelector: React.FC = () => {
     <>
       <div className="flex w-full items-center justify-between">
         {/* 左侧区域 */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-[16px]">
           {/* 标题 */}
-          <h1 className="text-[20px] font-[600] leading-[30px] text-[var(--color-text-1)]">
+          <h1 className="text-[20px] font-semibold leading-[30px] text-[#0f172a]">
             本体AI工作台
           </h1>
 
           {/* 垂直分隔线 */}
-          <div className="h-[18px] w-[1px] bg-[var(--color-border-2)]" />
+          <div className="h-[18px] w-px bg-[#dfe2eb]" />
 
           {/* 本体场景选择器 */}
           <Dropdown
@@ -194,43 +194,43 @@ const OntologySelector: React.FC = () => {
             popupVisible={dropdownVisible}
             onVisibleChange={setDropdownVisible}
           >
-            <div className="flex cursor-pointer items-center gap-2 hover:opacity-80">
+            <div className="flex cursor-pointer items-center gap-[8px] hover:opacity-80">
               {currentOntology ? (
                 <>
                   {/* 本体图标 */}
                   {currentOntology.icon && (
-                    <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--color-border-2)] bg-gradient-to-b from-[rgba(24,79,242,0.4)] to-[rgba(24,79,242,0.1)]">
+                    <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center overflow-hidden rounded-[8px] border-[0.208px] border-[#e2e8f0] bg-gradient-to-b from-[rgba(24,79,242,0.4)] to-[rgba(24,79,242,0.1)]">
                       {getIconComponent(currentOntology.icon, 16)}
                     </div>
                   )}
                   {/* 本体名称 */}
-                  <span className="max-w-[200px] truncate text-[16px] font-[600] leading-[24px] text-[var(--color-text-1)]">
+                  <span className="max-w-[200px] truncate text-[16px] font-semibold leading-[24px] text-[#0f172a]">
                     {currentOntology.name}
                   </span>
                 </>
               ) : (
                 <>
-                  <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--color-border-2)] bg-gradient-to-b from-[rgba(24,79,242,0.4)] to-[rgba(24,79,242,0.1)]">
+                  <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center overflow-hidden rounded-[8px] border-[0.208px] border-[#e2e8f0] bg-gradient-to-b from-[rgba(24,79,242,0.4)] to-[rgba(24,79,242,0.1)]">
                     {getIconComponent('general-1', 16)}
                   </div>
-                  <span className="text-[16px] font-[600] leading-[24px] text-[var(--color-text-1)]">
+                  <span className="text-[16px] font-semibold leading-[24px] text-[#0f172a]">
                     新建本体场景
                   </span>
                 </>
               )}
               {/* 下拉箭头 */}
-              <IconDown className="text-[18px] text-[var(--color-text-3)]" />
+              <IconDown className="text-[16px] text-[var(--color-text-3)]" />
             </div>
           </Dropdown>
         </div>
 
         {/* 右侧区域 - 设置按钮 */}
-        {/* <div className="flex cursor-pointer items-center gap-1 hover:opacity-80">
-                    <IconSettings className="text-[20px] text-[var(--color-text-3)]" />
-                    <span className="text-[14px] leading-[22px] text-[var(--color-text-3)]">
-                        设置
-                    </span>
-                </div> */}
+        {/* <div className="flex cursor-pointer items-center gap-[4px] hover:opacity-80">
+          <IconSettings className="text-[20px] text-[#4a5169]" />
+          <span className="text-[14px] leading-[22px] text-[#4a5169]">
+            设置
+          </span>
+        </div> */}
       </div>
 
       <SceneModal

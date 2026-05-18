@@ -88,7 +88,7 @@ const ChatView: React.FC<ChatViewProps> = ({
       {/* 消息列表 - 可滚动，隐藏滚动条 */}
       <div
         ref={messageListRef}
-        className={`flex-1 overflow-y-auto p-5 ${styles.scrollbarHide}`}
+        className={`flex-1 overflow-y-auto px-[20px] py-5 ${styles.scrollbarHide}`}
       >
         <MessageList
           messages={messages}
@@ -114,7 +114,7 @@ const ChatView: React.FC<ChatViewProps> = ({
       )} */}
 
       {/* Sender 组件 - 固定在底部 */}
-      <div className="w-full flex-shrink-0 p-5">
+      <div className="w-full flex-shrink-0 px-[20px] pb-[8px]">
         <Sender
           placeholder="输入消息..."
           onSend={handleSend}

@@ -2,23 +2,16 @@ import React from 'react';
 
 /**
  * 介绍组件 - 根据 Figma 设计实现
+ * 背景色: #f5f7fc
  * padding: px-[16px] py-[10px]
- * 不需要额外的 margin，gap 由父组件控制
+ * border-radius: 4px
  */
 const Introduction: React.FC = () => {
   return (
-    <div className="w-full">
-      <div
-        className="flex w-full items-center justify-center overflow-hidden rounded-[12px] px-4 py-[10px]"
-        style={{
-          background:
-            'linear-gradient(74deg, rgba(24, 79, 242, 0.05) 23.817%, rgba(115, 63, 245, 0.05) 96.646%)'
-        }}
-      >
-        <p className="flex-1 text-[14px] font-normal leading-[22px] text-[#0f131f]">
-          你好！我是专为你搭建的智能体知识问答智能助手，已加载完整知识库，可快速、准确地为你解答各类问题。
-        </p>
-      </div>
+    <div className="w-full rounded-[4px] bg-[#f5f7fc] px-[16px] py-[10px]">
+      <p className="text-[14px] font-normal leading-[22px] text-[#0f131f]">
+        你好！我是专为你搭建的智能体知识问答智能助手，已加载完整知识库，可快速、准确地为你解答各类问题。
+      </p>
     </div>
   );
 };
