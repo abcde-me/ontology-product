@@ -127,6 +127,56 @@ function buildSqlSourceSelectorFormFields(
   };
 }
 
+/** 从详情 initialValues 解析与第 2 步建模一致的数据源信息 */
+function getModelingSourceInfoFromInitial(
+  initial: Partial<ObjectTypeFormData>
+): SqlSourceDataInfo | undefined {
+  if (initial._dataSource?.type !== DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC) {
+    return undefined;
+  }
+  if (initial.sourceDataInfo) {
+    return {
+      ...initial.sourceDataInfo,
+      queryMode: initial.sourceDataInfo.queryMode === 'sql' ? 'sql' : 'selected'
+    };
+  }
+  return {
+    connectorId: initial._dataSource.connectorId,
+    connectorName: initial._dataSource.connectorName,
+    connectorSubtype: initial._dataSource.connectorSubtype,
+    databaseName: initial._dataSource.database,
+    tableName: initial._dataSource.table,
+    queryMode: initial._dataSource.queryMode === 'sql' ? 'sql' : 'selected',
+    sql: initial._dataSource.sql
+  };
+}
+
+/** 将建模数据源写入第 3 步实例同步（与「下一步」进入第 3 步行为一致） */
+function applySyncSourceFromModelingInfo(
+  form: ReturnType<typeof Form.useForm>[0],
+  info: SqlSourceDataInfo,
+  setSyncSourceDataStrategy: React.Dispatch<
+    React.SetStateAction<SyncSourceDataStrategyFormState>
+  >
+) {
+  const queryMode = info.queryMode === 'sql' ? 'sql' : 'selected';
+  const sourceDataInfo: SqlSourceDataInfo = {
+    connectorId: info.connectorId,
+    connectorName: info.connectorName,
+    connectorSubtype: info.connectorSubtype,
+    databaseName: info.databaseName,
+    tableName: info.tableName,
+    projectID: info.projectID,
+    queryMode,
+    sql: info.sql
+  };
+  setSyncSourceDataStrategy((prev) => ({
+    ...prev,
+    sourceDataInfo
+  }));
+  form.setFieldsValue(buildSqlSourceSelectorFormFields('sync', sourceDataInfo));
+}
+
 interface ObjectTypeFormProps {
   initialValues?: Partial<ObjectTypeFormData>;
   onSubmit: (data: ObjectTypeFormData) => void;
@@ -137,6 +187,8 @@ interface ObjectTypeFormProps {
   initialStep?: number;
   /** 编辑态下一步/上一步后调用，可在此重新请求 GetOntologyObjectType 刷新 initialValues */
   onStepChange?: (stepIndex: number) => void | Promise<void>;
+  /** 编辑态下是否允许配置/保存第 3 步实例同步（列表「配置」?step=3） */
+  allowInstanceSyncEdit?: boolean;
 }
 
 export interface ObjectTypeFormRef {
@@ -153,7 +205,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       showFooter = true,
       isEdit = false,
       initialStep,
-      onStepChange
+      onStepChange,
+      allowInstanceSyncEdit = false
     },
     ref
   ) => {
@@ -196,7 +249,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         maxStepForDataSourceType(initialDsType)
       );
     });
-    const secondaryStepsReadOnly = isEdit;
+    const modelingReadOnly = isEdit;
+    const instanceSyncReadOnly = isEdit && !allowInstanceSyncEdit;
     const isLocalCsv = dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV;
     const [basicInfoValues, setBasicInfoValues] = useState<BasicInfoValues>(
       () => ({
@@ -249,13 +303,17 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                   }
             )
           : {};
-        const syncSqlSourcePatch = initialValues.syncSourceDataStrategy
-          ?.sourceDataInfo
-          ? buildSqlSourceSelectorFormFields(
-              'sync',
-              initialValues.syncSourceDataStrategy.sourceDataInfo
-            )
-          : {};
+        const modelingSourceForSync =
+          getModelingSourceInfoFromInitial(initialValues);
+        const syncSqlSourcePatch =
+          allowInstanceSyncEdit && modelingSourceForSync
+            ? buildSqlSourceSelectorFormFields('sync', modelingSourceForSync)
+            : initialValues.syncSourceDataStrategy?.sourceDataInfo
+              ? buildSqlSourceSelectorFormFields(
+                  'sync',
+                  initialValues.syncSourceDataStrategy.sourceDataInfo
+                )
+              : {};
 
         /** 与下方 setSyncSourceDataStrategy 使用同一合并结果，且必须在同一次/最后一次 setFieldsValue 中写入，避免 Arco Form 未吃到分步更新的策略字段 */
         const mergedSyncStrategyForForm =
@@ -356,6 +414,13 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         if (mergedSyncStrategyForForm) {
           setSyncSourceDataStrategy(mergedSyncStrategyForForm);
         }
+        if (allowInstanceSyncEdit && modelingSourceForSync) {
+          applySyncSourceFromModelingInfo(
+            form,
+            modelingSourceForSync,
+            setSyncSourceDataStrategy
+          );
+        }
         if (initialValues.syncMappingFields) {
           setSyncMappingFields(initialValues.syncMappingFields);
         }
@@ -388,7 +453,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         });
         setSyncSourceDataStrategy(DEFAULT_SYNC_SOURCE_DATA_STRATEGY);
       }
-    }, [initialValues, form, isEdit]);
+    }, [initialValues, form, isEdit, allowInstanceSyncEdit]);
 
     useEffect(() => {
       if (
@@ -647,36 +712,14 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     };
 
     const syncInstanceSourceFromModeling = () => {
-      if (
-        dataSource.type !== DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC ||
-        (modelingSourceDataInfo.queryMode || 'selected') !== 'selected' ||
-        !modelingSourceDataInfo.connectorId ||
-        !modelingSourceDataInfo.databaseName ||
-        !modelingSourceDataInfo.tableName
-      ) {
+      if (dataSource.type !== DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC) {
         return;
       }
-
-      setSyncSourceDataStrategy((prev) => ({
-        ...prev,
-        sourceDataInfo: {
-          connectorId: modelingSourceDataInfo.connectorId,
-          connectorName: modelingSourceDataInfo.connectorName,
-          connectorSubtype: modelingSourceDataInfo.connectorSubtype,
-          databaseName: modelingSourceDataInfo.databaseName,
-          tableName: modelingSourceDataInfo.tableName,
-          projectID: modelingSourceDataInfo.projectID,
-          queryMode: 'selected'
-        }
-      }));
-      form.setFieldsValue({
-        syncConnector: modelingSourceDataInfo.connectorId,
-        syncQueryMode: 'selected',
-        syncDatabaseTable: [
-          modelingSourceDataInfo.databaseName,
-          modelingSourceDataInfo.tableName
-        ]
-      });
+      applySyncSourceFromModelingInfo(
+        form,
+        modelingSourceDataInfo,
+        setSyncSourceDataStrategy
+      );
     };
 
     const handleNextStep = async () => {
@@ -692,7 +735,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         if (dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV) {
           return;
         }
-        if (secondaryStepsReadOnly) {
+        if (modelingReadOnly) {
+          syncInstanceSourceFromModeling();
           setCurrentStep(INSTANCE_SYNC_STEP);
           return;
         }
@@ -794,6 +838,37 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           syncSourceDataStrategy,
           syncMappingFields,
           enableSyncSourceData: initialValues?.enableSyncSourceData === true,
+          isReUpload
+        });
+
+        if (!formData) {
+          return;
+        }
+
+        onSubmit(formData);
+      } catch (error) {
+        console.error('Form validation failed:', error);
+      }
+    };
+
+    const handleEditSaveFromInstanceSync = async () => {
+      try {
+        const isValid = await validateBeforeSubmit(true);
+        if (!isValid) {
+          return;
+        }
+
+        const values = getSubmitValues();
+        const formData = buildObjectTypeFormData({
+          values,
+          selectedIcon,
+          initialOntologyModelID: initialValues?.ontologyModelID,
+          dataSource,
+          attributeFields,
+          objectTypeAttributes,
+          syncSourceDataStrategy,
+          syncMappingFields,
+          enableSyncSourceData: true,
           isReUpload
         });
 
@@ -943,7 +1018,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         initialFileList={initialFileList}
         setInitialFileList={setInitialFileList}
         styles={styles}
-        readOnly={secondaryStepsReadOnly}
+        readOnly={modelingReadOnly}
       />
     );
 
@@ -958,7 +1033,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         fieldsLoading={fieldsLoading}
         setFieldsLoading={setFieldsLoading}
         styles={styles}
-        readOnly={secondaryStepsReadOnly}
+        readOnly={instanceSyncReadOnly}
       />
     );
 
@@ -1033,9 +1108,20 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
               )}
 
               {isInstanceSyncStep && (
-                <Button onClick={handlePrevStep} disabled={loading}>
-                  上一步
-                </Button>
+                <>
+                  {allowInstanceSyncEdit && (
+                    <Button
+                      type="primary"
+                      onClick={handleEditSaveFromInstanceSync}
+                      loading={loading}
+                    >
+                      保存
+                    </Button>
+                  )}
+                  <Button onClick={handlePrevStep} disabled={loading}>
+                    上一步
+                  </Button>
+                </>
               )}
 
               <Button onClick={onCancel} disabled={loading}>
