@@ -37,8 +37,11 @@ interface AIWorkbenchGraphState {
   closeBottomPanel: () => void;
   /** 设置底部面板高度 */
   setBottomPanelHeight: (height: number) => void;
-  /** 高亮节点 */
-  highlightNode: (code: string) => void;
+  /** 高亮节点并居中 */
+  highlightNode: (
+    code: string,
+    options?: { duration?: number; center?: boolean }
+  ) => void;
   /** 清除高亮 */
   clearHighlight: () => void;
   /** 重置状态 */
@@ -70,13 +73,28 @@ export const useAIWorkbenchGraphStore = create<AIWorkbenchGraphState>(
     setBottomPanelHeight: (height) => set({ bottomPanelHeight: height }),
 
     // ========== 节点高亮相关 Actions ==========
-    highlightNode: (code) => {
-      console.log('[AIWorkbenchGraphStore] 高亮节点:', code);
+    highlightNode: (code, options = {}) => {
+      const { duration = 5000, center = true } = options; // 默认5秒，默认居中
+      console.log('[AIWorkbenchGraphStore] 高亮节点:', code, '选项:', options);
       set({ highlightedNodeCode: code });
-      // 3秒后自动清除高亮
+
+      // 如果需要居中，触发自定义事件
+      if (center) {
+        window.dispatchEvent(
+          new CustomEvent('centerGraphNode', { detail: { code } })
+        );
+      }
+
+      // 延迟后自动清除高亮
       setTimeout(() => {
-        set({ highlightedNodeCode: null });
-      }, 3000);
+        set((state) => {
+          // 只有当前高亮的节点是这个节点时才清除（避免被新的高亮覆盖）
+          if (state.highlightedNodeCode === code) {
+            return { highlightedNodeCode: null };
+          }
+          return state;
+        });
+      }, duration);
     },
     clearHighlight: () => set({ highlightedNodeCode: null }),
 

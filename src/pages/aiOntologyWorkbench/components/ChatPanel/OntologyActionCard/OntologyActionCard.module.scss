@@ -35,6 +35,11 @@
   justify-content: center;
 }
 
+.icon {
+  width: 16px;
+  height: 16px;
+}
+
 .name {
   font-size: 14px;
   line-height: 22px;
@@ -43,6 +48,38 @@
   overflow: hidden;
   text-overflow: ellipsis;
   flex-shrink: 1;
+  max-width: 200px; // 最大宽度，超长截断
+}
+
+// 自定义标签样式 - 根据 Figma 设计稿
+.tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  // 新增 - 绿色
+  &[data-action-type='create'] {
+    background: var(--color-success-light-1, #edfff8);
+    color: var(--color-success-6, #0cbf92);
+  }
+
+  // 更改 - 橙色
+  &[data-action-type='update'] {
+    background: var(--color-warning-light-1, #fff9ed);
+    color: var(--color-warning-6, #f18619);
+  }
+
+  // 删除 - 红色
+  &[data-action-type='delete'] {
+    background: var(--color-danger-light-1, #fff0ed);
+    color: var(--color-danger-6, #e52e2d);
+  }
 }
 
 .rightSection {
@@ -50,6 +87,7 @@
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
+  height: 26px;
 }
 
 .actionIcon {
@@ -59,6 +97,8 @@
   align-items: center;
   justify-content: center;
   transition: color 0.2s;
+  width: 14px;
+  height: 14px;
 
   &:hover {
     color: var(--color-text-1, #0f131f);

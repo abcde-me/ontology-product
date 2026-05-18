@@ -5,7 +5,7 @@ import { Button } from '@arco-design/web-react';
 import { IconDown } from '@arco-design/web-react/icon';
 import MessageList from './MessageList';
 import LoadingIndicator from './LoadingIndicator';
-import { ChatMessage } from '@/hooks/chat/types';
+import { ChatMessage, OntologyAction } from '@/hooks/chat/types';
 import { useAutoScroll } from '@/hooks/chat';
 import styles from './ChatPanel.module.scss';
 
@@ -13,6 +13,7 @@ interface ChatViewProps {
   messages: ChatMessage[];
   isLoading: boolean;
   isStreaming: boolean;
+  ontologyId?: number | string; // 本体 ID
   onSend: (params: {
     text: string;
     files?: any[];
@@ -25,18 +26,21 @@ interface ChatViewProps {
     formData: FormData
   ) => Promise<{ data: { content: { text: string; type: string }[] } }>;
   onLocateNode?: (code: string) => void;
+  onViewNode?: (action: OntologyAction) => void; // 查看节点回调
 }
 
 const ChatView: React.FC<ChatViewProps> = ({
   messages,
   isLoading,
   isStreaming,
+  ontologyId,
   onSend,
   onStop,
   uploaderProps,
   GetFile,
   GetAudioText,
-  onLocateNode
+  onLocateNode,
+  onViewNode
 }) => {
   // 消息列表容器的 ref
   const messageListRef = useRef<HTMLDivElement>(null);
@@ -86,7 +90,12 @@ const ChatView: React.FC<ChatViewProps> = ({
         ref={messageListRef}
         className={`flex-1 overflow-y-auto p-5 ${styles.scrollbarHide}`}
       >
-        <MessageList messages={messages} onLocateNode={onLocateNode} />
+        <MessageList
+          messages={messages}
+          ontologyId={ontologyId}
+          onLocateNode={onLocateNode}
+          onViewNode={onViewNode}
+        />
 
         {/* Loading 指示器 - 只在特定条件下显示 */}
         {shouldShowLoading && <LoadingIndicator />}

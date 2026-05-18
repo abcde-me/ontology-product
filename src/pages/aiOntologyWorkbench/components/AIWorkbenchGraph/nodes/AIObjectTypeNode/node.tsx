@@ -49,12 +49,9 @@ const Node = ({ id, data }) => {
     <div
       className="flex w-[200px] items-center gap-[8px] p-[16px]"
       style={{
-        width: '200px',
-        backgroundColor: isHighlighted ? '#e6f4ff' : 'transparent',
-        border: isHighlighted ? '2px solid #1890ff' : 'none',
-        borderRadius: isHighlighted ? '4px' : '0',
-        transition: 'all 0.3s ease'
+        width: '200px'
       }}
+      data-highlighted={isHighlighted ? 'true' : 'false'} // 添加数据属性，用于外层样式
     >
       {/* 左侧：图标 + 名称 */}
       <div className="flex min-w-0 flex-1 items-center gap-[8px]">
@@ -82,7 +79,7 @@ const Node = ({ id, data }) => {
       </div>
 
       {/* 右侧：行为指示器 - 使用 Tooltip 包裹 */}
-      <Tooltip
+      {/* <Tooltip
         content={
           <BehaviorTooltip
             objectTypeId={data.id}
@@ -104,7 +101,7 @@ const Node = ({ id, data }) => {
             {totalCount}
           </span>
         </div>
-      </Tooltip>
+      </Tooltip> */}
     </div>
   );
 };

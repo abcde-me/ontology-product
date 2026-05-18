@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Spin } from '@arco-design/web-react';
+import { useHistory } from 'react-router-dom';
 import { useAIWorkbenchStore } from './store';
 import { useOntologyManagement } from './hooks/useOntologyManagement';
 import { useUserInfoStore } from '@/store/userInfoStore';
@@ -10,6 +11,7 @@ import ChatPanel from './components/ChatPanel';
 import GraphPanel from './components/GraphPanel';
 import ResizableLayout from './components/ResizableLayout';
 import { useAIWorkbenchGraphStore } from './components/AIWorkbenchGraph/store';
+import { OntologyAction, OntologyTargetType } from '@/hooks/chat/types';
 
 /**
  * AI 本体工作台
@@ -20,6 +22,9 @@ const AIOntoWorkbench: React.FC = () => {
 
   // 从 userInfoStore 获取 projectId
   const projectId = useUserInfoStore((state) => state.projectId);
+
+  // 路由
+  const history = useHistory();
 
   const {
     createModalVisible,
@@ -52,6 +57,56 @@ const AIOntoWorkbench: React.FC = () => {
     const { highlightNode } = useAIWorkbenchGraphStore.getState();
     highlightNode(code);
   }, []);
+
+  // 节点查看回调 - 根据 target_type 跳转到不同路由
+  const handleViewNode = React.useCallback(
+    (action: OntologyAction) => {
+      console.log('[AIOntoWorkbench] 查看节点，action:', action);
+
+      if (!currentOntology?.id) {
+        console.warn('[AIOntoWorkbench] 没有当前本体，无法跳转');
+        return;
+      }
+
+      const { target_type, name } = action;
+      const ontologyId = currentOntology.id;
+
+      // 根据 target_type 生成不同的路由
+      let targetPath = '';
+
+      switch (target_type) {
+        case OntologyTargetType.OBJECT_TYPE:
+          // 对象类型：/onto/tenant/compute/onto/ontologyScene/detail/{ontologyId}/objectType/list?search={name}
+          targetPath = `/onto/tenant/compute/onto/ontologyScene/detail/${ontologyId}/objectType/list?search=${encodeURIComponent(name)}`;
+          break;
+
+        case OntologyTargetType.LINK:
+          // 链接：/onto/tenant/compute/onto/ontologyScene/detail/{ontologyId}/links/list?search={name}
+          targetPath = `/onto/tenant/compute/onto/ontologyScene/detail/${ontologyId}/links/list?search=${encodeURIComponent(name)}`;
+          break;
+
+        case OntologyTargetType.FUNCTION:
+          // 函数：/onto/tenant/compute/onto/ontologyScene/detail/{ontologyId}/functions?search={name}
+          targetPath = `/onto/tenant/compute/onto/ontologyScene/detail/${ontologyId}/functions?search=${encodeURIComponent(name)}`;
+          break;
+
+        case OntologyTargetType.ACTION:
+          // 行为：/onto/tenant/compute/onto/ontologyScene/detail/{ontologyId}/behaviorActions?search={name}
+          targetPath = `/onto/tenant/compute/onto/ontologyScene/detail/${ontologyId}/behaviorActions?search=${encodeURIComponent(name)}`;
+          break;
+
+        default:
+          console.warn('[AIOntoWorkbench] 未知的 target_type:', target_type);
+          return;
+      }
+
+      console.log('[AIOntoWorkbench] 跳转路由:', targetPath);
+
+      // 在新窗口打开
+      window.open(targetPath, '_blank');
+    },
+    [currentOntology]
+  );
 
   // 初始化
   useEffect(() => {
@@ -156,25 +211,39 @@ const AIOntoWorkbench: React.FC = () => {
         {console.log('[AIOntoWorkbench] currentAppID:', currentAppID)}
         <ResizableLayout
           leftContent={
-            currentAppID ? (
-              <ChatPanel
-                appId={currentAppID}
-                appConfigId="appconfig-e8b9wqn0"
-                projectId={projectId?.[1]}
-                channel="Preview"
-                source="debugger"
-                onConversationCreated={(conversationId) => {
-                  console.log('会话创建:', conversationId);
-                  // TODO: 保存会话 ID
-                }}
-                onGraphRefresh={handleGraphRefresh}
-                onLocateNode={handleLocateNode}
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center">
-                <Spin tip="正在初始化 Agent..." />
-              </div>
-            )
+            <ChatPanel
+              appId="app-j0euma2a"
+              appConfigId={null}
+              projectId={projectId?.[1]}
+              channel="WebPage"
+              source="debugger"
+              onConversationCreated={(conversationId) => {
+                console.log('会话创建:', conversationId);
+                // TODO: 保存会话 ID
+              }}
+              onGraphRefresh={handleGraphRefresh}
+              onLocateNode={handleLocateNode}
+              onViewNode={handleViewNode}
+            />
+            // currentAppID ? (
+            //   <ChatPanel
+            //     appId={currentAppID}
+            //     appConfigId={null}
+            //     projectId={projectId?.[1]}
+            //     channel="WebPage"
+            //     source="debugger"
+            //     onConversationCreated={(conversationId) => {
+            //       console.log('会话创建:', conversationId);
+            //       // TODO: 保存会话 ID
+            //     }}
+            //     onGraphRefresh={handleGraphRefresh}
+            //     onLocateNode={handleLocateNode}
+            //   />
+            // ) : (
+            //   <div className="flex h-full w-full items-center justify-center">
+            //     <Spin tip="正在初始化 Agent..." />
+            //   </div>
+            // )
           }
           rightContent={<GraphPanel key={graphRefreshKey} />}
           defaultLeftWidth={400}

@@ -6,15 +6,146 @@ import React, { memo } from 'react';
 import ThinkingChain from '../ThinkingChain';
 import MarkdownRenderer from '../MarkdownRenderer';
 import OntologyActionCard from '../OntologyActionCard';
-import { ChatMessage } from '@/hooks/chat/types';
+import { ChatMessage, OntologyAction } from '@/hooks/chat/types';
 import styles from './MessageBubble.module.scss';
 
 interface AIBubbleProps {
   message: ChatMessage;
+  ontologyId?: number | string; // 本体 ID
   onLocateNode?: (code: string) => void;
+  onViewNode?: (action: OntologyAction) => void; // 查看节点回调
 }
 
-const AIBubble: React.FC<AIBubbleProps> = ({ message, onLocateNode }) => {
+// ========== MOCK 数据 - 用于调试，后续需要删除 ==========
+const MOCK_ONTOLOGY_ACTIONS: OntologyAction[] = [
+  // ===== 对象类型示例 =====
+  {
+    action_type: 'create', // 新增操作 - 绿色标签
+    target_type: 'object_type', // 对象类型 - 显示对象图标
+    code: 'ArgusTrackPrediction3',
+    name: '预测轨迹',
+    toolName: '本体场景快照'
+  },
+  {
+    action_type: 'update', // 更新操作 - 蓝色标签
+    target_type: 'object_type', // 对象类型 - 显示对象图标
+    code: 'VehicleType',
+    name: '车辆类型',
+    toolName: '本体场景快照'
+  },
+  {
+    action_type: 'delete', // 删除操作 - 红色标签
+    target_type: 'object_type', // 对象类型 - 不显示定位图标
+    code: 'OldVehicleType',
+    name: '旧车辆类型',
+    toolName: '本体场景快照'
+  },
+  {
+    action_type: 'get', // 查询操作 - 蓝色标签
+    target_type: 'object_type', // 对象类型 - 显示对象图标
+    code: 'PersonType',
+    name: '人员类型',
+    toolName: '本体场景快照'
+  },
+
+  // ===== 链接类型示例 =====
+  {
+    action_type: 'create', // 新增操作 - 绿色标签
+    target_type: 'link', // 链接 - 显示链接图标
+    code: 'UavGeneratRecord3',
+    name: '产生',
+    toolName: '本体场景快照'
+  },
+  {
+    action_type: 'update', // 更新操作 - 蓝色标签
+    target_type: 'link', // 链接 - 显示链接图标
+    code: 'LinkBelongsTo',
+    name: '属于关系',
+    toolName: '本体场景快照'
+  },
+  {
+    action_type: 'delete', // 删除操作 - 红色标签
+    target_type: 'link', // 链接 - 不显示定位图标
+    code: 'OldLinkContains',
+    name: '旧包含关系',
+    toolName: '本体场景快照'
+  },
+  {
+    action_type: 'get', // 查询操作 - 蓝色标签
+    target_type: 'link', // 链接 - 显示链接图标
+    code: 'LinkHasProperty',
+    name: '具有属性',
+    toolName: '本体场景快照'
+  },
+
+  // ===== 行为类型示例 =====
+  {
+    action_type: 'create', // 新增操作 - 绿色标签
+    target_type: 'action', // 行为 - 显示行为图标，只显示查看图标
+    code: 'tmpAlertPush23',
+    name: '临时测试推送行为',
+    toolName: '本体场景快照'
+  },
+  {
+    action_type: 'update', // 更新操作 - 蓝色标签
+    target_type: 'action', // 行为 - 显示行为图标，只显示查看图标
+    code: 'tmpAlertPush24',
+    name: '更新推送行为',
+    toolName: '本体场景快照'
+  },
+  {
+    action_type: 'delete', // 删除操作 - 红色标签
+    target_type: 'action', // 行为 - 显示行为图标，只显示查看图标
+    code: 'tmpAlertPush25',
+    name: '删除推送行为',
+    toolName: '本体场景快照'
+  },
+  {
+    action_type: 'get', // 查询操作 - 蓝色标签
+    target_type: 'action', // 行为 - 显示行为图标，只显示查看图标
+    code: 'tmpAlertPush26',
+    name: '查询推送行为',
+    toolName: '本体场景快照'
+  },
+
+  // ===== 函数类型示例 =====
+  {
+    action_type: 'create', // 新增操作 - 绿色标签
+    target_type: 'function', // 函数 - 显示函数图标，只显示查看图标
+    code: 'argus_scheme_func3',
+    name: '方案推荐函数',
+    toolName: '本体场景快照'
+  },
+  {
+    action_type: 'update', // 更新操作 - 蓝色标签
+    target_type: 'function', // 函数 - 显示函数图标，只显示查看图标
+    code: 'argus_scheme_func4',
+    name: '更新推荐函数',
+    toolName: '本体场景快照'
+  },
+  {
+    action_type: 'delete', // 删除操作 - 红色标签
+    target_type: 'function', // 函数 - 显示函数图标，只显示查看图标
+    code: 'argus_scheme_func5',
+    name: '删除推荐函数',
+    toolName: '本体场景快照'
+  },
+  {
+    action_type: 'get', // 查询操作 - 蓝色标签
+    target_type: 'function', // 函数 - 显示函数图标，只显示查看图标
+    code: 'argus_scheme_func6',
+    name: '查询推荐函数',
+    toolName: '本体场景快照'
+  }
+];
+// ========== MOCK 数据结束 ==========
+
+const AIBubble: React.FC<AIBubbleProps> = ({
+  message,
+  ontologyId,
+  onLocateNode,
+  onViewNode
+}) => {
   const { content, thinkingSteps, ontologyActions, status } = message;
 
   const isStreaming = status === 'streaming';
@@ -28,6 +159,10 @@ const AIBubble: React.FC<AIBubbleProps> = ({ message, onLocateNode }) => {
   const hasContent = content && content.trim().length > 0;
   const hasOntologyActions = ontologyActions && ontologyActions.length > 0;
   const hasAnyContent = hasThinkingSteps || hasContent || hasOntologyActions;
+
+  // ========== MOCK: 强制显示本体操作卡片 ==========
+  const displayActions = MOCK_ONTOLOGY_ACTIONS;
+  // ========== MOCK 结束 ==========
 
   return (
     <div className={styles.aiBubbleContainer}>
@@ -46,17 +181,18 @@ const AIBubble: React.FC<AIBubbleProps> = ({ message, onLocateNode }) => {
         )}
 
         {/* 本体操作卡片 - 显示在正文下方 */}
-        {hasOntologyActions && (
-          <div className={styles.ontologyActions}>
-            {ontologyActions.map((action, index) => (
-              <OntologyActionCard
-                key={`${action.code}-${index}`}
-                action={action}
-                onLocate={onLocateNode}
-              />
-            ))}
-          </div>
-        )}
+        {/* MOCK: 使用 displayActions 替代 ontologyActions */}
+        <div className={styles.ontologyActions}>
+          {displayActions.map((action, index) => (
+            <OntologyActionCard
+              key={`${action.code}-${index}`}
+              action={action}
+              ontologyId={ontologyId}
+              onLocate={onLocateNode}
+              onView={onViewNode}
+            />
+          ))}
+        </div>
 
         {/* 错误状态 */}
         {isError && (
