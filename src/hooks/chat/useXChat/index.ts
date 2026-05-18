@@ -28,6 +28,7 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
     apiConfig,
     showMessage,
     onConversationCreated,
+    onMessageEnd,
     onError
   } = config;
 
@@ -92,10 +93,11 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
       conversationIdRef,
       currentMessageIdRef,
       onConversationCreated,
+      onMessageEnd,
       onError,
       lastChatDone
     }),
-    [setMessages, lastChatDone, onConversationCreated, onError]
+    [setMessages, lastChatDone, onConversationCreated, onMessageEnd, onError]
   );
 
   // ==================== 发送消息 ====================

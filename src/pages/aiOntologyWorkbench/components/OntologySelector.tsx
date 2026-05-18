@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Dropdown, Spin } from '@arco-design/web-react';
-import { IconDown, IconPlus } from '@arco-design/web-react/icon';
+import { IconPlus } from '@arco-design/web-react/icon';
 import { useInfiniteScroll } from 'ahooks';
 import { useAIWorkbenchStore } from '../store';
 import SceneModal from '@/pages/ontologyScene/modules/list/components/SceneModal';
@@ -8,6 +8,7 @@ import { useOntologyManagement } from '../hooks/useOntologyManagement';
 import { getIconComponent } from '../utils/iconHelper';
 import type { OntologScene } from '@/types/ontologySceneApi';
 import { listOntologyModel } from '@/api/ontologySceneLibrary/ontologyScene';
+import DownIcon from '../assets/down.svg';
 
 interface InfiniteScrollData {
   list: OntologScene[];
@@ -124,7 +125,7 @@ const OntologySelector: React.FC = () => {
    * 渲染下拉菜单
    */
   const dropdownList = (
-    <div className="w-[216px] overflow-hidden rounded-[12px] bg-white py-[4px] shadow-[0px_2px_8px_0px_rgba(0,0,0,0.08)]">
+    <div className="w-[216px] overflow-hidden rounded-[4px] bg-white py-[4px] shadow-[0px_2px_8px_0px_rgba(0,0,0,0.08)]">
       <div ref={scrollContainerRef} className="max-h-[400px] overflow-y-auto">
         {ontologyList.map((ontology) => {
           const isSelected = currentOntology?.id === ontology.id;
@@ -136,16 +137,15 @@ const OntologySelector: React.FC = () => {
               }`}
               onClick={() => handleSelectOntology(ontology)}
             >
-              {/* 图标 */}
-              <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-[var(--color-border-2)] bg-gradient-to-b from-[rgba(24,79,242,0.4)] to-[rgba(24,79,242,0.1)]">
+              {/* 本体图标 */}
+              <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center overflow-hidden rounded-[8px] border-[0.208px] border-[#e2e8f0] bg-gradient-to-b from-[rgba(24,79,242,0.4)] to-[rgba(24,79,242,0.1)]">
                 {getIconComponent(ontology.icon || 'general-1', 16)}
               </div>
+
               {/* 名称 */}
               <span
                 className={`flex-1 truncate text-[14px] font-normal leading-[22px] ${
-                  isSelected
-                    ? 'text-[rgb(var(--primary-6))]'
-                    : 'text-[var(--color-text-1)]'
+                  isSelected ? 'text-[#184ff2]' : 'text-[var(--color-text-1)]'
                 }`}
               >
                 {ontology.name}
@@ -162,13 +162,15 @@ const OntologySelector: React.FC = () => {
 
       {/* 创建按钮 */}
       <div
-        className="flex cursor-pointer items-center justify-center gap-[4px] px-[12px] py-[8px] transition-colors hover:bg-[#f7f8fa]"
+        className="flex cursor-pointer items-center px-[12px] py-[8px] transition-colors hover:bg-[#f7f8fa]"
         onClick={handleOpenCreateModal}
       >
-        <IconPlus className="text-[16px] text-[rgb(var(--primary-6))]" />
-        <span className="text-[14px] font-normal leading-[22px] text-[rgb(var(--primary-6))]">
-          创建本体场景
-        </span>
+        <div className="flex h-[32px] w-full items-center justify-center gap-[4px] overflow-hidden rounded-[4px]">
+          <IconPlus className="text-[16px] text-[#184ff2]" />
+          <span className="text-[14px] font-normal leading-[22px] text-[#184ff2]">
+            创建本体场景
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -218,8 +220,12 @@ const OntologySelector: React.FC = () => {
                   </span>
                 </>
               )}
-              {/* 下拉箭头 */}
-              <IconDown className="text-[16px] text-[var(--color-text-3)]" />
+              {/* 下拉箭头 - 根据展开状态切换方向 */}
+              <DownIcon
+                className={`h-[18px] w-[18px] transition-transform ${
+                  dropdownVisible ? 'rotate-180' : ''
+                }`}
+              />
             </div>
           </Dropdown>
         </div>

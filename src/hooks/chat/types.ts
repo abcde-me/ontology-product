@@ -160,6 +160,7 @@ export interface UseChatConfig {
   };
 
   onConversationCreated?: (conversationId: string) => void;
+  onMessageEnd?: (conversationId: string) => void; // 消息完成回调
   onError?: (error: Error) => void;
 }
 

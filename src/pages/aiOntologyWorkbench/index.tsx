@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { Spin } from '@arco-design/web-react';
-import { useHistory } from 'react-router-dom';
 import { useAIWorkbenchStore } from './store';
 import { useOntologyManagement } from './hooks/useOntologyManagement';
 import { useUserInfoStore } from '@/store/userInfoStore';
@@ -22,9 +21,6 @@ const AIOntoWorkbench: React.FC = () => {
 
   // 从 userInfoStore 获取 projectId
   const projectId = useUserInfoStore((state) => state.projectId);
-
-  // 路由
-  const history = useHistory();
 
   const {
     createModalVisible,
@@ -211,39 +207,26 @@ const AIOntoWorkbench: React.FC = () => {
         {console.log('[AIOntoWorkbench] currentAppID:', currentAppID)}
         <ResizableLayout
           leftContent={
-            <ChatPanel
-              appId="app-j0euma2a"
-              appConfigId={null}
-              projectId={projectId?.[1]}
-              channel="WebPage"
-              source="debugger"
-              onConversationCreated={(conversationId) => {
-                console.log('会话创建:', conversationId);
-                // TODO: 保存会话 ID
-              }}
-              onGraphRefresh={handleGraphRefresh}
-              onLocateNode={handleLocateNode}
-              onViewNode={handleViewNode}
-            />
-            // currentAppID ? (
-            //   <ChatPanel
-            //     appId={currentAppID}
-            //     appConfigId={null}
-            //     projectId={projectId?.[1]}
-            //     channel="WebPage"
-            //     source="debugger"
-            //     onConversationCreated={(conversationId) => {
-            //       console.log('会话创建:', conversationId);
-            //       // TODO: 保存会话 ID
-            //     }}
-            //     onGraphRefresh={handleGraphRefresh}
-            //     onLocateNode={handleLocateNode}
-            //   />
-            // ) : (
-            //   <div className="flex h-full w-full items-center justify-center">
-            //     <Spin tip="正在初始化 Agent..." />
-            //   </div>
-            // )
+            currentAppID ? (
+              <ChatPanel
+                appId={currentAppID}
+                appConfigId={null}
+                projectId={projectId?.[1]}
+                channel="WebPage"
+                source="debugger"
+                onConversationCreated={(conversationId) => {
+                  console.log('会话创建:', conversationId);
+                  // TODO: 保存会话 ID
+                }}
+                onGraphRefresh={handleGraphRefresh}
+                onLocateNode={handleLocateNode}
+                onViewNode={handleViewNode}
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center">
+                <Spin tip="正在初始化 Agent..." />
+              </div>
+            )
           }
           rightContent={<GraphPanel key={graphRefreshKey} />}
           defaultLeftWidth={400}
