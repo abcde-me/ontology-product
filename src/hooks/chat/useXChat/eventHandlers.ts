@@ -12,6 +12,7 @@ export interface EventHandlerContext {
   conversationIdRef: React.MutableRefObject<string>;
   currentMessageIdRef: React.MutableRefObject<string>;
   onConversationCreated?: (conversationId: string) => void;
+  onMessageEnd?: (conversationId: string) => void;
   onError?: (error: Error) => void;
   lastChatDone: () => void;
 }
@@ -381,6 +382,7 @@ export const handleDoneEvent = (
     conversationIdRef,
     currentMessageIdRef,
     onConversationCreated,
+    onMessageEnd,
     lastChatDone
   } = context;
 
@@ -410,6 +412,11 @@ export const handleDoneEvent = (
   });
 
   lastChatDone();
+
+  // 调用消息完成回调，传递当前会话 ID
+  if (conversationIdRef.current) {
+    onMessageEnd?.(conversationIdRef.current);
+  }
 };
 
 /**

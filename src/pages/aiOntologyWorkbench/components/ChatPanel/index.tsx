@@ -192,13 +192,18 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       console.log('[ChatPanel] 新会话创建:', newConversationId);
       // 设置为活跃会话
       setActiveConversation(newConversationId);
-      // 重新加载会话列表，以便在列表中显示新会话
+      // 调用外部回调
+      onConversationCreated?.(newConversationId);
+      // 注意：不在这里刷新会话列表，由 onMessageEnd 统一处理
+    },
+    onMessageEnd: (conversationId) => {
+      console.log('[ChatPanel] 消息完成，刷新会话列表:', conversationId);
+      // 每次对话完成后刷新会话列表，更新会话的最后消息和时间
+      // 这里会处理新会话创建和已有会话更新两种情况
       loadConversations(
         String(appId),
         projectId ? String(projectId) : undefined
       );
-      // 调用外部回调
-      onConversationCreated?.(newConversationId);
     },
     onError: (error) => {
       Message.error(error.message || '发送失败');

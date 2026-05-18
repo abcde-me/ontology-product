@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { Input, Spin, Empty, Tooltip, Modal } from '@arco-design/web-react';
+import { Input, Spin, Empty, Modal } from '@arco-design/web-react';
 import { IconSearch, IconEdit, IconDelete } from '@arco-design/web-react/icon';
+import { GlobalTooltip } from '@ceai-front/arco-material';
 import { useVirtualList } from 'ahooks';
 import dayjs from 'dayjs';
 import { Conversation } from '@/hooks/chat/types';
@@ -219,9 +220,12 @@ const ConversationList: React.FC<ConversationListProps> = ({
                   ) : (
                     <>
                       <div className={styles.conversationContent}>
-                        <Tooltip content={conv.title}>
-                          <span className={styles.title}>{conv.title}</span>
-                        </Tooltip>
+                        <GlobalTooltip.Ellipsis
+                          text={conv.title}
+                          maxWidth={280}
+                        >
+                          {conv.title}
+                        </GlobalTooltip.Ellipsis>
                         {!isHovered && (
                           <span className={styles.time}>
                             {formatTime(conv.updatedAt)}
