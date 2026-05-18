@@ -49,9 +49,31 @@ export interface ChatMessage {
  */
 export interface OntologyAction {
   action_type: string; // create, update, delete, get, list
+  target_type: string; // object_type, link, function, action
   code: string;
   name: string;
   toolName?: string;
+}
+
+/**
+ * 本体操作类型枚举
+ */
+export enum OntologyActionType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  GET = 'get',
+  LIST = 'list'
+}
+
+/**
+ * 本体目标类型枚举
+ */
+export enum OntologyTargetType {
+  OBJECT_TYPE = 'object_type',
+  LINK = 'link',
+  FUNCTION = 'function',
+  ACTION = 'action'
 }
 
 export type MessageStatus =
@@ -123,7 +145,7 @@ export interface UseChatConfig {
   appId: string | number;
   conversationId?: string | null; // null = 未初始化, undefined = 新建会话, string = 已有会话
   projectId?: string | number;
-  appConfigId?: string | number; // 应用配置ID
+  appConfigId?: null; // 应用配置ID
   channel?: string; // 渠道（Preview/Production）
   source?: 'published' | 'debugger'; // 来源（published/debugger）
 

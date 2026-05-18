@@ -33,6 +33,14 @@
   :global(.react-flow__node-default) {
     padding: 0 !important;
   }
+
+  // 节点高亮样式 - 通过 data-highlighted 属性选择器
+  :global(.react-flow__node:has([data-highlighted='true'])) {
+    border: 2px solid #165dff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.2) !important;
+    transition: all 0.3s ease !important;
+  }
 }
 
 // 行为 Tooltip 的样式

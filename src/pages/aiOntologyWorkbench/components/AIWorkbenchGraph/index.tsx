@@ -27,7 +27,12 @@ import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants
 import BottomPanel from './panels/BottomPanel';
 import { ZoomInOut } from '@ceai-front/workflow';
 import { Space } from '@arco-design/web-react';
-import { useNodes, useNodesInitialized, useReactFlow } from 'reactflow';
+import {
+  useNodes,
+  useNodesInitialized,
+  useReactFlow,
+  useEdges
+} from 'reactflow';
 
 const NODE_WIDTH = 200;
 const NODE_HEIGHT = 56;
@@ -35,8 +40,9 @@ const NODE_HEIGHT = 56;
 // 自动适应视图组件
 function AutoFitView() {
   const nodes = useNodes();
+  const edges = useEdges();
   const nodesInitialized = useNodesInitialized();
-  const { fitView } = useReactFlow();
+  const { fitView, setCenter, getZoom } = useReactFlow();
   const hasFittedRef = React.useRef(false);
 
   useEffect(() => {
@@ -58,6 +64,83 @@ function AutoFitView() {
       window.cancelAnimationFrame(frameId);
     };
   }, [fitView, nodes, nodesInitialized]);
+
+  // 监听节点/边居中事件
+  useEffect(() => {
+    const handleCenterNode = (event: CustomEvent) => {
+      const { code } = event.detail;
+      console.log('[AutoFitView] 收到居中事件，code:', code);
+
+      // 先查找节点
+      const targetNode = nodes.find(
+        (node) => (node.data as any)?.code === code
+      );
+      if (targetNode) {
+        console.log('[AutoFitView] 找到目标节点:', targetNode);
+        // 获取当前缩放级别
+        const zoom = getZoom();
+        // 居中到节点
+        setCenter(
+          targetNode.position.x + NODE_WIDTH / 2,
+          targetNode.position.y + NODE_HEIGHT / 2,
+          { zoom, duration: 800 } // 800ms 动画
+        );
+        return;
+      }
+
+      // 如果没找到节点，查找边
+      const targetEdge = edges.find(
+        (edge) => (edge.data as any)?.code === code
+      );
+      if (targetEdge) {
+        console.log('[AutoFitView] 找到目标边:', targetEdge);
+
+        // 找到边的源节点和目标节点
+        const sourceNode = nodes.find((node) => node.id === targetEdge.source);
+        const targetNode = nodes.find((node) => node.id === targetEdge.target);
+
+        if (sourceNode && targetNode) {
+          // 计算边的中点位置
+          const centerX =
+            (sourceNode.position.x +
+              NODE_WIDTH / 2 +
+              targetNode.position.x +
+              NODE_WIDTH / 2) /
+            2;
+          const centerY =
+            (sourceNode.position.y +
+              NODE_HEIGHT / 2 +
+              targetNode.position.y +
+              NODE_HEIGHT / 2) /
+            2;
+
+          console.log('[AutoFitView] 边的中点位置:', { centerX, centerY });
+
+          // 获取当前缩放级别
+          const zoom = getZoom();
+          // 居中到边的中点
+          setCenter(centerX, centerY, { zoom, duration: 800 });
+        } else {
+          console.warn('[AutoFitView] 未找到边的源节点或目标节点');
+        }
+        return;
+      }
+
+      console.warn('[AutoFitView] 未找到目标节点或边，code:', code);
+    };
+
+    window.addEventListener(
+      'centerGraphNode',
+      handleCenterNode as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        'centerGraphNode',
+        handleCenterNode as EventListener
+      );
+    };
+  }, [nodes, edges, setCenter, getZoom]);
 
   return null;
 }
@@ -147,6 +230,7 @@ function layoutNodesWithDagre(
         type: 'custom-edge',
         data: {
           id: topologyEdge.id,
+          code: topologyEdge.code ?? '', // 添加 code 字段用于高亮匹配
           name: topologyEdge.name || '',
           syncStatus: topologyEdge.syncStatus
         }

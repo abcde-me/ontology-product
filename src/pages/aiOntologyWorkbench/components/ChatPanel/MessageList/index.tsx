@@ -4,17 +4,21 @@
  */
 import React, { memo } from 'react';
 import MessageBubble from '../MessageBubble';
-import { ChatMessage } from '@/hooks/chat/types';
+import { ChatMessage, OntologyAction } from '@/hooks/chat/types';
 import styles from './MessageList.module.scss';
 
 interface MessageListProps {
   messages: ChatMessage[];
+  ontologyId?: number | string; // 本体 ID
   onLocateNode?: (code: string) => void;
+  onViewNode?: (action: OntologyAction) => void; // 查看节点回调
 }
 
 const MessageList: React.FC<MessageListProps> = ({
   messages,
-  onLocateNode
+  ontologyId,
+  onLocateNode,
+  onViewNode
 }) => {
   if (!messages || messages.length === 0) {
     return null;
@@ -24,7 +28,12 @@ const MessageList: React.FC<MessageListProps> = ({
     <div className={styles.messageList}>
       {messages.map((message) => (
         <div key={message.id} className={styles.messageItem}>
-          <MessageBubble message={message} onLocateNode={onLocateNode} />
+          <MessageBubble
+            message={message}
+            ontologyId={ontologyId}
+            onLocateNode={onLocateNode}
+            onViewNode={onViewNode}
+          />
         </div>
       ))}
     </div>

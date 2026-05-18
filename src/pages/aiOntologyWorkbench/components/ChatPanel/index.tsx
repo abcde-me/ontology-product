@@ -13,6 +13,7 @@ import ChatView from './ChatView';
 import { useXChat, useXConversations } from '@/hooks/chat';
 import { useAIWorkbenchStore } from '../../store';
 import { useMultipartUploader } from '@/hooks/chat/useMultipartUpload';
+import { OntologyAction } from '@/hooks/chat/types';
 import {
   getChatApiUrl,
   getConversationMessages,
@@ -35,7 +36,7 @@ const PROMPT_LIST: PromptItem[] = [
 interface ChatPanelProps {
   appId: string | number;
   projectId?: string | number;
-  appConfigId?: string | number;
+  appConfigId?: null;
   channel?: string;
   source?: 'published' | 'debugger';
   conversationId?: string;
@@ -44,6 +45,8 @@ interface ChatPanelProps {
   onGraphRefresh?: () => void;
   /** 节点定位回调 */
   onLocateNode?: (code: string) => void;
+  /** 节点查看回调 */
+  onViewNode?: (action: OntologyAction) => void;
 }
 
 const ChatPanel: React.FC<ChatPanelProps> = ({
@@ -55,7 +58,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   conversationId,
   onConversationCreated,
   onGraphRefresh,
-  onLocateNode
+  onLocateNode,
+  onViewNode
 }) => {
   // 获取图谱状态管理和当前本体
   const { setGraphData, currentOntology } = useAIWorkbenchStore();
@@ -138,7 +142,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         source?: string;
       }) => ({
         responseMode: 'Streaming',
-        status: params.source === 'published' ? 'Published' : 'Unpublished',
+        status: 'Published',
         channel: params.channel,
         appID: params.appId,
         appConfigID: params.appConfigId,
@@ -532,12 +536,14 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
             messages={messages}
             isLoading={isLoading}
             isStreaming={isStreaming}
+            ontologyId={currentOntology?.id}
             onSend={handleSend}
             onStop={stopGeneration}
             uploaderProps={uploaderProps}
             GetFile={GetFile}
             GetAudioText={GetAudioText}
             onLocateNode={onLocateNode}
+            onViewNode={onViewNode}
           />
         )}
       </div>
