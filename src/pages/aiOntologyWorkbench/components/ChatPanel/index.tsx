@@ -5,7 +5,7 @@ import React, {
   useCallback,
   useState
 } from 'react';
-import { UploadProps } from '@arco-design/web-react';
+import { UploadProps, Modal } from '@arco-design/web-react';
 import { Message } from '@arco-design/web-react';
 import Header from './Header';
 import WelcomeView from './WelcomeView';
@@ -472,6 +472,30 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   const handleNewSession = () => {
     console.log('[ChatPanel] 用户点击新建会话');
+
+    // 检查是否正在生成内容
+    if (isLoading || isStreaming) {
+      Modal.confirm({
+        title: '中止对话？',
+        content: '新建会话或切换会话将中止生成，是否确认？',
+        okText: '确定',
+        cancelText: '取消',
+        onOk: () => {
+          // 停止生成
+          stopGeneration();
+          // 设置标记，表示这是用户主动新建会话
+          isUserNewSession.current = true;
+          // 清空消息列表，显示欢迎页面
+          clearMessages();
+          // 清空活跃会话 ID，下次发送消息时会创建新会话
+          setActiveConversation(undefined);
+          // 清空图谱数据
+          setGraphData(null);
+        }
+      });
+      return;
+    }
+
     // 设置标记，表示这是用户主动新建会话
     isUserNewSession.current = true;
     // 清空消息列表，显示欢迎页面
@@ -484,11 +508,28 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   const handleSelectConversation = (id: string) => {
     console.log('[ChatPanel] 用户选择会话:', id);
+
+    // 检查是否正在生成内容
+    if (isLoading || isStreaming) {
+      Modal.confirm({
+        title: '中止对话？',
+        content: '新建会话或切换会话将中止生成，是否确认？',
+        okText: '确定',
+        cancelText: '取消',
+        onOk: () => {
+          // 停止生成
+          stopGeneration();
+          // 清除新建会话标记
+          isUserNewSession.current = false;
+          setActiveConversation(id);
+        }
+      });
+      return;
+    }
+
     // 清除新建会话标记
     isUserNewSession.current = false;
     setActiveConversation(id);
-    // TODO: 加载选中会话的消息
-    // 这里可能需要添加一个新的 API 来获取会话的历史消息
   };
 
   const handleDeleteConversation = async (id: string) => {

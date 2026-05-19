@@ -394,7 +394,10 @@ function LinkPanel({ linkId }: LinkPanelProps) {
               key="instances"
               title={`实例(${instancesPagination.total})`}
             >
-              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <div
+                style={{ maxHeight: '400px', overflowY: 'auto' }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
                 {instancesPagination.total === 0 ? (
                   <div className="flex flex-1 items-center justify-center">
                     <NoDataCard title="暂无数据" />
@@ -443,7 +446,10 @@ function LinkPanel({ linkId }: LinkPanelProps) {
               key="attributes"
               title={`属性(${attributesPagination.total})`}
             >
-              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <div
+                style={{ maxHeight: '400px', overflowY: 'auto' }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
                 <Table
                   loading={attributesLoading}
                   columns={attributeColumns}

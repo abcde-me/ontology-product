@@ -458,7 +458,10 @@ function ObjectPanel({ objectId }: ObjectPanelProps) {
               key="instances"
               title={`实例(${instancesPagination.total})`}
             >
-              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <div
+                style={{ maxHeight: '400px', overflowY: 'auto' }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
                 {instancesPagination.total === 0 ? (
                   <div className="flex flex-1 items-center justify-center">
                     <NoDataCard title="暂无数据" />
@@ -506,7 +509,10 @@ function ObjectPanel({ objectId }: ObjectPanelProps) {
               key="attributes"
               title={`属性(${attributesPagination.total})`}
             >
-              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <div
+                style={{ maxHeight: '400px', overflowY: 'auto' }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
                 <Table
                   loading={attributesLoading}
                   columns={attributeColumns}
@@ -537,7 +543,10 @@ function ObjectPanel({ objectId }: ObjectPanelProps) {
             </TabPane>
 
             <TabPane key="links" title={`链接(${linksPagination.total})`}>
-              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <div
+                style={{ maxHeight: '400px', overflowY: 'auto' }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
                 <div className="flex flex-1 items-center justify-center">
                   <NoDataCard title="链接功能待实现" />
                 </div>
@@ -548,7 +557,10 @@ function ObjectPanel({ objectId }: ObjectPanelProps) {
               key="behaviors"
               title={`行为(${behaviorsPagination.total})`}
             >
-              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <div
+                style={{ maxHeight: '400px', overflowY: 'auto' }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
                 <Table
                   loading={behaviorsLoading}
                   columns={behaviorColumns}
