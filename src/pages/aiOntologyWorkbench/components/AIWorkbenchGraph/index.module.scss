@@ -11,6 +11,13 @@
     z-index: -1 !important;
   }
 
+  // 节点高亮样式 - 直接给 wk-node-wrapper 添加边框
+  :global(.wk-node-wrapper:has([data-highlighted='true'])) {
+    border: 2px solid #165dff !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+  }
+
   // 隐藏节点默认的标题区域 - 尝试多种可能的类名
   :global {
     .wk-node-header,
@@ -32,14 +39,6 @@
   // 如果节点有默认的容器，移除其内边距
   :global(.react-flow__node-default) {
     padding: 0 !important;
-  }
-
-  // 节点高亮样式 - 通过 data-highlighted 属性选择器
-  :global(.react-flow__node:has([data-highlighted='true'])) {
-    border: 2px solid #165dff !important;
-    border-radius: 8px !important;
-    box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.2) !important;
-    transition: all 0.3s ease !important;
   }
 }
 

@@ -30,6 +30,10 @@ interface AIWorkbenchGraphState {
   /** 高亮的节点 code */
   highlightedNodeCode: string | null;
 
+  // ========== 缩放相关 ==========
+  /** 目标缩放比例 */
+  targetZoom: number | null;
+
   // ========== Actions ==========
   /** 打开底部面板 */
   openBottomPanel: (data: BottomPanelData) => void;
@@ -40,10 +44,12 @@ interface AIWorkbenchGraphState {
   /** 高亮节点并居中 */
   highlightNode: (
     code: string,
-    options?: { duration?: number; center?: boolean }
+    options?: { duration?: number; center?: boolean; zoom?: number }
   ) => void;
   /** 清除高亮 */
   clearHighlight: () => void;
+  /** 设置目标缩放比例 */
+  setTargetZoom: (zoom: number | null) => void;
   /** 重置状态 */
   reset: () => void;
 }
@@ -52,7 +58,8 @@ const initialState = {
   bottomPanelVisible: false,
   bottomPanelData: null,
   bottomPanelHeight: 400, // 默认高度 400px
-  highlightedNodeCode: null
+  highlightedNodeCode: null,
+  targetZoom: null
 };
 
 export const useAIWorkbenchGraphStore = create<AIWorkbenchGraphState>(
@@ -74,14 +81,19 @@ export const useAIWorkbenchGraphStore = create<AIWorkbenchGraphState>(
 
     // ========== 节点高亮相关 Actions ==========
     highlightNode: (code, options = {}) => {
-      const { duration = 5000, center = true } = options; // 默认5秒，默认居中
+      const { duration = 5000, center = true, zoom } = options; // 默认5秒，默认居中
       console.log('[AIWorkbenchGraphStore] 高亮节点:', code, '选项:', options);
       set({ highlightedNodeCode: code });
+
+      // 如果指定了缩放比例，设置目标缩放
+      if (zoom !== undefined) {
+        set({ targetZoom: zoom });
+      }
 
       // 如果需要居中，触发自定义事件
       if (center) {
         window.dispatchEvent(
-          new CustomEvent('centerGraphNode', { detail: { code } })
+          new CustomEvent('centerGraphNode', { detail: { code, zoom } })
         );
       }
 
@@ -97,6 +109,7 @@ export const useAIWorkbenchGraphStore = create<AIWorkbenchGraphState>(
       }, duration);
     },
     clearHighlight: () => set({ highlightedNodeCode: null }),
+    setTargetZoom: (zoom) => set({ targetZoom: zoom }),
 
     // ========== 重置状态 ==========
     reset: () => set(initialState)

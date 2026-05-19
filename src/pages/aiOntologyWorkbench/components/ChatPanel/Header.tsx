@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Tooltip, Dropdown } from '@arco-design/web-react';
+import { GlobalTooltip } from '@ceai-front/arco-material';
 import PlusIcon from '../../assets/plus.svg';
 import ConversationsIcon from '../../assets/conversations.svg';
 import ConversationList from './ConversationList';
@@ -44,10 +45,14 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <div className="flex items-center justify-between px-[20px] py-[12px]">
-      <h3 className="text-[16px] font-medium leading-[24px] text-[#0f172a]">
-        本体智能助手
-      </h3>
-      <div className="flex items-center gap-[16px]">
+      <div className="min-w-0 flex-1 pr-[12px]">
+        <GlobalTooltip.Ellipsis text="本体智能助手">
+          <h3 className="text-[16px] font-medium leading-[24px] text-[#0f172a]">
+            本体智能助手
+          </h3>
+        </GlobalTooltip.Ellipsis>
+      </div>
+      <div className="flex flex-shrink-0 items-center gap-[16px]">
         <Tooltip content="新建会话">
           <div
             className="flex size-[16px] cursor-pointer items-center justify-center"

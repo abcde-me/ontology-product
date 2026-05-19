@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Dropdown, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { useInfiniteScroll } from 'ahooks';
+import { GlobalTooltip } from '@ceai-front/arco-material';
 import { useAIWorkbenchStore } from '../store';
 import SceneModal from '@/pages/ontologyScene/modules/list/components/SceneModal';
 import { useOntologyManagement } from '../hooks/useOntologyManagement';
@@ -143,13 +144,15 @@ const OntologySelector: React.FC = () => {
               </div>
 
               {/* 名称 */}
-              <span
-                className={`flex-1 truncate text-[14px] font-normal leading-[22px] ${
-                  isSelected ? 'text-[#184ff2]' : 'text-[var(--color-text-1)]'
-                }`}
-              >
-                {ontology.name}
-              </span>
+              <GlobalTooltip.Ellipsis text={ontology.name}>
+                <span
+                  className={`flex-1 truncate text-[14px] font-normal leading-[22px] ${
+                    isSelected ? 'text-[#184ff2]' : 'text-[var(--color-text-1)]'
+                  }`}
+                >
+                  {ontology.name}
+                </span>
+              </GlobalTooltip.Ellipsis>
             </div>
           );
         })}
@@ -206,9 +209,11 @@ const OntologySelector: React.FC = () => {
                     </div>
                   )}
                   {/* 本体名称 */}
-                  <span className="max-w-[200px] truncate text-[16px] font-semibold leading-[24px] text-[#0f172a]">
-                    {currentOntology.name}
-                  </span>
+                  <GlobalTooltip.Ellipsis text={currentOntology.name}>
+                    <span className="max-w-[200px] truncate text-[16px] font-semibold leading-[24px] text-[#0f172a]">
+                      {currentOntology.name}
+                    </span>
+                  </GlobalTooltip.Ellipsis>
                 </>
               ) : (
                 <>

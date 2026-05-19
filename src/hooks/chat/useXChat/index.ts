@@ -68,6 +68,7 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
   const [messages, setMessages] = useImmer<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useImmer(false);
   const [isStreaming, setIsStreaming] = useImmer(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useImmer(false);
 
   // ==================== Refs ====================
   const conversationIdRef = useRef<string>(
@@ -260,15 +261,11 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
     setIsStreaming(false);
     setIsLoading(false);
 
+    // 将最后一条消息标记为中止状态
     setMessages((draft) => {
       const lastIndex = draft.length - 1;
       if (lastIndex >= 0 && draft[lastIndex].type === 'assistant') {
         draft[lastIndex].status = 'abort';
-        if (draft[lastIndex].content) {
-          draft[lastIndex].content += '\n\n您中途停止生成回答';
-        } else {
-          draft[lastIndex].content = '您中途停止生成回答';
-        }
       }
     });
   }, [disconnectStream, setIsStreaming, setIsLoading, setMessages]);
@@ -279,6 +276,7 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
       console.log('[useXChat] loadHistoryMessages 被调用:', {
         conversationID,
         appId,
+        conversationIdRefCurrent: conversationIdRef.current,
         hasGetHistoryMessages: !!getHistoryMessages
       });
 
@@ -287,9 +285,19 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
         return;
       }
 
+      // 更新 conversationIdRef，确保后续操作使用正确的会话 ID
+      console.log(
+        '[useXChat] 更新 conversationIdRef.current 为:',
+        conversationID
+      );
+      conversationIdRef.current = conversationID;
+
       try {
-        setIsLoading(true);
-        console.log('[useXChat] 开始调用 getHistoryMessages API');
+        setIsLoadingHistory(true);
+        console.log(
+          '[useXChat] 开始调用 getHistoryMessages API，conversationID:',
+          conversationID
+        );
         const response = await getHistoryMessages({
           appId: String(appId),
           conversationId: conversationID
@@ -334,10 +342,10 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
         console.error('[useXChat] 加载历史消息失败:', error);
         showMessage?.error(error.message || '加载历史消息失败');
       } finally {
-        setIsLoading(false);
+        setIsLoadingHistory(false);
       }
     },
-    [appId, getHistoryMessages, setMessages, setIsLoading, showMessage]
+    [appId, getHistoryMessages, setMessages, setIsLoadingHistory, showMessage]
   );
 
   // ==================== 监听 conversationId 变化 ====================
@@ -350,7 +358,8 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
     });
 
     if (externalConversationId === null) {
-      console.log('[useXChat] conversationId 为 null，跳过');
+      console.log('[useXChat] conversationId 为 null，清空 ref');
+      conversationIdRef.current = '';
       return;
     }
 
@@ -360,14 +369,13 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
       return;
     }
 
-    // 只有当 conversationId 真正变化时才加载历史消息
+    // 只有当 conversationId 真正变化时才更新 ref
     if (externalConversationId !== conversationIdRef.current) {
       console.log(
-        '[useXChat] conversationId 变化，更新 ref 但不自动加载历史消息'
+        '[useXChat] conversationId 变化，更新 ref:',
+        externalConversationId
       );
       conversationIdRef.current = externalConversationId;
-      // 注释掉自动加载，改为在外部手动调用
-      // loadHistoryMessages(externalConversationId);
     }
   }, [externalConversationId]);
 
@@ -413,6 +421,7 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
     messages,
     isLoading,
     isStreaming,
+    isLoadingHistory,
     sendMessage,
     stopGeneration,
     clearMessages,

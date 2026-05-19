@@ -379,60 +379,65 @@ function LinkPanel({ linkId }: LinkPanelProps) {
       </div>
 
       {/* 内容区域 */}
-      <div className="flex-1 overflow-hidden px-[24px] py-[12px]">
-        <Spin loading={basicInfoLoading} className="w-full">
+      <div className="flex flex-1 flex-col overflow-hidden px-[24px] py-[12px]">
+        <Spin
+          loading={basicInfoLoading}
+          className="flex h-full w-full flex-col"
+        >
           {/* Tabs */}
           <Tabs
             activeTab={activeTab}
             onChange={setActiveTab}
-            className="h-full [&_.arco-tabs-content]:flex-1 [&_.arco-tabs-content]:overflow-hidden [&_.arco-tabs-nav]:mb-4"
+            className="flex h-full flex-col [&_.arco-tabs-content]:flex-1 [&_.arco-tabs-content]:overflow-hidden [&_.arco-tabs-nav]:mb-4"
           >
             <TabPane
               key="instances"
               title={`实例(${instancesPagination.total})`}
             >
-              <div className="flex h-full flex-col gap-[16px]">
+              <div
+                style={{ maxHeight: '400px', overflowY: 'auto' }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
                 {instancesPagination.total === 0 ? (
                   <div className="flex flex-1 items-center justify-center">
                     <NoDataCard title="暂无数据" />
                   </div>
                 ) : (
-                  <Table
-                    loading={instancesLoading}
-                    columns={instanceColumns}
-                    data={instancesData}
-                    rowKey={(record) => {
-                      if (record.link_id) return String(record.link_id);
-                      if (record.id) return String(record.id);
-                      return Object.values(record).join('-');
-                    }}
-                    border={false}
-                    pagination={false}
-                    noDataElement={<NoDataCard title="暂无数据" />}
-                    className="flex-1 [&_.arco-table-td]:py-[8px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[8px]"
-                    scroll={
-                      instanceColumns.length > 4
-                        ? {
-                            x: instanceColumns.length * 140,
-                            y: 'calc(100% - 40px)'
-                          }
-                        : { y: 'calc(100% - 40px)' }
-                    }
-                  />
-                )}
-                {instancesPagination.total > defaultPageSize && (
-                  <div className="flex justify-end">
-                    <Pagination
-                      current={instancesPagination.current}
-                      pageSize={instancesPagination.pageSize}
-                      total={instancesPagination.total}
-                      onChange={(page, pageSize) => {
-                        loadInstances(page, pageSize);
+                  <>
+                    <Table
+                      loading={instancesLoading}
+                      columns={instanceColumns}
+                      data={instancesData}
+                      rowKey={(record) => {
+                        if (record.link_id) return String(record.link_id);
+                        if (record.id) return String(record.id);
+                        return Object.values(record).join('-');
                       }}
-                      showTotal
-                      size="small"
+                      border={false}
+                      pagination={false}
+                      noDataElement={<NoDataCard title="暂无数据" />}
+                      className="[&_.arco-table-td]:py-[8px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[8px]"
+                      scroll={
+                        instanceColumns.length > 4
+                          ? { x: instanceColumns.length * 140 }
+                          : undefined
+                      }
                     />
-                  </div>
+                    {instancesPagination.total > defaultPageSize && (
+                      <div className="flex justify-end pt-[16px]">
+                        <Pagination
+                          current={instancesPagination.current}
+                          pageSize={instancesPagination.pageSize}
+                          total={instancesPagination.total}
+                          onChange={(page, pageSize) => {
+                            loadInstances(page, pageSize);
+                          }}
+                          showTotal
+                          size="small"
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </TabPane>
@@ -441,7 +446,10 @@ function LinkPanel({ linkId }: LinkPanelProps) {
               key="attributes"
               title={`属性(${attributesPagination.total})`}
             >
-              <div className="flex h-full flex-col gap-[16px]">
+              <div
+                style={{ maxHeight: '400px', overflowY: 'auto' }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
                 <Table
                   loading={attributesLoading}
                   columns={attributeColumns}
@@ -450,11 +458,11 @@ function LinkPanel({ linkId }: LinkPanelProps) {
                   border={false}
                   pagination={false}
                   noDataElement={<NoDataCard title="暂无数据" />}
-                  className="flex-1 [&_.arco-table-td]:py-[8px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[8px]"
-                  scroll={{ y: 'calc(100% - 40px)' }}
+                  className="[&_.arco-table-td]:py-[8px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[8px]"
+                  scroll={{ x: 400 }}
                 />
                 {attributesPagination.total > defaultPageSize && (
-                  <div className="flex justify-end">
+                  <div className="flex justify-end pt-[16px]">
                     <Pagination
                       current={attributesPagination.current}
                       pageSize={attributesPagination.pageSize}

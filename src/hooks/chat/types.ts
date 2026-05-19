@@ -175,6 +175,7 @@ export interface UseChatReturn {
   messages: ChatMessage[];
   isLoading: boolean;
   isStreaming: boolean;
+  isLoadingHistory: boolean;
   sendMessage: (params: SendMessageParams) => Promise<void>;
   stopGeneration: () => void;
   clearMessages: () => void;

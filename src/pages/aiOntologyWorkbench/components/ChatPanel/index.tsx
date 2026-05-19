@@ -5,7 +5,7 @@ import React, {
   useCallback,
   useState
 } from 'react';
-import { UploadProps } from '@arco-design/web-react';
+import { UploadProps, Modal } from '@arco-design/web-react';
 import { Message } from '@arco-design/web-react';
 import Header from './Header';
 import WelcomeView from './WelcomeView';
@@ -19,19 +19,14 @@ import {
   getConversationMessages,
   getConversationList,
   deleteConversation as deleteConversationApi,
-  renameConversation as renameConversationApi
+  renameConversation as renameConversationApi,
+  getAgentInfo
 } from '@/api/aiOntologyWorkbench/chat';
 
 interface PromptItem {
   id: string;
   value: string;
 }
-
-const PROMPT_LIST: PromptItem[] = [
-  { id: '1', value: '先获取本体场景列表，随后获取对象类型元数据信息' },
-  { id: '2', value: '如何定义对象之间的关系？' },
-  { id: '3', value: '为对象添加行为' }
-];
 
 interface ChatPanelProps {
   appId: string | number;
@@ -64,14 +59,69 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   // 获取图谱状态管理和当前本体
   const { setGraphData, currentOntology } = useAIWorkbenchStore();
 
+  // 推荐问题状态
+  const [suggestedQuestions, setSuggestedQuestions] = useState<PromptItem[]>(
+    []
+  );
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+
   // 文件上传相关
   const uploader = useMultipartUploader();
   const [uploadFileList, setUploadFileList] = useState<any[]>([]);
 
   // 使用 ref 记录是否是初始加载
   const isInitialMount = useRef(true);
+  // 使用 ref 记录上一次的本体 ID
+  const prevOntologyIdRef = useRef<number | string | undefined>(undefined);
   // 使用 ref 记录是否是用户主动新建会话
   const isUserNewSession = useRef(false);
+
+  // 加载推荐问题
+  const loadSuggestedQuestions = useCallback(async () => {
+    if (!appId) {
+      console.log('[ChatPanel] 没有 appId，跳过加载推荐问题');
+      return;
+    }
+
+    try {
+      setLoadingSuggestions(true);
+      console.log('[ChatPanel] 开始加载推荐问题，appId:', appId);
+
+      const response = await getAgentInfo({
+        id: String(appId),
+        status: 'Published'
+      });
+
+      if (response.code === 'Success' && response.data) {
+        const questions =
+          response.data.appConfig?.suggestedQuestions?.slice(0, 3) || [];
+        console.log('[ChatPanel] 推荐问题加载成功:', questions);
+
+        // 转换为 PromptItem 格式
+        const prompts: PromptItem[] = questions.map(
+          (q: string, index: number) => ({
+            id: String(index + 1),
+            value: q
+          })
+        );
+
+        setSuggestedQuestions(prompts);
+      } else {
+        console.warn('[ChatPanel] 推荐问题加载失败:', response.message);
+        setSuggestedQuestions([]);
+      }
+    } catch (error) {
+      console.error('[ChatPanel] 加载推荐问题出错:', error);
+      setSuggestedQuestions([]);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  }, [appId]);
+
+  // 监听 appId 变化，加载推荐问题
+  useEffect(() => {
+    loadSuggestedQuestions();
+  }, [loadSuggestedQuestions]);
 
   // 稳定 API 配置对象的引用，避免无限循环
   const conversationApiConfig = useMemo(
@@ -175,8 +225,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     messages,
     isLoading,
     isStreaming,
+    isLoadingHistory,
     sendMessage,
-    stopGeneration,
+    stopGeneration: stopGenerationOriginal,
     clearMessages,
     loadHistoryMessages
   } = useXChat({
@@ -210,28 +261,63 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     }
   });
 
+  // 包装 stopGeneration，添加停止提示
+  const stopGeneration = useCallback(() => {
+    stopGenerationOriginal();
+    Message.info('已停止生成');
+  }, [stopGenerationOriginal]);
+
   // 监听本体切换，清空聊天和图谱
   useEffect(() => {
+    const currentOntologyId = currentOntology?.id;
+
     // 跳过初始加载
     if (isInitialMount.current) {
       isInitialMount.current = false;
-      console.log('[ChatPanel] 初始加载，跳过本体切换逻辑');
+      prevOntologyIdRef.current = currentOntologyId;
+      console.log('[ChatPanel] 初始加载，记录本体 ID:', currentOntologyId);
       return;
     }
 
     // 只在本体 ID 真正切换时才清空
-    if (!currentOntology?.id) return;
+    if (!currentOntologyId || currentOntologyId === prevOntologyIdRef.current) {
+      return;
+    }
 
-    console.log('[ChatPanel] 本体切换，清空聊天和图谱数据');
+    console.log('[ChatPanel] 本体切换，清空聊天和图谱数据', {
+      prev: prevOntologyIdRef.current,
+      current: currentOntologyId
+    });
+
+    // 更新上一次的本体 ID
+    prevOntologyIdRef.current = currentOntologyId;
+
     // 清空消息列表
     clearMessages();
     // 清空活跃会话 ID（设置为 null，而不是 undefined）
     setActiveConversation(null);
     // 清空图谱数据
     setGraphData(null);
-  }, [currentOntology?.id, clearMessages, setActiveConversation, setGraphData]);
 
-  // 组件挂载时加载会话列表
+    // 重新加载会话列表
+    if (appId) {
+      console.log('[ChatPanel] 本体切换后重新加载会话列表');
+      loadConversations(
+        String(appId),
+        projectId ? String(projectId) : undefined
+      );
+    }
+  }, [
+    currentOntology?.id,
+    clearMessages,
+    setActiveConversation,
+    setGraphData,
+    appId,
+    projectId,
+    loadConversations
+  ]);
+
+  // 组件挂载时加载会话列表（仅初始加载）
   useEffect(() => {
     console.log('[ChatPanel] 组件挂载 useEffect 触发:', {
       appId,
@@ -239,94 +325,22 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       hasAppId: !!appId
     });
 
+    // 初始挂载时加载会话列表
     if (appId) {
-      console.log('[ChatPanel] 开始加载会话列表');
+      console.log('[ChatPanel] 初始挂载，开始加载会话列表');
       loadConversations(
         String(appId),
         projectId ? String(projectId) : undefined
       );
-    } else {
-      console.log('[ChatPanel] appId 不存在，跳过加载会话列表');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appId, projectId]); // 只依赖 appId 和 projectId，不依赖 loadConversations
+  }, []); // 空依赖数组，只在组件挂载时执行一次
 
-  // 会话列表加载完成后，自动选择第一个会话（仅在初始加载时）
-  useEffect(() => {
-    console.log('[ChatPanel] 会话列表变化:', {
-      conversationsLength: conversations.length,
-      activeConversationId,
-      conversationId,
-      firstConversation: conversations[0],
-      isUserNewSession: isUserNewSession.current
-    });
+  // 移除自动加载第一个对话的逻辑
+  // 用户需要手动点击历史对话才会加载
 
-    // 如果是用户主动新建会话，不自动选择
-    if (isUserNewSession.current) {
-      console.log('[ChatPanel] 用户主动新建会话，不自动选择');
-      return;
-    }
-
-    // 只在初始加载时（activeConversationId 为 null 或 undefined）自动选择第一个会话
-    if (
-      !conversationId &&
-      (activeConversationId === null || activeConversationId === undefined) &&
-      conversations.length > 0
-    ) {
-      console.log('[ChatPanel] 自动选择第一个会话:', conversations[0].id);
-      setActiveConversation(conversations[0].id);
-    }
-  }, [
-    conversations,
-    conversationId,
-    activeConversationId,
-    setActiveConversation
-  ]);
-
-  // 监听 activeConversationId 变化，加载历史消息
-  useEffect(() => {
-    console.log('[ChatPanel] activeConversationId 变化 useEffect 触发:', {
-      conversationId,
-      activeConversationId,
-      type: typeof activeConversationId,
-      appId,
-      hasLoadHistoryMessages: !!loadHistoryMessages
-    });
-
-    // 如果有外部传入的 conversationId，不处理（由 useXChat 内部处理）
-    if (conversationId) {
-      console.log('[ChatPanel] 有外部 conversationId，跳过');
-      return;
-    }
-
-    // 如果 activeConversationId 是有效的会话 ID（不是 null 或 undefined），加载历史消息
-    if (
-      activeConversationId &&
-      typeof activeConversationId === 'string' &&
-      appId
-    ) {
-      console.log('[ChatPanel] 满足条件，准备加载会话历史消息:', {
-        activeConversationId,
-        appId
-      });
-
-      // 使用 setTimeout 确保在下一个事件循环中执行，避免时序问题
-      const timer = setTimeout(() => {
-        console.log('[ChatPanel] 开始调用 loadHistoryMessages');
-        loadHistoryMessages(activeConversationId);
-      }, 0);
-
-      return () => clearTimeout(timer);
-    } else {
-      console.log('[ChatPanel] 不加载历史消息，原因:', {
-        hasActiveConversationId: !!activeConversationId,
-        activeConversationIdValue: activeConversationId,
-        isString: typeof activeConversationId === 'string',
-        hasAppId: !!appId,
-        appIdValue: appId
-      });
-    }
-  }, [activeConversationId, conversationId, loadHistoryMessages, appId]);
+  // 移除自动加载历史消息的逻辑
+  // 用户需要手动点击历史对话才会加载
 
   // 监听消息变化，检查是否需要刷新图谱
   useEffect(() => {
@@ -471,6 +485,30 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   const handleNewSession = () => {
     console.log('[ChatPanel] 用户点击新建会话');
+
+    // 检查是否正在生成内容
+    if (isLoading || isStreaming) {
+      Modal.confirm({
+        title: '中止对话？',
+        content: '新建会话或切换会话将中止生成，是否确认？',
+        okText: '确定',
+        cancelText: '取消',
+        onOk: () => {
+          // 停止生成
+          stopGeneration();
+          // 设置标记，表示这是用户主动新建会话
+          isUserNewSession.current = true;
+          // 清空消息列表，显示欢迎页面
+          clearMessages();
+          // 清空活跃会话 ID，下次发送消息时会创建新会话
+          setActiveConversation(undefined);
+          // 清空图谱数据
+          setGraphData(null);
+        }
+      });
+      return;
+    }
+
     // 设置标记，表示这是用户主动新建会话
     isUserNewSession.current = true;
     // 清空消息列表，显示欢迎页面
@@ -483,11 +521,32 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   const handleSelectConversation = (id: string) => {
     console.log('[ChatPanel] 用户选择会话:', id);
+
+    // 检查是否正在生成内容
+    if (isLoading || isStreaming) {
+      Modal.confirm({
+        title: '中止对话？',
+        content: '新建会话或切换会话将中止生成，是否确认？',
+        okText: '确定',
+        cancelText: '取消',
+        onOk: () => {
+          // 停止生成
+          stopGeneration();
+          // 清除新建会话标记
+          isUserNewSession.current = false;
+          setActiveConversation(id);
+          // 加载历史消息
+          loadHistoryMessages(id);
+        }
+      });
+      return;
+    }
+
     // 清除新建会话标记
     isUserNewSession.current = false;
     setActiveConversation(id);
-    // TODO: 加载选中会话的消息
-    // 这里可能需要添加一个新的 API 来获取会话的历史消息
+    // 加载历史消息
+    loadHistoryMessages(id);
   };
 
   const handleDeleteConversation = async (id: string) => {
@@ -532,7 +591,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       <div className="flex flex-1 flex-col overflow-hidden">
         {showWelcome ? (
           <WelcomeView
-            prompts={PROMPT_LIST}
+            prompts={suggestedQuestions}
             onPromptSelect={handlePromptSelect}
             onSend={handleSend}
             uploaderProps={uploaderProps}
@@ -544,6 +603,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
             messages={messages}
             isLoading={isLoading}
             isStreaming={isStreaming}
+            isLoadingHistory={isLoadingHistory}
             ontologyId={currentOntology?.id}
             onSend={handleSend}
             onStop={stopGeneration}

@@ -1,9 +1,11 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { Input, Spin, Empty, Modal } from '@arco-design/web-react';
+import { Input, Spin, Modal } from '@arco-design/web-react';
 import { IconSearch, IconEdit, IconDelete } from '@arco-design/web-react/icon';
-import { GlobalTooltip } from '@ceai-front/arco-material';
+import { GlobalTooltip, NoDataCard } from '@ceai-front/arco-material';
 import { useVirtualList } from 'ahooks';
 import dayjs from 'dayjs';
+import EditIcon from '../../../assets/edit.svg';
+import DeleteIcon from '../../../assets/delete.svg';
 import { Conversation } from '@/hooks/chat/types';
 import styles from './ConversationList.module.scss';
 
@@ -179,7 +181,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
           </div>
         ) : isEmpty || isSearchEmpty ? (
           <div className={styles.empty}>
-            <Empty description="暂无数据" />
+            <NoDataCard type="block" />
           </div>
         ) : (
           <div ref={wrapperRef} className={styles.virtualWrapper}>
@@ -234,14 +236,14 @@ const ConversationList: React.FC<ConversationListProps> = ({
                       </div>
                       {isHovered && (
                         <div className={styles.actions}>
-                          <IconEdit
+                          <EditIcon
                             className={styles.actionIcon}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleStartEdit(conv);
                             }}
                           />
-                          <IconDelete
+                          <DeleteIcon
                             className={styles.actionIcon}
                             onClick={(e) => {
                               e.stopPropagation();

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sender } from '@ceai-front/chat';
-import { UploadProps } from '@arco-design/web-react';
+import { UploadProps, Spin } from '@arco-design/web-react';
 import WelcomeSection from './components/WelcomeSection';
 import Introduction from './components/Introduction';
 import PromptsSection from './components/PromptsSection';
