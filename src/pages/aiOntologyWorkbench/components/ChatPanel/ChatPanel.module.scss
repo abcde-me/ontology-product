@@ -22,3 +22,22 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   border-radius: 50%;
 }
+
+/* 修复 Sender 组件中上传图标过大的问题 */
+:global(.ac-sender) {
+  .uploader-wrapper {
+    .svg-icon {
+      width: 20px;
+      height: 20px;
+      font-size: 20px;
+    }
+  }
+
+  .audio-btn {
+    .voice-icon {
+      width: 20px;
+      height: 20px;
+      font-size: 20px;
+    }
+  }
+}
