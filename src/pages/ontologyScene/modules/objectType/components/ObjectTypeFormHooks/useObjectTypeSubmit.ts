@@ -316,8 +316,13 @@ export function buildUpdateObjectTypeRequest(
   id: number,
   data: ObjectTypeFormData
 ): UpdateOntologyObjectTypeReq {
+  const isLocalCsv =
+    data._dataSource?.type === DATA_SOURCE_TYPE.LOCAL_CSV ||
+    data.sourceType === SourceType.FILE_UPLOAD;
+
   return {
     ...buildCreateObjectTypeRequest(data),
-    id
+    id,
+    isReUpload: isLocalCsv ? (data.isReUpload ? 1 : 0) : 0
   };
 }
