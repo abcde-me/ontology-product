@@ -10,11 +10,17 @@ interface PromptsSectionProps {
 /**
  * 推荐问题区域组件
  * 根据 Figma 设计：gap-[8px] between items
+ * 如果没有推荐问题，则不显示整个组件
  */
 const PromptsSection: React.FC<PromptsSectionProps> = ({
   prompts,
   onSelect
 }) => {
+  // 如果没有推荐问题，不渲染任何内容
+  if (!prompts || prompts.length === 0) {
+    return null;
+  }
+
   return (
     <div className="flex w-full flex-col items-start gap-2">
       <div className="flex w-full items-center justify-between">

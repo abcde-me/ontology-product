@@ -60,9 +60,11 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   const { setGraphData, currentOntology } = useAIWorkbenchStore();
 
   // 推荐问题状态
-  const [suggestedQuestions, setSuggestedQuestions] = useState<PromptItem[]>(
-    []
-  );
+  const [suggestedQuestions, setSuggestedQuestions] = useState<PromptItem[]>([
+    { id: '1', value: '先获取本体场景列表，随后获取对象类型元数据信息' },
+    { id: '2', value: '如何定义对象之间的关系？' },
+    { id: '3', value: '为对象添加行为' }
+  ]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
   // 文件上传相关
@@ -97,22 +99,28 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
           response.data.appConfig?.suggestedQuestions?.slice(0, 3) || [];
         console.log('[ChatPanel] 推荐问题加载成功:', questions);
 
-        // 转换为 PromptItem 格式
-        const prompts: PromptItem[] = questions.map(
-          (q: string, index: number) => ({
-            id: String(index + 1),
-            value: q
-          })
-        );
+        // 只有当 API 返回了推荐问题时才更新，否则保留 mock 数据
+        if (questions.length > 0) {
+          // 转换为 PromptItem 格式
+          const prompts: PromptItem[] = questions.map(
+            (q: string, index: number) => ({
+              id: String(index + 1),
+              value: q
+            })
+          );
 
-        setSuggestedQuestions(prompts);
+          setSuggestedQuestions(prompts);
+        } else {
+          console.log('[ChatPanel] API 未返回推荐问题，保留 mock 数据');
+        }
       } else {
-        console.warn('[ChatPanel] 推荐问题加载失败:', response.message);
-        setSuggestedQuestions([]);
+        console.warn(
+          '[ChatPanel] 推荐问题加载失败，保留 mock 数据:',
+          response.message
+        );
       }
     } catch (error) {
-      console.error('[ChatPanel] 加载推荐问题出错:', error);
-      setSuggestedQuestions([]);
+      console.error('[ChatPanel] 加载推荐问题出错，保留 mock 数据:', error);
     } finally {
       setLoadingSuggestions(false);
     }

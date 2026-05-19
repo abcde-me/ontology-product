@@ -96,7 +96,7 @@ const ResizableLayout: React.FC<ResizableLayoutProps> = ({
 
       {/* 拖拽分隔条 - 紧贴左侧面板 */}
       <div
-        className="group relative w-[2px] flex-shrink-0 cursor-col-resize bg-transparent hover:bg-[rgb(var(--primary-6))]"
+        className="group relative w-[0px] flex-shrink-0 cursor-col-resize bg-transparent hover:bg-[rgb(var(--primary-6))]"
         onMouseDown={handleMouseDown}
       >
         {/* 拖拽热区 - 扩大点击区域 */}
