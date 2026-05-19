@@ -249,9 +249,10 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         maxStepForDataSourceType(initialDsType)
       );
     });
-    const modelingReadOnly = isEdit;
-    const instanceSyncReadOnly = isEdit && !allowInstanceSyncEdit;
     const isLocalCsv = dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV;
+    /** 编辑态：数据库/表建模只读；本地 CSV 允许改文件与属性 */
+    const modelingReadOnly = isEdit && !isLocalCsv;
+    const instanceSyncReadOnly = isEdit && !allowInstanceSyncEdit;
     const [basicInfoValues, setBasicInfoValues] = useState<BasicInfoValues>(
       () => ({
         code: initialValues?.code,
