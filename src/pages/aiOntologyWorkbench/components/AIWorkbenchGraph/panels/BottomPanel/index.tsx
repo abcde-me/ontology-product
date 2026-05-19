@@ -117,7 +117,9 @@ const BottomPanel: React.FC = () => {
       </div>
 
       {/* 面板内容 */}
-      <div className="flex-1 overflow-hidden">{renderPanelContent()}</div>
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        {renderPanelContent()}
+      </div>
     </div>
   );
 };

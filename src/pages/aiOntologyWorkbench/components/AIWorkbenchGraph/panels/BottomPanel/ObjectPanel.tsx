@@ -443,59 +443,61 @@ function ObjectPanel({ objectId }: ObjectPanelProps) {
       </div>
 
       {/* 内容区域 */}
-      <div className="flex-1 overflow-hidden px-[24px] py-[12px]">
-        <Spin loading={basicInfoLoading} className="w-full">
+      <div className="flex flex-1 flex-col overflow-hidden px-[24px] py-[12px]">
+        <Spin
+          loading={basicInfoLoading}
+          className="flex min-h-0 w-full flex-1 flex-col [&_.arco-spin-children]:flex [&_.arco-spin-children]:min-h-0 [&_.arco-spin-children]:flex-1 [&_.arco-spin-children]:flex-col"
+        >
           {/* Tabs */}
           <Tabs
             activeTab={activeTab}
             onChange={setActiveTab}
-            className="h-full [&_.arco-tabs-content]:flex-1 [&_.arco-tabs-content]:overflow-hidden [&_.arco-tabs-nav]:mb-4"
+            className="flex min-h-0 flex-1 flex-col [&_.arco-tabs-content-list]:h-full [&_.arco-tabs-content]:min-h-0 [&_.arco-tabs-content]:flex-1 [&_.arco-tabs-content]:overflow-hidden [&_.arco-tabs-nav]:mb-4 [&_.arco-tabs-pane]:h-full"
           >
             <TabPane
               key="instances"
               title={`实例(${instancesPagination.total})`}
             >
-              <div className="flex h-full flex-col gap-[16px]">
+              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                 {instancesPagination.total === 0 ? (
                   <div className="flex flex-1 items-center justify-center">
                     <NoDataCard title="暂无数据" />
                   </div>
                 ) : (
-                  <Table
-                    loading={instancesLoading}
-                    columns={instanceColumns}
-                    data={instancesData}
-                    rowKey={(record) => {
-                      if (record.id) return String(record.id);
-                      return Object.values(record).join('-');
-                    }}
-                    border={false}
-                    pagination={false}
-                    noDataElement={<NoDataCard title="暂无数据" />}
-                    className="flex-1 [&_.arco-table-td]:py-[8px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[8px]"
-                    scroll={
-                      instanceColumns.length > 4
-                        ? {
-                            x: instanceColumns.length * 140,
-                            y: 'calc(100% - 40px)'
-                          }
-                        : { y: 'calc(100% - 40px)' }
-                    }
-                  />
-                )}
-                {instancesPagination.total > defaultPageSize && (
-                  <div className="flex justify-end">
-                    <Pagination
-                      current={instancesPagination.current}
-                      pageSize={instancesPagination.pageSize}
-                      total={instancesPagination.total}
-                      onChange={(page, pageSize) => {
-                        loadInstances(page, pageSize);
+                  <>
+                    <Table
+                      loading={instancesLoading}
+                      columns={instanceColumns}
+                      data={instancesData}
+                      rowKey={(record) => {
+                        if (record.id) return String(record.id);
+                        return Object.values(record).join('-');
                       }}
-                      showTotal
-                      size="small"
+                      border={false}
+                      pagination={false}
+                      noDataElement={<NoDataCard title="暂无数据" />}
+                      className="[&_.arco-table-td]:py-[8px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[8px]"
+                      scroll={
+                        instanceColumns.length > 4
+                          ? { x: instanceColumns.length * 140 }
+                          : undefined
+                      }
                     />
-                  </div>
+                    {instancesPagination.total > defaultPageSize && (
+                      <div className="flex justify-end pt-[16px]">
+                        <Pagination
+                          current={instancesPagination.current}
+                          pageSize={instancesPagination.pageSize}
+                          total={instancesPagination.total}
+                          onChange={(page, pageSize) => {
+                            loadInstances(page, pageSize);
+                          }}
+                          showTotal
+                          size="small"
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </TabPane>
@@ -504,21 +506,21 @@ function ObjectPanel({ objectId }: ObjectPanelProps) {
               key="attributes"
               title={`属性(${attributesPagination.total})`}
             >
-              <div className="flex h-full flex-col gap-[16px]">
+              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                 <Table
                   loading={attributesLoading}
                   columns={attributeColumns}
                   data={attributesData}
-                  scroll={{ x: 400, y: 'calc(100% - 40px)' }}
+                  scroll={{ x: 400 }}
                   rowClassName={() => 'group'}
                   noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
                   border={false}
                   pagination={false}
-                  className="flex-1 [&_.arco-table-td]:py-[8px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[8px]"
+                  className="[&_.arco-table-td]:py-[8px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[8px]"
                 />
                 {attributesPagination.total > defaultPageSize && (
-                  <div className="flex justify-end">
+                  <div className="flex justify-end pt-[16px]">
                     <Pagination
                       current={attributesPagination.current}
                       pageSize={attributesPagination.pageSize}
@@ -535,8 +537,10 @@ function ObjectPanel({ objectId }: ObjectPanelProps) {
             </TabPane>
 
             <TabPane key="links" title={`链接(${linksPagination.total})`}>
-              <div className="flex flex-1 items-center justify-center">
-                <NoDataCard title="链接功能待实现" />
+              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                <div className="flex flex-1 items-center justify-center">
+                  <NoDataCard title="链接功能待实现" />
+                </div>
               </div>
             </TabPane>
 
@@ -544,18 +548,18 @@ function ObjectPanel({ objectId }: ObjectPanelProps) {
               key="behaviors"
               title={`行为(${behaviorsPagination.total})`}
             >
-              <div className="flex h-full flex-col gap-[16px]">
+              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                 <Table
                   loading={behaviorsLoading}
                   columns={behaviorColumns}
                   data={behaviorsData}
-                  scroll={{ x: 400, y: 'calc(100% - 40px)' }}
+                  scroll={{ x: 400 }}
                   pagination={false}
                   rowKey={(record) => `${record.id || record.code}`}
                   border={false}
                   rowClassName={() => 'group'}
                   noDataElement={<NoDataCard title="暂无数据" />}
-                  className="flex-1 [&_.arco-table-td]:py-[8px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[8px]"
+                  className="[&_.arco-table-td]:py-[8px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[8px]"
                   onRow={(record) => ({
                     onClick: () => {
                       openBottomPanel({
@@ -568,7 +572,7 @@ function ObjectPanel({ objectId }: ObjectPanelProps) {
                   })}
                 />
                 {behaviorsPagination.total > defaultPageSize && (
-                  <div className="flex justify-end">
+                  <div className="flex justify-end pt-[16px]">
                     <Pagination
                       current={behaviorsPagination.current}
                       pageSize={behaviorsPagination.pageSize}
