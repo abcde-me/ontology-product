@@ -38,6 +38,62 @@ const convertToThinkChainSteps = (
     const running_time =
       step.running_time !== undefined ? String(step.running_time) : undefined;
 
+    // 对于 type: 'http'、'workflow'、'mcp' 的步骤，需要转换数据结构以匹配 WorkflowItem
+    if (
+      step.type === 'http' ||
+      step.type === 'workflow' ||
+      step.type === 'mcp'
+    ) {
+      // step.content 可能是对象或字符串
+      const content =
+        typeof step.content === 'string'
+          ? (() => {
+              try {
+                return JSON.parse(step.content);
+              } catch {
+                return {};
+              }
+            })()
+          : step.content || {};
+
+      // 提取 tool_name, arg, response
+      const tool_name = content.tool_name || content.name || '本体场景快照';
+
+      // arg 和 response 必须是 JSON 字符串
+      let arg = '';
+      if (content.arg !== undefined && content.arg !== null) {
+        arg =
+          typeof content.arg === 'string'
+            ? content.arg
+            : JSON.stringify(content.arg, null, 2);
+      }
+
+      let response = '';
+      if (content.response !== undefined && content.response !== null) {
+        response =
+          typeof content.response === 'string'
+            ? content.response
+            : JSON.stringify(content.response, null, 2);
+      }
+
+      // 返回符合 WorkflowItem 格式的对象
+      return {
+        type: step.type,
+        chunk_id: step.chunk_id,
+        status,
+        running_time: running_time || '0',
+        done: step.done ?? false,
+        tool_name,
+        description: content.description || '',
+        arg,
+        response,
+        tool_id: content.tool_id || '',
+        workflow_id: content.workflow_id || '',
+        timestamp: new Date().toISOString()
+      } as AgentThinkTypes.ThinkChainStep;
+    }
+
+    // 其他类型（thinking, ontology 等）保持原样
     return {
       ...step,
       status,
