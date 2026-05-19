@@ -68,8 +68,8 @@ function AutoFitView() {
   // 监听节点/边居中事件
   useEffect(() => {
     const handleCenterNode = (event: CustomEvent) => {
-      const { code } = event.detail;
-      console.log('[AutoFitView] 收到居中事件，code:', code);
+      const { code, zoom } = event.detail;
+      console.log('[AutoFitView] 收到居中事件，code:', code, 'zoom:', zoom);
 
       // 先查找节点
       const targetNode = nodes.find(
@@ -77,13 +77,13 @@ function AutoFitView() {
       );
       if (targetNode) {
         console.log('[AutoFitView] 找到目标节点:', targetNode);
-        // 获取当前缩放级别
-        const zoom = getZoom();
+        // 使用指定的缩放级别，如果没有指定则使用当前缩放级别
+        const targetZoom = zoom !== undefined ? zoom : getZoom();
         // 居中到节点
         setCenter(
           targetNode.position.x + NODE_WIDTH / 2,
           targetNode.position.y + NODE_HEIGHT / 2,
-          { zoom, duration: 800 } // 800ms 动画
+          { zoom: targetZoom, duration: 800 } // 800ms 动画
         );
         return;
       }
@@ -116,10 +116,10 @@ function AutoFitView() {
 
           console.log('[AutoFitView] 边的中点位置:', { centerX, centerY });
 
-          // 获取当前缩放级别
-          const zoom = getZoom();
+          // 使用指定的缩放级别，如果没有指定则使用当前缩放级别
+          const targetZoom = zoom !== undefined ? zoom : getZoom();
           // 居中到边的中点
-          setCenter(centerX, centerY, { zoom, duration: 800 });
+          setCenter(centerX, centerY, { zoom: targetZoom, duration: 800 });
         } else {
           console.warn('[AutoFitView] 未找到边的源节点或目标节点');
         }

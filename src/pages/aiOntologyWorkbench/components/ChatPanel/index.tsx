@@ -179,7 +179,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     isStreaming,
     isLoadingHistory,
     sendMessage,
-    stopGeneration,
+    stopGeneration: stopGenerationOriginal,
     clearMessages,
     loadHistoryMessages
   } = useXChat({
@@ -212,6 +212,12 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       Message.error(error.message || '发送失败');
     }
   });
+
+  // 包装 stopGeneration，添加停止提示
+  const stopGeneration = useCallback(() => {
+    stopGenerationOriginal();
+    Message.info('已停止生成');
+  }, [stopGenerationOriginal]);
 
   // 监听本体切换，清空聊天和图谱
   useEffect(() => {

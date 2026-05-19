@@ -49,9 +49,9 @@ const AIOntoWorkbench: React.FC = () => {
   // 节点定位回调
   const handleLocateNode = React.useCallback((code: string) => {
     console.log('[AIOntoWorkbench] 定位节点，code:', code);
-    // 通过图谱 store 触发高亮
+    // 通过图谱 store 触发高亮，并设置缩放比例为 75%
     const { highlightNode } = useAIWorkbenchGraphStore.getState();
-    highlightNode(code);
+    highlightNode(code, { zoom: 0.75 });
   }, []);
 
   // 节点查看回调 - 根据 target_type 跳转到不同路由
@@ -209,6 +209,7 @@ const AIOntoWorkbench: React.FC = () => {
           leftContent={
             currentAppID ? (
               <ChatPanel
+                key={currentAppID} // 添加 key，确保 appId 变化时重新挂载组件
                 appId={currentAppID}
                 // appId="app-4th0ybq9"
                 appConfigId={null}

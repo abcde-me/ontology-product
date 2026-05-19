@@ -47,11 +47,13 @@ const Node = ({ id, data }) => {
 
   return (
     <div
-      className="flex w-[200px] items-center gap-[8px] p-[16px]"
+      className="flex w-[200px] items-center gap-[8px] rounded-[8px] bg-white p-[16px]"
       style={{
-        width: '200px'
+        width: '200px',
+        height: '100%',
+        boxSizing: 'border-box'
       }}
-      data-highlighted={isHighlighted ? 'true' : 'false'} // 添加数据属性，用于外层样式
+      data-highlighted={isHighlighted ? 'true' : 'false'}
     >
       {/* 左侧：图标 + 名称 */}
       <div className="flex min-w-0 flex-1 items-center gap-[8px]">

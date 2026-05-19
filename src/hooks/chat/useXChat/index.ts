@@ -261,15 +261,11 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
     setIsStreaming(false);
     setIsLoading(false);
 
+    // 将最后一条消息标记为中止状态
     setMessages((draft) => {
       const lastIndex = draft.length - 1;
       if (lastIndex >= 0 && draft[lastIndex].type === 'assistant') {
         draft[lastIndex].status = 'abort';
-        if (draft[lastIndex].content) {
-          draft[lastIndex].content += '\n\n您中途停止生成回答';
-        } else {
-          draft[lastIndex].content = '您中途停止生成回答';
-        }
       }
     });
   }, [disconnectStream, setIsStreaming, setIsLoading, setMessages]);
