@@ -43,7 +43,7 @@
     "@babel/preset-typescript": "^7.27.0",
     "@ccf2e/arco-material": "^0.7.2",
     "@ceai-front/arco-material": "1.2.3",
-    "@ceai-front/chat": "^1.0.0",
+    "@ceai-front/chat": "^1.0.1",
     "@ceai-front/svg-icons": "^1.0.0",
     "@ceai-front/workflow": "^0.2.3",
     "@dagrejs/dagre": "^1.1.4",

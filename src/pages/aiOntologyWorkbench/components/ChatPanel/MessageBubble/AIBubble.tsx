@@ -47,7 +47,12 @@ const convertToThinkChainSteps = (
   });
 };
 
-// ========== MOCK 数据 - 用于调试，后续需要删除 ==========
+// ========== MOCK 数据开关 ==========
+// 设置为 true 使用 mock 数据，false 使用真实数据
+const USE_MOCK_ONTOLOGY_ACTIONS = false;
+// ========== MOCK 数据开关结束 ==========
+
+// ========== MOCK 数据 - 用于调试 ==========
 const MOCK_ONTOLOGY_ACTIONS: OntologyAction[] = [
   // ===== 对象类型示例 =====
   {
@@ -197,9 +202,11 @@ const AIBubble: React.FC<AIBubbleProps> = ({
     return convertToThinkChainSteps(thinkingSteps);
   }, [thinkingSteps]);
 
-  // ========== MOCK: 强制显示本体操作卡片 ==========
-  const displayActions = MOCK_ONTOLOGY_ACTIONS;
-  // ========== MOCK 结束 ==========
+  // ========== 根据开关决定使用 mock 数据还是真实数据 ==========
+  const displayActions = USE_MOCK_ONTOLOGY_ACTIONS
+    ? MOCK_ONTOLOGY_ACTIONS
+    : ontologyActions || [];
+  // ========== 数据选择结束 ==========
 
   return (
     <div className={styles.aiBubbleContainer}>
@@ -224,18 +231,19 @@ const AIBubble: React.FC<AIBubbleProps> = ({
         )}
 
         {/* 本体操作卡片 - 显示在正文下方 */}
-        {/* MOCK: 使用 displayActions 替代 ontologyActions */}
-        <div className={styles.ontologyActions}>
-          {displayActions.map((action, index) => (
-            <OntologyActionCard
-              key={`${action.code}-${index}`}
-              action={action}
-              ontologyId={ontologyId}
-              onLocate={onLocateNode}
-              onView={onViewNode}
-            />
-          ))}
-        </div>
+        {displayActions.length > 0 && (
+          <div className={styles.ontologyActions}>
+            {displayActions.map((action, index) => (
+              <OntologyActionCard
+                key={`${action.code}-${index}`}
+                action={action}
+                ontologyId={ontologyId}
+                onLocate={onLocateNode}
+                onView={onViewNode}
+              />
+            ))}
+          </div>
+        )}
 
         {/* 错误状态 */}
         {isError && (
