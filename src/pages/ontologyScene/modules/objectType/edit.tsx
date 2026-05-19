@@ -10,6 +10,7 @@ import {
 } from '@/api/ontologySceneLibrary/objectType';
 import { buildUpdateObjectTypeRequest } from './components/ObjectTypeFormHooks/useObjectTypeSubmit';
 import { mapObjectTypeDetailToFormData } from './mapObjectTypeDetailToFormData';
+import { DATA_SOURCE_TYPE } from '@/pages/ontologyScene/common/constants';
 
 import { IconLeft } from '@arco-design/web-react/icon';
 
@@ -93,9 +94,11 @@ export default function OntologySceneObjectTypeEdit() {
 
     setLoading(true);
     try {
-      const submitData = enteredForInstanceSyncRef.current
-        ? data
-        : { ...data, enableSyncSourceData: false };
+      const isLocalCsv = data._dataSource?.type === DATA_SOURCE_TYPE.LOCAL_CSV;
+      const submitData =
+        enteredForInstanceSyncRef.current || isLocalCsv
+          ? data
+          : { ...data, enableSyncSourceData: false };
 
       const res = await updateOntologyObjectType(
         buildUpdateObjectTypeRequest(objectTypeIdNum, submitData)
