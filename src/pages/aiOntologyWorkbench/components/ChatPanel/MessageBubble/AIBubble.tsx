@@ -1,12 +1,13 @@
 /**
  * AIBubble - AI 消息气泡（左侧）
- * 包含：ThinkingChain → ToolCalling → Markdown 内容 → OntologyActions
+ * 包含：ThinkChain → ToolCalling → Markdown 内容 → OntologyActions
  */
-import React, { memo } from 'react';
-import ThinkingChain from '../ThinkingChain';
+import React, { memo, useMemo } from 'react';
+import { ThinkChain } from '@ceai-front/chat';
+import type { AgentThinkTypes } from '@ceai-front/chat';
 import MarkdownRenderer from '../MarkdownRenderer';
 import OntologyActionCard from '../OntologyActionCard';
-import { ChatMessage, OntologyAction } from '@/hooks/chat/types';
+import { ChatMessage, OntologyAction, ThinkingStep } from '@/hooks/chat/types';
 import styles from './MessageBubble.module.scss';
 
 interface AIBubbleProps {
@@ -15,6 +16,36 @@ interface AIBubbleProps {
   onLocateNode?: (code: string) => void;
   onViewNode?: (action: OntologyAction) => void; // 查看节点回调
 }
+
+/**
+ * 将 ai-onto 的 ThinkingStep 转换为 @ceai-front/chat 的 ThinkChainStep
+ */
+const convertToThinkChainSteps = (
+  steps: ThinkingStep[]
+): AgentThinkTypes.ThinkChainStep[] => {
+  return steps.map((step) => {
+    // 转换 status: running -> loading, success -> success, error -> error
+    let status: 'success' | 'error' | 'loading' = 'loading';
+    if (step.status === 'running') {
+      status = 'loading';
+    } else if (step.status === 'success') {
+      status = 'success';
+    } else if (step.status === 'error') {
+      status = 'error';
+    }
+
+    // 转换 running_time: number -> string
+    const running_time =
+      step.running_time !== undefined ? String(step.running_time) : undefined;
+
+    return {
+      ...step,
+      status,
+      running_time,
+      done: step.done ?? false
+    } as AgentThinkTypes.ThinkChainStep;
+  });
+};
 
 // ========== MOCK 数据 - 用于调试，后续需要删除 ==========
 const MOCK_ONTOLOGY_ACTIONS: OntologyAction[] = [
@@ -160,6 +191,12 @@ const AIBubble: React.FC<AIBubbleProps> = ({
   const hasOntologyActions = ontologyActions && ontologyActions.length > 0;
   const hasAnyContent = hasThinkingSteps || hasContent || hasOntologyActions;
 
+  // 转换思维链步骤格式
+  const convertedSteps = useMemo(() => {
+    if (!thinkingSteps) return [];
+    return convertToThinkChainSteps(thinkingSteps);
+  }, [thinkingSteps]);
+
   // ========== MOCK: 强制显示本体操作卡片 ==========
   const displayActions = MOCK_ONTOLOGY_ACTIONS;
   // ========== MOCK 结束 ==========
@@ -168,9 +205,15 @@ const AIBubble: React.FC<AIBubbleProps> = ({
     <div className={styles.aiBubbleContainer}>
       {/* 移除 AI 头像 */}
       <div className={styles.aiBubble}>
-        {/* 思维链 - 包含所有步骤（thinking、ontology 等） */}
+        {/* 思维链 - 使用 @ceai-front/chat 的 ThinkChain 组件 */}
         {hasThinkingSteps && (
-          <ThinkingChain steps={thinkingSteps} allDone={isDone || isAbort} />
+          <ThinkChain
+            steps={convertedSteps}
+            done={isDone || isAbort}
+            defaultOpen={true}
+            defaultStepOpen={false}
+            showDebug={false}
+          />
         )}
 
         {/* 正文内容 - Markdown */}
