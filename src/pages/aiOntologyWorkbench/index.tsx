@@ -209,8 +209,8 @@ const AIOntoWorkbench: React.FC = () => {
           leftContent={
             currentAppID ? (
               <ChatPanel
-                // appId={currentAppID}
-                appId="app-4th0ybq9"
+                appId={currentAppID}
+                // appId="app-4th0ybq9"
                 appConfigId={null}
                 projectId={projectId?.[1]}
                 channel="WebPage"

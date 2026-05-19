@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { Sender } from '@ceai-front/chat';
-import { UploadProps } from '@arco-design/web-react';
+import { UploadProps, Spin } from '@arco-design/web-react';
 import { Button } from '@arco-design/web-react';
 import { IconDown } from '@arco-design/web-react/icon';
 import MessageList from './MessageList';
@@ -13,6 +13,7 @@ interface ChatViewProps {
   messages: ChatMessage[];
   isLoading: boolean;
   isStreaming: boolean;
+  isLoadingHistory: boolean;
   ontologyId?: number | string; // 本体 ID
   onSend: (params: {
     text: string;
@@ -33,6 +34,7 @@ const ChatView: React.FC<ChatViewProps> = ({
   messages,
   isLoading,
   isStreaming,
+  isLoadingHistory,
   ontologyId,
   onSend,
   onStop,
@@ -85,54 +87,63 @@ const ChatView: React.FC<ChatViewProps> = ({
 
   return (
     <div className="relative flex h-full flex-col">
-      {/* 消息列表 - 可滚动，隐藏滚动条 */}
-      <div
-        ref={messageListRef}
-        className={`flex-1 overflow-y-auto px-[20px] py-5 ${styles.scrollbarHide}`}
-      >
-        <MessageList
-          messages={messages}
-          ontologyId={ontologyId}
-          onLocateNode={onLocateNode}
-          onViewNode={onViewNode}
-        />
-
-        {/* Loading 指示器 - 只在特定条件下显示 */}
-        {shouldShowLoading && <LoadingIndicator />}
-      </div>
-
-      {/* 回到底部按钮 - 悬浮在消息列表和输入框之间 */}
-      {/* {showGoBottom && (
-        <div className={styles.goBottomButton}>
-          <Button
-            type="primary"
-            shape="circle"
-            icon={<IconDown />}
-            onClick={() => forceScrollToBottom('smooth')}
-          />
+      {/* 历史消息加载中 - 全屏居中显示 */}
+      {isLoadingHistory ? (
+        <div className="flex flex-1 items-center justify-center">
+          <Spin />
         </div>
-      )} */}
+      ) : (
+        <>
+          {/* 消息列表 - 可滚动，隐藏滚动条 */}
+          <div
+            ref={messageListRef}
+            className={`flex-1 overflow-y-auto px-[20px] py-5 ${styles.scrollbarHide}`}
+          >
+            <MessageList
+              messages={messages}
+              ontologyId={ontologyId}
+              onLocateNode={onLocateNode}
+              onViewNode={onViewNode}
+            />
 
-      {/* Sender 组件 - 固定在底部 */}
-      <div className="w-full flex-shrink-0 px-[20px] pb-[8px]">
-        <Sender
-          placeholder="输入消息..."
-          onSend={handleSend}
-          onStop={onStop}
-          isChatting={isLoading || isStreaming}
-          showDeepThink={false}
-          showFileUpload={true}
-          showAudioRecord={false}
-          showAITips={true}
-          uploaderProps={{
-            ...uploaderProps
-          }}
-          singleFileLimit={60 * 1024 * 1024}
-          totalFileLimit={60 * 1024 * 1024}
-          GetFile={GetFile}
-          GetAudioText={GetAudioText}
-        />
-      </div>
+            {/* Loading 指示器 - 只在特定条件下显示 */}
+            {shouldShowLoading && <LoadingIndicator />}
+          </div>
+
+          {/* 回到底部按钮 - 悬浮在消息列表和输入框之间 */}
+          {/* {showGoBottom && (
+            <div className={styles.goBottomButton}>
+              <Button
+                type="primary"
+                shape="circle"
+                icon={<IconDown />}
+                onClick={() => forceScrollToBottom('smooth')}
+              />
+            </div>
+          )} */}
+
+          {/* Sender 组件 - 固定在底部 */}
+          <div className="w-full flex-shrink-0 px-[20px] pb-[8px]">
+            <Sender
+              placeholder="输入消息..."
+              onSend={handleSend}
+              onStop={onStop}
+              isChatting={isLoading || isStreaming}
+              showDeepThink={false}
+              showFileUpload={true}
+              showAudioRecord={false}
+              showAITips={true}
+              uploaderProps={{
+                ...uploaderProps
+              }}
+              singleFileLimit={60 * 1024 * 1024}
+              totalFileLimit={60 * 1024 * 1024}
+              GetFile={GetFile}
+              GetAudioText={GetAudioText}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 };

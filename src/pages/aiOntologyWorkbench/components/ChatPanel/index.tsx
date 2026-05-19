@@ -175,6 +175,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     messages,
     isLoading,
     isStreaming,
+    isLoadingHistory,
     sendMessage,
     stopGeneration,
     clearMessages,
@@ -544,6 +545,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
             messages={messages}
             isLoading={isLoading}
             isStreaming={isStreaming}
+            isLoadingHistory={isLoadingHistory}
             ontologyId={currentOntology?.id}
             onSend={handleSend}
             onStop={stopGeneration}

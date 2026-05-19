@@ -68,6 +68,7 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
   const [messages, setMessages] = useImmer<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useImmer(false);
   const [isStreaming, setIsStreaming] = useImmer(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useImmer(false);
 
   // ==================== Refs ====================
   const conversationIdRef = useRef<string>(
@@ -288,7 +289,7 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
       }
 
       try {
-        setIsLoading(true);
+        setIsLoadingHistory(true);
         console.log('[useXChat] 开始调用 getHistoryMessages API');
         const response = await getHistoryMessages({
           appId: String(appId),
@@ -334,10 +335,10 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
         console.error('[useXChat] 加载历史消息失败:', error);
         showMessage?.error(error.message || '加载历史消息失败');
       } finally {
-        setIsLoading(false);
+        setIsLoadingHistory(false);
       }
     },
-    [appId, getHistoryMessages, setMessages, setIsLoading, showMessage]
+    [appId, getHistoryMessages, setMessages, setIsLoadingHistory, showMessage]
   );
 
   // ==================== 监听 conversationId 变化 ====================
@@ -413,6 +414,7 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
     messages,
     isLoading,
     isStreaming,
+    isLoadingHistory,
     sendMessage,
     stopGeneration,
     clearMessages,
