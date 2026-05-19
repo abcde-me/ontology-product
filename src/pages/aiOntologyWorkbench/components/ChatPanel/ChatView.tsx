@@ -97,7 +97,7 @@ const ChatView: React.FC<ChatViewProps> = ({
           {/* 消息列表 - 可滚动，隐藏滚动条 */}
           <div
             ref={messageListRef}
-            className={`flex-1 overflow-y-auto px-[20px] py-5 ${styles.scrollbarHide}`}
+            className={`flex-1 overflow-y-auto px-[20px] pb-5 pt-[8px] ${styles.scrollbarHide}`}
           >
             <MessageList
               messages={messages}
