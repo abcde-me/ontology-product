@@ -3,6 +3,7 @@
   display: flex;
   justify-content: flex-end;
   width: 100%;
+  user-select: text;
 }
 
 .userBubble {
@@ -10,6 +11,7 @@
   background: rgba(24, 79, 242, 0.1);
   border-radius: 8px;
   padding: 12px 20px;
+  user-select: text;
 }
 
 .userContent {
@@ -40,12 +42,14 @@
   gap: 12px;
   width: 100%;
   max-width: 100%;
+  user-select: text;
 }
 
 .aiAvatar {
   flex-shrink: 0;
   width: 36px;
   height: 36px;
+  user-select: none; // 头像不需要选择
 }
 
 .avatarIcon {
@@ -79,6 +83,7 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  user-select: text;
 }
 
 .ontologyActions {

@@ -53,16 +53,15 @@ const OntologyActionCard: React.FC<OntologyActionCardProps> = ({
     return null;
   }
 
-  // 是否显示导出图标（查看）- create、update、get、delete 显示
+  // 是否显示导出图标（查看）- create、update、get 显示，delete 不显示
   const showExport =
     actionType === OntologyActionType.CREATE ||
     actionType === OntologyActionType.UPDATE ||
-    actionType === OntologyActionType.GET ||
-    actionType === OntologyActionType.DELETE;
+    actionType === OntologyActionType.GET;
 
   // 是否显示定位图标
   // 1. 只有 object_type 和 link 类型才可能显示
-  // 2. delete 操作不显示定位图标
+  // 2. delete 操作不显示定位图标（数据已删除）
   const showLocate =
     actionType !== OntologyActionType.DELETE &&
     (targetType === OntologyTargetType.OBJECT_TYPE ||
