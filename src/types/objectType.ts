@@ -432,6 +432,10 @@ export interface UpdateOntologyObjectTypeReq
    * 对象类型id
    */
   id: number;
+  /**
+   * 本地 CSV 是否重新上传：1-是，0-否
+   */
+  isReUpload?: number;
 }
 
 export interface GetOntologyObjectTypeDetailRes
