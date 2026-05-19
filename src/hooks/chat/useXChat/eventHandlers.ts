@@ -36,6 +36,24 @@ export const handleThinkingEvent = (
     }
     const steps = lastMsg.thinkingSteps;
 
+    // 如果类型从 THINKING 切换到其他类型，或从其他类型切换到 THINKING
+    // 将上一个未完成的步骤标记为完成
+    if (
+      prevEventTypeRef.current &&
+      prevEventTypeRef.current !== EVENT_TYPES.THINKING &&
+      steps.length > 0
+    ) {
+      const lastStep = steps[steps.length - 1];
+      if (!lastStep.done) {
+        console.log('[handleThinkingEvent] auto-completing previous step:', {
+          chunk_id: lastStep.chunk_id,
+          type: lastStep.type
+        });
+        lastStep.done = true;
+        lastStep.status = 'success';
+      }
+    }
+
     // 如果上一次也是 thinking，累积内容
     if (prevEventTypeRef.current === EVENT_TYPES.THINKING && steps.length > 0) {
       const lastStepIndex = steps.length - 1;
@@ -74,7 +92,7 @@ export const handleOntologyEvent = (
   event: SSEEvent,
   context: EventHandlerContext
 ) => {
-  const { setMessages } = context;
+  const { setMessages, prevEventTypeRef } = context;
 
   console.log('[useXChat] ontology event:', event);
 
@@ -90,6 +108,24 @@ export const handleOntologyEvent = (
 
     // 查找是否已存在相同 chunk_id 的步骤
     const stepIndex = steps.findIndex((s) => s.chunk_id === event.chunk_id);
+
+    // 如果是新步骤（不存在相同 chunk_id），且类型发生变化，标记上一个步骤为完成
+    if (
+      stepIndex < 0 &&
+      prevEventTypeRef.current &&
+      prevEventTypeRef.current !== EVENT_TYPES.ONTOLOGY &&
+      steps.length > 0
+    ) {
+      const lastStep = steps[steps.length - 1];
+      if (!lastStep.done) {
+        console.log('[handleOntologyEvent] auto-completing previous step:', {
+          chunk_id: lastStep.chunk_id,
+          type: lastStep.type
+        });
+        lastStep.done = true;
+        lastStep.status = 'success';
+      }
+    }
 
     let contentData = event.content;
     if (typeof contentData === 'string') {
@@ -132,13 +168,32 @@ export const handleAnswerEvent = (
   event: SSEEvent,
   context: EventHandlerContext
 ) => {
-  const { setMessages } = context;
+  const { setMessages, prevEventTypeRef } = context;
 
   setMessages((draft) => {
     const lastIndex = draft.length - 1;
     if (lastIndex < 0) return;
 
     const lastMsg = draft[lastIndex];
+
+    // 如果类型从其他类型切换到 ANSWER，将上一个未完成的步骤标记为完成
+    if (
+      prevEventTypeRef.current &&
+      prevEventTypeRef.current !== EVENT_TYPES.ANSWER &&
+      lastMsg.thinkingSteps &&
+      lastMsg.thinkingSteps.length > 0
+    ) {
+      const lastStep = lastMsg.thinkingSteps[lastMsg.thinkingSteps.length - 1];
+      if (!lastStep.done) {
+        console.log('[handleAnswerEvent] auto-completing previous step:', {
+          chunk_id: lastStep.chunk_id,
+          type: lastStep.type
+        });
+        lastStep.done = true;
+        lastStep.status = 'success';
+      }
+    }
+
     lastMsg.content += event.content || '';
     lastMsg.status = 'streaming';
   });
@@ -196,7 +251,7 @@ export const handleToolCallEvent = (
   event: SSEEvent,
   context: EventHandlerContext
 ) => {
-  const { setMessages } = context;
+  const { setMessages, prevEventTypeRef } = context;
   const { type } = event;
 
   console.log('[useXChat] tool call event:', {
@@ -224,6 +279,25 @@ export const handleToolCallEvent = (
     const stepIndex = lastMsg.thinkingSteps.findIndex(
       (s) => s.chunk_id === event.chunk_id
     );
+
+    // 如果是新步骤（不存在相同 chunk_id），且类型发生变化，标记上一个步骤为完成
+    if (
+      stepIndex < 0 &&
+      prevEventTypeRef.current &&
+      prevEventTypeRef.current !== type &&
+      lastMsg.thinkingSteps.length > 0
+    ) {
+      const lastStep = lastMsg.thinkingSteps[lastMsg.thinkingSteps.length - 1];
+      if (!lastStep.done) {
+        console.log('[handleToolCallEvent] auto-completing previous step:', {
+          chunk_id: lastStep.chunk_id,
+          type: lastStep.type,
+          new_type: type
+        });
+        lastStep.done = true;
+        lastStep.status = 'success';
+      }
+    }
 
     // 解析 content
     // 注意：后端可能将数据放在 event.content 中，也可能直接放在 event 对象上

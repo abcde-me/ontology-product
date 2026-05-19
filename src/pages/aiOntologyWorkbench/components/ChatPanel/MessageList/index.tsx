@@ -25,7 +25,7 @@ const MessageList: React.FC<MessageListProps> = ({
   }
 
   return (
-    <div className={styles.messageList}>
+    <div className={styles.messageList} style={{ userSelect: 'text' }}>
       {messages.map((message) => (
         <div key={message.id} className={styles.messageItem}>
           <MessageBubble
