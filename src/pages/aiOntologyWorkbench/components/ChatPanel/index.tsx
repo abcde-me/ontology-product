@@ -19,19 +19,14 @@ import {
   getConversationMessages,
   getConversationList,
   deleteConversation as deleteConversationApi,
-  renameConversation as renameConversationApi
+  renameConversation as renameConversationApi,
+  getAgentInfo
 } from '@/api/aiOntologyWorkbench/chat';
 
 interface PromptItem {
   id: string;
   value: string;
 }
-
-const PROMPT_LIST: PromptItem[] = [
-  { id: '1', value: '先获取本体场景列表，随后获取对象类型元数据信息' },
-  { id: '2', value: '如何定义对象之间的关系？' },
-  { id: '3', value: '为对象添加行为' }
-];
 
 interface ChatPanelProps {
   appId: string | number;
@@ -64,6 +59,12 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   // 获取图谱状态管理和当前本体
   const { setGraphData, currentOntology } = useAIWorkbenchStore();
 
+  // 推荐问题状态
+  const [suggestedQuestions, setSuggestedQuestions] = useState<PromptItem[]>(
+    []
+  );
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+
   // 文件上传相关
   const uploader = useMultipartUploader();
   const [uploadFileList, setUploadFileList] = useState<any[]>([]);
@@ -74,6 +75,53 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   const prevOntologyIdRef = useRef<number | string | undefined>(undefined);
   // 使用 ref 记录是否是用户主动新建会话
   const isUserNewSession = useRef(false);
+
+  // 加载推荐问题
+  const loadSuggestedQuestions = useCallback(async () => {
+    if (!appId) {
+      console.log('[ChatPanel] 没有 appId，跳过加载推荐问题');
+      return;
+    }
+
+    try {
+      setLoadingSuggestions(true);
+      console.log('[ChatPanel] 开始加载推荐问题，appId:', appId);
+
+      const response = await getAgentInfo({
+        id: String(appId),
+        status: 'Published'
+      });
+
+      if (response.code === 'Success' && response.data) {
+        const questions =
+          response.data.appConfig?.suggestedQuestions?.slice(0, 3) || [];
+        console.log('[ChatPanel] 推荐问题加载成功:', questions);
+
+        // 转换为 PromptItem 格式
+        const prompts: PromptItem[] = questions.map(
+          (q: string, index: number) => ({
+            id: String(index + 1),
+            value: q
+          })
+        );
+
+        setSuggestedQuestions(prompts);
+      } else {
+        console.warn('[ChatPanel] 推荐问题加载失败:', response.message);
+        setSuggestedQuestions([]);
+      }
+    } catch (error) {
+      console.error('[ChatPanel] 加载推荐问题出错:', error);
+      setSuggestedQuestions([]);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  }, [appId]);
+
+  // 监听 appId 变化，加载推荐问题
+  useEffect(() => {
+    loadSuggestedQuestions();
+  }, [loadSuggestedQuestions]);
 
   // 稳定 API 配置对象的引用，避免无限循环
   const conversationApiConfig = useMemo(
@@ -543,7 +591,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       <div className="flex flex-1 flex-col overflow-hidden">
         {showWelcome ? (
           <WelcomeView
-            prompts={PROMPT_LIST}
+            prompts={suggestedQuestions}
             onPromptSelect={handlePromptSelect}
             onSend={handleSend}
             uploaderProps={uploaderProps}

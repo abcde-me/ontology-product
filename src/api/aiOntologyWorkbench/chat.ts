@@ -171,6 +171,23 @@ export const getConversationMessages = async (params: {
 };
 
 /**
+ * 获取 Agent 信息（包含推荐问题）
+ */
+export const getAgentInfo = async (params: { id: string; status: string }) => {
+  const { id, status } = params;
+
+  const response = await UAPI.RES.GetAgentApi({})
+    .post({
+      id,
+      status
+    })
+    .inRegion()
+    .do();
+
+  return response;
+};
+
+/**
  * 创建分片上传
  */
 export const createMultipartUpload = async (params: {

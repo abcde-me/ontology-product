@@ -775,6 +775,9 @@ export const ModaForgeResourceEndpoints = {
   // 获取链接类型列表
   ListOntologyLinkTypeApi: PrefixAimdp + '/ListOntologyLinkType',
 
+  // 获取当前agent的信息
+  GetAgentApi: PrefixAiAppforge + '/GetApp',
+
   // 本体场景
   // 获取本体场景列表
   ListOntologyModelApi: PrefixAimdp + '/ListOntologyModel',
