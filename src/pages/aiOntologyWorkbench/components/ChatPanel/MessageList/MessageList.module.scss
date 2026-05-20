@@ -3,8 +3,10 @@
   flex-direction: column;
   gap: 24px;
   width: 100%;
+  user-select: text;
 }
 
 .messageItem {
   width: 100%;
+  user-select: text;
 }

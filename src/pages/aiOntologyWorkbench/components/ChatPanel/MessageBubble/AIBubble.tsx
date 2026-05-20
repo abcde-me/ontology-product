@@ -268,53 +268,60 @@ const AIBubble: React.FC<AIBubbleProps> = ({
     <div className={styles.aiBubbleContainer}>
       {/* 移除 AI 头像 */}
       <div className={styles.aiBubble}>
-        {/* 思维链 - 使用 @ceai-front/chat 的 ThinkChain 组件 */}
-        {hasThinkingSteps && (
-          <ThinkChain
-            steps={convertedSteps}
-            done={isDone || isAbort}
-            defaultOpen={true}
-            defaultStepOpen={false}
-            showDebug={false}
-          />
-        )}
-
-        {/* 正文内容 - Markdown */}
-        {hasContent && (
-          <div className={styles.aiContent}>
-            <MarkdownRenderer content={content} />
-          </div>
-        )}
-
-        {/* 本体操作卡片 - 显示在正文下方 */}
-        {displayActions.length > 0 && (
-          <div className={styles.ontologyActions}>
-            {displayActions.map((action, index) => (
-              <OntologyActionCard
-                key={`${action.code}-${index}`}
-                action={action}
-                ontologyId={ontologyId}
-                onLocate={onLocateNode}
-                onView={onViewNode}
+        {/* 中止状态 - 如果没有内容，只显示中止提示，不显示思维链 */}
+        {isAbort && !hasContent ? (
+          <div className={styles.abortMessage}>您中途停止生成回答</div>
+        ) : (
+          <>
+            {/* 思维链 - 使用 @ceai-front/chat 的 ThinkChain 组件 */}
+            {hasThinkingSteps && (
+              <ThinkChain
+                steps={convertedSteps}
+                done={isDone || isAbort}
+                defaultOpen={true}
+                defaultStepOpen={false}
+                showDebug={false}
               />
-            ))}
-          </div>
-        )}
+            )}
 
-        {/* 错误状态 */}
-        {isError && (
-          <div className={styles.errorMessage}>
-            {content || '生成失败，请重试'}
-          </div>
-        )}
+            {/* 正文内容 - Markdown */}
+            {hasContent && (
+              <div className={styles.aiContent}>
+                <MarkdownRenderer content={content} />
+              </div>
+            )}
 
-        {/* 流式加载指示器 - 当没有任何内容且正在加载时显示 */}
-        {(isLoading || (isStreaming && !hasAnyContent)) && (
-          <div className={styles.loadingIndicator}>
-            <span className={styles.dot}></span>
-            <span className={styles.dot}></span>
-            <span className={styles.dot}></span>
-          </div>
+            {/* 本体操作卡片 - 显示在正文下方 */}
+            {displayActions.length > 0 && (
+              <div className={styles.ontologyActions}>
+                {displayActions.map((action, index) => (
+                  <OntologyActionCard
+                    key={`${action.code}-${index}`}
+                    action={action}
+                    ontologyId={ontologyId}
+                    onLocate={onLocateNode}
+                    onView={onViewNode}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* 错误状态 */}
+            {isError && (
+              <div className={styles.errorMessage}>
+                {content || '生成失败，请重试'}
+              </div>
+            )}
+
+            {/* 流式加载指示器 - 当没有任何内容且正在加载时显示 */}
+            {(isLoading || (isStreaming && !hasAnyContent)) && (
+              <div className={styles.loadingIndicator}>
+                <span className={styles.dot}></span>
+                <span className={styles.dot}></span>
+                <span className={styles.dot}></span>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

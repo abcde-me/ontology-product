@@ -933,6 +933,8 @@ export const ModaForgeResourceEndpoints = {
   // 文件上传
   UploadFileApi: PrefixAiAppforgeFile + '/createMultipartUpload',
   CompleteMultipartUploadApi: PrefixAiAppforgeFile + '/completeMultipartUpload',
+  ConvertToPDFApi: PrefixAiAppforge + '/ConvertToPDF',
+  DeleteFile: PrefixAiAppforgeFile + '/deleteFile', // 应用广场详情对话上传文件删除(参数配置)
   // 创建本体agent
   CreateOntologyAgentApi: PrefixAimdp + '/CreateOntologyAgent'
 };

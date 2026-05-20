@@ -261,11 +261,23 @@ export const useXChat = (config: UseChatConfig): UseChatReturn => {
     setIsStreaming(false);
     setIsLoading(false);
 
-    // 将最后一条消息标记为中止状态
+    // 将最后一条消息标记为中止状态，并完成所有未完成的思维链步骤
     setMessages((draft) => {
       const lastIndex = draft.length - 1;
       if (lastIndex >= 0 && draft[lastIndex].type === 'assistant') {
         draft[lastIndex].status = 'abort';
+
+        // 将所有未完成的思考步骤标记为完成
+        const steps = draft[lastIndex].thinkingSteps;
+        if (steps && steps.length > 0) {
+          steps.forEach((step) => {
+            if (!step.done) {
+              step.done = true;
+              // 可以选择标记为 abort 状态，或者保持原状态
+              // step.status = 'abort';
+            }
+          });
+        }
       }
     });
   }, [disconnectStream, setIsStreaming, setIsLoading, setMessages]);
