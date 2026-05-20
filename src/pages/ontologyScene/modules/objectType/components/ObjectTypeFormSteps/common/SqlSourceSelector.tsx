@@ -616,7 +616,7 @@ export default function SqlSourceSelector({
                 <Tooltip
                   content={!canTriggerSqlAction ? '请先输入自定义SQL' : ''}
                 >
-                  <span>
+                  {/* <span>
                     <Button
                       type="text"
                       size="small"
@@ -626,7 +626,7 @@ export default function SqlSourceSelector({
                     >
                       测试
                     </Button>
-                  </span>
+                  </span> */}
                 </Tooltip>
                 <Tooltip
                   content={

@@ -77,6 +77,8 @@ export interface ObjectTypeDetailData {
   filePath?: string;
   sourceDataInfo?: SourceDataInfo;
   enableSyncSourceData?: boolean;
+  /** 与列表一致：开启数据源同步且同步任务开启时不可编辑 */
+  syncEnabled?: boolean;
   syncSourceDataStrategy?: SyncSourceDataStrategy;
 }
 
@@ -155,6 +157,7 @@ const convertDetailResToDetailData = (
     filePath: detailRes.filePath,
     sourceDataInfo: detailRes.sourceDataInfo,
     enableSyncSourceData: detailRes.enableSyncSourceData,
+    syncEnabled: detailRes.syncEnabled,
     syncSourceDataStrategy: detailRes.syncSourceDataStrategy
       ? ({
           sourceDataInfo: detailRes.syncSourceDataStrategy.sourceDataInfo,
@@ -875,6 +878,11 @@ export default function ObjectTypeDetailDrawer({
   };
 
   const displayData: ObjectTypeDetailData | undefined = basicInfo;
+
+  const isEditDisabled = Boolean(
+    displayData?.enableSyncSourceData && displayData?.syncEnabled
+  );
+
   const syncStatusConfig =
     OBJECT_TYPE_SYNC_STATUS_CONFIG[
       displayData?.syncStatus ?? SyncStatus.NOT_SYNC
@@ -901,6 +909,7 @@ export default function ObjectTypeDetailDrawer({
       onCancel={onClose}
       title="对象类型详情"
       onEdit={handleEdit}
+      editDisabled={isEditDisabled}
       footer={null}
       className={styles['object-type-detail-drawer']}
     >
@@ -1006,7 +1015,7 @@ export default function ObjectTypeDetailDrawer({
         >
           <DataSourceInfo
             sourceType={basicInfo?.sourceType}
-            sourceDataInfo={basicInfo?.syncSourceDataStrategy?.sourceDataInfo}
+            sourceDataInfo={basicInfo?.sourceDataInfo}
             filePath={basicInfo?.filePath}
           />
         </CollapsibleSection>

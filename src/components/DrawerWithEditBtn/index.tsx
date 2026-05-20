@@ -1,5 +1,11 @@
 import React, { ComponentProps, DetailedHTMLProps } from 'react';
-import { Button, Drawer, DrawerProps, ResizeBox } from '@arco-design/web-react';
+import {
+  Button,
+  Drawer,
+  DrawerProps,
+  ResizeBox,
+  Tooltip
+} from '@arco-design/web-react';
 import styles from './index.module.scss';
 import { IconClose } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
@@ -9,6 +15,12 @@ import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 
 export interface DrawerWithEditBtnProps extends DrawerProps {
   onEdit?: () => void;
+  /**
+   * 为 true 时编辑按钮禁用（仍展示），与对象类型/链接列表「同步开启中不可编辑」一致
+   */
+  editDisabled?: boolean;
+  /** 禁用时 Tooltip 文案，默认与列表编辑按钮提示一致 */
+  editDisabledTooltip?: string;
   extra?: React.ReactNode;
   /**
    * 权限点
@@ -52,6 +64,8 @@ export const DrawerWithEditBtn = (props: DrawerWithEditBtnProps) => {
   const {
     className,
     onEdit,
+    editDisabled = false,
+    editDisabledTooltip = '当前状态不支持编辑，停止后方可编辑',
     title,
     onCancel,
     extra,
@@ -129,9 +143,22 @@ export const DrawerWithEditBtn = (props: DrawerWithEditBtnProps) => {
             {extra && <div className="ml-4">{extra}</div>}
             {onEdit && (
               <PermissionWrapper permission={permission}>
-                <Button type={'default'} size={'small'} onClick={onEdit}>
-                  编辑
-                </Button>
+                <Tooltip
+                  content={editDisabled ? editDisabledTooltip : undefined}
+                  disabled={!editDisabled}
+                  position="bottom"
+                >
+                  <span>
+                    <Button
+                      type={'default'}
+                      size={'small'}
+                      onClick={onEdit}
+                      disabled={editDisabled}
+                    >
+                      编辑
+                    </Button>
+                  </span>
+                </Tooltip>
               </PermissionWrapper>
             )}
           </div>

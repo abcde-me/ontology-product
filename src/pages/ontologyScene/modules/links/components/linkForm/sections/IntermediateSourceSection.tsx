@@ -37,6 +37,8 @@ interface IntermediateSourceSectionProps {
   ) => void;
   /** N:N 仅改名称：中间表与同步策略只读 */
   readOnly?: boolean;
+  /** N:N 仅改名称时仍允许本地 CSV 删除/重传 */
+  allowLocalCsvReUpload?: boolean;
 }
 
 export default function IntermediateSourceSection({
@@ -47,6 +49,7 @@ export default function IntermediateSourceSection({
   initialFileList,
   syncSourceDataStrategy,
   readOnly = false,
+  allowLocalCsvReUpload = false,
   onIntermediateTableTypeChange,
   onLocalCsvFileChange,
   onSyncSourceDataInfoChange,
@@ -71,14 +74,14 @@ export default function IntermediateSourceSection({
   return (
     <>
       <div className="my-[16px] flex items-center gap-[8px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
-        <span>中间表</span>
+        <span>中间表来源</span>
         <Popover content="中间表用于存储N:N关系的关联数据">
           <IconQuestionCircle className="cursor-pointer text-[#86909C]" />
         </Popover>
       </div>
 
       <FormItem
-        label="上传中间表"
+        label="数据来源类型"
         field="intermediateTable"
         rules={[
           {
@@ -111,7 +114,7 @@ export default function IntermediateSourceSection({
                 accept=".csv"
                 fileType="csv"
                 maxSize={100}
-                disabled={readOnly}
+                disabled={readOnly && !allowLocalCsvReUpload}
                 customAction={`${PrefixAimdp}/UploadOntologyEntityDataFile`}
                 fileList={initialFileList}
                 onFileChange={(file) =>
@@ -128,9 +131,6 @@ export default function IntermediateSourceSection({
 
       {intermediateTable.type === 'data_lake_sync' && (
         <>
-          <div className="my-[16px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
-            数据源
-          </div>
           <SqlSourceSelector
             form={form}
             value={syncSourceDataStrategy.sourceDataInfo}
@@ -143,6 +143,10 @@ export default function IntermediateSourceSection({
             syncSourceDataStrategyForSqlTest={syncSourceDataStrategy}
             readOnly={readOnly}
           />
+
+          <div className="my-[16px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
+            中间表同步策略
+          </div>
 
           <SyncSourceDataStrategyFormSection
             styles={styles}
