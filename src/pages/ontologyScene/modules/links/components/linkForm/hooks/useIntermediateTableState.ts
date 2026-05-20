@@ -303,6 +303,7 @@ export function useIntermediateTableState(form: any) {
       });
       clearAttributeFields();
       setFileUploaded(false);
+      setIsReUpload(false);
       setInitialFileList([]);
       clearRelationFields();
     } else {

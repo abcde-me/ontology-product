@@ -37,6 +37,8 @@ interface IntermediateSourceSectionProps {
   ) => void;
   /** N:N 仅改名称：中间表与同步策略只读 */
   readOnly?: boolean;
+  /** N:N 仅改名称时仍允许本地 CSV 删除/重传 */
+  allowLocalCsvReUpload?: boolean;
 }
 
 export default function IntermediateSourceSection({
@@ -47,6 +49,7 @@ export default function IntermediateSourceSection({
   initialFileList,
   syncSourceDataStrategy,
   readOnly = false,
+  allowLocalCsvReUpload = false,
   onIntermediateTableTypeChange,
   onLocalCsvFileChange,
   onSyncSourceDataInfoChange,
@@ -111,7 +114,7 @@ export default function IntermediateSourceSection({
                 accept=".csv"
                 fileType="csv"
                 maxSize={100}
-                disabled={readOnly}
+                disabled={readOnly && !allowLocalCsvReUpload}
                 customAction={`${PrefixAimdp}/UploadOntologyEntityDataFile`}
                 fileList={initialFileList}
                 onFileChange={(file) =>

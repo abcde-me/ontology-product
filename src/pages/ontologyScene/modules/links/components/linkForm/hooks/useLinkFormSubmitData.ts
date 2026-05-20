@@ -41,10 +41,14 @@ export function useLinkFormSubmitData({
   restrictManyToManyEditToNameOnly
 }: UseLinkFormSubmitDataParams) {
   const buildSubmitData = async (): Promise<LinkFormData | undefined> => {
+    const skipNameOnlyForLocalCsvReUpload =
+      intermediateTable.type === 'local_csv' && isReUpload;
+
     if (
       restrictManyToManyEditToNameOnly &&
       linkType === LinkType.MANY_TO_MANY &&
-      initialValues
+      initialValues &&
+      !skipNameOnlyForLocalCsvReUpload
     ) {
       await form.validate(['name']);
       const values = form.getFieldsValue();
