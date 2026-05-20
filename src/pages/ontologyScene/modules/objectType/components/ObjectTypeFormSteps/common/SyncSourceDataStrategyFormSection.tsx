@@ -345,9 +345,6 @@ export default function SyncSourceDataStrategyFormSection({
 
   return (
     <>
-      <div className="my-[16px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
-        同步策略
-      </div>
       <FormItem
         label={
           <span className="inline-flex items-center gap-[4px]">
