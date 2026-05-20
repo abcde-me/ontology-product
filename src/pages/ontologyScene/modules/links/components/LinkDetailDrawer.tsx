@@ -608,7 +608,7 @@ export default function LinkDetailDrawer({
           >
             <DataSourceInfo
               sourceType={basicInfo?.sourceType}
-              sourceDataInfo={basicInfo?.syncSourceDataStrategy?.sourceDataInfo}
+              sourceDataInfo={basicInfo?.sourceDataInfo}
               filePath={basicInfo?.filePath}
             />
           </CollapsibleSection>
@@ -628,8 +628,8 @@ export default function LinkDetailDrawer({
             }
           >
             <SyncStrategyInfo
+              enableSyncSourceData={basicInfo?.enableSyncSourceData}
               syncSourceDataStrategy={basicInfo?.syncSourceDataStrategy}
-              skipEnableCheck={true}
             />
           </CollapsibleSection>
         )}

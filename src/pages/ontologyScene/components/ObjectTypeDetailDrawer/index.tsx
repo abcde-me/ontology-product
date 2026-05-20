@@ -1006,7 +1006,7 @@ export default function ObjectTypeDetailDrawer({
         >
           <DataSourceInfo
             sourceType={basicInfo?.sourceType}
-            sourceDataInfo={basicInfo?.syncSourceDataStrategy?.sourceDataInfo}
+            sourceDataInfo={basicInfo?.sourceDataInfo}
             filePath={basicInfo?.filePath}
           />
         </CollapsibleSection>

@@ -6,6 +6,7 @@ import {
   QueryMode,
   SourceDataInfo
 } from '../CollapsibleSection/types';
+import { DETAIL_LOCAL_CSV_SOURCE_LABEL } from '@/pages/ontologyScene/common/constants';
 
 interface DataSourceInfoProps {
   sourceType?: SourceType;
@@ -54,22 +55,15 @@ export const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
     return (
       <>
         <div className="flex gap-[16px]">
-          {renderField('数据来源', sourceDataInfo?.connectorName)}
+          {renderField('数据来源', DETAIL_LOCAL_CSV_SOURCE_LABEL)}
           {renderField('文件上传', filePath)}
         </div>
       </>
     );
   }
-  console.log(
-    'sourceType',
-    sourceType,
-    SourceType.DATABASE,
-    sourceType === SourceType.DATABASE
-  );
   // 数据库/表类型
   if (sourceType === SourceType.DATABASE) {
     const queryMode = sourceDataInfo?.queryMode;
-    console.log('queryMode', queryMode, sourceDataInfo);
 
     // 自定义SQL
     if (queryMode === QueryMode.SQL || queryMode === 'sql') {
