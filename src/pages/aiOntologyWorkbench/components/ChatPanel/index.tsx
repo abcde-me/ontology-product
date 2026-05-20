@@ -20,7 +20,8 @@ import {
   getConversationList,
   deleteConversation as deleteConversationApi,
   renameConversation as renameConversationApi,
-  getAgentInfo
+  getAgentInfo,
+  convertToPDF
 } from '@/api/aiOntologyWorkbench/chat';
 
 interface PromptItem {
@@ -67,7 +68,6 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   // 文件上传相关
   const uploader = useMultipartUploader();
-  const [uploadFileList, setUploadFileList] = useState<any[]>([]);
 
   // 使用 ref 记录是否是初始加载
   const isInitialMount = useRef(true);
@@ -395,32 +395,98 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   // 文件上传配置
   const uploaderProps: Partial<UploadProps> = useMemo(
     () => ({
-      accept: '.pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif',
+      accept:
+        '.pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.xls,.xlsx,.csv,.wps,.ofd,.wav,.mp3,.ogg,.webm,.m4a,.amr,.mpga,.pcm,.bmp,.tif,.tiff',
       multiple: true,
+      data: () => ({
+        projectID: projectId ? String(projectId) : undefined,
+        source: 'AIWorkbench',
+        batch: new Date().getTime().toString()
+      }),
       customRequest: (option: any) => {
         const { file, onProgress, onSuccess, onError } = option;
 
-        uploader.uploadFile({
-          file,
-          fileKey: file.uid,
-          uploadParams: {
-            projectID: projectId ? String(projectId) : undefined,
-            isInternal: false,
-            fileName: file.name
-          },
-          onProgress: (percent) => {
-            onProgress?.(percent, file);
-          },
-          onSuccess: (res) => {
-            onSuccess?.(res, file);
-          },
-          onError: (err) => {
+        // 用于存储文件的 objectURI
+        let objectURI = '';
+
+        uploader
+          .uploadFile({
+            file,
+            uploadParams: {
+              projectID: projectId ? String(projectId) : undefined,
+              isInternal: false,
+              fileName: file.name
+            },
+            onCreated: (multipartInfo) => {
+              console.log('[ChatPanel] 文件创建成功:', multipartInfo);
+              // 保存 objectURI，用于后续获取预览 URL
+              objectURI = multipartInfo.objectURI || '';
+            },
+            onProgress: (percent) => {
+              onProgress?.(percent, file);
+            },
+            onSuccess: async (res) => {
+              console.log('[ChatPanel] 文件上传成功:', res);
+
+              // 调用 convertToPDF 获取预览 URL
+              let presignedUrl = '';
+              try {
+                const uri = res?.data?.objectURI || objectURI;
+                if (uri) {
+                  console.log(
+                    '[ChatPanel] 调用 convertToPDF 获取预览 URL:',
+                    uri
+                  );
+                  const previewRes = await convertToPDF({ uri });
+
+                  if (previewRes?.code === 'Success' && previewRes?.data?.url) {
+                    presignedUrl = previewRes.data.url;
+                    console.log('[ChatPanel] 获取预览 URL 成功:', presignedUrl);
+                  } else {
+                    console.warn(
+                      '[ChatPanel] convertToPDF 返回异常:',
+                      previewRes
+                    );
+                  }
+                }
+              } catch (err) {
+                console.error('[ChatPanel] 获取预览 URL 失败:', err);
+                // 即使获取预览 URL 失败，也要标记文件上传成功
+              }
+
+              // 构建响应数据 - 匹配 Sender 组件期望的格式
+              const response = {
+                code: 'Success',
+                statusCode: 0,
+                data: {
+                  id: file.uid,
+                  objectURI: res?.data?.objectURI || objectURI,
+                  presignedUrl: presignedUrl,
+                  name: file.name,
+                  size: file.size,
+                  mimeType: file.type
+                }
+              };
+
+              console.log('[ChatPanel] 返回给 Upload 组件的响应:', response);
+              console.log('[ChatPanel] presignedUrl 是否存在:', !!presignedUrl);
+
+              // 调用 onSuccess，Arco Upload 会自动将 response 设置到 file.response
+              onSuccess?.(response, file);
+            },
+            onError: (err) => {
+              console.error('[ChatPanel] 文件上传失败:', err);
+              Message.error(err?.message || '文件上传失败');
+              onError?.(err, file);
+            }
+          })
+          .catch((err) => {
+            console.error('[ChatPanel] 文件上传异常:', err);
             Message.error(err?.message || '文件上传失败');
             onError?.(err, file);
-          }
-        });
-      },
-      onChange: setUploadFileList
+          });
+      }
+      // 注意：不要设置 onChange，让 Sender 组件内部的 FileUploader 管理文件列表
     }),
     [uploader, projectId]
   );
@@ -452,19 +518,33 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     (params: { text: string; files?: any[]; enableDeepThink: boolean }) => {
       const { text, files = [], enableDeepThink } = params;
 
+      console.log('[ChatPanel] 发送消息:', { text, files, enableDeepThink });
+
       // 清除新建会话标记（用户开始发送消息）
       isUserNewSession.current = false;
 
-      // 过滤出已上传完成的文件
+      // 过滤出已上传完成的文件，并转换为正确的格式
       const uploadedFiles = files
         .filter((file) => file.status === 'done')
-        .map((file) => ({
-          id: file.uid,
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          url: file.response?.data?.objectURI || ''
-        }));
+        .map((file) => {
+          const fileData = {
+            id: file.response?.data?.id || file.uid,
+            name: file.name || file.originFile?.name,
+            size: file.size || file.originFile?.size,
+            type: file.type || file.originFile?.type,
+            // 使用 presignedUrl 作为预览 URL（用于图片显示）
+            // 使用 objectURI 作为存储路径（用于后端处理）
+            url:
+              file.response?.data?.presignedUrl ||
+              file.response?.data?.objectURI ||
+              '',
+            objectURI: file.response?.data?.objectURI || ''
+          };
+          console.log('[ChatPanel] 文件数据:', fileData);
+          return fileData;
+        });
+
+      console.log('[ChatPanel] 已上传文件:', uploadedFiles);
 
       // 调用 sendMessage，传递对象参数
       sendMessage({
@@ -473,8 +553,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         enableDeepThink
       });
 
-      // 发送后清空文件列表
-      setUploadFileList([]);
+      // 注意：不需要手动清空文件列表，Sender 组件会自己处理
     },
     [sendMessage]
   );

@@ -4,6 +4,7 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import { useInfiniteScroll } from 'ahooks';
 import { GlobalTooltip } from '@ceai-front/arco-material';
 import { useAIWorkbenchStore } from '../store';
+import { useUserInfoStore } from '@/store/userInfoStore';
 import SceneModal from '@/pages/ontologyScene/modules/list/components/SceneModal';
 import { useOntologyManagement } from '../hooks/useOntologyManagement';
 import { getIconComponent } from '../utils/iconHelper';
@@ -21,6 +22,7 @@ interface InfiniteScrollData {
  */
 const OntologySelector: React.FC = () => {
   const { currentOntology, setCurrentOntology } = useAIWorkbenchStore();
+  const { projectId } = useUserInfoStore();
   const {
     createModalVisible,
     createLoading,
@@ -64,7 +66,7 @@ const OntologySelector: React.FC = () => {
         hasMore: false
       };
     },
-    [currentOntology, setCurrentOntology]
+    []
   );
 
   /**
@@ -81,6 +83,21 @@ const OntologySelector: React.FC = () => {
   );
 
   const ontologyList = data?.list || [];
+
+  /**
+   * 监听 projectId 变化，重新加载本体列表
+   */
+  React.useEffect(() => {
+    console.log(
+      '[OntologySelector] projectId 变化，重新加载本体列表:',
+      projectId
+    );
+    if (projectId && projectId.length > 0) {
+      // 项目切换时，清空当前本体并重新加载列表
+      // 注意：不要在这里调用 reload()，因为会触发 loadOntologyList 自动选择第一个本体
+      // 我们需要在主页面中处理项目切换的逻辑
+    }
+  }, [projectId, setCurrentOntology]);
 
   /**
    * 监听下拉菜单打开，触发加载

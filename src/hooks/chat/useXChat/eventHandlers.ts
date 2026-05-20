@@ -226,6 +226,7 @@ const extractOntologyAction = (response: any): any | null => {
     ) {
       const result = {
         action_type: responseData.data.action_type,
+        target_type: responseData.data.target_type, // 添加 target_type 字段
         code: responseData.data.code,
         name: responseData.data.name
       };

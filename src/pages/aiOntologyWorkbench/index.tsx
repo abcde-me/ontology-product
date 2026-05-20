@@ -109,14 +109,38 @@ const AIOntoWorkbench: React.FC = () => {
     // TODO: 收起左侧菜单 - 需要与布局组件集成
     // setLeftMenuCollapsed(true);
 
-    // 加载本体列表
-    loadOntologyList();
+    // 加载本体列表（初始加载时自动选择第一个）
+    loadOntologyList(1, 20, true);
 
     // 组件卸载时恢复左侧菜单
     // return () => {
     //   setLeftMenuCollapsed(false);
     // };
-  }, [loadOntologyList]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 只在组件挂载时执行一次
+
+  // 监听 projectId 变化，重新加载本体列表
+  useEffect(() => {
+    // 跳过初始加载（projectId 为 undefined 或空数组）
+    if (!projectId || projectId.length === 0) {
+      return;
+    }
+
+    console.log(
+      '[AIOntoWorkbench] projectId 变化，重新加载本体列表:',
+      projectId
+    );
+
+    // 清空当前本体
+    useAIWorkbenchStore.setState({ currentOntology: null });
+
+    // 清空图谱数据
+    useAIWorkbenchStore.setState({ graphData: null });
+
+    // 重新加载本体列表（项目切换时不自动选择第一个）
+    loadOntologyList(1, 20, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId?.[1]]); // 只监听实际的 projectId（数组的第二个元素）
 
   // 监听当前本体变化，检查并创建 Agent
   useEffect(() => {

@@ -98,6 +98,7 @@ const ChatView: React.FC<ChatViewProps> = ({
           <div
             ref={messageListRef}
             className={`flex-1 overflow-y-auto px-[20px] pb-5 pt-[8px] ${styles.scrollbarHide}`}
+            style={{ userSelect: 'text' }}
           >
             <MessageList
               messages={messages}

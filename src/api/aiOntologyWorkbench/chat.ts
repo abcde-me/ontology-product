@@ -222,3 +222,71 @@ export const completeMultipartUpload = async (params: {
     .do();
   return response;
 };
+
+/**
+ * 转换文件为 PDF（获取预览 URL）
+ */
+export const convertToPDF = async (params: { uri: string }) => {
+  const response = await UAPI.RES.ConvertToPDFApi({})
+    .post(params)
+    .inRegion()
+    .do();
+  return response;
+};
+
+/**
+ * 打开文件预览（在新窗口中）
+ */
+export const openPreview = (
+  url: string,
+  isPreview: boolean,
+  fileType: string
+) => {
+  return fetch(url)
+    .then((res) => {
+      return res.blob();
+    })
+    .then((blob) => {
+      const pdfBlob = new Blob([blob], { type: fileType });
+      const previewUrl = URL.createObjectURL(pdfBlob);
+      if (isPreview) {
+        window.open(previewUrl, '_blank');
+      }
+      return previewUrl;
+    });
+};
+
+// 删除文件
+export async function DeleteFile(
+  params: { projectID?: string; objectPath?: string } = {
+    projectID: '',
+    objectPath: ''
+  }
+) {
+  return await UAPI.RES.DeleteFile({})
+    .post({
+      projectID: params.projectID ?? '',
+      objectPath: params.objectPath ?? ''
+    })
+    .inRegion()
+    .do();
+}
+// 获取预览地址
+export async function PreviewFile(params) {
+  return await UAPI.RES.ConvertToPDFApi({}).post(params).inRegion().do();
+}
+// 文件预览
+export function OpenPreview(url: string, isPreview: boolean, fileType: string) {
+  return fetch(url)
+    .then((res) => {
+      return res.blob();
+    })
+    .then((blob) => {
+      const pdfBlob = new Blob([blob], { type: fileType });
+      const previewUrl = URL.createObjectURL(pdfBlob);
+      if (isPreview) {
+        window.open(previewUrl, '_blank');
+      }
+      return previewUrl;
+    });
+}

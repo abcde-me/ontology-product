@@ -48,6 +48,15 @@ const OntologyActionCard: React.FC<OntologyActionCardProps> = ({
     code
   } = action;
 
+  // 调试日志：查看实际的数据
+  console.log('[OntologyActionCard] 渲染卡片，数据:', {
+    actionType,
+    targetType,
+    name,
+    code,
+    fullAction: action
+  });
+
   // 忽略 list 操作
   if (actionType === OntologyActionType.LIST) {
     return null;
@@ -62,10 +71,24 @@ const OntologyActionCard: React.FC<OntologyActionCardProps> = ({
   // 是否显示定位图标
   // 1. 只有 object_type 和 link 类型才可能显示
   // 2. delete 操作不显示定位图标（数据已删除）
+  // 注意：后端可能返回不同的字段值，需要做兼容处理
   const showLocate =
     actionType !== OntologyActionType.DELETE &&
     (targetType === OntologyTargetType.OBJECT_TYPE ||
-      targetType === OntologyTargetType.LINK);
+      targetType === 'object_type' || // 兼容字符串
+      targetType === OntologyTargetType.LINK ||
+      targetType === 'link'); // 兼容字符串
+
+  console.log('[OntologyActionCard] 显示逻辑判断:', {
+    showExport,
+    showLocate,
+    actionType,
+    targetType,
+    isNotDelete: actionType !== OntologyActionType.DELETE,
+    isObjectType: targetType === OntologyTargetType.OBJECT_TYPE,
+    isLink: targetType === OntologyTargetType.LINK,
+    OntologyTargetTypeEnum: OntologyTargetType
+  });
 
   const actionText = ACTION_TEXT_MAP[actionType] || actionType;
 
