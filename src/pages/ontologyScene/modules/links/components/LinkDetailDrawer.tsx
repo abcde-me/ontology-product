@@ -334,6 +334,10 @@ export default function LinkDetailDrawer({
 
   const displayData = basicInfo;
 
+  const isEditDisabled = Boolean(
+    displayData?.enableSyncSourceData && displayData?.syncEnabled
+  );
+
   const instanceCount = useMemo(() => {
     return instancesPagination.total || 0;
   }, [instancesPagination.total]);
@@ -463,6 +467,7 @@ export default function LinkDetailDrawer({
       onCancel={onClose}
       title="链接详情"
       onEdit={handleEdit}
+      editDisabled={isEditDisabled}
       footer={null}
     >
       <div className="flex flex-col gap-[24px]">
