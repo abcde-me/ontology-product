@@ -246,7 +246,7 @@ export default function SyncSourceDataStrategyFormSection({
             </span>
             <Space size={8}>
               <Tooltip content={!canTest ? `请先输入${title}` : ''}>
-                <span>
+                {/* <span>
                   <Button
                     type="text"
                     size="small"
@@ -256,7 +256,7 @@ export default function SyncSourceDataStrategyFormSection({
                   >
                     测试
                   </Button>
-                </span>
+                </span> */}
               </Tooltip>
             </Space>
           </div>
@@ -345,9 +345,6 @@ export default function SyncSourceDataStrategyFormSection({
 
   return (
     <>
-      <div className="my-[16px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
-        同步策略
-      </div>
       <FormItem
         label={
           <span className="inline-flex items-center gap-[4px]">

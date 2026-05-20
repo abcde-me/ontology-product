@@ -461,6 +461,10 @@ export interface GetOntologyObjectTypeDetailRes
    */
   enableSyncSourceData?: boolean;
   /**
+   * 是否开启实例同步任务（与列表、编辑页可用性一致）
+   */
+  syncEnabled?: boolean;
+  /**
    * 同步策略信息
    */
   syncSourceDataStrategy?: {
