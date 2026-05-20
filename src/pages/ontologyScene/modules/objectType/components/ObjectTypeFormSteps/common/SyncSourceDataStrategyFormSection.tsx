@@ -246,7 +246,7 @@ export default function SyncSourceDataStrategyFormSection({
             </span>
             <Space size={8}>
               <Tooltip content={!canTest ? `请先输入${title}` : ''}>
-                <span>
+                {/* <span>
                   <Button
                     type="text"
                     size="small"
@@ -256,7 +256,7 @@ export default function SyncSourceDataStrategyFormSection({
                   >
                     测试
                   </Button>
-                </span>
+                </span> */}
               </Tooltip>
             </Space>
           </div>
