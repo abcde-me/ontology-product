@@ -6,6 +6,10 @@ import {
   QueryMode,
   SourceDataInfo
 } from '../CollapsibleSection/types';
+import {
+  DETAIL_LOCAL_CSV_SOURCE_LABEL,
+  DETAIL_DATABASE_TABLE_SOURCE_LABEL
+} from '@/pages/ontologyScene/common/constants';
 
 interface DataSourceInfoProps {
   sourceType?: SourceType;
@@ -54,22 +58,17 @@ export const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
     return (
       <>
         <div className="flex gap-[16px]">
-          {renderField('数据来源', sourceDataInfo?.connectorName)}
+          {renderField('数据来源', DETAIL_LOCAL_CSV_SOURCE_LABEL)}
           {renderField('文件上传', filePath)}
         </div>
       </>
     );
   }
-  console.log(
-    'sourceType',
-    sourceType,
-    SourceType.DATABASE,
-    sourceType === SourceType.DATABASE
-  );
   // 数据库/表类型
   if (sourceType === SourceType.DATABASE) {
     const queryMode = sourceDataInfo?.queryMode;
-    console.log('queryMode', queryMode, sourceDataInfo);
+    const databaseDisplay =
+      sourceDataInfo?.connectorSubtype || sourceDataInfo?.databaseName || '-';
 
     // 自定义SQL
     if (queryMode === QueryMode.SQL || queryMode === 'sql') {
@@ -90,8 +89,8 @@ export const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
       return (
         <>
           <div className="mb-[12px] flex gap-[16px]">
-            {renderField('数据来源', sourceDataInfo?.connectorName)}
-            {renderField('数据库', sourceDataInfo?.connectorSubtype)}
+            {renderField('数据来源', DETAIL_DATABASE_TABLE_SOURCE_LABEL)}
+            {renderField('数据库', databaseDisplay)}
           </div>
           <div className="flex gap-[16px]">
             {renderField('数据表', tableDisplay)}
@@ -117,8 +116,8 @@ export const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
     return (
       <>
         <div className="mb-[12px] flex gap-[16px]">
-          {renderField('数据来源', sourceDataInfo?.connectorName)}
-          {renderField('数据库', sourceDataInfo?.connectorSubtype)}
+          {renderField('数据来源', DETAIL_DATABASE_TABLE_SOURCE_LABEL)}
+          {renderField('数据库', databaseDisplay)}
         </div>
         <div className="flex gap-[16px]">
           {renderField('数据表', tableDisplay)}

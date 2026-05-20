@@ -220,8 +220,7 @@ export default function OntologySceneObjectTypeList() {
           : await pauseSyncObjectTypeTask(params);
 
         if (res.status === 200 && res.code === '') {
-          const succeed =
-            res?.data?.succeed || (res as any)?.data?.data?.succeed;
+          const succeed = res?.data?.succeed;
           if (succeed === '1') {
             Message.success(checked ? '启动同步成功' : '暂停同步成功');
             // 刷新列表以获取最新状态

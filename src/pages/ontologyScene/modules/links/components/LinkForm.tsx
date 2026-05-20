@@ -82,12 +82,16 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     const nnNameOnlyEdit =
       restrictManyToManyEditToNameOnly && linkType === LinkType.MANY_TO_MANY;
 
+    const allowLocalCsvReUpload =
+      nnNameOnlyEdit && intermediateTable.type === 'local_csv';
+    const localCsvReUploadActive = allowLocalCsvReUpload && isReUpload;
+
     const attributeColumns = useAttributeFieldColumns({
       form,
       attributeFields,
       setAttributeFields,
       intermediateTable,
-      readOnly: nnNameOnlyEdit
+      readOnly: nnNameOnlyEdit && !localCsvReUploadActive
     });
 
     const { buildSubmitData } = useLinkFormSubmitData({
@@ -285,6 +289,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                   initialFileList={initialFileList}
                   syncSourceDataStrategy={syncSourceDataStrategy}
                   readOnly={nnNameOnlyEdit}
+                  allowLocalCsvReUpload={allowLocalCsvReUpload}
                   onIntermediateTableTypeChange={
                     handleIntermediateTableTypeChange
                   }
@@ -301,7 +306,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                   form={form}
                   fileUploaded={fileUploaded}
                   attributeOptions={getAttributeOptions()}
-                  readOnly={nnNameOnlyEdit}
+                  readOnly={nnNameOnlyEdit && !localCsvReUploadActive}
                 />
 
                 <AttributeMappingSection

@@ -212,6 +212,10 @@ export interface GetOntologyLinkTypeRes {
    */
   enableSyncSourceData?: boolean;
   /**
+   * 是否开启实例同步任务（与对象类型列表编辑禁用逻辑一致）
+   */
+  syncEnabled?: boolean;
+  /**
    * 数据表名称
    */
   linkTableName?: string;
