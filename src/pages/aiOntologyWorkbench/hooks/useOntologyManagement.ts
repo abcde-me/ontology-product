@@ -21,9 +21,12 @@ export const useOntologyManagement = () => {
 
   /**
    * 加载本体列表
+   * @param pageNo 页码
+   * @param pageSize 每页数量
+   * @param autoSelectFirst 是否自动选择第一个本体（默认 true）
    */
   const loadOntologyList = useCallback(
-    async (pageNo = 1, pageSize = 20) => {
+    async (pageNo = 1, pageSize = 20, autoSelectFirst = true) => {
       setOntologyListLoading(true);
       try {
         const res = await listOntologyModel({
@@ -38,10 +41,10 @@ export const useOntologyManagement = () => {
           // 如果是第一页，直接设置列表
           if (pageNo === 1) {
             setOntologyList(list);
-            // 只在没有当前本体时，才设置默认选中第一个
+            // 只在没有当前本体且 autoSelectFirst 为 true 时，才设置默认选中第一个
             const currentOntology =
               useAIWorkbenchStore.getState().currentOntology;
-            if (list.length > 0 && !currentOntology) {
+            if (list.length > 0 && !currentOntology && autoSelectFirst) {
               console.log('[useOntologyManagement] 设置默认本体:', list[0].id);
               setCurrentOntology(list[0]);
             }
