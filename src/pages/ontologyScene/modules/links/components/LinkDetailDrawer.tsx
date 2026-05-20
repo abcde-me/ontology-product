@@ -42,6 +42,10 @@ import {
   OBJECT_TYPE_ICON_OPTIONS
 } from '@/pages/ontologyScene/common/constants';
 import { isNil } from 'lodash-es';
+import {
+  normalizeLinkDetailSourceDataInfo,
+  normalizeLinkDetailSyncSourceDataStrategy
+} from '../utils/normalizeLinkDetailSourceDataInfo';
 
 const TabPane = Tabs.TabPane;
 
@@ -254,71 +258,6 @@ export default function LinkDetailDrawer({
       setBasicInfoLoading(true);
       try {
         const res = await fetchBasicInfoFn(resolvedLinkId);
-
-        // TODO: MOCK 数据 - 用于测试显示效果，后端接口返回真实数据后删除
-        const mockData = {
-          ...res,
-          // Mock 数据源 - 情况1: 本地CSV
-          // sourceType: 2,
-          // filePath: '/uploads/data/link_data.csv',
-          // sourceDataInfo: {
-          //   connectorName: '本地文件',
-          // },
-
-          // Mock 数据源 - 情况2: 数据库/表-选择数据表
-          // sourceType: 1,
-          // sourceDataInfo: {
-          //   queryMode: 'selected',
-          //   connectorId: 2,
-          //   connectorName: 'PostgreSQL数据源',
-          //   connectorType: 'PostgreSQL',
-          //   connectorSubtype: 'PostgreSQL 14',
-          //   databaseName: 'link_db',
-          //   tableName: 'relationship_table',
-          // },
-
-          // Mock 数据源 - 情况3: 数据库/表-自定义SQL
-          sourceType: 1,
-          sourceDataInfo: {
-            queryMode: 'sql',
-            connectorId: 2,
-            connectorName: 'PostgreSQL数据源',
-            connectorType: 'PostgreSQL',
-            connectorSubtype: 'PostgreSQL 14',
-            databaseName: 'link_db',
-            sql: 'SELECT source_id, target_id, relation_type FROM relationships WHERE is_active = true'
-          },
-
-          // Mock 同步策略 - 有同步策略（轮询模式）
-          enableSyncSourceData: true,
-          syncSourceDataStrategy: {
-            mode: 'JDBC_POLLING',
-            conflictStrategy: 'KEEP_TARGET',
-            syncScope: 'FULL_THEN_INCREMENTAL',
-            pollFetchSize: 500,
-            parallelism: 2,
-            exceptionStrategy: 'LOG_ERROR_AND_CONTINUE',
-            jdbcSyncSqlFull:
-              'SELECT * FROM relationships WHERE created_at <= NOW()',
-            jdbcSyncSqlIncrement:
-              'SELECT * FROM relationships WHERE updated_at > ${last_sync_time}'
-          }
-
-          // Mock 同步策略 - 有同步策略（CDC模式）
-          // enableSyncSourceData: true,
-          // syncSourceDataStrategy: {
-          //   mode: 'BINLOG_CDC',
-          //   conflictStrategy: 'KEEP_SOURCE',
-          //   syncScope: 'INCREMENTAL',
-          //   pollFetchSize: 1000,
-          //   parallelism: 4,
-          //   exceptionStrategy: 'STOP_ON_ERROR',
-          // },
-
-          // Mock 同步策略 - 无同步策略
-          // enableSyncSourceData: false,
-        };
-
         setBasicInfo(res);
       } catch (e) {
         Message.error('加载基本信息失败');
@@ -333,6 +272,20 @@ export default function LinkDetailDrawer({
   }, [visible, resolvedLinkId]);
 
   const displayData = basicInfo;
+
+  const displaySourceDataInfo = useMemo(
+    () =>
+      basicInfo ? normalizeLinkDetailSourceDataInfo(basicInfo) : undefined,
+    [basicInfo]
+  );
+
+  const displaySyncSourceDataStrategy = useMemo(
+    () =>
+      basicInfo
+        ? normalizeLinkDetailSyncSourceDataStrategy(basicInfo)
+        : undefined,
+    [basicInfo]
+  );
 
   const isEditDisabled = Boolean(
     displayData?.enableSyncSourceData && displayData?.syncEnabled
@@ -561,7 +514,7 @@ export default function LinkDetailDrawer({
         {/* 关系对 */}
         <CollapsibleSection
           title="关系对"
-          defaultExpanded={false}
+          defaultExpanded={true}
           loading={basicInfoLoading}
           expandIcon={
             <ExpandIcon className="h-[16px] w-[16px] flex-shrink-0 text-[var(--color-text-3)]" />
@@ -613,7 +566,7 @@ export default function LinkDetailDrawer({
           >
             <DataSourceInfo
               sourceType={basicInfo?.sourceType}
-              sourceDataInfo={basicInfo?.sourceDataInfo}
+              sourceDataInfo={displaySourceDataInfo}
               filePath={basicInfo?.filePath}
             />
           </CollapsibleSection>
@@ -633,8 +586,8 @@ export default function LinkDetailDrawer({
             }
           >
             <SyncStrategyInfo
-              enableSyncSourceData={basicInfo?.enableSyncSourceData}
-              syncSourceDataStrategy={basicInfo?.syncSourceDataStrategy}
+              skipEnableCheck
+              syncSourceDataStrategy={displaySyncSourceDataStrategy}
             />
           </CollapsibleSection>
         )}

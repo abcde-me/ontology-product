@@ -122,6 +122,9 @@ export type DataSourceType =
 /** 详情页：来源类型为本地 CSV 时「数据来源」展示文案 */
 export const DETAIL_LOCAL_CSV_SOURCE_LABEL = '本地CSV导入';
 
+/** 详情页：来源类型为数据库/表 时「数据来源」展示文案 */
+export const DETAIL_DATABASE_TABLE_SOURCE_LABEL = '数据库/表';
+
 export const COLUMN_TYPE_OPTIONS = [
   {
     label: 'tinyint',
