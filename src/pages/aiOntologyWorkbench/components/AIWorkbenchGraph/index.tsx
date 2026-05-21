@@ -347,6 +347,28 @@ export default function AIWorkbenchGraph() {
     [OSId, history]
   );
 
+  // 禁用右键菜单
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      // 检查是否在图谱区域内
+      const target = e.target as HTMLElement;
+      const isInWorkflow = target.closest('.react-flow');
+
+      if (isInWorkflow) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    };
+
+    // 添加事件监听器，使用捕获阶段以确保优先处理
+    document.addEventListener('contextmenu', handleContextMenu, true);
+
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu, true);
+    };
+  }, []);
+
   // 监听本体切换，重新加载图谱数据
   useEffect(() => {
     console.log(
@@ -471,6 +493,7 @@ export default function AIWorkbenchGraph() {
             });
           }
         }}
+        contextMenu={null} // 禁用右键菜单（隐藏"添加节点"和"添加注释"面板）
         rightPanels={[]} // 禁用右侧面板
         subHeader={{ fullyCustomSubheader: <CustomSubHeader /> }}
       >

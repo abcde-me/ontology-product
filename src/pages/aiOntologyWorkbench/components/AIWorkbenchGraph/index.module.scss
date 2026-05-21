@@ -40,6 +40,18 @@
   :global(.react-flow__node-default) {
     padding: 0 !important;
   }
+
+  // 隐藏右键菜单（添加节点、添加注释面板）
+  :global {
+    .wk-context-menu,
+    .wk-pane-context-menu,
+    .workflow-context-menu,
+    [class*='context-menu'],
+    [class*='contextmenu'],
+    [class*='pane-menu'] {
+      display: none !important;
+    }
+  }
 }
 
 // 行为 Tooltip 的样式
