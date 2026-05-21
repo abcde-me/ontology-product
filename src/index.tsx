@@ -4,6 +4,7 @@ import '@arco-themes/react-aiux2026/css/arco.css';
 import '@ccf2e/arco-material/dist/css/index.css';
 import '@ccf2e/arco-material/lib/style/css.js';
 import '@ceai-front/arco-material/dist/index.css';
+import '@ceai-front/chat/dist/index.css';
 import '@ccf2e/arco-material';
 import './index.css';
 import './style/ai.theme.scss';

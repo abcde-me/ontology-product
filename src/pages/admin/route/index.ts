@@ -41,6 +41,14 @@ export const routes: IRoute[] = [
     children: [],
     permission: ONTOLOGY_PERMISSIONS.LIST
   },
+  // AI 本体工作台
+  {
+    name: 'aiOntologyWorkbench',
+    key: '/tenant/compute/onto/aiOntologyWorkbench',
+    component: React.lazy(async () => import('../../aiOntologyWorkbench')),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
   // 本体场景库
   {
     name: 'ontologyScene',

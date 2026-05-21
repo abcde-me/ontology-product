@@ -89,6 +89,10 @@ export interface OntologScene {
    * 修改人
    */
   updateUser?: string;
+  /**
+   * AI Agent 应用 ID
+   */
+  appID?: string;
 }
 
 export interface ListOntologyModelRes {

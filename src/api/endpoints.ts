@@ -16,6 +16,8 @@ export const PrefixV2 = '/api/aiap/v1'; // '/api/aiap/v1';
 export const PrefixAuth = '/api/auth/v1';
 export const PrefixV1 = '/api/v1';
 export const PrefixAimdp = API_PREFIX + '/ontology-manager/api/v1';
+export const PrefixAiAppforge = API_PREFIX + '/appforge/api/v1'; // ai-appforge (需要 /ceai 前缀)
+export const PrefixAiAppforgeFile = API_PREFIX + '/compute/api/v1/file';
 export const PrefixLabelService = API_PREFIX + '/label-service/api/v1';
 export const PrefixUserCenter = API_PREFIX + '/user-space/api/v1';
 export const ResourceEndpointsV2 = {
@@ -773,6 +775,9 @@ export const ModaForgeResourceEndpoints = {
   // 获取链接类型列表
   ListOntologyLinkTypeApi: PrefixAimdp + '/ListOntologyLinkType',
 
+  // 获取当前agent的信息
+  GetAgentApi: PrefixAiAppforge + '/GetApp',
+
   // 本体场景
   // 获取本体场景列表
   ListOntologyModelApi: PrefixAimdp + '/ListOntologyModel',
@@ -912,7 +917,26 @@ export const ModaForgeResourceEndpoints = {
   // 删除数据源
   DeleteConnectorApi: PrefixAimdp + '/DeleteConnector',
   // 测试数据源连接
-  TestConnectorApi: PrefixAimdp + '/TestConnector'
+  TestConnectorApi: PrefixAimdp + '/TestConnector',
+
+  // ===================== AI本体对话相关 =====================
+  // AI对话 - 使用 appforge 的接口
+  GetAIChatCompletionsApi: PrefixAiAppforge + '/CreateMessage',
+  // 历史会话列表
+  GetAIChatHistoryApi: PrefixAiAppforge + '/ListConversation',
+  // 重命名对话名称
+  RenameAIChatApi: PrefixAiAppforge + '/UpdateConversation',
+  // 删除会话
+  DeleteAIChatApi: PrefixAiAppforge + '/DeleteConversation',
+  // 当前会话
+  GetCurrentAIChatApi: PrefixAiAppforge + '/ListMessage',
+  // 文件上传
+  UploadFileApi: PrefixAiAppforgeFile + '/createMultipartUpload',
+  CompleteMultipartUploadApi: PrefixAiAppforgeFile + '/completeMultipartUpload',
+  ConvertToPDFApi: PrefixAiAppforge + '/ConvertToPDF',
+  DeleteFile: PrefixAiAppforgeFile + '/deleteFile', // 应用广场详情对话上传文件删除(参数配置)
+  // 创建本体agent
+  CreateOntologyAgentApi: PrefixAimdp + '/CreateOntologyAgent'
 };
 
 /**

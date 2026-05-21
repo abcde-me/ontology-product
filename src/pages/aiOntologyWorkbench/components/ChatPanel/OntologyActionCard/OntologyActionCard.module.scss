@@ -1,0 +1,106 @@
+.card {
+  background: var(--color-fill-2, #f5f7fc);
+  border: 1px solid var(--color-border-1, #ebeef5);
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-top: 8px;
+
+  &:first-child {
+    margin-top: 12px;
+  }
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.iconWrapper {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-1, #0f131f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+}
+
+.name {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-1, #0f131f);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  max-width: 200px; // 最大宽度，超长截断
+}
+
+// 自定义标签样式 - 根据 Figma 设计稿
+.tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  // 新增 - 绿色
+  &[data-action-type='create'] {
+    background: var(--color-success-light-1, #edfff8);
+    color: var(--color-success-6, #0cbf92);
+  }
+
+  // 更改 - 橙色
+  &[data-action-type='update'] {
+    background: var(--color-warning-light-1, #fff9ed);
+    color: var(--color-warning-6, #f18619);
+  }
+
+  // 删除 - 红色
+  &[data-action-type='delete'] {
+    background: var(--color-danger-light-1, #fff0ed);
+    color: var(--color-danger-6, #e52e2d);
+  }
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  height: 26px;
+}
+
+.actionIcon {
+  cursor: pointer;
+  color: var(--color-text-3, #86909c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  width: 14px;
+  height: 14px;
+
+  &:hover {
+    color: var(--color-text-1, #0f131f);
+  }
+}
