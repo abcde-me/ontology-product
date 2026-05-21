@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
 import { useAIWorkbenchStore } from '../store';
 import {
@@ -22,6 +22,9 @@ export const useOntologyManagement = () => {
   // 正在创建 Agent 的本体 ID 集合（防止重复调用）
   const creatingAgentIds = useState(new Set<number>())[0];
 
+  // 使用 ref 存储 loading 状态，避免异步竞态问题
+  const loadingRef = useRef(false);
+
   /**
    * 加载本体列表
    * @param pageNo 页码
@@ -30,14 +33,16 @@ export const useOntologyManagement = () => {
    */
   const loadOntologyList = useCallback(
     async (pageNo = 1, pageSize = 20, autoSelectFirst = true) => {
-      // 如果正在加载中，跳过
-      const currentLoading = useAIWorkbenchStore.getState().ontologyListLoading;
-      if (currentLoading) {
+      // 使用 ref 检查 loading 状态，避免竞态条件
+      if (loadingRef.current) {
         console.log('[useOntologyManagement] 正在加载中，跳过重复调用');
         return { list: [], total: 0, hasMore: false };
       }
 
+      // 立即设置 loading 状态
+      loadingRef.current = true;
       setOntologyListLoading(true);
+
       try {
         const res = await listOntologyModel({
           pageNo,
@@ -77,6 +82,8 @@ export const useOntologyManagement = () => {
         Message.error('加载本体列表失败');
         return { list: [], total: 0, hasMore: false };
       } finally {
+        // 确保 loading 状态被重置
+        loadingRef.current = false;
         setOntologyListLoading(false);
       }
     },
