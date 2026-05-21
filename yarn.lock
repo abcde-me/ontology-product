@@ -1721,10 +1721,10 @@
     react-sticky "^6.0.3"
     zustand "^4.5.2"
 
-"@ceai-front/chat@^1.0.1":
-  version "1.0.1"
-  resolved "http://npm.cestc.cn/@ceai-front/chat/download/@ceai-front/chat-1.0.1.tgz#308425b4ee21177c4c6893c64b41ac33db390640"
-  integrity sha1-MIQltO4hF3xMaJPGS0GsM9s5BkA=
+"@ceai-front/chat@^1.0.2":
+  version "1.0.2"
+  resolved "http://npm.cestc.cn/@ceai-front/chat/download/@ceai-front/chat-1.0.2.tgz#4edfd6428405974abbfe377bf7506f8436c04d8f"
+  integrity sha1-Tt/WQoQFl0q7/jd791BvhDbATY8=
   dependencies:
     "@ccf2e/arco-material" "^0.7.2"
     "@ceai-front/arco-material" "^1.3.1"
