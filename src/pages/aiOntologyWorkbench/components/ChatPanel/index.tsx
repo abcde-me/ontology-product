@@ -66,8 +66,17 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   );
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
-  // 文件上传相关
-  const uploader = useMultipartUploader();
+  // 文件上传相关 - 启用自动取消机制
+  const uploader = useMultipartUploader({ autoCancelOnUnmount: true });
+
+  // 组件卸载时的清理工作
+  useEffect(() => {
+    return () => {
+      // useMultipartUploader 内部已经有 autoCancelOnUnmount 机制
+      // 会自动取消所有进行中的上传并清理资源
+      console.log('[ChatPanel] 组件卸载，uploader 将自动清理资源');
+    };
+  }, []);
 
   // 使用 ref 记录是否是初始加载
   const isInitialMount = useRef(true);
