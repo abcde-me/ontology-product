@@ -119,10 +119,15 @@ const AIOntoWorkbench: React.FC = () => {
     // 加载本体列表（初始加载时自动选择第一个）
     loadOntologyList(1, 20, true);
 
-    // 组件卸载时恢复左侧菜单
-    // return () => {
-    //   setLeftMenuCollapsed(false);
-    // };
+    // 组件卸载时的清理工作
+    return () => {
+      // 清理图谱面板状态（关闭底部面板、清除高亮等）
+      useAIWorkbenchGraphStore.getState().reset();
+      console.log('[AIOntoWorkbench] 组件卸载，已清理图谱面板状态');
+
+      // TODO: 恢复左侧菜单
+      // setLeftMenuCollapsed(false);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 只在组件挂载时执行一次
 
@@ -143,6 +148,10 @@ const AIOntoWorkbench: React.FC = () => {
 
     // 清空图谱数据
     useAIWorkbenchStore.setState({ graphData: null });
+
+    // 清理图谱面板状态（关闭底部面板、清除高亮等）
+    useAIWorkbenchGraphStore.getState().reset();
+    console.log('[AIOntoWorkbench] 项目切换，已清理图谱面板状态');
 
     // 重新加载本体列表（项目切换时不自动选择第一个）
     loadOntologyList(1, 20, false);
