@@ -19,6 +19,9 @@ export const useOntologyManagement = () => {
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
 
+  // 正在创建 Agent 的本体 ID 集合（防止重复调用）
+  const creatingAgentIds = useState(new Set<number>())[0];
+
   /**
    * 加载本体列表
    * @param pageNo 页码
@@ -27,6 +30,13 @@ export const useOntologyManagement = () => {
    */
   const loadOntologyList = useCallback(
     async (pageNo = 1, pageSize = 20, autoSelectFirst = true) => {
+      // 如果正在加载中，跳过
+      const currentLoading = useAIWorkbenchStore.getState().ontologyListLoading;
+      if (currentLoading) {
+        console.log('[useOntologyManagement] 正在加载中，跳过重复调用');
+        return { list: [], total: 0, hasMore: false };
+      }
+
       setOntologyListLoading(true);
       try {
         const res = await listOntologyModel({
@@ -84,11 +94,23 @@ export const useOntologyManagement = () => {
         return ontology.appID;
       }
 
+      // 如果正在创建中，跳过
+      if (creatingAgentIds.has(ontology.id!)) {
+        console.log(
+          '[useOntologyManagement] 本体 Agent 正在创建中，跳过重复调用:',
+          ontology.id
+        );
+        return undefined;
+      }
+
       // 如果没有 appID，调用接口创建
       console.log('[useOntologyManagement] 本体没有 appID，开始创建 Agent...', {
         ontologyId: ontology.id,
         ontologyName: ontology.name
       });
+
+      // 标记为正在创建
+      creatingAgentIds.add(ontology.id!);
 
       try {
         const res = await createOntologyAgent({
@@ -97,13 +119,13 @@ export const useOntologyManagement = () => {
 
         console.log('[useOntologyManagement] createOntologyAgent 响应:', res);
 
-        if (res.status === 200 && res.code === '' && res.data?.app_id) {
-          const appID = res.data.app_id;
+        if (res.status === 200 && res.code === '' && res.data?.appID) {
+          const appID = res.data.appID;
           console.log('[useOntologyManagement] Agent 创建成功，appID:', appID);
 
-          // 刷新本体列表以获取最新的 appID
+          // 刷新本体列表以获取最新的 appID（不自动选择第一个）
           console.log('[useOntologyManagement] 开始刷新本体列表...');
-          await loadOntologyList();
+          await loadOntologyList(1, 20, false);
           console.log('[useOntologyManagement] 本体列表刷新完成');
 
           return appID;
@@ -121,9 +143,12 @@ export const useOntologyManagement = () => {
         console.error('[useOntologyManagement] 创建 Agent 异常:', error);
         Message.error('创建 Agent 失败');
         return undefined;
+      } finally {
+        // 移除创建标记
+        creatingAgentIds.delete(ontology.id!);
       }
     },
-    [loadOntologyList]
+    [loadOntologyList, creatingAgentIds]
   );
 
   /**
