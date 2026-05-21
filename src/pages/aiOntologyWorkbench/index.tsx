@@ -44,6 +44,9 @@ const AIOntoWorkbench: React.FC = () => {
     undefined
   );
 
+  // Agent 创建错误状态
+  const [agentError, setAgentError] = React.useState<string | null>(null);
+
   // 图谱刷新回调
   const handleGraphRefresh = React.useCallback(() => {
     console.log('[AIOntoWorkbench] 触发图谱刷新');
@@ -148,7 +151,18 @@ const AIOntoWorkbench: React.FC = () => {
 
   // 监听当前本体变化，检查并创建 Agent
   useEffect(() => {
-    if (currentOntology) {
+    // 使用 AbortController 来中止未完成的请求
+    const abortController = new AbortController();
+    let isCancelled = false;
+
+    const initializeAgent = async () => {
+      if (!currentOntology) {
+        console.log('[AIOntoWorkbench] 没有当前本体，清空 appID');
+        setCurrentAppID(undefined);
+        setAgentError(null);
+        return;
+      }
+
       console.log(
         '[AIOntoWorkbench] 当前本体变化:',
         currentOntology.id,
@@ -164,66 +178,79 @@ const AIOntoWorkbench: React.FC = () => {
           currentOntology.appID
         );
         setCurrentAppID(currentOntology.appID);
-      } else {
-        // 如果没有 appID，调用接口创建
-        console.log('[AIOntoWorkbench] 本体没有 appID，开始创建...');
-        setCurrentAppID(undefined); // 先清空，显示 loading
+        setAgentError(null);
+        return;
+      }
 
-        ensureOntologyAgent(currentOntology).then((appID) => {
+      // 如果没有 appID，调用接口创建
+      console.log('[AIOntoWorkbench] 本体没有 appID，开始创建...');
+      setCurrentAppID(undefined); // 先清空，显示 loading
+      setAgentError(null); // 清空之前的错误
+
+      try {
+        const appID = await ensureOntologyAgent(currentOntology);
+
+        // 检查是否已被取消
+        if (isCancelled || abortController.signal.aborted) {
+          console.log('[AIOntoWorkbench] 操作已取消，忽略结果');
+          return;
+        }
+
+        console.log(
+          '[AIOntoWorkbench] ensureOntologyAgent 返回，appID:',
+          appID
+        );
+
+        if (appID) {
+          console.log('[AIOntoWorkbench] Agent 创建成功，设置 appID:', appID);
+
+          // 直接设置 appID
+          setCurrentAppID(appID);
+          setAgentError(null);
+
+          // 等待 loadOntologyList 完成（在 ensureOntologyAgent 内部已调用）
+          // 然后从最新的列表中获取更新后的本体
+          const updatedOntology = useAIWorkbenchStore
+            .getState()
+            .ontologyList.find((o) => o.id === currentOntology.id);
+
           console.log(
-            '[AIOntoWorkbench] ensureOntologyAgent 返回，appID:',
-            appID
+            '[AIOntoWorkbench] 从 ontologyList 中查找更新后的本体:',
+            updatedOntology
           );
 
-          if (appID) {
+          if (updatedOntology && updatedOntology.appID) {
             console.log(
-              '[AIOntoWorkbench] Agent 创建成功，准备设置 appID:',
-              appID
+              '[AIOntoWorkbench] 找到更新后的本体，更新 currentOntology'
             );
-            console.log(
-              '[AIOntoWorkbench] 当前 currentAppID 状态:',
-              currentAppID
-            );
-
-            // 直接设置 appID
-            setCurrentAppID(appID);
-
-            console.log(
-              '[AIOntoWorkbench] setCurrentAppID 已调用，等待 React 重新渲染...'
-            );
-
-            // 延迟一下，等待 loadOntologyList 完成，然后更新 currentOntology
-            setTimeout(() => {
-              const updatedOntology = useAIWorkbenchStore
-                .getState()
-                .ontologyList.find((o) => o.id === currentOntology.id);
-              console.log(
-                '[AIOntoWorkbench] 从 ontologyList 中查找更新后的本体:',
-                updatedOntology
-              );
-
-              if (updatedOntology && updatedOntology.appID) {
-                console.log(
-                  '[AIOntoWorkbench] 找到更新后的本体，更新 currentOntology'
-                );
-                setCurrentOntology(updatedOntology);
-              } else {
-                console.warn(
-                  '[AIOntoWorkbench] 未找到更新后的本体或本体没有 appID，ontologyList:',
-                  useAIWorkbenchStore.getState().ontologyList
-                );
-              }
-            }, 200); // 给 loadOntologyList 一点时间完成
+            setCurrentOntology(updatedOntology);
           } else {
-            console.error('[AIOntoWorkbench] Agent 创建失败');
-            setCurrentAppID(undefined);
+            console.warn(
+              '[AIOntoWorkbench] 未找到更新后的本体或本体没有 appID'
+            );
           }
-        });
+        } else {
+          console.error('[AIOntoWorkbench] Agent 创建失败');
+          setCurrentAppID(undefined);
+          setAgentError('Agent 创建失败，请重试');
+        }
+      } catch (error: any) {
+        if (!isCancelled && !abortController.signal.aborted) {
+          console.error('[AIOntoWorkbench] Agent 初始化异常:', error);
+          setCurrentAppID(undefined);
+          setAgentError(error?.message || 'Agent 初始化失败，请重试');
+        }
       }
-    } else {
-      console.log('[AIOntoWorkbench] 没有当前本体，清空 appID');
-      setCurrentAppID(undefined);
-    }
+    };
+
+    initializeAgent();
+
+    // 清理函数：组件卸载或依赖变化时取消操作
+    return () => {
+      isCancelled = true;
+      abortController.abort();
+      console.log('[AIOntoWorkbench] 清理：取消 Agent 初始化操作');
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentOntology?.id]); // 只依赖 id，避免因 appID 变化触发重复执行
 
@@ -278,7 +305,35 @@ const AIOntoWorkbench: React.FC = () => {
         {console.log('[AIOntoWorkbench] currentAppID:', currentAppID)}
         <ResizableLayout
           leftContent={
-            currentAppID ? (
+            agentError ? (
+              <div className="flex h-full w-full flex-col items-center justify-center gap-4 px-6">
+                <div className="text-center">
+                  <div className="mb-2 text-[14px] text-red-500">
+                    {agentError}
+                  </div>
+                  <button
+                    className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                    onClick={() => {
+                      if (currentOntology) {
+                        setAgentError(null);
+                        setCurrentAppID(undefined);
+                        // 触发重新初始化
+                        ensureOntologyAgent(currentOntology).then((appID) => {
+                          if (appID) {
+                            setCurrentAppID(appID);
+                            setAgentError(null);
+                          } else {
+                            setAgentError('Agent 创建失败，请重试');
+                          }
+                        });
+                      }
+                    }}
+                  >
+                    重试
+                  </button>
+                </div>
+              </div>
+            ) : currentAppID ? (
               <ChatPanel
                 key={currentAppID} // 添加 key，确保 appId 变化时重新挂载组件
                 appId={currentAppID}
