@@ -28,8 +28,7 @@ const OntologySelector: React.FC = () => {
     createLoading,
     handleCreateOntology,
     openCreateModal,
-    closeCreateModal,
-    ensureOntologyAgent
+    closeCreateModal
   } = useOntologyManagement();
 
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -103,7 +102,10 @@ const OntologySelector: React.FC = () => {
    * 监听下拉菜单打开，触发加载
    */
   React.useEffect(() => {
+    // 只有在下拉菜单打开且列表为空时才加载
+    // 如果列表已经有数据，就不需要重新加载了
     if (dropdownVisible && ontologyList.length === 0) {
+      console.log('[OntologySelector] 下拉菜单打开且列表为空，加载本体列表');
       reload();
     }
   }, [dropdownVisible, ontologyList.length, reload]);
@@ -112,7 +114,10 @@ const OntologySelector: React.FC = () => {
    * 监听当前本体变化，如果本体列表为空但有当前本体，重新加载列表
    */
   React.useEffect(() => {
+    // 只有在有当前本体但列表为空时才重新加载
+    // 这种情况通常发生在页面刷新后，store 中有 currentOntology 但列表还没加载
     if (currentOntology && ontologyList.length === 0) {
+      console.log('[OntologySelector] 有当前本体但列表为空，重新加载列表');
       reload();
     }
   }, [currentOntology, ontologyList.length, reload]);
@@ -120,14 +125,11 @@ const OntologySelector: React.FC = () => {
   /**
    * 切换本体
    */
-  const handleSelectOntology = async (ontology: OntologScene) => {
+  const handleSelectOntology = (ontology: OntologScene) => {
     console.log('[OntologySelector] 选择本体:', ontology.id, ontology.name);
     setDropdownVisible(false);
 
-    // 检查并创建 Agent（如果需要）
-    await ensureOntologyAgent(ontology);
-
-    // 设置当前本体
+    // 直接设置当前本体，Agent 创建由主页面的 useEffect 统一处理
     setCurrentOntology(ontology);
   };
 

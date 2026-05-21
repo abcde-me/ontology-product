@@ -16,8 +16,12 @@ import { OntologyAction, OntologyTargetType } from '@/hooks/chat/types';
  * AI 本体工作台
  */
 const AIOntoWorkbench: React.FC = () => {
-  const { ontologyList, ontologyListLoading, currentOntology } =
-    useAIWorkbenchStore();
+  const {
+    ontologyList,
+    ontologyListLoading,
+    currentOntology,
+    setCurrentOntology
+  } = useAIWorkbenchStore();
 
   // 从 userInfoStore 获取 projectId
   const projectId = useUserInfoStore((state) => state.projectId);
@@ -163,10 +167,53 @@ const AIOntoWorkbench: React.FC = () => {
       } else {
         // 如果没有 appID，调用接口创建
         console.log('[AIOntoWorkbench] 本体没有 appID，开始创建...');
+        setCurrentAppID(undefined); // 先清空，显示 loading
+
         ensureOntologyAgent(currentOntology).then((appID) => {
+          console.log(
+            '[AIOntoWorkbench] ensureOntologyAgent 返回，appID:',
+            appID
+          );
+
           if (appID) {
-            console.log('[AIOntoWorkbench] Agent 创建成功，appID:', appID);
+            console.log(
+              '[AIOntoWorkbench] Agent 创建成功，准备设置 appID:',
+              appID
+            );
+            console.log(
+              '[AIOntoWorkbench] 当前 currentAppID 状态:',
+              currentAppID
+            );
+
+            // 直接设置 appID
             setCurrentAppID(appID);
+
+            console.log(
+              '[AIOntoWorkbench] setCurrentAppID 已调用，等待 React 重新渲染...'
+            );
+
+            // 延迟一下，等待 loadOntologyList 完成，然后更新 currentOntology
+            setTimeout(() => {
+              const updatedOntology = useAIWorkbenchStore
+                .getState()
+                .ontologyList.find((o) => o.id === currentOntology.id);
+              console.log(
+                '[AIOntoWorkbench] 从 ontologyList 中查找更新后的本体:',
+                updatedOntology
+              );
+
+              if (updatedOntology && updatedOntology.appID) {
+                console.log(
+                  '[AIOntoWorkbench] 找到更新后的本体，更新 currentOntology'
+                );
+                setCurrentOntology(updatedOntology);
+              } else {
+                console.warn(
+                  '[AIOntoWorkbench] 未找到更新后的本体或本体没有 appID，ontologyList:',
+                  useAIWorkbenchStore.getState().ontologyList
+                );
+              }
+            }, 200); // 给 loadOntologyList 一点时间完成
           } else {
             console.error('[AIOntoWorkbench] Agent 创建失败');
             setCurrentAppID(undefined);
@@ -178,7 +225,7 @@ const AIOntoWorkbench: React.FC = () => {
       setCurrentAppID(undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentOntology?.id, currentOntology?.appID]); // 只依赖 id 和 appID，避免无限循环
+  }, [currentOntology?.id]); // 只依赖 id，避免因 appID 变化触发重复执行
 
   // 判断是否为空状态
   const isEmpty = !ontologyListLoading && ontologyList.length === 0;
