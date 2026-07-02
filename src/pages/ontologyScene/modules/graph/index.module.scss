@@ -1,6 +1,11 @@
 .ai-workflow {
+  height: 100%;
+  min-height: 0;
+
   :global(.react-flow) {
     border-radius: 0px !important;
+    height: 100% !important;
+    min-height: 0 !important;
   }
 
   :global(.wk-node-panel-content-scroller-container) {
@@ -8,7 +13,11 @@
   }
 
   :global(.react-flow__node) {
-    z-index: -1 !important;
+    z-index: 1 !important;
+  }
+
+  :global(.react-flow__edges) {
+    z-index: 2 !important;
   }
 }
 
@@ -19,6 +28,11 @@
     stroke-dasharray: 4 4 !important;
     stroke-linecap: round;
     animation: edge-flow 2s linear infinite !important;
+  }
+
+  :global(.react-flow__edge.selected .react-flow__edge-path) {
+    stroke: #184ff2 !important;
+    stroke-width: 2px !important;
   }
 }
 

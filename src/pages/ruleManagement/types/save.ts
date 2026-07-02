@@ -1,5 +1,6 @@
 import {
   ChangeType,
+  ExecutionMode,
   InstanceScope,
   MonthDayMode,
   ParameterValue,
@@ -41,6 +42,10 @@ export interface ActionConfigReq {
    * 行为 ID，对应 ontology_action.id
    */
   actionId: number;
+  /**
+   * 执行模式：auto=自动执行，manual_confirm=人工确认
+   */
+  executionMode?: ExecutionMode;
   /**
    * 行为参数 key-value 映射
    */

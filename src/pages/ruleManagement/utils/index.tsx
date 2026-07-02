@@ -9,6 +9,7 @@ import {
   AutoRuleFormData,
   ChangeConfigRes,
   ChangeType,
+  ExecutionMode,
   InstanceScope,
   MonthDayMode,
   OntologyObjectTypeInfo,
@@ -145,6 +146,7 @@ function buildAutoTriggerRuleForm(data: AutoRuleDetail): AutoRuleFormData {
     description,
     triggerType,
     action: actionConfig?.actionId,
+    executionMode: actionConfig?.executionMode || ExecutionMode.Auto,
     actionParams: buildFormParams(
       actionConfig?.parameters,
       actionConfig?.actionInfo?.params
@@ -205,6 +207,7 @@ function buildAutoChangeRuleForm(data: AutoRuleDetail): AutoRuleFormData {
       gateConfig?.functionInfo?.params
     ),
     action: actionConfig?.actionId,
+    executionMode: actionConfig?.executionMode || ExecutionMode.Auto,
     actionParams: buildFormParams(
       actionConfig?.parameters,
       actionConfig?.actionInfo?.params

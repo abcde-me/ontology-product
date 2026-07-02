@@ -11,6 +11,8 @@ interface ResizableLayoutProps {
   minLeftWidth?: number;
   /** 左侧最大宽度 */
   maxLeftWidth?: number;
+  /** 右侧默认宽度相对剩余空间的比例，例如 0.75 表示右侧占原来的 75% */
+  rightWidthScale?: number;
 }
 
 /**
@@ -21,11 +23,37 @@ const ResizableLayout: React.FC<ResizableLayoutProps> = ({
   rightContent,
   defaultLeftWidth = 400,
   minLeftWidth = 300,
-  maxLeftWidth = 600
+  maxLeftWidth = 600,
+  rightWidthScale = 1
 }) => {
   const [leftWidth, setLeftWidth] = useState(defaultLeftWidth);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const widthInitializedRef = useRef(false);
+
+  React.useLayoutEffect(() => {
+    if (
+      widthInitializedRef.current ||
+      rightWidthScale === 1 ||
+      !containerRef.current
+    ) {
+      return;
+    }
+
+    const containerWidth = containerRef.current.getBoundingClientRect().width;
+    if (containerWidth <= 0) {
+      return;
+    }
+
+    widthInitializedRef.current = true;
+    const defaultRightWidth = containerWidth - defaultLeftWidth;
+    const targetRightWidth = defaultRightWidth * rightWidthScale;
+    const nextLeftWidth = Math.min(
+      maxLeftWidth,
+      Math.max(minLeftWidth, containerWidth - targetRightWidth)
+    );
+    setLeftWidth(nextLeftWidth);
+  }, [defaultLeftWidth, maxLeftWidth, minLeftWidth, rightWidthScale]);
 
   /**
    * 开始拖拽
@@ -63,24 +91,30 @@ const ResizableLayout: React.FC<ResizableLayoutProps> = ({
    * 监听鼠标事件
    */
   React.useEffect(() => {
+    const resetDragStyles = () => {
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    };
+
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
-      // 禁止文本选择
+      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('blur', resetDragStyles);
       document.body.style.userSelect = 'none';
       document.body.style.cursor = 'col-resize';
     } else {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.userSelect = '';
-      document.body.style.cursor = '';
+      resetDragStyles();
     }
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.userSelect = '';
-      document.body.style.cursor = '';
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('blur', resetDragStyles);
+      resetDragStyles();
     };
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
@@ -88,7 +122,7 @@ const ResizableLayout: React.FC<ResizableLayoutProps> = ({
     <div ref={containerRef} className="flex h-full w-full overflow-hidden">
       {/* 左侧面板 - 聊天面板 */}
       <div
-        className="flex-shrink-0 overflow-hidden"
+        className="flex h-full min-h-0 flex-shrink-0 flex-col overflow-hidden"
         style={{ width: `${leftWidth}px` }}
       >
         {leftContent}
@@ -104,7 +138,7 @@ const ResizableLayout: React.FC<ResizableLayoutProps> = ({
       </div>
 
       {/* 右侧面板 - 图谱 */}
-      <div className="flex-1 overflow-hidden">{rightContent}</div>
+      <div className="min-h-0 flex-1 overflow-hidden">{rightContent}</div>
     </div>
   );
 };

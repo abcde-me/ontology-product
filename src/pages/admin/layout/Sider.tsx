@@ -6,10 +6,10 @@ import { menus, type MenuModel } from './menus';
 import './sider.scss';
 import { usePermission } from '@/hooks/usePermission';
 import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
-import { ProjectSelect, SiderMenu } from '@ceai-front/arco-material';
-import { GetProjOrg } from '@/api/modules/project';
+import { SiderMenu } from '@ceai-front/arco-material';
+import SidebarProjectSelect from '@/components/SidebarProjectSelect';
 import { isSameArray } from '@/utils/array';
-import { setLocalStorage, getLocalStorage } from '@/utils/storage';
+import { setLocalStorage } from '@/utils/storage';
 import { ProjectIdKey } from '@/utils/const';
 import { isInFrame, isWujie, isEmbeddedBySingleApp } from '@/utils/env';
 
@@ -26,7 +26,6 @@ const hideSidebarPaths = [
   '/tenant/compute/onto/ragDetail',
   '/tenant/compute/onto/ontologyScene/detail'
 ];
-const collapseSidebarPaths = ['/tenant/compute/onto/aiOntologyWorkbench'];
 
 export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
   const { createPermissionFilter } = usePermission();
@@ -42,17 +41,8 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
   // 从全局 store 获取用户信息
   const userInfo = useUserInfo();
   const { id: userId } = userInfo || {};
-  const {
-    clearUserInfo,
-    setUserActions,
-    projectId,
-    setProjectId,
-    isInitialized,
-    fetchUserInfo
-  } = useUserInfoStore();
-  const [projects, setProjects] = useState([]);
+  const { setUserActions, projectId, setProjectId } = useUserInfoStore();
   const FullStorageKey = useMemo(() => `${ProjectIdKey}${userId}`, [userId]);
-  const [value, setValue] = useState<string[] | undefined>([]);
 
   // 用于防抖的 ref
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -69,36 +59,43 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
     (isInFrame && !isWujie); // 被单产品集成时隐藏侧边栏
 
   const actives = useMemo(() => {
-    // console.log('noto actives', location.pathname, location.search, locSearch);
-    const findMatch = (menus: MenuModel[]): string[] | null => {
-      for (const menu of menus) {
-        if (menu.children?.length && menu.children?.length > 0) {
-          const key = findMatch(menu.children);
-          if (key) return [...key, menu.key];
-        } else {
-          const activePaths = menu.activePaths || [menu.path];
-          const path = activePaths.find((path) =>
-            location.pathname.startsWith(path ?? '')
-          );
-          if (path) {
-            // 如果有查询参数匹配器，使用它来进一步判断
-            if (menu.queryParamMatcher) {
-              if (
-                menu.queryParamMatcher(locSearch || location.search)
-                // menu.queryParamMatcher(location.search)
-              ) {
-                return [menu.key];
-              }
-              continue;
-            } else {
-              return [menu.key];
-            }
+    const search = locSearch || location.search;
+    const matchState: {
+      best: { keys: string[]; pathLength: number } | null;
+    } = { best: null };
+
+    const walkMenus = (items: MenuModel[], parentKeys: string[] = []) => {
+      for (const menu of items) {
+        if (menu.children?.length) {
+          walkMenus(menu.children, [...parentKeys, menu.key]);
+          continue;
+        }
+
+        const activePaths = (menu.activePaths || [menu.path]).filter(
+          Boolean
+        ) as string[];
+
+        for (const path of activePaths) {
+          if (!location.pathname.startsWith(path)) {
+            continue;
+          }
+
+          if (menu.queryParamMatcher && !menu.queryParamMatcher(search)) {
+            continue;
+          }
+
+          if (!matchState.best || path.length > matchState.best.pathLength) {
+            matchState.best = {
+              keys: [menu.key, ...parentKeys],
+              pathLength: path.length
+            };
           }
         }
       }
-      return null;
     };
-    return findMatch(showMenus);
+
+    walkMenus(showMenus);
+    return matchState.best?.keys ?? null;
   }, [location.pathname, location.search, showMenus, locSearch]);
 
   useEffect(() => {
@@ -195,13 +192,6 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
     });
   }, [actives]);
 
-  useEffect(() => {
-    const collapse = !!collapseSidebarPaths.find((item) =>
-      location.pathname.includes(item)
-    );
-    setCollapsed(collapse);
-  }, [location.pathname]);
-
   // 清理超时
   useEffect(() => {
     return () => {
@@ -210,49 +200,6 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
       }
     };
   }, []);
-
-  useEffect(() => {
-    const list = async () => {
-      const { data: result } = await GetProjOrg({});
-      const newResult = result.map((item) => ({
-        ...item,
-        name: item.title,
-        isPermission: true,
-        projList: item.projectList.map((project) => ({
-          ...project,
-          name: project.title,
-          organization: {
-            id: item.id,
-            name: item.title
-          }
-        }))
-      }));
-      setProjects(newResult);
-
-      // 设置 store 的 projectList，用于 PermissionRoute 判断加载状态
-      useUserInfoStore.setState({ projectList: result || [] });
-      const fullProjectIdKey = `${ProjectIdKey}${userInfo?.id}`;
-
-      if (result.length) {
-        const pId = getLocalStorage<string[]>(fullProjectIdKey);
-        if (Array.isArray(pId)) {
-          const org = result.find((r) => r.id === pId[0]);
-          if (org && org.projectList.find((p) => p.id === pId[1])) {
-            setProjectId(pId);
-            return;
-          }
-        }
-
-        const defaultPId = [result[0].id, result[0].projectList[0].id];
-        setLocalStorage(fullProjectIdKey, defaultPId);
-        setProjectId(defaultPId);
-      }
-    };
-
-    if (userInfo?.id) {
-      list();
-    }
-  }, [userInfo?.id]);
 
   const changeProject = (value: string[]) => {
     if (!userId || !userId.length) return;
@@ -312,12 +259,10 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
             }
           }}
           menuTopExtra={
-            <ProjectSelect
-              treeData={projects}
+            <SidebarProjectSelect
               value={projectId}
-              showAddButton={false}
+              collapsed={collapsed}
               onChange={(v) => {
-                console.log('🚀 ~ BasicDemo ~ v:', v);
                 v ? changeProject(v) : setProjectId([]);
               }}
             />

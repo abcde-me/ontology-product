@@ -1,0 +1,42 @@
+import React from 'react';
+import { Form, Input, Button } from '@arco-design/web-react';
+import { IconSearch, IconPlus } from '@arco-design/web-react/icon';
+import { FormInstance } from '@arco-design/web-react';
+import { PermissionWrapper } from '@/components/PermissionGuard/PermissionWrapper';
+import { DATA_SOURCE_PERMISSIONS } from '@/config/permissions';
+
+interface SearchFormProps {
+  form: FormInstance;
+  onSearch: () => void;
+  onAdd?: () => void;
+}
+
+export const SearchForm: React.FC<SearchFormProps> = ({
+  form,
+  onSearch,
+  onAdd
+}) => {
+  return (
+    <div className="flex items-center justify-between">
+      <Form form={form}>
+        <Form.Item noStyle field="keyword">
+          <Input.Search
+            className="w-[220px]"
+            placeholder="请输入任务名称"
+            suffix={<IconSearch />}
+            allowClear
+            onClear={onSearch}
+            onSearch={onSearch}
+          />
+        </Form.Item>
+      </Form>
+      {onAdd && (
+        <PermissionWrapper permission={DATA_SOURCE_PERMISSIONS.CREATE}>
+          <Button type="primary" icon={<IconPlus />} onClick={onAdd}>
+            新增
+          </Button>
+        </PermissionWrapper>
+      )}
+    </div>
+  );
+};

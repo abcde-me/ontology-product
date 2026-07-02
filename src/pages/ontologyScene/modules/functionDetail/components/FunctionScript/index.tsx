@@ -7,17 +7,13 @@ import React, {
   useImperativeHandle
 } from 'react';
 import styles from './index.module.scss';
-import { Button, Form, Message, Space, Tooltip } from '@arco-design/web-react';
+import { Button, Form, Space, Tooltip } from '@arco-design/web-react';
 import {
   IconCopy,
   IconDown,
-  IconExpand,
-  IconFile,
   IconLoading,
-  IconRecordStop,
   IconRight,
-  IconShrink,
-  IconToBottom
+  IconRobot
 } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
@@ -40,7 +36,7 @@ import classNames from 'classnames';
 import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
 import { ResizeBoxWithCursorChange } from '@/pages/ontologyScene/components';
 import { RunStatus } from '@/pages/ontologyScene/hooks/useTestFunction';
-import { OntologyFunctionDetail } from '@/pages/ontologyScene/types/ontologyFunction';
+import type { FixedOntologyFunctionCode } from '@/pages/ontologyScene/modules/functionDetail/services/fixOntologyFunctionCode';
 import { OntologyActionParam } from '@/pages/ontologyScene/types/behaviorActions';
 
 const extension = [python(), lintGutter()];
@@ -51,6 +47,12 @@ export const FunctionScript = forwardRef(
       runInfo?: RunStatus;
       isFullscreen: boolean;
       functionCode?: string;
+      smartFixing?: boolean;
+      fixResult?: Pick<
+        FixedOntologyFunctionCode,
+        'changeSummary' | 'changeDetails'
+      > | null;
+      onSmartFix?: () => void;
     },
     ref: React.ForwardedRef<any>
   ) => {
@@ -60,7 +62,10 @@ export const FunctionScript = forwardRef(
       disabled,
       runInfo,
       isFullscreen,
-      functionCode = 'my_function'
+      functionCode = 'my_function',
+      smartFixing = false,
+      fixResult,
+      onSmartFix
     } = props;
     const codeEditor = useRef<EditorView>();
     const functionDiv = useRef<HTMLDivElement>(null);
@@ -92,7 +97,14 @@ export const FunctionScript = forwardRef(
     }, []);
 
     const currentRunLog =
-      runInfo?.runLog?.map((item, index) => item.run_log).join('\n') || '';
+      runInfo?.runLog?.map((item) => item.run_log).join('\n') || '';
+
+    const canSmartFix =
+      !!onSmartFix &&
+      !disabled &&
+      !!currentRunLog &&
+      (runInfo?.run_status === 3 ||
+        (runInfo?.run_status === 4 && currentRunLog !== '已被手动停止'));
 
     useImperativeHandle(ref, () => {
       return {
@@ -186,35 +198,71 @@ export const FunctionScript = forwardRef(
                       <DotStatus color={'#E52E2D'} text={'已被手动停止'} />
                     )}
                   </Space>
-                  {!!currentRunLog && (
-                    <Tooltip
-                      getPopupContainer={() => {
-                        return (
-                          document.querySelector('#functionSettingContainer') ||
-                          document.body
-                        );
-                      }}
-                      content={'复制'}
-                    >
-                      <IconCopy
+                  <Space size={8}>
+                    {canSmartFix && (
+                      <Button
+                        type="text"
+                        size="mini"
+                        icon={<IconRobot />}
+                        loading={smartFixing}
+                        className={styles['smart-fix-btn']}
                         onClick={(e) => {
                           e.stopPropagation();
-                          copyToClipboard(currentRunLog);
+                          onSmartFix?.();
                         }}
-                        className={`hover:text-[#184ff2] ${styles['copy-btn']}`}
-                      />
-                    </Tooltip>
-                  )}
+                      >
+                        {smartFixing ? '修改中...' : '智能修改'}
+                      </Button>
+                    )}
+                    {!!currentRunLog && (
+                      <Tooltip
+                        getPopupContainer={() => {
+                          return (
+                            document.querySelector(
+                              '#functionSettingContainer'
+                            ) || document.body
+                          );
+                        }}
+                        content={'复制'}
+                      >
+                        <IconCopy
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            copyToClipboard(currentRunLog);
+                          }}
+                          className={`hover:text-[#184ff2] ${styles['copy-btn']}`}
+                        />
+                      </Tooltip>
+                    )}
+                  </Space>
                 </div>
-                <pre
+                <div
                   className={classNames({
-                    [styles['run-log-wrapper']]: true,
+                    [styles['run-log-body']]: true,
                     visible: logOpen,
                     hidden: !logOpen
                   })}
                 >
-                  {currentRunLog}
-                </pre>
+                  <pre className={styles['run-log-wrapper']}>
+                    {currentRunLog}
+                  </pre>
+                  {fixResult && (
+                    <div className={styles['fix-result-panel']}>
+                      <div className={styles['fix-result-title']}>
+                        智能修改说明
+                      </div>
+                      <div className={styles['fix-result-summary']}>
+                        <span className={styles['fix-result-label']}>
+                          修改摘要：
+                        </span>
+                        {fixResult.changeSummary}
+                      </div>
+                      <pre className={styles['fix-result-details']}>
+                        {fixResult.changeDetails}
+                      </pre>
+                    </div>
+                  )}
+                </div>
               </ResizeBoxWithCursorChange>
             </div>
           )}

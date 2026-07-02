@@ -5588,10 +5588,10 @@
   resolved "http://npm.cestc.cn/@types/d3-delaunay/download/@types/d3-delaunay-6.0.4.tgz#185c1a80cc807fdda2a3fe960f7c11c4a27952e1"
   integrity sha1-GFwagMyAf92io/6WD3wRxKJ5UuE=
 
-"@types/d3-dispatch@*":
-  version "3.0.7"
-  resolved "http://npm.cestc.cn/@types/d3-dispatch/download/@types/d3-dispatch-3.0.7.tgz#ef004d8a128046cfce434d17182f834e44ef95b2"
-  integrity sha1-7wBNihKARs/OQ00XGC+DTkTvlbI=
+"@types/d3-dispatch@*", "@types/d3-dispatch@3.0.6":
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/@types/d3-dispatch/-/d3-dispatch-3.0.6.tgz#096efdf55eb97480e3f5621ff9a8da552f0961e7"
+  integrity sha512-4fvZhzMeeuBJYZXRXrRIQnvUYfyXwYmLsdiN7XXmVNQKKw1cM8a5WdID0g1hVFZDqT9ZqZEY5pD44p24VS7iZQ==
 
 "@types/d3-drag@*", "@types/d3-drag@^3.0.1":
   version "3.0.7"
@@ -20329,6 +20329,11 @@ q@^1.1.2:
   version "1.5.1"
   resolved "http://npm.cestc.cn/q/download/q-1.5.1.tgz#7e32f75b41381291d04611f1bf14109ac00651d7"
   integrity sha1-fjL3W0E4EpHQRhHxvxQQmsAGUdc=
+
+qrcode.react@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/qrcode.react/-/qrcode.react-4.2.0.tgz#1bce8363f348197d145c0da640929a24c83cbca3"
+  integrity sha512-QpgqWi8rD9DsS9EP3z7BT+5lY5SFhsqGjpgW5DY/i3mK4M9DTBNz3ErMi8BWYEfI3L0d8GIbGmcdFAS1uIRGjA==
 
 qs@6.13.0:
   version "6.13.0"

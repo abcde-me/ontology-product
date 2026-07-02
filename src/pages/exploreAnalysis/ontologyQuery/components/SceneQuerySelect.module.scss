@@ -1,0 +1,11 @@
+.sceneQuerySelect {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+
+  :global {
+    .arco-select-view {
+      width: 100% !important;
+    }
+  }
+}

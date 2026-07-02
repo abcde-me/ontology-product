@@ -42,7 +42,9 @@ export const getFunctionList = async (params: FunctionListQuery) => {
     .post(params)
     .inRegion()
     .do();
-  const { result: items = [], totalCount: total = 0 } = res.data || {};
+  const data = res.data || {};
+  const items = data.result ?? data.items ?? [];
+  const total = data.totalCount ?? data.total ?? 0;
   return {
     items: items ?? [],
     total

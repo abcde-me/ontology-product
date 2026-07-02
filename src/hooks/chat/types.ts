@@ -121,6 +121,9 @@ export interface ChatApiConfig {
   /** 获取聊天 API URL */
   getChatUrl: (appId: string) => string;
 
+  /** 获取 SSE 请求头（可选，默认使用 buildStreamRequestHeaders） */
+  getStreamHeaders?: () => Record<string, string>;
+
   /** 获取历史消息（可选） */
   getHistoryMessages?: (params: {
     appId: string;
@@ -138,7 +141,18 @@ export interface ChatApiConfig {
     appConfigId?: string;
     channel?: string;
     source?: string;
+    /** Agent 按钮触发的 CreateMessage SSE */
+    useAgentSse?: boolean;
   }) => Record<string, any>;
+
+  /** 为 true 时发送消息直连 DeepSeek，不走 CreateMessage 后端 */
+  useDirectLlmChat?: boolean;
+
+  /** 构建 DeepSeek Chat Completions messages */
+  buildDirectLlmMessages?: (params: { query: string }) => Array<{
+    role: 'system' | 'user' | 'assistant';
+    content: string;
+  }>;
 }
 
 export interface UseChatConfig {
@@ -168,6 +182,10 @@ export interface SendMessageParams {
   text: string;
   files?: FileAttachment[];
   enableDeepThink?: boolean;
+  /** 为 true 时走 appforge CreateMessage SSE，而非直连大模型 */
+  useAgentSse?: boolean;
+  /** Agent SSE 使用的 appforge appID（需为真实 Agent ID） */
+  agentAppId?: string;
 }
 
 // ==================== Hook 返回 ====================

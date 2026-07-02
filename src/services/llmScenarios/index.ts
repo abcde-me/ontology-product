@@ -1,0 +1,28 @@
+/**
+ * 大模型环节注册表入口。
+ *
+ * 新增 LLM 能力时，在 llmScenarioDefinitions.ts 的 BUILTIN_LLM_SCENARIOS 中追加一项。
+ */
+export {
+  registerLlmScenario,
+  getRegisteredLlmScenarios,
+  getRegisteredLlmScenario,
+  isLlmScenarioRegistered,
+  type LlmScenarioDefinition
+} from '@/services/llmScenarioRegistry';
+
+export {
+  AI_WORKBENCH_CHAT_SCENARIO,
+  ONTOLOGY_AGENT_CREATE_SCENARIO,
+  SCENE_VERSION_SUMMARY_SCENARIO,
+  OBJECT_TYPE_TEMPLATE_SCENARIO,
+  OBJECT_BROWSE_SEMANTIC_QUERY_SCENARIO,
+  ONTOLOGY_FIELD_VECTORIZATION_SCENARIO,
+  ONTOLOGY_FUNCTION_NAME_GEN_SCENARIO,
+  ONTOLOGY_OBJECT_TYPE_ID_GEN_SCENARIO,
+  ONTOLOGY_FUNCTION_CODEGEN_SCENARIO,
+  ONTOLOGY_SMART_LINK_SCENARIO,
+  ONTOLOGY_BEHAVIOR_FUNCTION_RECOMMEND_SCENARIO,
+  INSTANCE_SYNC_COLUMN_MAPPING_SCENARIO,
+  BUILTIN_LLM_SCENARIOS
+} from '@/services/llmScenarioDefinitions';

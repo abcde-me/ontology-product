@@ -6,6 +6,7 @@ import {
   ActionConfigRes,
   AutoRuleDetail,
   ChangeConfigRes,
+  ExecutionMode,
   GateConfigRes,
   OntologyModelInfo,
   OntologyObjectTypeInfo,
@@ -114,6 +115,9 @@ export const useRuleManagementStore = create<RuleManagementStore>()(
         scheduleConfig: {
           enabled: true,
           periodType: PeriodType.Daily
+        },
+        actionConfig: {
+          executionMode: ExecutionMode.Auto
         }
       } as AutoRuleDetail,
 

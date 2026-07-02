@@ -88,6 +88,10 @@ export interface ActionConfigRes {
    */
   actionId?: number;
   /**
+   * 执行模式：auto=自动执行，manual_confirm=人工确认
+   */
+  executionMode?: import('@/pages/ruleManagement/types').ExecutionMode;
+  /**
    * 行为参数
    */
   parameters?: Record<string, any>;

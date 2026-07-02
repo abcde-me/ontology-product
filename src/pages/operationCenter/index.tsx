@@ -1,18 +1,24 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from '@/utils/url';
+import React, { useEffect, useMemo, useRef } from 'react';
 import WujieReact from 'wujie-react';
 import { OpenNewPageForOperationCenter } from '@/utils/env';
 import { useHistory, useLocation } from 'react-router-dom';
 
 const { bus } = WujieReact;
 
+function getOperationCenterUrl(search: string) {
+  const params = new URLSearchParams(search);
+  const url = params.get('url');
+  return url ? decodeURIComponent(url) : '';
+}
+
 function OperationCenterPage() {
-  const url = useParams('url');
   const history = useHistory();
-  const pageUrl = useMemo(() => {
-    return url ? decodeURIComponent(url) : url;
-  }, [url]);
-  const lastUrl = useRef(pageUrl);
+  const location = useLocation();
+  const pageUrl = useMemo(
+    () => getOperationCenterUrl(location.search),
+    [location.search]
+  );
+  const lastUrl = useRef<string | undefined>();
 
   const refreshOperationCenter = (search: string) => {
     const params = new URLSearchParams(search);
@@ -24,33 +30,46 @@ function OperationCenterPage() {
   };
 
   useEffect(() => {
-    console.log('noto URL before:', history);
     refreshOperationCenter(history.location.search);
-    const unlisten = history.listen((location, action) => {
-      console.log('noto URL after:', location.search);
-      refreshOperationCenter(location.search);
+    const unlisten = history.listen((nextLocation) => {
+      refreshOperationCenter(nextLocation.search);
     });
 
     return () => unlisten();
   }, [history]);
 
   useEffect(() => {
-    if (lastUrl.current && pageUrl && pageUrl !== lastUrl.current) {
-      lastUrl.current = pageUrl;
-      if (pageUrl.startsWith('/operationcenter/')) {
-        bus.$emit('refresh', pageUrl.replace('/operationcenter', ''), 'noto');
-      }
+    if (!pageUrl || pageUrl === lastUrl.current) {
+      return;
+    }
+
+    lastUrl.current = pageUrl;
+    if (pageUrl.startsWith('/operationcenter/')) {
+      bus.$emit('refresh', pageUrl.replace('/operationcenter', ''), 'noto');
     }
   }, [pageUrl]);
 
+  const wujieUrl = useMemo(() => {
+    if (!pageUrl) {
+      return '';
+    }
+
+    if (/^https?:\/\//.test(pageUrl)) {
+      return pageUrl;
+    }
+
+    return `${window.location.origin}${pageUrl}`;
+  }, [pageUrl]);
+
   return (
-    <div className={`app-operation-center-page h-full w-full`}>
-      {pageUrl && (
+    <div className="app-operation-center-page h-full w-full">
+      {wujieUrl ? (
         <WujieReact
+          key={wujieUrl}
           width="100%"
           height="100%"
           name="mdp_operation_center"
-          url={pageUrl}
+          url={wujieUrl}
           sync={true}
           alive={true}
           loading={document.createElement('span') as any}
@@ -59,8 +78,8 @@ function OperationCenterPage() {
             appName: 'noto',
             openNewPage: OpenNewPageForOperationCenter
           }}
-        ></WujieReact>
-      )}
+        />
+      ) : null}
     </div>
   );
 }

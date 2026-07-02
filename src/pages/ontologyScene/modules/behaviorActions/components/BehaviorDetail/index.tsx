@@ -28,6 +28,12 @@ import ObjectTypeTag from '@/pages/ontologyScene/components/ObjectTypeTag';
 import NoDataEmpty from '@/components/NoDataEmpty';
 import { NoDataCard } from '@ceai-front/arco-material';
 import { ValidateRuleCard } from '@/pages/ontologyScene/modules/behaviorActions/components';
+import { fetchSceneObjectTypes } from '@/utils/enrichLinkTypeObjectTypes';
+import {
+  buildBehaviorObjectTypeLookup,
+  isGlobalBehaviorObjectType,
+  resolveBehaviorObjectTypeDisplay
+} from '@/pages/ontologyScene/modules/behaviorActions/services/resolveBehaviorObjectType';
 
 interface IProps {
   show: boolean;
@@ -42,6 +48,18 @@ export const BehaviorDetail = (props: IProps) => {
   const [validateRules, setValidateRules] = useState<ValidateRule[]>([]);
   const [inputParams, setInputParams] = useState<OntologyActionParam[]>([]);
   const { id: OSId } = useParams<Record<string, string>>();
+  const { data: objectTypeLookup } = useRequest(
+    async () => {
+      if (!OSId) {
+        return new Map<number, { name: string; icon?: string }>();
+      }
+      const objectTypes = await fetchSceneObjectTypes(+OSId);
+      return buildBehaviorObjectTypeLookup(objectTypes);
+    },
+    {
+      refreshDeps: [OSId]
+    }
+  );
   const { data: actionDetail } = useRequest(
     () => {
       return getActionDetail(actionItem!);
@@ -192,19 +210,34 @@ export const BehaviorDetail = (props: IProps) => {
             <div className={styles['base-info-item']}>
               <div className={styles['item-field']}>所属对象类型：</div>
               <div className={styles['item-value']}>
-                <ObjectTypeTag
-                  ontologyObjectTypeIcon={actionDetail?.objectTypeIcon || '-'}
-                  ontologyObjectTypeName={
-                    actionDetail?.objectTypeName || '全局行为'
+                {(() => {
+                  if (!actionDetail) {
+                    return '-';
                   }
-                  ontologyObjectTypeId={String(
-                    actionDetail?.ontologyObjectTypeId ||
-                      actionDetail?.objectTypeId ||
-                      ''
-                  )}
-                  onClick={() => {}}
-                  className={styles['obj-tag']}
-                />
+                  const objectTypeDisplay = resolveBehaviorObjectTypeDisplay(
+                    actionDetail,
+                    objectTypeLookup
+                  );
+                  const displayName =
+                    objectTypeDisplay.objectTypeName ||
+                    (isGlobalBehaviorObjectType(objectTypeDisplay.objectTypeId)
+                      ? '全局行为'
+                      : '-');
+
+                  return (
+                    <ObjectTypeTag
+                      ontologyObjectTypeIcon={
+                        objectTypeDisplay.objectTypeIcon || '-'
+                      }
+                      ontologyObjectTypeName={displayName}
+                      ontologyObjectTypeId={String(
+                        objectTypeDisplay.objectTypeId ?? ''
+                      )}
+                      onClick={() => {}}
+                      className={styles['obj-tag']}
+                    />
+                  );
+                })()}
               </div>
             </div>
             <div className={styles['base-info-item']}>

@@ -1,4 +1,4 @@
-import { LinkType } from '../../../../types/link';
+import { LinkDirection, LinkType } from '../../../../types/link';
 import {
   SqlSourceDataInfo,
   SyncSourceDataStrategyFormState
@@ -28,6 +28,19 @@ export interface IntermediateTable {
   table?: string;
   sql?: string;
   queryMode?: 'selected' | 'sql';
+}
+
+export interface LinkPairFormItem {
+  name: string;
+  id: string;
+  linkDirection: LinkDirection;
+  sourceObjectType?: number;
+  targetObjectType?: number;
+  targetObjectAttribute?: string;
+}
+
+export interface LinkCreateFormData {
+  linkPairs: LinkPairFormItem[];
 }
 
 export interface LinkFormData {
@@ -68,12 +81,14 @@ export interface CascaderOption {
 
 export interface LinkFormProps {
   initialValues?: Partial<LinkFormData>;
-  onSubmit: (data: LinkFormData) => void;
+  onSubmit: (data: LinkFormData | LinkCreateFormData) => void;
   onCancel: () => void;
   loading?: boolean;
   showFooter?: boolean;
   /** 编辑页：已是 N:N 时仅允许修改链接名称，其余区块只读 */
   restrictManyToManyEditToNameOnly?: boolean;
+  /** 创建页：无链接类型分类，使用方向 + 链接对 */
+  createMode?: boolean;
 }
 
 export interface LinkFormRef {

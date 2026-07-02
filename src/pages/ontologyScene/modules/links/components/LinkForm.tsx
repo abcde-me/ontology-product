@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button, Form } from '@arco-design/web-react';
 import classNames from 'classnames';
-import { LinkType } from '../../../types/link';
+import { LinkDirection, LinkType } from '../../../types/link';
 import styles from './LinkForm.module.scss';
 import { useAttributeFieldColumns } from './linkForm/hooks/useAttributeFieldColumns';
 import { useIntermediateTableState } from './linkForm/hooks/useIntermediateTableState';
@@ -10,14 +10,24 @@ import { useLinkFormSubmitData } from './linkForm/hooks/useLinkFormSubmitData';
 import { useObjectTypePrimaryAttributes } from './linkForm/hooks/useObjectTypePrimaryAttributes';
 import AttributeMappingSection from './linkForm/sections/AttributeMappingSection';
 import BasicInfoSection from './linkForm/sections/BasicInfoSection';
+import LinkPairsSection from './linkForm/sections/LinkPairsSection';
 import IntermediateSourceSection from './linkForm/sections/IntermediateSourceSection';
 import RelationMappingSection from './linkForm/sections/RelationMappingSection';
 import { LinkFormProps, LinkFormRef } from './linkForm/types';
+import {
+  mapFormLinkTypeToLinkDirection,
+  mapLinkDirectionToFormLinkType
+} from './linkForm/constants';
+import { createEmptyLinkPairItem } from './linkForm/linkPairUtils';
+import { LinkCreateFormData } from './linkForm/types';
+import { useAutoOntologyIdentifierFromName } from '@/pages/ontologyScene/hooks/useAutoOntologyIdentifierFromName';
 
 export type {
   AttributeField,
+  LinkCreateFormData,
   LinkFormData,
-  LinkFormRef
+  LinkFormRef,
+  LinkPairFormItem
 } from './linkForm/types';
 
 const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
@@ -28,17 +38,40 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       onCancel,
       loading = false,
       showFooter = true,
-      restrictManyToManyEditToNameOnly = false
+      restrictManyToManyEditToNameOnly = false,
+      createMode = false
     },
     ref
   ) => {
     const [form] = Form.useForm();
-    const [linkType, setLinkType] = useState<LinkType>(LinkType.ONE_TO_ONE);
+    const [linkDirection, setLinkDirection] = useState<LinkDirection>(() => {
+      if (createMode) {
+        return LinkDirection.UNIDIRECTIONAL;
+      }
+      if (initialValues?.linkType) {
+        return mapFormLinkTypeToLinkDirection(initialValues.linkType);
+      }
+      return LinkDirection.UNIDIRECTIONAL;
+    });
+    const [linkType, setLinkType] = useState<LinkType>(() => {
+      if (createMode) {
+        return mapLinkDirectionToFormLinkType(LinkDirection.UNIDIRECTIONAL);
+      }
+      return initialValues?.linkType ?? LinkType.ONE_TO_ONE;
+    });
     const { id: OSId } = useParams<{ id: string }>();
     const ontologyModelID = OSId ? Number(OSId) : undefined;
 
     const sourceObjectType = Form.useWatch('sourceObjectType', form);
     const targetObjectType = Form.useWatch('targetObjectType', form);
+
+    useAutoOntologyIdentifierFromName({
+      form,
+      ontologyModelID,
+      nameField: 'name',
+      idField: 'id',
+      enabled: !createMode && !initialValues?.id
+    });
 
     const intermediateState = useIntermediateTableState(form);
     const {
@@ -80,7 +113,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     });
 
     const nnNameOnlyEdit =
-      restrictManyToManyEditToNameOnly && linkType === LinkType.MANY_TO_MANY;
+      !createMode &&
+      restrictManyToManyEditToNameOnly &&
+      linkType === LinkType.MANY_TO_MANY;
 
     const allowLocalCsvReUpload =
       nnNameOnlyEdit && intermediateTable.type === 'local_csv';
@@ -114,6 +149,11 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         form.setFieldsValue({
           name: initialValues.name,
           id: initialValues.id,
+          linkType: initialValues.linkType ?? LinkType.ONE_TO_ONE,
+          linkDirection:
+            initialValues.linkType != null
+              ? mapFormLinkTypeToLinkDirection(initialValues.linkType)
+              : LinkDirection.UNIDIRECTIONAL,
           sourceObjectType: initialValues.sourceObjectType,
           targetObjectType: initialValues.targetObjectType,
           targetObjectAttribute: initialValues.targetObjectAttribute,
@@ -158,6 +198,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
 
         if (initialValues.linkType) {
           setLinkType(initialValues.linkType);
+          setLinkDirection(
+            mapFormLinkTypeToLinkDirection(initialValues.linkType)
+          );
         }
 
         if (initialValues.intermediateTable) {
@@ -203,12 +246,17 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         if (initialValues.attributeFields) {
           setAttributeFields(initialValues.attributeFields);
         }
+      } else if (createMode) {
+        form.setFieldsValue({
+          linkPairs: [createEmptyLinkPairItem()]
+        });
       } else {
         form.setFieldsValue({
           linkType: LinkType.ONE_TO_ONE
         });
       }
     }, [
+      createMode,
       form,
       initialValues,
       setAttributeFields,
@@ -220,19 +268,42 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
 
     const handleLinkTypeChange = (type: LinkType) => {
       setLinkType(type);
+      setLinkDirection(mapFormLinkTypeToLinkDirection(type));
       const cachedName = form.getFieldValue('name');
       const cachedId = form.getFieldValue('id');
       form.resetFields();
       form.setFieldsValue({
         name: cachedName,
         id: cachedId,
-        linkType: type
+        linkType: type,
+        linkDirection: mapFormLinkTypeToLinkDirection(type)
       });
       resetForLinkTypeChange();
     };
 
+    const handleLinkDirectionChange = (direction: LinkDirection) => {
+      const nextLinkType = mapLinkDirectionToFormLinkType(direction);
+      setLinkDirection(direction);
+      setLinkType(nextLinkType);
+      form.setFieldsValue({
+        linkDirection: direction,
+        linkType: nextLinkType
+      });
+    };
+
     const handleSubmit = async () => {
       try {
+        if (createMode) {
+          await form.validate();
+          const values = form.getFieldsValue();
+          const linkPairs = values.linkPairs || [];
+          if (!linkPairs.length) {
+            return;
+          }
+          onSubmit({ linkPairs } as LinkCreateFormData);
+          return;
+        }
+
         const formData = await buildSubmitData();
         if (formData) {
           onSubmit(formData);
@@ -258,28 +329,39 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
           <Form
             form={form}
             autoComplete="off"
+            requiredSymbol={createMode ? false : undefined}
             wrapperCol={{ span: 18 }}
             labelAlign="left"
             className={styles['link-form']}
           >
-            <BasicInfoSection
-              form={form}
-              styles={styles}
-              initialValues={initialValues}
-              linkType={linkType}
-              ontologyModelID={ontologyModelID}
-              sourceObjectType={sourceObjectType}
-              targetObjectType={targetObjectType}
-              sourcePrimaryAttribute={sourcePrimaryAttribute}
-              setSourcePrimaryAttribute={setSourcePrimaryAttribute}
-              targetPrimaryAttributeName={targetPrimaryAttributeName}
-              targetObjectAttributeOptions={targetObjectAttributeOptions}
-              targetPrimaryAttributeLoading={targetPrimaryAttributeLoading}
-              onLinkTypeChange={handleLinkTypeChange}
-              nnNameOnlyEdit={nnNameOnlyEdit}
-            />
+            {createMode ? (
+              <LinkPairsSection
+                form={form}
+                ontologyModelID={ontologyModelID}
+                styles={styles}
+              />
+            ) : (
+              <BasicInfoSection
+                form={form}
+                styles={styles}
+                initialValues={initialValues}
+                linkType={linkType}
+                linkDirection={linkDirection}
+                ontologyModelID={ontologyModelID}
+                sourceObjectType={sourceObjectType}
+                targetObjectType={targetObjectType}
+                sourcePrimaryAttribute={sourcePrimaryAttribute}
+                setSourcePrimaryAttribute={setSourcePrimaryAttribute}
+                targetPrimaryAttributeName={targetPrimaryAttributeName}
+                targetObjectAttributeOptions={targetObjectAttributeOptions}
+                targetPrimaryAttributeLoading={targetPrimaryAttributeLoading}
+                onLinkTypeChange={handleLinkTypeChange}
+                onLinkDirectionChange={handleLinkDirectionChange}
+                nnNameOnlyEdit={nnNameOnlyEdit}
+              />
+            )}
 
-            {linkType === LinkType.MANY_TO_MANY && (
+            {!createMode && linkType === LinkType.MANY_TO_MANY && (
               <>
                 <IntermediateSourceSection
                   form={form}

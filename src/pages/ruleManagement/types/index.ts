@@ -10,9 +10,25 @@ export interface AutoRuleActionParamFormItem extends OntologyActionParam {
   value?: string;
 }
 
+export enum ExecutionMode {
+  Auto = 'auto',
+  ManualConfirm = 'manual_confirm'
+}
+
+export const EXECUTION_MODE_OPTIONS = [
+  { label: '自动执行', value: ExecutionMode.Auto },
+  { label: '人工确认', value: ExecutionMode.ManualConfirm }
+];
+
+export const EXECUTION_MODE_LABEL_MAP: Record<ExecutionMode, string> = {
+  [ExecutionMode.Auto]: '自动执行',
+  [ExecutionMode.ManualConfirm]: '人工确认'
+};
+
 export interface AutoRuleFormData {
   action?: number | string;
   actionParams?: AutoRuleActionParamFormItem[];
+  executionMode?: ExecutionMode;
   advConfig?: boolean;
   changeObjectType?: number | string;
   changeOntoScene?: number | string;
@@ -94,6 +110,10 @@ export interface ActionConfigRes {
    */
   actionId?: number;
   actionInfo?: BehaviorActionDetail;
+  /**
+   * 执行模式：auto=自动执行，manual_confirm=人工确认
+   */
+  executionMode?: ExecutionMode;
   /**
    * 行为参数
    */

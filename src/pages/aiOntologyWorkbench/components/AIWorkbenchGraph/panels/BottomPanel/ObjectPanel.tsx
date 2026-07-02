@@ -286,9 +286,10 @@ function ObjectPanel({ objectId }: ObjectPanelProps) {
     {
       title: '属性名称',
       dataIndex: 'comment',
-      width: 150,
-      ellipsis: true,
-      render: (text: string) => <EllipsisPopover value={text || '-'} />
+      width: 200,
+      render: (text: string) => (
+        <span className="whitespace-normal break-words">{text || '-'}</span>
+      )
     },
     {
       title: '属性id',

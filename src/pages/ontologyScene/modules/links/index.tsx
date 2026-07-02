@@ -26,7 +26,7 @@ export default function OntologySceneObjectType() {
       }
     >
       <Switch>
-        <Redirect exact from={match.path} to={`${match.path}/list`} />
+        <Redirect exact from={match.path} to={`${match.url}/list`} />
         <Route path={`${match.path}/list`} component={OntologySceneLinksList} />
         <Route
           path={`${match.path}/create`}

@@ -6,13 +6,16 @@ import ObjectTypeForm, {
 } from './components/ObjectTypeForm';
 import {
   getOntologyObjectTypeDetail,
+  syncObjectTypeTask,
   updateOntologyObjectType
 } from '@/api/ontologySceneLibrary/objectType';
+import { isOntologyApiSuccess } from '@/utils/apiResponse';
 import { buildUpdateObjectTypeRequest } from './components/ObjectTypeFormHooks/useObjectTypeSubmit';
 import { mapObjectTypeDetailToFormData } from './mapObjectTypeDetailToFormData';
 import { DATA_SOURCE_TYPE } from '@/pages/ontologyScene/common/constants';
 
 import { IconLeft } from '@arco-design/web-react/icon';
+import formStyles from './components/ObjectTypeForm.module.scss';
 
 const getInitialStepFromSearch = (search: string) => {
   const step = new URLSearchParams(search).get('step');
@@ -43,6 +46,8 @@ export default function OntologySceneObjectTypeEdit() {
   const [loading, setLoading] = useState(false);
   const [initialValues, setInitialValues] =
     useState<Partial<ObjectTypeFormData>>();
+  const [formStep, setFormStep] = useState(() => initialStep ?? 0);
+  const formStepRef = useRef(formStep);
 
   useEffect(() => {
     const loadData = async () => {
@@ -94,9 +99,11 @@ export default function OntologySceneObjectTypeEdit() {
 
     setLoading(true);
     try {
-      const isLocalCsv = data._dataSource?.type === DATA_SOURCE_TYPE.LOCAL_CSV;
+      const isModelingOnlySource =
+        data._dataSource?.type === DATA_SOURCE_TYPE.LOCAL_CSV ||
+        data._dataSource?.type === DATA_SOURCE_TYPE.DATA_RESOURCE;
       const submitData =
-        enteredForInstanceSyncRef.current || isLocalCsv
+        enteredForInstanceSyncRef.current || isModelingOnlySource
           ? data
           : { ...data, enableSyncSourceData: false };
 
@@ -109,7 +116,19 @@ export default function OntologySceneObjectTypeEdit() {
         return;
       }
 
-      Message.success('更新成功');
+      if (submitData.enableSyncSourceData) {
+        const syncRes = await syncObjectTypeTask({ id: objectTypeIdNum });
+        if (!isOntologyApiSuccess(syncRes)) {
+          Message.warning(
+            syncRes.message ||
+              '同步配置已保存，但触发实例同步任务失败，请在列表中重试'
+          );
+        } else {
+          Message.success('更新成功，已触发实例同步');
+        }
+      } else {
+        Message.success('更新成功');
+      }
       history.push(
         `/tenant/compute/onto/ontologyScene/detail/${OSId}/objectType/list`
       );
@@ -153,34 +172,46 @@ export default function OntologySceneObjectTypeEdit() {
     [objectTypeId]
   );
 
+  const handleFormStepChange = useCallback(
+    async (nextStep: number) => {
+      const prevStep = formStepRef.current;
+      formStepRef.current = nextStep;
+      setFormStep(nextStep);
+      if (nextStep < prevStep) {
+        return;
+      }
+      await refetchDetailAfterStepChange(nextStep);
+    },
+    [refetchDetailAfterStepChange]
+  );
+
   return (
     <>
       {initialValues ? (
-        <div className="relative flex h-[calc(100vh-56px)] w-full flex-col bg-[#fff]">
-          <div className="flex items-center gap-[16px] border-b border-[##EBEEF5] p-[24px] text-[20px] font-[600] leading-[32px] text-[var(--color-text-1)]">
+        <div
+          className={`relative flex h-[calc(100vh-56px)] w-full flex-col bg-[#fff] ${formStyles['object-type-form-shell']}`}
+        >
+          <div className={formStyles['object-type-form-page-header']}>
             <Button
               icon={<IconLeft />}
-              size={'default'}
+              size="small"
               type={'default'}
               onClick={goBack}
             />
-            编辑对象类型
+            {allowInstanceSyncEdit ? '实例同步' : '编辑对象类型'}
           </div>
-          <div className="flex flex-1 flex-col overflow-hidden">
-            <div className="overflow-y-auto pb-[65px]">
-              {initialValues && (
-                <ObjectTypeForm
-                  isEdit={true}
-                  initialValues={initialValues}
-                  initialStep={initialStep}
-                  allowInstanceSyncEdit={allowInstanceSyncEdit}
-                  onSubmit={handleSubmit}
-                  onCancel={handleCancel}
-                  onStepChange={refetchDetailAfterStepChange}
-                  loading={loading}
-                />
-              )}
-            </div>
+          <div className="min-h-0 flex-1 overflow-hidden">
+            <ObjectTypeForm
+              isEdit={true}
+              initialValues={initialValues}
+              initialStep={initialStep}
+              step={formStep}
+              allowInstanceSyncEdit={allowInstanceSyncEdit}
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+              onStepChange={handleFormStepChange}
+              loading={loading}
+            />
           </div>
         </div>
       ) : (

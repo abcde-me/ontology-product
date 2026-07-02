@@ -1,6 +1,19 @@
 import { create } from 'zustand';
 import type { OntologScene } from '@/types/ontologySceneApi';
 import type { GetOntologyTopologyResponse } from '@/types/graphApi';
+import type { SystemPromptStore } from '../types/systemPrompt';
+import type { PluginConfigStore } from '../types/pluginConfig';
+import type { SecurityProtectionConfig } from '../types/securityProtection';
+import {
+  getActiveSystemPromptContent as resolveActiveSystemPromptContent,
+  loadSystemPromptStore
+} from '../services/systemPromptStorage';
+import {
+  buildPluginConfigPayload,
+  loadPluginConfigStore
+} from '../services/pluginConfigStorage';
+import { loadSecurityProtectionConfig } from '../services/securityProtectionStorage';
+import { checkSensitiveContent } from '../services/checkSensitiveContent';
 
 /**
  * 详情面板类型
@@ -54,6 +67,18 @@ interface AIWorkbenchState {
   /** 左侧菜单是否收起 */
   leftMenuCollapsed: boolean;
 
+  // ========== 系统提示词 ==========
+  /** 当前本体的系统提示词版本库 */
+  systemPromptStore: SystemPromptStore | null;
+
+  // ========== 插件配置 ==========
+  /** 当前本体的插件配置 */
+  pluginConfigStore: PluginConfigStore | null;
+
+  // ========== 安全防护 ==========
+  /** 当前本体的安全防护配置 */
+  securityProtectionConfig: SecurityProtectionConfig | null;
+
   // ========== Actions ==========
   /** 设置本体列表 */
   setOntologyList: (list: OntologScene[]) => void;
@@ -84,6 +109,31 @@ interface AIWorkbenchState {
   /** 设置左侧菜单收起状态 */
   setLeftMenuCollapsed: (collapsed: boolean) => void;
 
+  /** 加载本体的系统提示词配置 */
+  loadSystemPromptForOntology: (ontologyModelId: number) => void;
+  /** 更新系统提示词配置 */
+  setSystemPromptStore: (store: SystemPromptStore | null) => void;
+  /** 获取当前生效的系统提示词 */
+  getActiveSystemPromptContent: () => string;
+
+  /** 加载本体的插件配置 */
+  loadPluginConfigForOntology: (ontologyModelId: number) => void;
+  /** 更新插件配置 */
+  setPluginConfigStore: (store: PluginConfigStore | null) => void;
+  /** 获取对话请求使用的插件配置 */
+  getPluginConfigPayload: () => ReturnType<typeof buildPluginConfigPayload>;
+
+  /** 加载本体的安全防护配置 */
+  loadSecurityProtectionForOntology: (ontologyModelId: number) => void;
+  /** 更新安全防护配置 */
+  setSecurityProtectionConfig: (
+    config: SecurityProtectionConfig | null
+  ) => void;
+  /** 检测输入是否包含敏感内容 */
+  checkInputSecurity: (
+    text: string
+  ) => ReturnType<typeof checkSensitiveContent>;
+
   /** 重置状态 */
   reset: () => void;
 }
@@ -100,10 +150,13 @@ const initialState = {
   detailPanelVisible: false,
   detailPanelData: null,
   detailPanelHeight: 400, // 默认高度 400px
-  leftMenuCollapsed: false
+  leftMenuCollapsed: false,
+  systemPromptStore: null,
+  pluginConfigStore: null,
+  securityProtectionConfig: null
 };
 
-export const useAIWorkbenchStore = create<AIWorkbenchState>((set) => ({
+export const useAIWorkbenchStore = create<AIWorkbenchState>((set, get) => ({
   ...initialState,
 
   // ========== 本体相关 Actions ==========
@@ -138,6 +191,34 @@ export const useAIWorkbenchStore = create<AIWorkbenchState>((set) => ({
 
   // ========== 左侧菜单相关 Actions ==========
   setLeftMenuCollapsed: (collapsed) => set({ leftMenuCollapsed: collapsed }),
+
+  // ========== 系统提示词 Actions ==========
+  loadSystemPromptForOntology: (ontologyModelId) =>
+    set({
+      systemPromptStore: loadSystemPromptStore(ontologyModelId)
+    }),
+  setSystemPromptStore: (store) => set({ systemPromptStore: store }),
+  getActiveSystemPromptContent: () =>
+    resolveActiveSystemPromptContent(get().systemPromptStore),
+
+  // ========== 插件配置 Actions ==========
+  loadPluginConfigForOntology: (ontologyModelId) =>
+    set({
+      pluginConfigStore: loadPluginConfigStore(ontologyModelId)
+    }),
+  setPluginConfigStore: (store) => set({ pluginConfigStore: store }),
+  getPluginConfigPayload: () =>
+    buildPluginConfigPayload(get().pluginConfigStore),
+
+  // ========== 安全防护 Actions ==========
+  loadSecurityProtectionForOntology: (ontologyModelId) =>
+    set({
+      securityProtectionConfig: loadSecurityProtectionConfig(ontologyModelId)
+    }),
+  setSecurityProtectionConfig: (config) =>
+    set({ securityProtectionConfig: config }),
+  checkInputSecurity: (text) =>
+    checkSensitiveContent(text, get().securityProtectionConfig),
 
   // ========== 重置状态 ==========
   reset: () => set(initialState)

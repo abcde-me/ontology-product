@@ -1,0 +1,21 @@
+.data-task-page {
+  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+  flex-shrink: 0;
+}
+
+.table-section {
+  flex: 1;
+  min-height: 0;
+  margin-top: 16px;
+}

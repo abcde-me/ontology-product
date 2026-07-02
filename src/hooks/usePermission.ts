@@ -8,6 +8,8 @@ import {
 import { ResourcePermissionActions } from '@/api/modules/project';
 import { isRequestSuccess } from '@/api/utils';
 import { isWujie } from '@/utils/env';
+import { getDevAdminActions, isDevBypassEnabled } from '@/utils/devFallback';
+import { isApiResponseSuccess } from '@/utils/apiResponse';
 
 /**
  * 权限相关的 hooks 集合
@@ -174,22 +176,35 @@ export const usePermission = () => {
 
   const setUserPermissions = async (projectId: string) => {
     console.log('setUserPermissions', projectId);
+
+    if (isDevBypassEnabled()) {
+      setUserActions(getDevAdminActions());
+      return;
+    }
+
+    const applyDevFallback = () => {
+      setUserActions({ isAdmin: false, actions: [] });
+    };
+
     try {
       const response = await ResourcePermissionActions({
         projectID: projectId,
         platforms: ['aimdp-manager', 'aisocket', 'common', 'ontology']
       });
 
-      if (isRequestSuccess(response)) {
-        const { admin, scope } = response.data;
+      if (isRequestSuccess(response) || isApiResponseSuccess(response)) {
+        const { admin } = response.data || {};
         setUserActions({
           isAdmin: admin === true,
-          actions: response.data.actions
+          actions: response.data?.actions || []
         });
+        return;
       }
     } catch (error) {
-      console.error('Failed to fetch project list:', error);
+      console.error('Failed to fetch user permissions:', error);
     }
+
+    applyDevFallback();
   };
 
   return {

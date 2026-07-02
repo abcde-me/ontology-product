@@ -94,6 +94,7 @@ export const DrawerWithEditBtn = (props: DrawerWithEditBtnProps) => {
   return (
     <Drawer
       {...otherProps}
+      unmountOnExit
       autoFocus={false}
       getChildrenPopupContainer={(node) => {
         return document.querySelector('#ontologySceneContent') || document.body;

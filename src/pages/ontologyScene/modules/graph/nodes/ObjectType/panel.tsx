@@ -44,23 +44,48 @@ import {
   OBJECT_TYPE_ICON_OPTIONS,
   OBJECT_TYPE_SYNC_STATUS_CONFIG
 } from '@/pages/ontologyScene/common/constants';
-import { useHistory, useParams } from 'react-router';
+import { useHistory, useLocation, useParams } from 'react-router';
+import { resolveInstanceId } from '@/pages/exploreAnalysis/objectBrowse/utils/instanceRow';
+import {
+  buildFieldCommentMap,
+  formatFieldDisplayLabel
+} from '@/pages/exploreAnalysis/objectBrowse/utils/fieldDisplayLabel';
+import { fetchFieldCommentMap } from '@/pages/exploreAnalysis/objectBrowse/services/conditionQuery';
+import { useOntologyGraphBrowse } from '../../context/OntologyGraphBrowseContext';
 import { isNil } from 'lodash-es';
 import { getLinkTypeText } from '@/pages/ontologyScene/utils';
 import { AttributeItem } from '@/pages/ontologyScene/components/ObjectTypeDetailDrawer';
 import { openNewPage } from '@/utils/env';
 import { EllipsisPopover } from '@/pages/ontologyScene/components';
+import classNames from 'classnames';
+import panelStyles from './panel.module.scss';
 
 const defaultPageSize = 10;
+const browseLinksPageSize = 2;
+const browseInstancesFetchSize = 100;
 
 const Panel: FC<any> = ({ id, data }) => {
+  const browseContext = useOntologyGraphBrowse();
+  const compactPanel = browseContext?.compactPanel ?? false;
+  const tableSize = compactPanel ? 'small' : 'default';
+  const location = useLocation();
+  const browseSearchParams = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search]
+  );
+  const focusNeighbors =
+    browseContext?.focusNeighbors ??
+    browseSearchParams.get('focusNeighbors') === '1';
+  const highlightInstanceId =
+    browseContext?.instanceId ?? browseSearchParams.get('instanceId') ?? '';
   const [activeTab, setActiveTab] = useState('instances');
   const [instancesData, setInstancesData] = useState<any[]>([]);
   const [instancesTotal, setInstancesTotal] = useState(0);
   const [instancesLoading, setInstancesLoading] = useState(false);
   const [instancesPage, setInstancesPage] = useState(1);
   const [instancesPageSize, setInstancesPageSize] = useState(defaultPageSize);
-  const { id: OSId } = useParams<{ id: string }>();
+  const { id: routeSceneId } = useParams<{ id: string }>();
+  const OSId = String(browseContext?.sceneId ?? routeSceneId ?? '');
   const history = useHistory();
 
   const [propertiesData, setPropertiesData] = useState<PhysicalProperties[]>(
@@ -75,7 +100,9 @@ const Panel: FC<any> = ({ id, data }) => {
   const [linksTotal, setLinksTotal] = useState(0);
   const [linksLoading, setLinksLoading] = useState(false);
   const [linksPage, setLinksPage] = useState(1);
-  const [linksPageSize, setLinksPageSize] = useState(defaultPageSize);
+  const [linksPageSize, setLinksPageSize] = useState(
+    focusNeighbors ? browseLinksPageSize : defaultPageSize
+  );
   const [linksIsNoMore, setLinksIsNoMore] = useState(false);
   const linksScrollContainerRef = useRef<HTMLDivElement>(null);
   const linksPageNoRef = useRef(1);
@@ -90,6 +117,10 @@ const Panel: FC<any> = ({ id, data }) => {
   const [objectTypeDetail, setObjectTypeDetail] =
     useState<GetOntologyObjectTypeDetailRes | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+
+  const [fieldCommentMap, setFieldCommentMap] = useState<
+    Record<string, string>
+  >({});
 
   // 获取节点ID，从 id 或 data 中提取
   // id prop 是字符串类型（如 "1"），需要转换为数字
@@ -109,11 +140,30 @@ const Panel: FC<any> = ({ id, data }) => {
       const res = await listOntologyObjectTypeData({
         id: nodeId,
         page,
-        pageSize
+        pageSize: highlightInstanceId ? browseInstancesFetchSize : pageSize
       });
       if (res.status === 200 && res.code === '' && res.data) {
-        setInstancesData(res.data.result || []);
-        setInstancesTotal(res.data.totalCount || 0);
+        const rows = res.data.result || [];
+
+        if (highlightInstanceId) {
+          const targetIndex = rows.findIndex(
+            (item) =>
+              String(resolveInstanceId(item) ?? '') ===
+              String(highlightInstanceId)
+          );
+
+          if (targetIndex >= 0) {
+            const start = Math.max(0, targetIndex - 1);
+            setInstancesData(rows.slice(start, start + 2));
+            setInstancesTotal(Math.min(2, rows.length - start));
+          } else {
+            setInstancesData(rows.slice(0, 2));
+            setInstancesTotal(Math.min(2, res.data.totalCount || rows.length));
+          }
+        } else {
+          setInstancesData(rows);
+          setInstancesTotal(res.data.totalCount || 0);
+        }
       }
     } catch (error) {
       console.error('加载实例数据失败:', error);
@@ -288,6 +338,17 @@ const Panel: FC<any> = ({ id, data }) => {
   };
 
   useEffect(() => {
+    if (!nodeId || !OSId) {
+      setFieldCommentMap({});
+      return;
+    }
+
+    fetchFieldCommentMap(Number(OSId), nodeId)
+      .then(setFieldCommentMap)
+      .catch(() => setFieldCommentMap({}));
+  }, [nodeId, OSId]);
+
+  useEffect(() => {
     loadInstances(instancesPage, instancesPageSize);
     loadObjectTypeDetail();
     loadProperties(propertiesPage, propertiesPageSize);
@@ -342,9 +403,19 @@ const Panel: FC<any> = ({ id, data }) => {
     const shouldUseFixedWidth = columnCount > 4;
     const columnWidth = shouldUseFixedWidth ? fixedWidth : averageWidth;
 
+    const commentMap =
+      Object.keys(fieldCommentMap).length > 0
+        ? fieldCommentMap
+        : buildFieldCommentMap(propertiesData);
+
     // 生成列配置
     return keys.map((key) => ({
-      title: <EllipsisPopover value={key} className="pointer-events-auto" />,
+      title: (
+        <EllipsisPopover
+          value={formatFieldDisplayLabel(key, commentMap)}
+          className="pointer-events-auto"
+        />
+      ),
       dataIndex: key,
       width: columnWidth,
       ellipsis: true,
@@ -352,7 +423,7 @@ const Panel: FC<any> = ({ id, data }) => {
         return <EllipsisPopover value={text || '-'} />;
       }
     }));
-  }, [instancesData]);
+  }, [fieldCommentMap, instancesData, propertiesData]);
 
   const handleViewPublicAttribute = (record: AttributeItem) => {
     if (!record.ontologyPublicPropertiesName) {
@@ -367,14 +438,12 @@ const Panel: FC<any> = ({ id, data }) => {
     {
       title: '属性名称',
       dataIndex: 'comment',
-      width: 150,
-      ellipsis: true,
+      width: 200,
       render: (text: string, record: PhysicalProperties) => (
-        <div className="flex items-center gap-2">
-          <EllipsisPopover
-            className="max-w-[70px] font-[600]"
-            value={text || '-'}
-          />
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="whitespace-normal break-words font-[600]">
+            {text || '-'}
+          </span>
           {record.isPrimary === 1 && (
             <Tag color="#FBF2FF" className="text-[#9254DE]" size="small">
               主键
@@ -509,16 +578,33 @@ const Panel: FC<any> = ({ id, data }) => {
 
     return (
       <div
-        className="flex flex-1 items-center gap-3 overflow-hidden rounded-lg px-4 py-3"
-        style={{
-          backgroundColor: '#fff',
-          minHeight: '56px'
-        }}
+        className={classNames(
+          'flex flex-1 items-center overflow-hidden rounded-lg',
+          compactPanel ? panelStyles['object-type-card'] : 'gap-3 px-4 py-3'
+        )}
+        style={
+          compactPanel
+            ? undefined
+            : {
+                backgroundColor: '#fff',
+                minHeight: '56px'
+              }
+        }
       >
-        <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded">
-          <IconComponent className="h-6 w-6" />
+        <div
+          className={classNames(
+            'flex flex-shrink-0 items-center justify-center rounded',
+            compactPanel ? 'h-5 w-5' : 'h-6 w-6'
+          )}
+        >
+          <IconComponent className={compactPanel ? 'h-5 w-5' : 'h-6 w-6'} />
         </div>
-        <div className="min-w-0 overflow-hidden text-[14px] leading-[22px] text-[#23293b]">
+        <div
+          className={classNames(
+            'min-w-0 overflow-hidden text-[#23293b]',
+            compactPanel ? '' : 'text-[14px] leading-[22px]'
+          )}
+        >
           <EllipsisPopover preferTypography value={name} />
         </div>
         {!isNil(objectType?.syncStatus) ? (
@@ -536,15 +622,38 @@ const Panel: FC<any> = ({ id, data }) => {
   };
 
   return (
-    <div className="bg-white">
+    <div
+      className={classNames(
+        compactPanel ? panelStyles['compact-panel'] : 'bg-white'
+      )}
+    >
       {/* 基本信息 */}
-      <div className="flex flex-col gap-[12px] px-[16px] pb-[24px] pt-[16px]">
-        <div className="text-[14px] font-[600] text-[var(--color-text-1)]">
+      <div
+        className={classNames(
+          'flex flex-col',
+          compactPanel
+            ? panelStyles['basic-section']
+            : 'gap-[12px] px-[16px] pb-[24px] pt-[16px]'
+        )}
+      >
+        <div
+          className={classNames(
+            'font-[600] text-[var(--color-text-1)]',
+            compactPanel ? panelStyles['section-title'] : 'text-[14px]'
+          )}
+        >
           基本信息
         </div>
         <Spin loading={detailLoading}>
           <div className="flex items-center">
-            <span className="w-[82px] text-[14px] text-[var(--color-text-4)]">
+            <span
+              className={classNames(
+                'text-[var(--color-text-4)]',
+                compactPanel
+                  ? panelStyles['field-label']
+                  : 'w-[82px] text-[14px]'
+              )}
+            >
               同步状态:
             </span>
             {objectTypeDetail?.syncStatus !== undefined ? (
@@ -563,14 +672,29 @@ const Panel: FC<any> = ({ id, data }) => {
             )}
           </div>
           <div className="flex items-center">
-            <span className="w-[82px] flex-shrink-0 text-[14px] text-[var(--color-text-4)]">
+            <span
+              className={classNames(
+                'flex-shrink-0 text-[var(--color-text-4)]',
+                compactPanel
+                  ? panelStyles['field-label']
+                  : 'w-[82px] text-[14px]'
+              )}
+            >
               对象类型id:
             </span>
-            <div className="flex min-w-0 flex-1 items-center gap-1 leading-[22px]">
+            <div
+              className={classNames(
+                'flex min-w-0 flex-1 items-center gap-1',
+                compactPanel ? 'leading-[18px]' : 'leading-[22px]'
+              )}
+            >
               <EllipsisPopover
                 value={objectTypeDetail?.code || '-'}
                 wrapperClassName="min-w-0"
-                className="text-[14px] text-[var(--color-text-1)]"
+                className={classNames(
+                  'text-[var(--color-text-1)]',
+                  compactPanel ? panelStyles['field-value'] : 'text-[14px]'
+                )}
               ></EllipsisPopover>
               {objectTypeDetail?.code && (
                 <Popover content="复制">
@@ -590,10 +714,20 @@ const Panel: FC<any> = ({ id, data }) => {
       </div>
 
       {/* Tabs */}
-      <Tabs activeTab={activeTab} onChange={setActiveTab} className="px-4">
+      <Tabs
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        size={compactPanel ? 'small' : 'default'}
+        className={compactPanel ? panelStyles['tabs-wrap'] : 'px-4'}
+      >
         <Tabs.TabPane key="instances" title={`实例(${instancesTotal})`}>
           {instancesTotal === 0 ? (
-            <div className="flex justify-center py-[100px]">
+            <div
+              className={classNames(
+                'flex justify-center',
+                compactPanel ? panelStyles['empty-wrap'] : 'py-[100px]'
+              )}
+            >
               <NoDataCard title="暂无数据" />
             </div>
           ) : (
@@ -601,12 +735,24 @@ const Panel: FC<any> = ({ id, data }) => {
               columns={instancesColumns}
               data={instancesData}
               loading={instancesLoading}
+              size={tableSize}
               scroll={
                 instancesColumns.length > 4
                   ? { x: instancesColumns.length * 140 }
                   : undefined
               }
               pagination={false}
+              rowClassName={(record) => {
+                const classNames = ['group'];
+                if (
+                  highlightInstanceId &&
+                  String(resolveInstanceId(record) ?? '') ===
+                    String(highlightInstanceId)
+                ) {
+                  classNames.push('bg-[#f2f8ff]');
+                }
+                return classNames.join(' ');
+              }}
               rowKey={(record) => `${record.id}`}
               border={false}
               // className="mt-2"
@@ -614,12 +760,18 @@ const Panel: FC<any> = ({ id, data }) => {
             />
           )}
           {instancesTotal > defaultPageSize && (
-            <div className="mt-[16px] flex items-center justify-end">
+            <div
+              className={classNames(
+                'flex items-center justify-end',
+                compactPanel ? panelStyles['pagination-wrap'] : 'mt-[16px]'
+              )}
+            >
               <Pagination
                 current={instancesPage}
                 pageSize={instancesPageSize}
                 total={instancesTotal}
                 showTotal
+                size={compactPanel ? 'small' : 'default'}
                 sizeOptions={[10, 20, 50, 100]}
                 onChange={(page, pageSize) => {
                   setInstancesPage(page);
@@ -638,6 +790,7 @@ const Panel: FC<any> = ({ id, data }) => {
             data={propertiesData}
             scroll={{ x: 400 }}
             loading={propertiesLoading}
+            size={tableSize}
             rowClassName={() => 'group'}
             noDataElement={<NoDataCard title="暂无数据" />}
             rowKey="id"
@@ -646,12 +799,18 @@ const Panel: FC<any> = ({ id, data }) => {
             // className="mt-2"
           />
           {propertiesTotal > defaultPageSize && (
-            <div className="mt-[16px] flex items-center justify-end">
+            <div
+              className={classNames(
+                'flex items-center justify-end',
+                compactPanel ? panelStyles['pagination-wrap'] : 'mt-[16px]'
+              )}
+            >
               <Pagination
                 current={propertiesPage}
                 pageSize={propertiesPageSize}
                 total={propertiesTotal}
                 showTotal
+                size={compactPanel ? 'small' : 'default'}
                 sizeOptions={[10, 20, 50, 100]}
                 onChange={(page, pageSize) => {
                   setPropertiesPage(page);
@@ -665,13 +824,23 @@ const Panel: FC<any> = ({ id, data }) => {
 
         <Tabs.TabPane key="links" title={`链接(${linksTotal})`}>
           {linksTotal === 0 && !linksScrollLoading ? (
-            <div className="flex justify-center py-[100px]">
+            <div
+              className={classNames(
+                'flex justify-center',
+                compactPanel ? panelStyles['empty-wrap'] : 'py-[100px]'
+              )}
+            >
               <NoDataCard title="暂无数据" />
             </div>
           ) : (
             <div
               ref={linksScrollContainerRef}
-              className="max-h-[calc(100vh-360px)] overflow-y-auto"
+              className={classNames(
+                'overflow-y-auto',
+                compactPanel
+                  ? 'max-h-[calc(100vh-280px)]'
+                  : 'max-h-[calc(100vh-360px)]'
+              )}
             >
               {linksData.map((link) => {
                 // 判断当前节点是源节点还是目标节点
@@ -692,19 +861,48 @@ const Panel: FC<any> = ({ id, data }) => {
                 return (
                   <div
                     key={link.id}
-                    className="mb-[16px] rounded-[12px] border border-[var(--color-border-2)] bg-white p-[16px]"
+                    className={classNames(
+                      'rounded-[12px] border border-[var(--color-border-2)]',
+                      compactPanel
+                        ? panelStyles['link-card']
+                        : 'mb-[16px] bg-white p-[16px]'
+                    )}
                   >
                     {/* 标题区域 */}
-                    <div className="mb-[8px] text-[14px] font-[600] text-[var(--color-text-1)]">
+                    <div
+                      className={classNames(
+                        'font-[600] text-[var(--color-text-1)]',
+                        compactPanel
+                          ? panelStyles['link-title']
+                          : 'mb-[8px] text-[14px]'
+                      )}
+                    >
                       <EllipsisPopover value={link.name} />
                     </div>
 
                     {/* ID */}
-                    <div className="mb-[8px] flex items-center gap-[8px] overflow-hidden leading-[22px]">
-                      <span className="text-[14px] text-[var(--color-text-5)]">
+                    <div
+                      className={classNames(
+                        'flex items-center overflow-hidden',
+                        compactPanel
+                          ? panelStyles['link-meta']
+                          : 'mb-[8px] gap-[8px] leading-[22px]'
+                      )}
+                    >
+                      <span
+                        className={classNames(
+                          'text-[var(--color-text-5)]',
+                          compactPanel ? '' : 'text-[14px]'
+                        )}
+                      >
                         链接id:
                       </span>
-                      <span className="min-w-0 max-w-full text-[14px] text-[var(--color-text-1)]">
+                      <span
+                        className={classNames(
+                          'min-w-0 max-w-full text-[var(--color-text-1)]',
+                          compactPanel ? '' : 'text-[14px]'
+                        )}
+                      >
                         <EllipsisPopover value={link.code} />
                       </span>
                       <Popover content="复制">
@@ -720,7 +918,14 @@ const Panel: FC<any> = ({ id, data }) => {
                     </div>
 
                     {/* 关系图 */}
-                    <div className="flex items-center overflow-hidden bg-[#F2F8FF] p-[12px]">
+                    <div
+                      className={classNames(
+                        'flex items-center overflow-hidden',
+                        compactPanel
+                          ? panelStyles['link-graph']
+                          : 'bg-[#F2F8FF] p-[12px]'
+                      )}
+                    >
                       {renderObjectTypeCard(leftObjectType, true)}
                       <div className="flex w-[76px] min-w-[76px] items-center">
                         <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
@@ -746,7 +951,12 @@ const Panel: FC<any> = ({ id, data }) => {
 
         <Tabs.TabPane key="behaviors" title={`行为(${behaviorsTotal})`}>
           {behaviorsTotal === 0 ? (
-            <div className="flex justify-center py-[100px]">
+            <div
+              className={classNames(
+                'flex justify-center',
+                compactPanel ? panelStyles['empty-wrap'] : 'py-[100px]'
+              )}
+            >
               <NoDataCard title="暂无数据" />
             </div>
           ) : (
@@ -755,6 +965,7 @@ const Panel: FC<any> = ({ id, data }) => {
               data={behaviorsData}
               loading={behaviorsLoading}
               scroll={{ x: 400 }}
+              size={tableSize}
               pagination={false}
               rowKey={(record) => `${record.id || record.code}`}
               border={false}
@@ -763,12 +974,18 @@ const Panel: FC<any> = ({ id, data }) => {
             />
           )}
           {behaviorsTotal > defaultPageSize && (
-            <div className="mt-[16px] flex items-center justify-end">
+            <div
+              className={classNames(
+                'flex items-center justify-end',
+                compactPanel ? panelStyles['pagination-wrap'] : 'mt-[16px]'
+              )}
+            >
               <Pagination
                 current={behaviorsPage}
                 pageSize={behaviorsPageSize}
                 total={behaviorsTotal}
                 showTotal
+                size={compactPanel ? 'small' : 'default'}
                 sizeOptions={[10, 20, 50, 100]}
                 onChange={(page, pageSize) => {
                   setBehaviorsPage(page);

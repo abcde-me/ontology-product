@@ -455,15 +455,16 @@ const GlobalMapPickerModal = () => {
     return () => document.removeEventListener('click', clickInArea);
   }, []);
 
+  if (!visible) {
+    return null;
+  }
+
   return (
     <OntoModal
       title="选择坐标"
       visible={visible}
       onCancel={closeGlobalMapPicker}
       onOk={handleConfirm}
-      maskStyle={{
-        display: visible ? 'block' : 'none'
-      }}
       style={{ width: 900, height: 600 }}
       getChildrenPopupContainer={(node) => node.parentElement || document.body}
       afterClose={() => {

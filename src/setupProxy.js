@@ -17,7 +17,7 @@ const addProxy = (options) => {
         proxyRes.headers['Access-Control-Allow-Methods'] =
           'GET, POST, PUT, DELETE, OPTIONS';
         proxyRes.headers['Access-Control-Allow-Headers'] =
-          'Origin, X-Requested-With, X-Regionid, X-Auth-Validate, Content-Type, Accept, Authorization';
+          'Origin, X-Requested-With, X-Regionid, X-Auth-Validate, X-Ceai-User-Id, X-Ceai-Project-Id, Content-Type, Accept, Authorization';
       }
     },
     ...options
@@ -42,10 +42,37 @@ module.exports = function (app) {
       );
       res.header(
         'Access-Control-Allow-Headers',
-        'Origin, X-Requested-With, X-Regionid, X-Auth-Validate, Content-Type, Accept, Authorization'
+        'Origin, X-Requested-With, X-Regionid, X-Auth-Validate, X-Ceai-User-Id, X-Ceai-Project-Id, Content-Type, Accept, Authorization'
       ); // Allowed headers
       res.sendStatus(200);
     });
+    app.use(
+      ['/deepseek-api'],
+      createProxyMiddleware({
+        target: 'https://api.deepseek.com',
+        changeOrigin: true,
+        secure: true,
+        logger: console,
+        proxyTimeout: 120000,
+        timeout: 120000,
+        pathRewrite: {
+          '^/deepseek-api': ''
+        }
+      })
+    );
+    // 本体管理 API 直连 ontology-manager 服务（避免走 appforge 网关 504）
+    app.use(
+      ['/ceai/ontology-manager/api/v1'],
+      createProxyMiddleware({
+        target: 'http://10.252.216.16:30281',
+        changeOrigin: true,
+        secure: false,
+        logger: console,
+        proxyTimeout: 120000,
+        timeout: 120000,
+        pathRewrite: (path, req) => req.baseUrl.replace(/^\/ceai/, '') + req.url
+      })
+    );
     app.use(
       ['/ceai'],
       createProxyMiddleware({
@@ -53,6 +80,8 @@ module.exports = function (app) {
         changeOrigin: true,
         secure: false,
         logger: console,
+        proxyTimeout: 120000,
+        timeout: 120000,
         pathRewrite: (path, req) => {
           // todo 待删除 test
           if (currentTarget === targets['test']) {
@@ -187,12 +216,17 @@ module.exports = function (app) {
     app.use(
       ['/operationcenter', '/user-space', '/auth-center'],
       createProxyMiddleware({
-        target: 'http://localhost:9040',
+        target: currentTarget,
         pathRewrite: (path, req) => req.baseUrl + path,
         changeOrigin: true,
         secure: false,
         logger: console,
-        on: {}
+        on: {
+          proxyReq: (proxyReq, req) => {
+            proxyReq.setHeader('Origin', currentTarget);
+            proxyReq.setHeader('Referer', `${currentTarget}/`);
+          }
+        }
       })
     );
   }

@@ -10,8 +10,19 @@ import {
 } from '@/types/objectType';
 import {
   DATA_SOURCE_TYPE,
+  INSTANCE_SYNC_SOURCE_TYPE,
   OBJECT_TYPE_ICON_OPTIONS
 } from '@/pages/ontologyScene/common/constants';
+import {
+  API_SYNC_MODE,
+  CSV_SYNC_MODE,
+  applyInstanceSyncStrategyDefaults,
+  isApiPollingMode,
+  isCsvIncrementalImportScope
+} from '../ObjectTypeFormSteps/common/instanceSyncStrategyConfig';
+import { resolveEmbeddingModelConfig } from '@/services/llmScenarioStorage';
+import { hasVectorizedPhysicalProperties } from '@/services/ontologyVectorization';
+import { isGraphObjectTypePlaceholderFilePath } from '@/utils/ontologyCsvTemplate';
 import {
   VECTOR_FIELD_SUFFIX,
   flattenOntologyPhysicalPropertiesForSubmit,
@@ -40,17 +51,73 @@ interface BuildObjectTypeFormDataParams {
   isReUpload: boolean;
 }
 
+function toSubmitSourceDataInfoFromSyncState(
+  state: SyncSourceDataStrategyFormState
+): SourceDataInfo | undefined {
+  const sourceType =
+    state.instanceSyncSourceType || INSTANCE_SYNC_SOURCE_TYPE.DATABASE;
+
+  if (sourceType === INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE) {
+    if (!state.messageQueueConnectorId) {
+      return undefined;
+    }
+    return {
+      connectorId: state.messageQueueConnectorId,
+      tableName: state.messageQueueTopic?.trim() || undefined,
+      queryMode: 'selected'
+    };
+  }
+
+  if (sourceType === INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE) {
+    if (!state.apiConnectorId) {
+      return undefined;
+    }
+    return {
+      connectorId: state.apiConnectorId,
+      queryMode: 'selected'
+    };
+  }
+
+  if (sourceType === INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD) {
+    if (!state.instanceCsvFilePath?.trim()) {
+      return undefined;
+    }
+    return {
+      tableName: state.instanceCsvFilePath.trim(),
+      queryMode: 'selected'
+    };
+  }
+
+  return toSubmitSourceDataInfo(state.sourceDataInfo);
+}
+
 function toSubmitSourceDataInfo(
   source?: SqlSourceDataInfo
 ): SourceDataInfo | undefined {
-  if (!source?.connectorId) return undefined;
-  return {
-    connectorId: source.connectorId,
-    databaseName: source.databaseName,
-    tableName: source.tableName,
-    queryMode: source.queryMode || 'selected',
-    sql: source.sql
-  };
+  if (!source) return undefined;
+
+  const queryMode = source.queryMode || 'selected';
+
+  if (source.connectorId) {
+    return {
+      connectorId: source.connectorId,
+      databaseName: source.databaseName,
+      tableName: source.tableName,
+      queryMode,
+      sql: source.sql
+    };
+  }
+
+  // 数据资源建模：无 SQL 连接器，依赖 originalDbName / originalTableName 提交同步策略
+  if (queryMode === 'selected' && source.tableName?.trim()) {
+    return {
+      databaseName: source.databaseName,
+      tableName: source.tableName.trim(),
+      queryMode
+    };
+  }
+
+  return undefined;
 }
 
 function dataSourceStateToSqlSourceDataInfo(
@@ -98,7 +165,12 @@ function buildPhysicalProperties(
   const resolveSourceTableName = (field: ObjectTypeAttributeField) => {
     const fromField = field.sourceTableName?.trim();
     if (fromField) return fromField;
-    if (!isSqlDirectorySource && dataSource?.table?.trim()) {
+    if (
+      !isSqlDirectorySource &&
+      (dataSource?.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC ||
+        dataSource?.type === DATA_SOURCE_TYPE.DATA_RESOURCE) &&
+      dataSource?.table?.trim()
+    ) {
       return dataSource.table.trim();
     }
     return '';
@@ -141,14 +213,14 @@ function buildPhysicalProperties(
     if (vectorizationOn) {
       const vecName = `${field.propertyID}${VECTOR_FIELD_SUFFIX}`;
       const vecComment =
+        mapping?._vectorComment ??
         field._vectorComment ??
         `${field.propertyComment || ''}${VECTOR_FIELD_SUFFIX}`;
       let vecBackendId = 0;
-      if (
-        field._vectorPropertyId !== undefined &&
-        field._vectorPropertyId !== ''
-      ) {
-        const n = Number(field._vectorPropertyId);
+      const vectorPropertyId =
+        mapping?._vectorPropertyId ?? field._vectorPropertyId;
+      if (vectorPropertyId !== undefined && vectorPropertyId !== '') {
+        const n = Number(vectorPropertyId);
         if (Number.isFinite(n)) vecBackendId = Math.trunc(n);
       }
       result.push({
@@ -177,32 +249,78 @@ function buildSyncSourceDataStrategy(
   state?: SyncSourceDataStrategyFormState
 ): SyncSourceDataStrategy | undefined {
   if (!state) return undefined;
-  const sourceDataInfo = toSubmitSourceDataInfo(state.sourceDataInfo);
+
+  const normalizedState = applyInstanceSyncStrategyDefaults(state);
+
+  const sourceDataInfo = toSubmitSourceDataInfoFromSyncState(normalizedState);
   if (!sourceDataInfo) return undefined;
-  const jdbcCheckpointField = state.jdbcCheckpointField ?? '';
-  const jdbcIncrementalTimeField = state.jdbcIncrementalTimeField ?? '';
-  const syncStrategy = {
-    mode: state.mode || 'BINLOG_CDC',
-    conflictStrategy: state.conflictStrategy || 'KEEP_SOURCE',
-    syncScope: state.syncScope || 'FULL_THEN_INCREMENTAL',
-    pollFetchSize: state.pollFetchSize || 500,
-    fullSyncBatchSize: state.fullSyncBatchSize || state.pollFetchSize || 500,
-    parallelism: state.parallelism || 1,
-    exceptionStrategy: state.exceptionStrategy || 'STOP_ON_ERROR',
+
+  const isKafkaSource =
+    normalizedState.instanceSyncSourceType ===
+    INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE;
+  const isApiSource =
+    normalizedState.instanceSyncSourceType ===
+    INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE;
+  const isCsvSource =
+    normalizedState.instanceSyncSourceType ===
+    INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD;
+  const jdbcCheckpointField = isApiSource
+    ? ''
+    : (normalizedState.jdbcCheckpointField ?? '');
+  const jdbcIncrementalTimeField = isApiSource
+    ? ''
+    : (normalizedState.jdbcIncrementalTimeField ?? '');
+  const syncStrategyPayload = {
+    mode: isKafkaSource
+      ? normalizedState.mode || 'KAFKA_CDC'
+      : isApiSource
+        ? normalizedState.mode || API_SYNC_MODE.API_PUSH
+        : isCsvSource
+          ? normalizedState.mode || CSV_SYNC_MODE.CSV_IMPORT
+          : normalizedState.mode || 'BINLOG_CDC',
+    conflictStrategy:
+      isCsvSource && !isCsvIncrementalImportScope(normalizedState.syncScope)
+        ? ''
+        : normalizedState.conflictStrategy || 'KEEP_SOURCE',
+    syncScope: isKafkaSource
+      ? normalizedState.syncScope || 'INCREMENTAL'
+      : isApiSource
+        ? normalizedState.syncScope || 'INCREMENTAL'
+        : isCsvSource
+          ? normalizedState.syncScope || 'FULL'
+          : normalizedState.syncScope || 'FULL_THEN_INCREMENTAL',
+    pollFetchSize: isCsvSource ? 500 : normalizedState.pollFetchSize || 500,
+    fullSyncBatchSize: isCsvSource
+      ? 500
+      : normalizedState.fullSyncBatchSize ||
+        normalizedState.pollFetchSize ||
+        500,
+    parallelism:
+      isCsvSource || (isApiSource && !isApiPollingMode(normalizedState.mode))
+        ? 1
+        : normalizedState.parallelism || 1,
+    exceptionStrategy:
+      isKafkaSource || isApiSource || isCsvSource
+        ? normalizedState.exceptionStrategy || 'LOG_ERROR_AND_CONTINUE'
+        : normalizedState.exceptionStrategy || 'STOP_ON_ERROR',
     jdbcCheckpointField,
     jdbcIncrementalTimeField,
-    jdbcPollingIntervalSeconds: state.jdbcPollingIntervalSeconds,
-    jdbcSyncSqlFull: state.jdbcSyncSqlFull,
-    jdbcSyncSqlIncrement: state.jdbcSyncSqlIncrement
+    jdbcPollingIntervalSeconds: normalizedState.jdbcPollingIntervalSeconds,
+    jdbcSyncSqlFull: normalizedState.jdbcSyncSqlFull,
+    jdbcSyncSqlIncrement: normalizedState.jdbcSyncSqlIncrement,
+    apiIncrementalTimeParam: isApiSource
+      ? normalizedState.apiIncrementalTimeParam?.trim() || undefined
+      : undefined,
+    apiCheckpointParam: isApiSource
+      ? normalizedState.apiCheckpointParam?.trim() || undefined
+      : undefined,
+    apiIncrementalMarkerField: isApiSource
+      ? normalizedState.apiIncrementalMarkerField?.trim() || undefined
+      : undefined
   };
   return {
-    ...syncStrategy,
-    jdbcCheckpointField,
-    jdbcIncrementalTimeField,
-    jdbcPollingIntervalSeconds: state.jdbcPollingIntervalSeconds,
-    jdbcSyncSqlFull: state.jdbcSyncSqlFull,
-    jdbcSyncSqlIncrement: state.jdbcSyncSqlIncrement,
-    syncStrategy,
+    ...syncStrategyPayload,
+    syncStrategy: syncStrategyPayload,
     sourceDataInfo
   };
 }
@@ -224,10 +342,26 @@ export function buildObjectTypeFormData({
     return null;
   }
 
+  if (dataSource.type === DATA_SOURCE_TYPE.DATA_RESOURCE) {
+    const selectedCount = dataSource.dataResourceIds?.length || 0;
+    if (!dataSource.table && selectedCount === 0) {
+      Message.warning('请选择数据资源表');
+      return null;
+    }
+  }
+
+  if (
+    dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV &&
+    isGraphObjectTypePlaceholderFilePath(dataSource.filePath)
+  ) {
+    Message.warning('请上传 Schema 文件或使用智能生成模板后再保存');
+    return null;
+  }
+
   if (dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC) {
     const isSqlMode = dataSource.queryMode === 'sql';
     if (!dataSource.connectorId) {
-      Message.warning('请选择数据源链接');
+      Message.warning('请选择数据源连接');
       return null;
     }
     if (isSqlMode) {
@@ -241,8 +375,19 @@ export function buildObjectTypeFormData({
     }
   }
 
+  if (dataSource.type === DATA_SOURCE_TYPE.MANUAL_CREATION) {
+    if (!dataSource.filePath) {
+      Message.warning('请先完善对象类型属性');
+      return null;
+    }
+  }
+
   if (!objectTypeAttributes?.length && attributeFields.length === 0) {
-    Message.warning('请先上传文件或选择数据源');
+    Message.warning(
+      dataSource.type === DATA_SOURCE_TYPE.MANUAL_CREATION
+        ? '请先添加对象类型属性'
+        : '请先上传文件或选择数据源'
+    );
     return null;
   }
 
@@ -260,15 +405,18 @@ export function buildObjectTypeFormData({
     ontologyModelID: values.ontologyModelID || initialOntologyModelID || 0,
     filePath: dataSource.filePath,
     originalDbName:
-      dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC
+      dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC ||
+      dataSource.type === DATA_SOURCE_TYPE.DATA_RESOURCE
         ? dataSource.database || ''
         : '',
     originalTableName:
-      dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC
+      dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC ||
+      dataSource.type === DATA_SOURCE_TYPE.DATA_RESOURCE
         ? dataSource.table || ''
         : '',
     sourceType:
-      dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV
+      dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV ||
+      dataSource.type === DATA_SOURCE_TYPE.MANUAL_CREATION
         ? SourceType.FILE_UPLOAD
         : SourceType.ICEBERG,
     ontologyPhysicalPropertiesList: selectedFields,
@@ -288,6 +436,13 @@ export function buildObjectTypeFormData({
 export function buildCreateObjectTypeRequest(
   data: ObjectTypeFormData
 ): CreateOntologyObjectTypeReq {
+  const ontologyPhysicalPropertiesList = buildPhysicalProperties(
+    data.objectTypeAttributes,
+    data.syncMappingFields,
+    data.ontologyPhysicalPropertiesList as AttributeField[],
+    data._dataSource
+  );
+
   return {
     code: data.code,
     name: data.name,
@@ -303,12 +458,12 @@ export function buildCreateObjectTypeRequest(
     syncSourceDataStrategy: buildSyncSourceDataStrategy(
       data.syncSourceDataStrategy
     ),
-    ontologyPhysicalPropertiesList: buildPhysicalProperties(
-      data.objectTypeAttributes,
-      data.syncMappingFields,
-      data.ontologyPhysicalPropertiesList as AttributeField[],
-      data._dataSource
+    ontologyPhysicalPropertiesList,
+    embeddingModel: hasVectorizedPhysicalProperties(
+      ontologyPhysicalPropertiesList
     )
+      ? resolveEmbeddingModelConfig()
+      : undefined
   };
 }
 

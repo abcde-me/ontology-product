@@ -38,6 +38,11 @@ import {
 } from '@/pages/ontologyScene/types/behaviorActions';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
+import { useAutoOntologyIdentifierFromName } from '@/pages/ontologyScene/hooks/useAutoOntologyIdentifierFromName';
+import {
+  ONTOLOGY_IDENTIFIER_EXTRA,
+  ontologyIdentifierValidatorRule
+} from '@/utils/ontologyIdentifier';
 
 const { TextArea } = Input;
 
@@ -48,6 +53,17 @@ export default function BehaviorActionDetailPage() {
   const currentFunction = Form.useWatch('functionId', form);
   const currentParams = Form.useWatch('function_params', form);
   const paramRules = Form.useWatch('validationRules', form);
+  const behaviorName = Form.useWatch('name', form);
+  const behaviorDescription = Form.useWatch('description', form);
+  const objectTypeName = Form.useWatch('objectTypeName', form);
+
+  useAutoOntologyIdentifierFromName({
+    form,
+    ontologyModelID: OSId ? +OSId : undefined,
+    nameField: 'name',
+    idField: 'code',
+    enabled: pageMode === 'create'
+  });
 
   const goBack = () => {
     history.replace(
@@ -239,9 +255,7 @@ export default function BehaviorActionDetailPage() {
             label="行为id"
             required
             field="code"
-            extra={
-              '首字符必须为英文字母；仅允许英文字母与数字（不允许下划线及特殊符号）；建议 camelCase'
-            }
+            extra={ONTOLOGY_IDENTIFIER_EXTRA}
             rules={[
               {
                 validator(v, cb) {
@@ -249,17 +263,13 @@ export default function BehaviorActionDetailPage() {
                   if (!value) {
                     return cb('请输入行为id');
                   }
-                  if (!/^[A-Za-z][A-Za-z0-9]*$/.test(value)) {
-                    cb(
-                      '首字符必须为英文字母；仅允许英文字母与数字（不允许下划线及特殊符号）'
-                    );
-                  }
+                  ontologyIdentifierValidatorRule.validator(value, cb);
                 }
               }
             ]}
           >
             <Input
-              placeholder="请输入id。用于 API 调用，全局唯一"
+              placeholder="根据名称自动生成，可修改"
               disabled={pageMode === 'edit'}
               maxLength={100}
               className={'w-[640px]'}
@@ -315,6 +325,11 @@ export default function BehaviorActionDetailPage() {
             ]}
           >
             <FunctionsSelect
+              behaviorName={behaviorName}
+              behaviorDescription={behaviorDescription}
+              objectTypeName={
+                objectTypeName === '全局行为' ? undefined : objectTypeName
+              }
               onChange={(v, f: OntologyFunctionDetail) => {
                 form.setFieldValue('functionId', v);
                 form.setFieldsValue(buildFunctionSchema(f));

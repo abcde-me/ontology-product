@@ -10,7 +10,8 @@ import {
   getWorkflow,
   createWorkflow,
   updateWorkflow,
-  setDraft
+  setDraft,
+  setActiveWorkflowSceneId
 } from '@/pages/ontologyScene/modules/graph/common/api';
 import { getOntologyTopology } from '@/api/ontologySceneLibrary/graph';
 import dagre from '@dagrejs/dagre';
@@ -33,6 +34,8 @@ import {
   useReactFlow,
   useEdges
 } from 'reactflow';
+import { buildWorkflowNodeLookup } from '@/pages/ontologyScene/modules/graph/utils/layoutOntologyGraph';
+import { mapTopologyEdgesToWorkflowEdges } from '@/pages/ontologyScene/modules/graph/utils/topologyEdgeIdentity';
 
 const NODE_WIDTH = 200;
 const NODE_HEIGHT = 56;
@@ -171,17 +174,17 @@ function layoutNodesWithDagre(
   g.setDefaultEdgeLabel(() => ({}));
   g.setGraph({ rankdir: 'LR', nodesep: 60, ranksep: 280 });
 
-  const nodeIdMap = new Map<number, string>();
+  const nodeLookup = buildWorkflowNodeLookup(topologyNodes);
   const workflowNodes: any[] = [];
 
   // 创建所有节点
   topologyNodes.forEach((topologyNode) => {
+    const numericId = Number(topologyNode.id);
     const nodeId = String(
-      topologyNode.id ?? topologyNode.code ?? topologyNode.name ?? Date.now()
+      Number.isFinite(numericId)
+        ? numericId
+        : (topologyNode.code ?? topologyNode.name ?? Date.now())
     );
-    if (topologyNode.id !== undefined) {
-      nodeIdMap.set(topologyNode.id, nodeId);
-    }
 
     const { newNode: workflowNode } = newNode({
       id: nodeId,
@@ -204,38 +207,16 @@ function layoutNodesWithDagre(
     g.setNode(nodeId, { width: NODE_WIDTH, height: NODE_HEIGHT });
   });
 
-  // 创建边
-  const workflowEdges = topologyEdges
-    .filter(
-      (topologyEdge) =>
-        topologyEdge.sourceId !== undefined &&
-        topologyEdge.targetId !== undefined
-    )
-    .map((topologyEdge) => {
-      const sourceId = nodeIdMap.get(topologyEdge.sourceId!);
-      const targetId = nodeIdMap.get(topologyEdge.targetId!);
-
-      if (sourceId && targetId) {
-        g.setEdge(sourceId, targetId);
-      }
-
-      return {
-        id: String(
-          topologyEdge.id ?? `${topologyEdge.sourceId}-${topologyEdge.targetId}`
-        ),
-        source: sourceId ?? String(topologyEdge.sourceId),
-        sourceHandle: 'source',
-        target: targetId ?? String(topologyEdge.targetId),
-        targetHandle: 'target',
-        type: 'custom-edge',
-        data: {
-          id: topologyEdge.id,
-          code: topologyEdge.code ?? '', // 添加 code 字段用于高亮匹配
-          name: topologyEdge.name || '',
-          syncStatus: topologyEdge.syncStatus
-        }
-      };
-    });
+  const workflowEdges = mapTopologyEdgesToWorkflowEdges(
+    topologyEdges,
+    nodeLookup,
+    { includeCode: true }
+  ).map((edge) => {
+    if (edge.source && edge.target) {
+      g.setEdge(edge.source, edge.target);
+    }
+    return edge;
+  });
 
   // 执行布局
   dagre.layout(g);
@@ -391,7 +372,8 @@ export default function AIWorkbenchGraph() {
 
     // 清理工作流缓存
     try {
-      setDraft(null);
+      setActiveWorkflowSceneId(Number(currentOntology.id));
+      setDraft(null, Number(currentOntology.id));
     } catch (error) {
       console.warn('清理工作流缓存失败:', error);
     }

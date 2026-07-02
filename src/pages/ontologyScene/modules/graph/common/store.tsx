@@ -12,8 +12,13 @@ export const useDemoStore = create<any>()(
       },
 
       showCustomEdgePanel: false,
-      setShowCustomEdgePanel: (show: boolean) => {
-        set({ showCustomEdgePanel: show });
+      setShowCustomEdgePanel: (
+        show: boolean | ((prev: boolean) => boolean)
+      ) => {
+        set((state) => ({
+          showCustomEdgePanel:
+            typeof show === 'function' ? show(state.showCustomEdgePanel) : show
+        }));
       },
 
       showRightPanel1: false,
@@ -46,8 +51,8 @@ export const useDemoStore = create<any>()(
         set({ targetNode: node });
       },
 
-      selectedEdgeId: null as number | null,
-      setSelectedEdgeId: (edgeId: number | null) => {
+      selectedEdgeId: null as number | string | null,
+      setSelectedEdgeId: (edgeId: number | string | null) => {
         set({ selectedEdgeId: edgeId });
       }
     }),

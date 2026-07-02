@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Tooltip, Dropdown } from '@arco-design/web-react';
+import { Tooltip, Dropdown, Menu } from '@arco-design/web-react';
 import { GlobalTooltip } from '@ceai-front/arco-material';
+import { IconSettings } from '@arco-design/web-react/icon';
 import PlusIcon from '../../assets/plus.svg';
 import ConversationsIcon from '../../assets/conversations.svg';
 import ConversationList from './ConversationList';
@@ -14,6 +15,9 @@ interface HeaderProps {
   onSelectConversation?: (id: string) => void;
   onDeleteConversation?: (id: string) => void;
   onRenameConversation?: (id: string, newTitle: string) => void;
+  onOpenSystemPromptSettings?: () => void;
+  onOpenPluginSettings?: () => void;
+  onOpenSecuritySettings?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -23,7 +27,10 @@ const Header: React.FC<HeaderProps> = ({
   onNewSession,
   onSelectConversation,
   onDeleteConversation,
-  onRenameConversation
+  onRenameConversation,
+  onOpenSystemPromptSettings,
+  onOpenPluginSettings,
+  onOpenSecuritySettings
 }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
@@ -43,6 +50,26 @@ const Header: React.FC<HeaderProps> = ({
     />
   );
 
+  const settingsMenu = (
+    <Menu
+      onClickMenuItem={(key) => {
+        if (key === 'systemPrompt') {
+          onOpenSystemPromptSettings?.();
+        }
+        if (key === 'plugin') {
+          onOpenPluginSettings?.();
+        }
+        if (key === 'security') {
+          onOpenSecuritySettings?.();
+        }
+      }}
+    >
+      <Menu.Item key="systemPrompt">系统提示词设置</Menu.Item>
+      <Menu.Item key="plugin">插件配置</Menu.Item>
+      <Menu.Item key="security">安全防护设置</Menu.Item>
+    </Menu>
+  );
+
   return (
     <div className="flex items-center justify-between px-[20px] py-[12px]">
       <div className="min-w-0 flex-1 pr-[12px]">
@@ -53,6 +80,13 @@ const Header: React.FC<HeaderProps> = ({
         </GlobalTooltip.Ellipsis>
       </div>
       <div className="flex flex-shrink-0 items-center gap-[16px]">
+        <Dropdown droplist={settingsMenu} trigger="click" position="br">
+          <Tooltip content="助手配置">
+            <div className="flex size-[16px] cursor-pointer items-center justify-center text-[#64748b] hover:text-[#184ff2]">
+              <IconSettings className="size-[16px]" />
+            </div>
+          </Tooltip>
+        </Dropdown>
         <Tooltip content="新建会话">
           <div
             className="flex size-[16px] cursor-pointer items-center justify-center"

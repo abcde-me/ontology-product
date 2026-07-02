@@ -1,0 +1,95 @@
+.toolbar {
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  background: var(--color-fill-2, #ebf0fa);
+}
+
+.form {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  column-gap: 8px;
+  width: 100%;
+  margin: 0;
+
+  :global {
+    .arco-form-item {
+      margin-bottom: 0;
+      margin-right: 0;
+    }
+
+    .arco-form-item-wrapper-col,
+    .arco-form-item-control-wrapper {
+      width: 100%;
+    }
+
+    .arco-input,
+    .arco-select,
+    .arco-select-view {
+      width: 100%;
+      border-radius: 4px;
+    }
+
+    .arco-input-inner-wrapper,
+    .arco-select-view {
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    .arco-input-inner-wrapper:hover,
+    .arco-input-inner-wrapper.arco-input-inner-wrapper-focus,
+    .arco-select-view:hover,
+    .arco-select-view.arco-select-view-focus {
+      border: none !important;
+      box-shadow: none !important;
+    }
+  }
+}
+
+.field {
+  flex-shrink: 0;
+}
+
+.fieldId {
+  width: 108px;
+}
+
+.fieldName {
+  width: 108px;
+}
+
+.fieldScene {
+  width: 108px;
+}
+
+.fieldDesc {
+  width: 88px;
+}
+
+.fieldSync {
+  width: 88px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: 2px;
+
+  :global(.arco-btn) {
+    min-width: 48px;
+    padding: 0 10px;
+    height: 28px;
+    font-size: 13px;
+  }
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 4px;
+}

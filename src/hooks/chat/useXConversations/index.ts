@@ -11,6 +11,11 @@ import {
   UseConversationsReturn
 } from '../types';
 import { generateId } from '../utils';
+import { isDevBypassEnabled } from '@/utils/devFallback';
+import {
+  extractConversationResult,
+  getApiErrorMessage
+} from '@/utils/apiResponse';
 
 export const useXConversations = (
   config: UseConversationsConfig
@@ -49,25 +54,11 @@ export const useXConversations = (
         });
 
         console.log('[useXConversations] 会话列表响应:', response);
-        console.log('[useXConversations] response.data:', response?.data);
-        console.log(
-          '[useXConversations] response.data.result:',
-          response?.data?.result
-        );
-        console.log(
-          '[useXConversations] result 类型:',
-          typeof response?.data?.result
-        );
-        console.log(
-          '[useXConversations] result 是否为数组:',
-          Array.isArray(response?.data?.result)
-        );
 
-        if (response?.data?.result) {
-          const result = response.data.result;
-          console.log('[useXConversations] result 长度:', result.length);
-          console.log('[useXConversations] result 内容:', result);
+        const result = extractConversationResult(response);
+        console.log('[useXConversations] 解析后的 result:', result);
 
+        if (result.length > 0) {
           const list = result.map((item: any) => ({
             id: item.id,
             title: item.name || '未命名会话',
@@ -80,12 +71,14 @@ export const useXConversations = (
           console.log('[useXConversations] 解析后的会话列表:', list);
           console.log('[useXConversations] 会话数量:', list.length);
         } else {
-          console.log('[useXConversations] 响应中没有 result 数据');
+          console.log('[useXConversations] 响应中没有会话数据');
           setConversations([]);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('[useXConversations] 加载会话列表失败:', error);
-        showMessage?.error(error.message || '加载会话列表失败');
+        if (!isDevBypassEnabled()) {
+          showMessage?.error(getApiErrorMessage(error, '加载会话列表失败'));
+        }
         setConversations([]);
       } finally {
         setLoading(false);

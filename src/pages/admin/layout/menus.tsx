@@ -4,19 +4,14 @@ import {
   ONTOLOGY_PERMISSIONS,
   API_KEY_PERMISSIONS,
   TAG_PERMISSIONS,
-  ORGANIZATION_PERMISSIONS,
-  USER_PERMISSIONS,
-  USER_GROUP_PERMISSIONS,
-  ROLE_PERMISSIONS,
-  PROJECT_PERMISSIONS,
+  MODEL_MANAGEMENT_PERMISSIONS,
   AUTOMATION_PERMISSIONS,
   DATA_SOURCE_PERMISSIONS
 } from '@/config/permissions';
+import { SECONDARY_MENU_ITEMS } from '@/config/secondaryMenuItems';
 import OntologyLibrary from '@/assets/sider/ontology-library.svg';
 import AIOntoWorkbench from '@/assets/sider/ai-onto-workbench.svg';
 import OrganMenu from '@/assets/sider/organmenu.svg';
-import LabelMenu from '@/assets/label-menu.svg';
-import MemberMenu from '@/assets/sider/membermenu.svg';
 import BaseMenu from '@/assets/sider/basemenu.svg';
 import HomeIcon from '@/assets/sider/home.svg';
 import RuleRunLogIcon from '@/assets/sider/rule-run-log.svg';
@@ -92,11 +87,6 @@ export const filterMenusByPermissions = (
 };
 
 const iconClass = 'appforge-sider-icon flex-none text-[20px]';
-const hasActiveMenu = (name: string, search: string) => {
-  const params = new URLSearchParams(search);
-  const url = params.get('mdp_operation_center') || params.get('url');
-  return url?.includes(name) ?? false;
-};
 
 export const menus: MenuModel[] = [
   {
@@ -105,10 +95,16 @@ export const menus: MenuModel[] = [
     key: 'homeGroup',
     children: [
       {
-        title: '首页',
+        title: SECONDARY_MENU_ITEMS.home,
         icon: <HomeIcon className={iconClass} />,
         key: 'home',
         path: '/tenant/compute/onto/home'
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.ontologyOverview,
+        icon: <OntologyLibrary className={iconClass} />,
+        key: 'ontologyOverview',
+        path: '/tenant/compute/onto/home/ontologyOverview'
       }
     ]
   },
@@ -118,14 +114,22 @@ export const menus: MenuModel[] = [
     key: 'OntologyManagement',
     children: [
       {
-        title: '本体场景库',
+        title: SECONDARY_MENU_ITEMS.OntologySceneLibrary,
         icon: <OntologyLibrary className={iconClass} />,
         key: 'OntologySceneLibrary',
         path: '/tenant/compute/onto/ontologyScene/list',
         permission: ONTOLOGY_PERMISSIONS.LIST
       },
       {
-        title: 'AI本体工作台',
+        title: SECONDARY_MENU_ITEMS.ontologyElements,
+        icon: <OntologyLibrary className={iconClass} />,
+        key: 'ontologyElements',
+        path: '/tenant/compute/onto/ontologyElements/objectType',
+        activePaths: ['/tenant/compute/onto/ontologyElements'],
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.AIOntoWorkbench,
         icon: <AIOntoWorkbench className={iconClass} />,
         key: 'AIOntoWorkbench',
         path: '/tenant/compute/onto/aiOntologyWorkbench',
@@ -135,11 +139,96 @@ export const menus: MenuModel[] = [
   },
   {
     type: 'itemGroup',
-    title: '数据链接',
+    title: '本体洞察',
+    key: 'ExploreAnalysis',
+    children: [
+      {
+        title: SECONDARY_MENU_ITEMS.OntologyQuery,
+        icon: <OntologyLibrary className={iconClass} />,
+        key: 'OntologyQuery',
+        path: '/tenant/compute/onto/exploreAnalysis/ontologyQuery',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.ObjectBrowse,
+        icon: <AIOntoWorkbench className={iconClass} />,
+        key: 'ObjectBrowse',
+        path: '/tenant/compute/onto/exploreAnalysis/objectBrowse',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.RelationInsight,
+        icon: <RuleRunLogIcon className={iconClass} />,
+        key: 'RelationInsight',
+        path: '/tenant/compute/onto/exploreAnalysis/relationInsight',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.ImplicitRelation,
+        icon: <RuleRunLogIcon className={iconClass} />,
+        key: 'ImplicitRelation',
+        path: '/tenant/compute/onto/exploreAnalysis/implicitRelation',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
+    title: '应用中心',
+    key: 'SceneCenter',
+    children: [
+      {
+        title: SECONDARY_MENU_ITEMS.ApplicationScenario,
+        icon: <IconMdpDatasetMgmt className={iconClass} />,
+        key: 'ApplicationScenario',
+        path: '/tenant/compute/onto/sceneCenter/applicationScene',
+        activePaths: ['/tenant/compute/onto/sceneCenter/applicationScene'],
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.IntelligenceAnalysis,
+        icon: <OntologyLibrary className={iconClass} />,
+        key: 'IntelligenceAnalysis',
+        path: '/tenant/compute/onto/sceneCenter/intelligenceAnalysis',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.JointOperations,
+        icon: <AIOntoWorkbench className={iconClass} />,
+        key: 'JointOperations',
+        path: '/tenant/compute/onto/sceneCenter/jointOperations',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
+    title: '数据管理',
     key: 'DataConnection',
     children: [
       {
-        title: '数据源管理',
+        title: SECONDARY_MENU_ITEMS.DataResourceManagement,
+        icon: <IconMdpDatasetMgmt className={iconClass} />,
+        key: 'DataResourceManagement',
+        path: '/tenant/compute/onto/dataConnection/dataResource',
+        permission: DATA_SOURCE_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.DataTaskManagement2,
+        icon: <RuleRunLogIcon className={iconClass} />,
+        key: 'DataTaskManagement2',
+        path: '/tenant/compute/onto/dataConnection/dataTask2',
+        permission: DATA_SOURCE_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.DataTaskManagement,
+        icon: <RuleRunLogIcon className={iconClass} />,
+        key: 'DataTaskManagement',
+        path: '/tenant/compute/onto/dataConnection/dataTask',
+        permission: DATA_SOURCE_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.DataSourceManagement,
         icon: <IconMdpDatasetMgmt className={iconClass} />,
         key: 'DataSourceManagement',
         path: '/tenant/compute/onto/dataConnection/dataSource',
@@ -149,141 +238,44 @@ export const menus: MenuModel[] = [
   },
   {
     type: 'itemGroup',
+    title: '平台资源',
+    key: 'platformResource',
+    children: [
+      {
+        title: SECONDARY_MENU_ITEMS.apiManagement,
+        icon: <OrganMenu className={iconClass} />,
+        key: 'apiManagement',
+        path: '/tenant/compute/onto/platformResource/apiManagement',
+        activePaths: ['/tenant/compute/onto/platformResource/apiManagement'],
+        anyPermission: [API_KEY_PERMISSIONS.MENU, TAG_PERMISSIONS.LIST]
+      },
+      {
+        key: 'modelManagement',
+        title: SECONDARY_MENU_ITEMS.modelManagement,
+        icon: <BaseMenu className={iconClass} />,
+        path: '/tenant/compute/onto/platformResource/modelManagement',
+        permission: MODEL_MANAGEMENT_PERMISSIONS.LIST
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
     title: '业务自动化',
     key: 'BusinessAutomation',
     children: [
       {
-        title: '规则管理',
+        title: SECONDARY_MENU_ITEMS.AutomationRuleManagement,
         icon: <IconMdpDatasetMgmt className={iconClass} />,
         key: 'AutomationRuleManagement',
         path: '/tenant/compute/onto/businessAutomation/management',
         permission: AUTOMATION_PERMISSIONS.LIST
       },
       {
-        title: '执行日志',
+        title: SECONDARY_MENU_ITEMS.AutomationRuleRunLog,
         icon: <RuleRunLogIcon className={iconClass} />,
         key: 'AutomationRuleRunLog',
         path: '/tenant/compute/onto/businessAutomation/runLog',
         permission: AUTOMATION_PERMISSIONS.LIST
-      }
-    ]
-  },
-  {
-    type: 'itemGroup',
-    title: '平台资源',
-    key: 'platformResource',
-    children: [
-      {
-        title: 'API Key管理',
-        icon: <OrganMenu className={iconClass} />,
-        key: 'apiKeyMgmt',
-        path:
-          '/tenant/compute/onto/operationCenter?url=' +
-          encodeURIComponent(
-            '/operationcenter/tenant/compute/operationcenter/apikey'
-          ),
-        activePaths: ['/tenant/compute/onto/operationCenter'],
-        queryParamMatcher: hasActiveMenu.bind(null, 'apikey'),
-        permission: API_KEY_PERMISSIONS.MENU
-      },
-      {
-        key: 'tag',
-        title: '标签管理',
-        icon: <LabelMenu className={iconClass} />,
-        path:
-          '/tenant/compute/onto/operationCenter?url=' +
-          encodeURIComponent(
-            '/operationcenter/tenant/compute/operationcenter/tag'
-          ),
-        activePaths: ['/tenant/compute/onto/operationCenter'],
-        queryParamMatcher: hasActiveMenu.bind(null, 'tag'),
-        permission: TAG_PERMISSIONS.LIST
-      }
-    ]
-  },
-  {
-    type: 'itemGroup',
-    title: '平台管理',
-    key: 'mgmtGroup',
-    external: true,
-    children: [
-      {
-        title: '组织管理',
-        icon: <OrganMenu className={iconClass} />,
-        key: 'orgMgmt',
-        path:
-          '/tenant/compute/onto/operationCenter?url=' +
-          encodeURIComponent(
-            '/operationcenter/tenant/compute/operationcenter/organization'
-          ),
-        activePaths: ['/tenant/compute/onto/operationCenter'],
-        queryParamMatcher: hasActiveMenu.bind(null, 'organization'),
-        permission: ORGANIZATION_PERMISSIONS.MENU
-      },
-      {
-        title: '用户管理',
-        icon: <MemberMenu className={iconClass} />,
-        path:
-          '/tenant/compute/onto/operationCenter?url=' +
-          encodeURIComponent(
-            '/operationcenter/tenant/compute/operationcenter/user'
-          ),
-        key: 'userMgmt',
-        activePaths: ['/tenant/compute/onto/operationCenter'],
-        queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('mdp_operation_center');
-          return (
-            (url?.includes('/user') && !url?.includes('user-group')) ?? false
-          );
-        },
-        permission: USER_PERMISSIONS.MENU
-      },
-      {
-        title: '用户组管理',
-        icon: <MemberMenu className={iconClass} />,
-        path:
-          '/tenant/compute/onto/operationCenter?url=' +
-          encodeURIComponent(
-            '/operationcenter/tenant/compute/operationcenter/user-group'
-          ),
-        key: 'userGroupMgmt',
-        activePaths: ['/tenant/compute/onto/operationCenter'],
-        queryParamMatcher: hasActiveMenu.bind(null, 'user-group'),
-        permission: USER_GROUP_PERMISSIONS.MENU
-      },
-      {
-        title: '角色管理',
-        icon: <BaseMenu className={iconClass} />,
-        path:
-          '/tenant/compute/onto/operationCenter?url=' +
-          encodeURIComponent(
-            '/operationcenter/tenant/compute/operationcenter/role'
-          ),
-        key: 'roleMgmt',
-        activePaths: ['/tenant/compute/onto/operationCenter'],
-        queryParamMatcher: hasActiveMenu.bind(null, 'role'),
-        permission: ROLE_PERMISSIONS.MENU
-      }
-    ]
-  },
-  {
-    type: 'itemGroup',
-    title: '工作空间',
-    key: 'workspaceGroup',
-    external: true,
-    children: [
-      {
-        title: '项目管理',
-        icon: <OrganMenu className={iconClass} />,
-        key: 'projectMgmt',
-        path:
-          '/tenant/compute/onto/operationCenter?url=' +
-          encodeURIComponent(
-            '/operationcenter/tenant/compute/operationcenter/project'
-          ),
-        activePaths: ['/tenant/compute/onto/operationCenter'],
-        queryParamMatcher: hasActiveMenu.bind(null, 'project'),
-        permission: PROJECT_PERMISSIONS.MENU
       }
     ]
   }

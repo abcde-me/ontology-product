@@ -11,7 +11,6 @@ import React, {
   useCallback,
   useEffect,
   useRef,
-  useState,
   useMemo
 } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -19,14 +18,18 @@ import { menus, filterMenusByPermissions, type MenuModel } from './menus';
 import HeaderLogo from '@/assets/header-logo.png';
 import cls from 'classnames';
 import { ProjectIdKey } from '@/utils/const';
-import { setLocalStorage, getLocalStorage } from '@/utils/storage';
+import { setLocalStorage } from '@/utils/storage';
 import { usePathChange, usePermission } from '@/hooks';
 import { IconQuestionCircle, IconUser } from '@arco-design/web-react/icon';
-import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
+import {
+  useUserInfo,
+  useUserInfoStore,
+  useUserProjectList
+} from '@/store/userInfoStore';
 import { handlePathName } from '@/hooks/use-path-change';
 import { logout, openNewPage } from '@/utils/env';
-import { GetProjOrg } from '@/api/modules/project';
 import { isSameArray } from '@/utils/array';
+import { normalizeProjOrgList } from '@/utils/projOrg';
 
 const { bus } = WujieReact;
 export default function Header({
@@ -53,10 +56,14 @@ export default function Header({
     isInitialized,
     fetchUserInfo
   } = useUserInfoStore();
+  const projectList = useUserProjectList();
   const { setUserPermissions } = usePermission();
   const { id: userId } = userInfo || {};
-  const [projects, setProjects] = useState<Record<string, any>[]>([]);
   const FullStorageKey = useMemo(() => `${ProjectIdKey}${userId}`, [userId]);
+  const projects = useMemo(
+    () => normalizeProjOrgList(projectList || []),
+    [projectList]
+  );
   // 组件卸载时的清理
   useEffect(() => {
     return () => {
@@ -91,42 +98,6 @@ export default function Header({
     },
     [logoutAction, pushPath]
   );
-  useEffect(() => {
-    const list = async () => {
-      const { data: result } = await GetProjOrg({});
-      setProjects(result);
-      // 设置 store 的 projectList，用于 PermissionRoute 判断加载状态
-      useUserInfoStore.setState({ projectList: result || [] });
-      const fullProjectIdKey = `${ProjectIdKey}${userInfo?.id}`;
-      console.log('fullProjectIdKey', fullProjectIdKey);
-
-      if (result.length) {
-        const pId = getLocalStorage<string[]>(fullProjectIdKey);
-        if (Array.isArray(pId)) {
-          const org = result.find((r) => r.id === pId[0]);
-          if (org && org.projectList.find((p) => p.id === pId[1])) {
-            setProjectId(pId);
-            return;
-          }
-        }
-
-        const defaultPId = [result[0].id, result[0].projectList[0].id];
-        setLocalStorage(fullProjectIdKey, defaultPId);
-        setProjectId(defaultPId);
-      }
-    };
-
-    if (userInfo?.id) {
-      list();
-    }
-  }, [userInfo?.id]);
-
-  // React.useEffect(() => {
-  //   if (projectId && projectId[1]) {
-  //     setUserPermissions(projectId[1]);
-  //   }
-  // }, [projectId[1]]);
-
   useEffect(() => {
     if (!isInitialized) {
       fetchUserInfo();

@@ -25,9 +25,11 @@ import {
   useHistory,
   useParams,
   useRouteMatch,
-  useLocation
+  useLocation,
+  Switch,
+  Route,
+  Redirect
 } from 'react-router-dom';
-import { Switch, Route, Redirect } from 'react-router';
 import cls from 'classnames';
 import Header from './components/Header';
 import {
@@ -36,6 +38,14 @@ import {
 } from '@/common/constants';
 import { getOntologyModelDetail } from '@/api/ontologySceneLibrary/ontologyScene';
 import { OntologScene } from '@/types/ontologySceneApi';
+import { isOntologyApiSuccess, getApiErrorMessage } from '@/utils/apiResponse';
+import { useUserInfoStore } from '@/store/userInfoStore';
+import { isDevBypassEnabled } from '@/utils/devFallback';
+import {
+  buildDevOntologyModelDetailStub,
+  cacheOntologySceneDetailSnapshot,
+  getCachedOntologySceneDetailSnapshot
+} from '@/utils/devOntologyStore';
 import MenuIcon from '../../assets/menu.svg';
 import styles from './index.module.scss';
 import CreateObjectIcon from '../../assets/create-object.svg';
@@ -72,7 +82,10 @@ const MenuGroup = Menu.ItemGroup;
 export default function OntologySceneDetail() {
   const history = useHistory();
   const location = useLocation();
-  const match = useRouteMatch();
+  const match = useRouteMatch({
+    path: '/tenant/compute/onto/ontologyScene/detail/:id',
+    exact: false
+  });
   const { id: OSId, moduleType = '' } = useParams<{
     id: string;
     moduleType: string;
@@ -87,28 +100,69 @@ export default function OntologySceneDetail() {
   // 页面进入时请求场景详情
   useEffect(() => {
     const fetchSceneDetail = async () => {
-      if (!OSId) {
+      const sceneId = Number(OSId);
+      if (!OSId || !Number.isFinite(sceneId) || sceneId <= 0) {
+        Message.error('场景 ID 无效');
         return;
       }
 
       setLoading(true);
       try {
+        await useUserInfoStore.getState().ensureProjectReady();
+
         const response = await getOntologyModelDetail({
-          id: Number(OSId)
+          id: sceneId
         });
 
-        if (response.status === 200 && response.code === '' && response.data) {
+        if (isOntologyApiSuccess(response) && response.data) {
           const sceneData = response.data;
+          cacheOntologySceneDetailSnapshot(sceneData);
           setSceneDetail(sceneData);
-          // 更新标题
           if (sceneData.name) {
             setSceneTitle(sceneData.name);
           }
-        } else {
-          Message.error(response.message || '获取场景详情失败');
+          return;
         }
+
+        if (isDevBypassEnabled()) {
+          const cached = getCachedOntologySceneDetailSnapshot(sceneId);
+          if (cached) {
+            setSceneDetail(cached);
+            if (cached.name) {
+              setSceneTitle(cached.name);
+            }
+            return;
+          }
+
+          const stub = buildDevOntologyModelDetailStub(sceneId);
+          if (stub.data) {
+            setSceneDetail(stub.data);
+            setSceneTitle(stub.data.name || `本体场景-${sceneId}`);
+            return;
+          }
+        }
+
+        Message.error(response.message || '获取场景详情失败');
       } catch (error) {
-        Message.error('获取场景详情失败');
+        if (isDevBypassEnabled()) {
+          const cached = getCachedOntologySceneDetailSnapshot(sceneId);
+          if (cached) {
+            setSceneDetail(cached);
+            if (cached.name) {
+              setSceneTitle(cached.name);
+            }
+            return;
+          }
+
+          const stub = buildDevOntologyModelDetailStub(sceneId);
+          if (stub.data) {
+            setSceneDetail(stub.data);
+            setSceneTitle(stub.data.name || `本体场景-${sceneId}`);
+            return;
+          }
+        }
+
+        Message.error(getApiErrorMessage(error, '获取场景详情失败'));
         console.error('获取场景详情失败:', error);
       } finally {
         setLoading(false);
@@ -152,14 +206,14 @@ export default function OntologySceneDetail() {
       type: 'group',
       children: [
         {
-          key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS,
-          title: '行为',
-          icon: <MenuBehaviorIcon fontSize={20} />
-        },
-        {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS,
           title: '函数',
           icon: <MenuFunctionIcon fontSize={20} />
+        },
+        {
+          key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS,
+          title: '行为',
+          icon: <MenuBehaviorIcon fontSize={20} />
         }
       ]
     },
@@ -176,8 +230,11 @@ export default function OntologySceneDetail() {
       ]
     }
   ];
-  const basePath = match.path;
-  const baseUrl = match.url;
+
+  const basePath =
+    match?.path ?? '/tenant/compute/onto/ontologyScene/detail/:id';
+  const baseUrl =
+    match?.url ?? `/tenant/compute/onto/ontologyScene/detail/${OSId || ''}`;
 
   const activeTab = React.useMemo(() => {
     const pathname = location.pathname;
@@ -247,16 +304,16 @@ export default function OntologySceneDetail() {
       icon: <CreateLinkIcon fontSize={40} />
     },
     {
-      key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS,
-      title: '行为',
-      description: '行为定义可在对象上执行的操作，封装业务逻辑与状态流转',
-      icon: <CreateBehaviorIcon fontSize={40} />
-    },
-    {
       key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS,
       title: '函数',
       description: '用于定义计算属性和行为逻辑的底层代码实现',
       icon: <CreateFunctionIcon fontSize={40} />
+    },
+    {
+      key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS,
+      title: '行为',
+      description: '行为定义可在对象上执行的操作，封装业务逻辑与状态流转',
+      icon: <CreateBehaviorIcon fontSize={40} />
     }
   ];
 
@@ -330,153 +387,164 @@ export default function OntologySceneDetail() {
   };
 
   return (
-    <Layout className={cls('h-full', styles['ontology-scene-detail'])}>
-      <Header
-        title={sceneTitle}
-        status="未发布"
-        onTitleEdit={handleTitleEdit}
-        onPublish={handlePublish}
-        sceneId={Number(OSId)}
-        sceneDetail={sceneDetail}
-        onSceneUpdate={() => {
-          // 重新获取场景详情
-          if (OSId) {
-            getOntologyModelDetail({ id: Number(OSId) })
-              .then((response) => {
-                if (
-                  response.status === 200 &&
-                  response.code === '' &&
-                  response.data
-                ) {
-                  setSceneDetail(response.data);
-                  if (response.data.name) {
-                    setSceneTitle(response.data.name);
-                  }
-                }
-              })
-              .catch((error) => {
-                console.error('更新场景详情失败:', error);
-              });
-          }
-        }}
-      />
+    <div className="flex min-h-[100vh] w-full flex-col bg-white">
       <Layout
-        className="relative flex flex-row overflow-hidden"
-        id={'ontologySceneContent'}
+        className={cls(
+          'flex h-full min-h-0 flex-1 flex-col',
+          styles['ontology-scene-detail']
+        )}
       >
-        <div
-          className={cls(
-            'flex flex-shrink-0 flex-col border-r border-[var(--color-border-2)] bg-white transition-all duration-200',
-            styles['ontology-scene-detail-sidebar'],
-            sidebarCollapsed &&
-              styles['ontology-scene-detail-sidebar-collapsed']
-          )}
+        <Header
+          title={sceneTitle}
+          status="未发布"
+          onTitleEdit={handleTitleEdit}
+          onPublish={handlePublish}
+          sceneId={Number(OSId)}
+          sceneDetail={sceneDetail}
+          onSceneUpdate={(updatedScene) => {
+            if (updatedScene) {
+              setSceneDetail(updatedScene);
+              if (updatedScene.name) {
+                setSceneTitle(updatedScene.name);
+              }
+              cacheOntologySceneDetailSnapshot(updatedScene);
+              return;
+            }
+
+            if (OSId) {
+              getOntologyModelDetail({ id: Number(OSId) })
+                .then((response) => {
+                  if (isOntologyApiSuccess(response) && response.data) {
+                    setSceneDetail(response.data);
+                    if (response.data.name) {
+                      setSceneTitle(response.data.name);
+                    }
+                  }
+                })
+                .catch((error) => {
+                  console.error('更新场景详情失败:', error);
+                });
+            }
+          }}
+        />
+        <Layout
+          className="relative flex min-h-0 flex-1 flex-row overflow-hidden"
+          id={'ontologySceneContent'}
         >
           <div
             className={cls(
-              'pt-[24px]',
-              sidebarCollapsed ? 'px-[8px]' : 'px-[12px]'
+              'flex flex-shrink-0 flex-col border-r border-[var(--color-border-2)] bg-white transition-all duration-200',
+              styles['ontology-scene-detail-sidebar'],
+              sidebarCollapsed &&
+                styles['ontology-scene-detail-sidebar-collapsed']
             )}
           >
-            <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.CREATE}>
-              <Dropdown
-                droplist={renderCreateDropdown()}
-                trigger="click"
-                position="bl"
-              >
-                <Button
-                  className={cls(
-                    '!flex w-full items-center justify-center',
-                    styles['ontology-scene-detail-create-button']
-                  )}
-                  type={'outline'}
+            <div
+              className={cls(
+                'pt-[24px]',
+                sidebarCollapsed ? 'px-[8px]' : 'px-[12px]'
+              )}
+            >
+              <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.CREATE}>
+                <Dropdown
+                  droplist={renderCreateDropdown()}
+                  trigger="click"
+                  position="bl"
                 >
-                  <IconPlus
-                    className={cls(sidebarCollapsed ? '' : 'mr-[4px]')}
-                  />
-                  {!sidebarCollapsed && '创建'}
-                </Button>
-              </Dropdown>
-            </PermissionWrapper>
+                  <Button
+                    className={cls(
+                      '!flex w-full items-center justify-center',
+                      styles['ontology-scene-detail-create-button']
+                    )}
+                    type={'outline'}
+                  >
+                    <IconPlus
+                      className={cls(sidebarCollapsed ? '' : 'mr-[4px]')}
+                    />
+                    {!sidebarCollapsed && '创建'}
+                  </Button>
+                </Dropdown>
+              </PermissionWrapper>
+            </div>
+            <Menu
+              selectedKeys={[activeTab]}
+              className={cls(styles['ontology-scene-detail-menu'], 'flex-1')}
+            >
+              {renderMenu()}
+            </Menu>
+            <div className="p-[8px]">
+              <Button
+                type="text"
+                className="w-full"
+                onClick={toggleSidebar}
+                icon={
+                  sidebarCollapsed ? (
+                    <IconMenuUnfold className="text-[20px] text-[var(--color-text-2)]" />
+                  ) : (
+                    <IconMenuFold className="text-[20px] text-[var(--color-text-2)]" />
+                  )
+                }
+              />
+            </div>
           </div>
-          <Menu
-            selectedKeys={[activeTab]}
-            className={cls(styles['ontology-scene-detail-menu'], 'flex-1')}
-          >
-            {renderMenu()}
-          </Menu>
-          <div className="p-[8px]">
-            <Button
-              type="text"
-              className="w-full"
-              onClick={toggleSidebar}
-              icon={
-                sidebarCollapsed ? (
-                  <IconMenuUnfold className="text-[20px] text-[var(--color-text-2)]" />
-                ) : (
-                  <IconMenuFold className="text-[20px] text-[var(--color-text-2)]" />
-                )
-              }
-            />
-          </div>
-        </div>
 
-        <Layout.Content className="relative flex-1 overflow-auto">
-          <Suspense
-            fallback={
-              <div className="flex h-full items-center justify-center">
-                <Spin />
-              </div>
-            }
-          >
-            <Switch>
-              <Redirect
-                exact
-                from={basePath}
-                to={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH}`}
-              />
-              <Route
-                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH}`}
-                component={OntologySceneGraph}
-              />
-              <Route
-                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE}`}
-                component={OntologySceneObjectType}
-              />
-              <Route
-                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.ATTRIBUTES}`}
-                component={OntologySceneAttributes}
-              />
-              <Route
-                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS}`}
-                component={OntologySceneLinks}
-              />
-              <Route
-                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS}`}
-                component={OntologySceneBehaviorActions}
-                exact
-              />
-              <Route
-                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS}/:pageMode/:actionId`}
-                component={OntologySceneBehaviorActionDetail}
-              />
-              <Route
-                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS}`}
-                component={OntologySceneFunctions}
-                exact
-              />
-              <Route
-                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS}/:pageMode/:functionId`}
-                component={OSFunctionDetail}
-              />
-              <Route
-                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_LOG}`}
-                component={OntologySceneBehaviorLog}
-              />
-            </Switch>
-          </Suspense>
-        </Layout.Content>
+          <Layout.Content className="relative z-0 flex min-h-0 flex-1 flex-col overflow-hidden">
+            <Suspense
+              fallback={
+                <div className="flex h-full items-center justify-center">
+                  <Spin />
+                </div>
+              }
+            >
+              <Switch>
+                <Redirect
+                  exact
+                  from={basePath}
+                  to={`${baseUrl}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH}`}
+                />
+                <Route
+                  path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH}`}
+                  component={OntologySceneGraph}
+                />
+                <Route
+                  path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE}`}
+                  component={OntologySceneObjectType}
+                />
+                <Route
+                  path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.ATTRIBUTES}`}
+                  component={OntologySceneAttributes}
+                />
+                <Route
+                  path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS}`}
+                  component={OntologySceneLinks}
+                />
+                <Route
+                  path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS}`}
+                  component={OntologySceneBehaviorActions}
+                  exact
+                />
+                <Route
+                  path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS}/:pageMode/:actionId`}
+                  component={OntologySceneBehaviorActionDetail}
+                />
+                <Route
+                  path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS}`}
+                  component={OntologySceneFunctions}
+                  exact
+                />
+                <Route
+                  path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS}/:pageMode/:functionId`}
+                  component={OSFunctionDetail}
+                />
+                <Route
+                  path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_LOG}`}
+                  component={OntologySceneBehaviorLog}
+                />
+              </Switch>
+            </Suspense>
+          </Layout.Content>
+        </Layout>
       </Layout>
-    </Layout>
+    </div>
   );
 }

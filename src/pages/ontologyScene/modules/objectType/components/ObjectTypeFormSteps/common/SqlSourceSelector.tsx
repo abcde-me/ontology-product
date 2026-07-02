@@ -13,10 +13,13 @@ import {
 import { IconDown } from '@arco-design/web-react/icon';
 import {
   connectorAnalyseFinkSQLColumns,
-  connectorTestFinkSQL,
-  listOntologyConnectors,
-  listSqlConnectorDBAndTables
+  connectorTestFinkSQL
 } from '@/api/ontologySceneLibrary/objectType';
+import {
+  fetchOntologySqlConnectors,
+  fetchSqlConnectorDatabaseTables,
+  formatSqlConnectorSelectLabel
+} from '@/pages/ontologyScene/modules/objectType/services/ontologySqlConnectorService';
 import { useUserInfoStore } from '@/store/userInfoStore';
 import {
   ConnectorAnalyseFinkSqlColumnItem,
@@ -24,6 +27,7 @@ import {
   SqlConnectorItem
 } from '@/types/objectType';
 import { normalizeConnectorAnalyseFinkSqlColumns } from '../../ObjectTypeFormUtils/attributeFields';
+import { normalizeSqlConnectorId } from '../../ObjectTypeFormUtils/normalizeSqlConnectorId';
 import {
   SqlSourceDataInfo,
   SyncSourceDataStrategyFormState
@@ -93,16 +97,6 @@ function filterCascaderOption(
   return [option.label, option.value]
     .filter((item) => item != null)
     .some((item) => String(item).toLowerCase().includes(q));
-}
-
-function normalizeConnectorList(data: any): SqlConnectorItem[] {
-  if (Array.isArray(data)) {
-    return data;
-  }
-  if (Array.isArray(data?.items)) {
-    return data.items;
-  }
-  return [];
 }
 
 function findKeywordAtTopLevel(sql: string, keyword: string, start = 0) {
@@ -259,7 +253,10 @@ export default function SqlSourceSelector({
   syncSourceDataStrategyForSqlTest,
   readOnly = false
 }: SqlSourceSelectorProps) {
-  const projectID = useUserInfoStore((state) => state.projectId?.[1]);
+  const getEffectiveProjectId = useUserInfoStore(
+    (state) => state.getEffectiveProjectId
+  );
+  const projectID = getEffectiveProjectId();
   const [connectors, setConnectors] = useState<SqlConnectorItem[]>([]);
   const [connectorsLoading, setConnectorsLoading] = useState(false);
   const [tablesLoading, setTablesLoading] = useState(false);
@@ -297,23 +294,12 @@ export default function SqlSourceSelector({
     const loadConnectors = async () => {
       setConnectorsLoading(true);
       try {
-        const response = await listOntologyConnectors({
-          page: 1,
-          page_size: 1000,
-          type: 'sql',
-          subtype: ['mysql', 'dameng', 'postgres'],
-          status: ['succeed'],
-          sort: 'desc',
-          sort_by: 'create_time'
-        });
-        if (isSuccessResponse(response)) {
-          setConnectors(normalizeConnectorList(response.data));
-        } else {
-          Message.error(response.message || '加载连接器列表失败');
-        }
+        const items = await fetchOntologySqlConnectors();
+        setConnectors(items);
       } catch (error) {
-        console.error('加载连接器列表失败:', error);
-        Message.error('加载连接器列表失败');
+        console.error('加载数据源连接失败:', error);
+        Message.error('加载数据源连接失败');
+        setConnectors([]);
       } finally {
         setConnectorsLoading(false);
       }
@@ -323,9 +309,8 @@ export default function SqlSourceSelector({
   }, []);
 
   const fetchDatabaseTables = useCallback(async () => {
-    const rawId = value.connectorId;
-    const id = rawId === undefined || rawId === null ? NaN : Number(rawId);
-    if (!Number.isFinite(id)) {
+    const id = normalizeSqlConnectorId(value.connectorId);
+    if (id === undefined) {
       setDatabases([]);
       return;
     }
@@ -336,16 +321,11 @@ export default function SqlSourceSelector({
 
     setTablesLoading(true);
     try {
-      const response = await listSqlConnectorDBAndTables({
-        id,
+      const databases = await fetchSqlConnectorDatabaseTables({
+        connectorId: id,
         projectID
       });
-      if (isSuccessResponse(response)) {
-        setDatabases(response.data || []);
-      } else {
-        Message.error(response.message || '加载数据库表失败');
-        setDatabases([]);
-      }
+      setDatabases(databases);
     } catch (error) {
       console.error('加载数据库表失败:', error);
       Message.error('加载数据库表失败');
@@ -358,6 +338,39 @@ export default function SqlSourceSelector({
   useEffect(() => {
     void fetchDatabaseTables();
   }, [fetchDatabaseTables]);
+
+  useEffect(() => {
+    const normalized = normalizeSqlConnectorId(value.connectorId);
+    if (normalized === value.connectorId) {
+      return;
+    }
+    onChange({ ...value, connectorId: normalized });
+    form.setFieldValue(`${fieldPrefix}Connector`, normalized);
+  }, [value.connectorId]);
+
+  useEffect(() => {
+    const connectorId = normalizeSqlConnectorId(value.connectorId);
+    if (connectorId !== undefined) {
+      return;
+    }
+    if (!value.databaseName && !value.tableName) {
+      return;
+    }
+
+    onChange({
+      ...value,
+      databaseName: undefined,
+      tableName: undefined
+    });
+    form.setFieldValue(`${fieldPrefix}DatabaseTable`, undefined);
+  }, [
+    fieldPrefix,
+    form,
+    onChange,
+    value.connectorId,
+    value.databaseName,
+    value.tableName
+  ]);
 
   const tableOptions = useMemo<CascaderOption[]>(
     () =>
@@ -374,8 +387,9 @@ export default function SqlSourceSelector({
     [databases]
   );
 
+  const connectorId = normalizeSqlConnectorId(value.connectorId);
   const cascaderValue =
-    value.databaseName && value.tableName
+    connectorId !== undefined && value.databaseName && value.tableName
       ? [value.databaseName, value.tableName]
       : undefined;
   const currentQueryMode = value.queryMode || 'selected';
@@ -406,7 +420,7 @@ export default function SqlSourceSelector({
     const baseSourceDataInfo =
       sqlSourceDataInfoToSourceDataInfoForTest(sourceForTest);
     if (!baseSourceDataInfo) {
-      Message.warning('请先选择数据源链接');
+      Message.warning('请先选择数据源连接');
       return;
     }
     if (!projectID) {
@@ -469,7 +483,7 @@ export default function SqlSourceSelector({
       return;
     }
     if (!value.connectorId) {
-      Message.warning('请先选择数据源链接');
+      Message.warning('请先选择数据源连接');
       return;
     }
     setParseLoading(true);
@@ -507,13 +521,7 @@ export default function SqlSourceSelector({
   };
 
   const handleConnectorChange = (connectorId?: number | string) => {
-    const numeric =
-      connectorId === undefined || connectorId === null || connectorId === ''
-        ? NaN
-        : Number(connectorId);
-    const normalizedConnectorId = Number.isFinite(numeric)
-      ? numeric
-      : undefined;
+    const normalizedConnectorId = normalizeSqlConnectorId(connectorId);
     const connector = connectors.find(
       (item) =>
         normalizedConnectorId !== undefined &&
@@ -535,10 +543,15 @@ export default function SqlSourceSelector({
   };
 
   const handleDatabaseTableChange = (selected?: string[]) => {
+    const connectorId = normalizeSqlConnectorId(value.connectorId);
+    if (connectorId === undefined) {
+      return;
+    }
     const databaseName = selected?.[0];
     const tableName = selected?.[1];
     const nextValue = {
       ...value,
+      connectorId,
       databaseName,
       tableName,
       projectID
@@ -548,9 +561,9 @@ export default function SqlSourceSelector({
       `${fieldPrefix}DatabaseTable`,
       databaseName && tableName ? [databaseName, tableName] : undefined
     );
-    if (value.connectorId && databaseName && tableName && projectID) {
+    if (databaseName && tableName && projectID) {
       onTableSelected?.({
-        connectorId: value.connectorId,
+        connectorId,
         databaseName,
         tableName,
         projectID
@@ -561,22 +574,25 @@ export default function SqlSourceSelector({
   return (
     <>
       <FormItem
-        label="数据源链接"
+        label="数据源连接"
         field={`${fieldPrefix}Connector`}
-        rules={[{ required: true, message: '请选择数据源链接' }]}
+        rules={[{ required: true, message: '请选择数据源连接' }]}
       >
         <Select
-          placeholder="请选择数据源链接"
+          className={styles['modeling-borderless-control']}
+          placeholder="请选择数据源连接"
           loading={connectorsLoading}
-          value={value.connectorId}
+          value={normalizeSqlConnectorId(value.connectorId)}
           onChange={handleConnectorChange}
           options={connectors.map((connector) => ({
-            label: connector.subtype
-              ? `${connector.name} (${connector.subtype})`
-              : connector.name,
+            label: formatSqlConnectorSelectLabel(
+              connector.name,
+              connector.subtype
+            ),
             value: connector.id
           }))}
           allowClear
+          showSearch
           disabled={readOnly}
         />
       </FormItem>
@@ -738,10 +754,18 @@ export default function SqlSourceSelector({
         <FormItem
           label=" "
           field={`${fieldPrefix}DatabaseTable`}
-          rules={[{ message: '请选择数据表' }]}
+          rules={[
+            {
+              required: currentQueryMode === 'selected',
+              message: '请选择数据表'
+            }
+          ]}
         >
           <Cascader
-            placeholder="请选择数据表"
+            className={styles['modeling-borderless-control']}
+            placeholder={
+              connectorId !== undefined ? '请选择数据表' : '请先选择数据源连接'
+            }
             loading={tablesLoading}
             value={cascaderValue}
             options={tableOptions}
@@ -751,7 +775,7 @@ export default function SqlSourceSelector({
             filterOption={filterCascaderOption}
             allowClear
             showSearch
-            disabled={readOnly}
+            disabled={readOnly || connectorId === undefined}
             dropdownMenuClassName={styles['object-type-cascader-dropdown']}
             renderFormat={(valueShow) => valueShow.join('/')}
           />

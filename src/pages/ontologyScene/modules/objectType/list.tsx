@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Button,
+  Dropdown,
   Form,
   Input,
+  Menu,
   Space,
   TableColumnProps,
   Pagination,
@@ -12,6 +14,7 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import {
+  IconDown,
   IconPlus,
   IconRefresh,
   IconQuestionCircle
@@ -35,6 +38,11 @@ import {
   startSyncObjectTypeTask,
   pauseSyncObjectTypeTask
 } from '@/api/ontologySceneLibrary/objectType';
+import {
+  canAutoConfigureDataResourceInstanceSync,
+  configureDataResourceInstanceSync,
+  isDataResourceBackedObjectTypeFromRecord
+} from '@/pages/ontologyScene/modules/objectType/services/configureDataResourceInstanceSync';
 import { ObjectType, ListOntologyObjectTypeReq } from '@/types/objectType';
 import { SyncStatus } from '@/types/graphApi';
 import styles from './list.module.scss';
@@ -47,6 +55,14 @@ import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 import LogIcon from '@/pages/ontologyScene/assets/log-icon.svg';
 import { EllipsisPopover, OntoModal } from '@/pages/ontologyScene/components';
+import { isOntologyApiSuccess } from '@/utils/apiResponse';
+import { bindOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
+import type { ObjectTypeQueryRow } from '@/pages/exploreAnalysis/ontologyQuery/types';
+import { invalidateObjectTypeQueryCache } from '@/pages/exploreAnalysis/ontologyQuery/services/objectTypeQuery';
+import { SelectExistingObjectTypeModal } from './components/SelectExistingObjectTypeModal';
+import { useOntologySceneDataSync } from '../../hooks/useOntologySceneDataSync';
+
+const MenuItem = Menu.Item;
 
 export default function OntologySceneObjectTypeList() {
   const [form] = Form.useForm();
@@ -68,6 +84,11 @@ export default function OntologySceneObjectTypeList() {
   const [switchLoadingIds, setSwitchLoadingIds] = useState<Set<number>>(
     new Set()
   );
+  const [configureSyncLoadingIds, setConfigureSyncLoadingIds] = useState<
+    Set<number>
+  >(new Set());
+  const [selectExistingVisible, setSelectExistingVisible] = useState(false);
+  const [selectExistingLoading, setSelectExistingLoading] = useState(false);
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
@@ -76,7 +97,7 @@ export default function OntologySceneObjectTypeList() {
         try {
           const response = await listOntologyObjectType(params);
 
-          if (response.status === 200 && response.code === '') {
+          if (isOntologyApiSuccess(response)) {
             const items = response.data?.result || [];
 
             return {
@@ -136,6 +157,12 @@ export default function OntologySceneObjectTypeList() {
       }
     });
 
+  useOntologySceneDataSync(
+    ontologyModelID ? Number(ontologyModelID) : 0,
+    ['objectType'],
+    refresh
+  );
+
   // 从 URL 的 search 参数同步到表单
   useEffect(() => {
     const currentKeyword = form.getFieldValue('keyword');
@@ -150,12 +177,73 @@ export default function OntologySceneObjectTypeList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlState.search]);
 
-  // 跳转到创建页面
-  const handleCreate = () => {
-    history.push(
-      `/tenant/compute/onto/ontologyScene/detail/${ontologyModelID}/objectType/create`
-    );
+  const createPagePath = `/tenant/compute/onto/ontologyScene/detail/${ontologyModelID}/objectType/create`;
+
+  const handleCreateNew = () => {
+    history.push(createPagePath);
   };
+
+  const boundObjectTypeCodes = useMemo(
+    () =>
+      new Set(
+        (data || [])
+          .map((item) => item.code?.trim())
+          .filter((code): code is string => Boolean(code))
+      ),
+    [data]
+  );
+
+  const handleSelectExisting = async (record: ObjectTypeQueryRow) => {
+    if (!record.id) {
+      Message.error('对象类型ID无效');
+      return;
+    }
+
+    if (!ontologyModelID) {
+      Message.error('场景库ID无效');
+      return;
+    }
+
+    const objectTypeCode = record.code?.trim();
+    if (objectTypeCode && boundObjectTypeCodes.has(objectTypeCode)) {
+      Message.warning('当前场景库已绑定该对象类型');
+      return;
+    }
+
+    setSelectExistingLoading(true);
+    try {
+      const response = await bindOntologyObjectType({
+        ontologyModelID: Number(ontologyModelID),
+        objectTypeID: record.id
+      });
+
+      if (isOntologyApiSuccess(response)) {
+        Message.success('绑定成功');
+        setSelectExistingVisible(false);
+        invalidateObjectTypeQueryCache();
+        refresh();
+        return;
+      }
+
+      Message.error(response.message || '绑定失败，请重试');
+    } catch (error) {
+      console.error('绑定对象类型失败:', error);
+      Message.error('绑定失败，请重试');
+    } finally {
+      setSelectExistingLoading(false);
+    }
+  };
+
+  const createDropdown = (
+    <Menu>
+      <MenuItem key="new" onClick={handleCreateNew}>
+        新建对象类型
+      </MenuItem>
+      <MenuItem key="existing" onClick={() => setSelectExistingVisible(true)}>
+        选择已有对象类型
+      </MenuItem>
+    </Menu>
+  );
 
   // 跳转到详情/编辑页面
   const handleViewDetail = (
@@ -181,11 +269,34 @@ export default function OntologySceneObjectTypeList() {
   };
 
   // 处理配置实例同步
-  const handleConfigureSync = (record: ObjectType) => {
+  const handleConfigureSync = async (record: ObjectType) => {
     if (!record.id) {
       Message.error('对象类型ID无效');
       return;
     }
+
+    if (canAutoConfigureDataResourceInstanceSync(record)) {
+      setConfigureSyncLoadingIds((prev) => new Set(prev).add(record.id));
+      try {
+        const result = await configureDataResourceInstanceSync(record.id);
+        if (result.ok) {
+          Message.success(result.message);
+          refresh();
+        } else {
+          Message.error(result.message);
+        }
+      } catch {
+        Message.error('配置实例同步失败');
+      } finally {
+        setConfigureSyncLoadingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(record.id);
+          return next;
+        });
+      }
+      return;
+    }
+
     history.push(
       `/tenant/compute/onto/ontologyScene/detail/${ontologyModelID}/objectType/edit/${record.id}?step=3`
     );
@@ -199,15 +310,47 @@ export default function OntologySceneObjectTypeList() {
         return;
       }
 
-      if (!record.funnel_task_id) {
-        Message.error('同步任务ID无效');
-        return;
-      }
-
       // 添加 loading 状态
       setSwitchLoadingIds((prev) => new Set(prev).add(record.id));
 
       try {
+        // 首次开启：后端尚未分配 funnel_task_id，走 SyncObjectTypeTask 创建并执行同步
+        if (!record.funnel_task_id) {
+          if (!checked) {
+            Message.info('同步任务尚未创建，无需关闭');
+            refresh();
+            return;
+          }
+
+          // 数据资源已标记开启同步但策略未落库时，先补全配置再触发任务
+          if (
+            record.enableSyncSourceData &&
+            isDataResourceBackedObjectTypeFromRecord(record)
+          ) {
+            const repairResult = await configureDataResourceInstanceSync(
+              record.id
+            );
+            if (repairResult.ok) {
+              Message.success(repairResult.message);
+              refresh();
+            } else {
+              Message.error(repairResult.message);
+              refresh();
+            }
+            return;
+          }
+
+          const res = await syncObjectTypeTask({ id: record.id });
+          if (res.status === 200 && res.code === '') {
+            Message.success('已触发实例同步，请稍后查看同步状态');
+            refresh();
+          } else {
+            Message.error(res.message || '触发实例同步失败');
+            refresh();
+          }
+          return;
+        }
+
         const params = {
           id: record.id,
           funnel_task_id: record.funnel_task_id
@@ -265,17 +408,23 @@ export default function OntologySceneObjectTypeList() {
             return;
           }
 
-          const response = await deleteOntologyObjectType({ id: record.id });
+          const response = await deleteOntologyObjectType({
+            id: Number(record.id),
+            ontologyModelID: ontologyModelID
+              ? Number(ontologyModelID)
+              : undefined
+          });
 
-          if (response.status === 200 && response.code === '') {
+          if (isOntologyApiSuccess(response)) {
             Message.success('删除成功');
-            // 重新加载列表
             refresh();
           } else {
             Message.error(response.message || '删除失败');
           }
         } catch (error) {
-          Message.error('删除失败');
+          Message.error(
+            typeof error === 'string' && error ? error : '删除失败'
+          );
         }
       }
     });
@@ -389,10 +538,18 @@ export default function OntologySceneObjectTypeList() {
             <div className="flex items-center gap-[4px]">
               <span className="text-[#334155]">未配置</span>
               <span
-                className="cursor-pointer text-[#184FF2] hover:underline"
-                onClick={() => handleConfigureSync(record)}
+                className={`text-[#184FF2] ${
+                  configureSyncLoadingIds.has(record.id)
+                    ? 'cursor-wait opacity-60'
+                    : 'cursor-pointer hover:underline'
+                }`}
+                onClick={() => {
+                  if (!configureSyncLoadingIds.has(record.id)) {
+                    void handleConfigureSync(record);
+                  }
+                }}
               >
-                配置
+                {configureSyncLoadingIds.has(record.id) ? '配置中...' : '配置'}
               </span>
             </div>
           );
@@ -562,9 +719,12 @@ export default function OntologySceneObjectTypeList() {
         }
         addButton={
           <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.CREATE}>
-            <Button type="outline" icon={<IconPlus />} onClick={handleCreate}>
-              创建对象类型
-            </Button>
+            <Dropdown droplist={createDropdown} position="br">
+              <Button type="outline" icon={<IconPlus />}>
+                创建对象类型
+                <IconDown className="ml-[4px]" />
+              </Button>
+            </Dropdown>
           </PermissionWrapper>
         }
         tableProps={{
@@ -622,6 +782,17 @@ export default function OntologySceneObjectTypeList() {
             setCurrentTaskName('');
           }}
           fetchLog={getObjectTypeSyncLog}
+        />
+      )}
+
+      {ontologyModelID && (
+        <SelectExistingObjectTypeModal
+          visible={selectExistingVisible}
+          currentSceneId={Number(ontologyModelID)}
+          excludedCodes={boundObjectTypeCodes}
+          confirmLoading={selectExistingLoading}
+          onCancel={() => setSelectExistingVisible(false)}
+          onConfirm={handleSelectExisting}
         />
       )}
     </div>

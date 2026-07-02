@@ -553,6 +553,18 @@ export const createEventProcessor = (context: EventHandlerContext) => {
       handleDoneEvent(event, context);
     } else if (type === EVENT_TYPES.ERROR) {
       handleErrorEvent(event, context);
+    } else if (event.content != null && event.content !== '') {
+      handleAnswerEvent(
+        {
+          ...event,
+          type: EVENT_TYPES.ANSWER,
+          content:
+            typeof event.content === 'string'
+              ? event.content
+              : JSON.stringify(event.content)
+        },
+        context
+      );
     }
 
     // 记录当前事件类型

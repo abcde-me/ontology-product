@@ -1,13 +1,15 @@
 import React from 'react';
 import { Form, Message, Radio } from '@arco-design/web-react';
-import FieldImportUpload from '@/pages/ontologyScene/components/FieldImportUpload';
+import FieldImportUpload, {
+  CsvSchemaTemplateLinks
+} from '@/pages/ontologyScene/components/FieldImportUpload';
 import {
   COLUMN_TYPE_OPTIONS,
   DATA_SOURCE_TYPE,
   DataSourceType
 } from '@/pages/ontologyScene/common/constants';
 import { PrefixAimdp } from '@/api/endpoints';
-import { getSqlConnectorTableSchemaToTIDB } from '@/api/ontologySceneLibrary/objectType';
+import { fetchSqlConnectorTableSchema } from '../../../services/ontologySqlConnectorService';
 import type { ConnectorAnalyseFinkSqlColumnItem } from '@/types/objectType';
 import {
   ObjectTypeAttributeField,
@@ -25,7 +27,13 @@ import {
   resolvePrimaryColumnIndex
 } from '../../ObjectTypeFormUtils/sqlConnectorTiDBSchema';
 import SqlSourceSelector from '../common/SqlSourceSelector';
+import DataResourceTableSelector from '../common/DataResourceTableSelector';
 import ObjectTypeAttributeTable from './ObjectTypeAttributeTable';
+import type { DataResourceTable } from '@/pages/dataResource/types';
+import {
+  buildDataResourceDataSourceStateFromTables,
+  dataResourceTablesToObjectTypeAttributes
+} from '../../../services/dataResourceMapping';
 
 const FormItem = Form.Item;
 
@@ -52,6 +60,10 @@ interface ModelingStepProps {
   setInitialFileList: React.Dispatch<React.SetStateAction<any[]>>;
   styles: Record<string, string>;
   readOnly?: boolean;
+  onGenerateSchema?: () => void | Promise<void>;
+  generatingSchema?: boolean;
+  showGenerateSchemaButton?: boolean;
+  onDataResourceSelected?: (tables: DataResourceTable[]) => void;
 }
 
 export default function ModelingStep({
@@ -70,7 +82,11 @@ export default function ModelingStep({
   initialFileList,
   setInitialFileList,
   styles,
-  readOnly = false
+  readOnly = false,
+  onGenerateSchema,
+  generatingSchema = false,
+  showGenerateSchemaButton = false,
+  onDataResourceSelected
 }: ModelingStepProps) {
   const syncAttributes = (fields: ObjectTypeAttributeField[]) => {
     setObjectTypeAttributes(fields);
@@ -96,9 +112,51 @@ export default function ModelingStep({
     });
     clearAttributes();
     setIsReUpload(false);
-    if (type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC) {
+    if (
+      type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC ||
+      type === DATA_SOURCE_TYPE.DATA_RESOURCE
+    ) {
       setInitialFileList([]);
     }
+    form.setFieldValue('dataResourceTableId', undefined);
+  };
+
+  const handleDataResourceTablesChange = (tables: DataResourceTable[]) => {
+    if (!tables.length) {
+      setDataSource((prev) => ({
+        ...prev,
+        type: DATA_SOURCE_TYPE.DATA_RESOURCE,
+        database: undefined,
+        table: undefined,
+        dataResourceId: undefined,
+        dataResourceIds: undefined,
+        tables: undefined
+      }));
+      clearAttributes();
+      form.setFieldValue('dataResourceTableId', undefined);
+      return;
+    }
+
+    const nextDataSource = buildDataResourceDataSourceStateFromTables(tables);
+    setDataSource((prev) => ({
+      ...prev,
+      ...nextDataSource,
+      connectorId: undefined,
+      connectorName: undefined,
+      connectorSubtype: undefined,
+      file: undefined,
+      filePath: undefined,
+      queryMode: 'selected',
+      sql: undefined
+    }));
+    setModelingSourceDataInfo({ queryMode: 'selected' });
+    form.setFieldValue(
+      'dataResourceTableId',
+      tables.map((table) => table.id)
+    );
+    syncAttributes(dataResourceTablesToObjectTypeAttributes(tables));
+    setFileUploaded(true);
+    onDataResourceSelected?.(tables);
   };
 
   const handleModelingSourceChange = (source: SqlSourceDataInfo) => {
@@ -137,7 +195,7 @@ export default function ModelingStep({
     }
     setFieldsLoading(true);
     try {
-      const response = await getSqlConnectorTableSchemaToTIDB({
+      const response = await fetchSqlConnectorTableSchema({
         id: connectorId,
         database_name: databaseName,
         table_name: tableName,
@@ -234,85 +292,139 @@ export default function ModelingStep({
 
   return (
     <>
-      <div className="my-[16px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
-        数据源
-      </div>
-      <FormItem
-        label="数据来源类型"
-        field="dataSourceType"
-        rules={[{ required: true, message: '请选择数据来源类型' }]}
-      >
-        <Radio.Group
-          value={dataSource.type}
-          onChange={handleDataSourceTypeChange}
-          disabled={readOnly}
-        >
-          <Radio value={DATA_SOURCE_TYPE.LOCAL_CSV}>本地CSV</Radio>
-          <Radio value={DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC}>数据库/表</Radio>
-        </Radio.Group>
-      </FormItem>
-
-      {dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV ? (
+      <div className={styles['modeling-section']}>
+        <div className={styles['modeling-section-title']}>创建方式</div>
         <FormItem
-          className={styles['local-csv-form-item']}
-          label="Schema文件"
-          field="file"
-          rules={[
-            {
-              required: true,
-              validator: (_value, callback) => {
-                if (!dataSource.filePath) {
-                  callback('请上传文件');
-                } else {
-                  callback();
+          label="数据来源类型"
+          field="dataSourceType"
+          rules={[{ required: true, message: '请选择数据来源类型' }]}
+        >
+          <Radio.Group
+            value={dataSource.type}
+            onChange={handleDataSourceTypeChange}
+            disabled={readOnly}
+          >
+            <Radio value={DATA_SOURCE_TYPE.MANUAL_CREATION}>手动创建</Radio>
+            <Radio value={DATA_SOURCE_TYPE.LOCAL_CSV}>本地CSV</Radio>
+            <Radio value={DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC}>
+              数据库/表
+            </Radio>
+            <Radio value={DATA_SOURCE_TYPE.DATA_RESOURCE}>数据资源</Radio>
+          </Radio.Group>
+        </FormItem>
+
+        {dataSource.type ===
+        DATA_SOURCE_TYPE.MANUAL_CREATION ? null : dataSource.type ===
+          DATA_SOURCE_TYPE.DATA_RESOURCE ? (
+          <FormItem
+            label="数据资源表"
+            field="dataResourceTableId"
+            rules={[
+              {
+                required: true,
+                validator: (_value, callback) => {
+                  const selectedCount = dataSource.dataResourceIds?.length || 0;
+                  if (!dataSource.table && selectedCount === 0) {
+                    callback('请选择数据资源表');
+                  } else {
+                    callback();
+                  }
                 }
               }
+            ]}
+          >
+            <DataResourceTableSelector
+              value={dataSource.dataResourceIds || dataSource.dataResourceId}
+              onChange={handleDataResourceTablesChange}
+              readOnly={readOnly}
+            />
+          </FormItem>
+        ) : dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV ? (
+          <FormItem
+            className={styles['local-csv-form-item']}
+            label={
+              <div className={styles['schema-file-label-row']}>
+                <span className={styles['schema-file-label-text']}>
+                  Schema文件
+                </span>
+                <CsvSchemaTemplateLinks
+                  from="object_type"
+                  disabled={readOnly}
+                  hasUploadedFile={
+                    Boolean(dataSource.filePath) || initialFileList.length > 0
+                  }
+                  onGenerateSchema={onGenerateSchema}
+                  generatingSchema={generatingSchema}
+                  showGenerateSchemaButton={showGenerateSchemaButton}
+                />
+              </div>
             }
-          ]}
-        >
-          <FieldImportUpload
-            accept=".csv"
-            fileType="csv"
-            maxSize={100}
-            customAction={`${PrefixAimdp}/UploadOntologyEntityDataFile`}
-            fileList={initialFileList}
-            disabled={readOnly}
-            onFileChange={(file) => {
-              if (
-                file === undefined ||
-                (Array.isArray(file) && file.length === 0)
-              ) {
-                setDataSource((prev) => ({
-                  ...prev,
-                  file: undefined,
-                  filePath: undefined
-                }));
-                form.setFieldValue('file', undefined);
-                clearAttributes();
-                setInitialFileList([]);
-              } else {
-                setIsReUpload(!!initialCode);
-                handleDataSourceFileChange(file);
+            field="file"
+            layout="vertical"
+            rules={[
+              {
+                required: true,
+                validator: (_value, callback) => {
+                  if (!dataSource.filePath) {
+                    callback('请上传文件');
+                  } else {
+                    callback();
+                  }
+                }
               }
-            }}
-            onUploadingChange={() => {
-              // 保持 FieldImportUpload 调用签名稳定。
-            }}
+            ]}
+          >
+            <FieldImportUpload
+              accept=".csv"
+              fileType="csv"
+              maxSize={100}
+              customAction={`${PrefixAimdp}/UploadOntologyEntityDataFile`}
+              fileList={initialFileList}
+              disabled={readOnly}
+              showTemplateLinks={false}
+              hasUploadedFile={
+                Boolean(dataSource.filePath) || initialFileList.length > 0
+              }
+              onGenerateSchema={onGenerateSchema}
+              generatingSchema={generatingSchema}
+              showGenerateSchemaButton={showGenerateSchemaButton}
+              onFileChange={(file) => {
+                if (
+                  file === undefined ||
+                  (Array.isArray(file) && file.length === 0)
+                ) {
+                  setDataSource((prev) => ({
+                    ...prev,
+                    file: undefined,
+                    filePath: undefined
+                  }));
+                  form.setFieldValue('file', undefined);
+                  clearAttributes();
+                  setInitialFileList([]);
+                } else {
+                  setIsReUpload(!!initialCode);
+                  handleDataSourceFileChange(file);
+                }
+              }}
+              onUploadingChange={() => {
+                // 保持 FieldImportUpload 调用签名稳定。
+              }}
+            />
+          </FormItem>
+        ) : dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC ? (
+          <SqlSourceSelector
+            form={form}
+            value={modelingSourceDataInfo}
+            onChange={handleModelingSourceChange}
+            onTableSelected={loadTableSchema}
+            onSqlColumnsParsed={handleSqlColumnsParsed}
+            fieldPrefix="modeling"
+            styles={styles}
+            ontologySqlTestTaskType="TABLE_REALTIME_SYNC"
+            readOnly={readOnly}
           />
-        </FormItem>
-      ) : (
-        <SqlSourceSelector
-          form={form}
-          value={modelingSourceDataInfo}
-          onChange={handleModelingSourceChange}
-          onTableSelected={loadTableSchema}
-          onSqlColumnsParsed={handleSqlColumnsParsed}
-          fieldPrefix="modeling"
-          styles={styles}
-          ontologySqlTestTaskType="TABLE_REALTIME_SYNC"
-          readOnly={readOnly}
-        />
-      )}
+        ) : null}
+      </div>
 
       <ObjectTypeAttributeTable
         form={form}

@@ -390,6 +390,36 @@ $spacing-9: 24px;
   }
 }
 
+// message - 增强 warning/error 提示背景色，提高可见性
+.arco-message {
+  border-radius: 4px;
+  padding: 10px 16px;
+
+  &.arco-message-warning {
+    background-color: rgb(var(--warning-1));
+    border: 1px solid rgb(var(--warning-3));
+  }
+
+  &.arco-message-error {
+    background-color: rgb(var(--danger-1));
+    border: 1px solid rgb(var(--danger-3));
+  }
+
+  &.arco-message-info {
+    background-color: rgb(var(--primary-1));
+    border: 1px solid rgb(var(--primary-3));
+  }
+
+  &.arco-message-success {
+    background-color: rgb(var(--success-1));
+    border: 1px solid rgb(var(--success-3));
+  }
+
+  .arco-message-content {
+    font-size: 14px;
+  }
+}
+
 // popover
 .arco-popover-inner-content {
   font-size: 14px !important;

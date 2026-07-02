@@ -2,7 +2,10 @@
 export enum DataSourceType {
   MYSQL = 'mysql',
   DAMENG = 'dameng',
-  POSTGRESQL = 'postgresql'
+  POSTGRES = 'postgres',
+  ICEBERG = 'iceberg',
+  API = 'api',
+  KAFKA = 'kafka'
 }
 
 // 连接状态枚举
@@ -11,26 +14,85 @@ export enum ConnectionStatus {
   FAILED = 'failed'
 }
 
+// API 鉴权方式
+export enum ApiAuthType {
+  NONE = 'none',
+  API_KEY = 'api_key',
+  BEARER = 'bearer',
+  BASIC = 'basic'
+}
+
+// API 请求方法
+export enum ApiHttpMethod {
+  GET = 'GET',
+  POST = 'POST',
+  PUT = 'PUT',
+  DELETE = 'DELETE'
+}
+
+// Kafka 字段解析模式
+export enum KafkaFieldParseMode {
+  PARSE = 'parse',
+  RAW = 'raw'
+}
+
+// SQL 连接器配置
+export interface SqlConnectorConfig {
+  host: string;
+  port: string;
+  user: string;
+  password: string;
+  database?: string;
+}
+
+// API 连接器配置
+export interface ApiConnectorConfig {
+  url: string;
+  method: ApiHttpMethod | string;
+  headers?: string;
+  auth_type: ApiAuthType | string;
+  api_key?: string;
+  api_key_header?: string;
+  bearer_token?: string;
+  username?: string;
+  password?: string;
+  request_body?: string;
+  timeout?: string;
+  data_path?: string;
+}
+
+// Kafka 连接器配置（Topic、字段解析等在接入时配置）
+export interface KafkaConnectorConfig {
+  brokers: string;
+  consumer_group: string;
+  topic?: string;
+  security_protocol?: string;
+  sasl_mechanism?: string;
+  username?: string;
+  password?: string;
+  field_parse_mode?: KafkaFieldParseMode | string;
+  message_format?: string;
+}
+
+export type ConnectorConfig =
+  | SqlConnectorConfig
+  | ApiConnectorConfig
+  | KafkaConnectorConfig;
+
 // 表格行数据
 export interface DataSourceItem {
   id: string;
   name: string;
   description?: string;
   dataSourceType: DataSourceType;
+  connectorType: 'sql' | 'api' | 'kafka';
   connectionInfo: string;
   connectionStatus: ConnectionStatus;
   creator?: string;
   creatorOrg?: string;
   createTime: string;
   updateTime: string;
-  // 添加 config 字段，用于编辑时获取真实的用户名和密码
-  config?: {
-    host: string;
-    port: string;
-    user: string;
-    password: string;
-    database?: string;
-  };
+  config?: ConnectorConfig;
 }
 
 // API 响应
@@ -55,9 +117,29 @@ export interface DataSourceFormData {
   name: string;
   description?: string;
   dataSourceType: DataSourceType;
-  host: string;
-  port: number;
+  // SQL 字段
+  host?: string;
+  port?: number;
   database?: string;
-  username: string;
-  password?: string; // 改为可选，编辑时如果不修改密码可以不传
+  username?: string;
+  password?: string;
+  // API 字段
+  apiUrl?: string;
+  apiMethod?: ApiHttpMethod;
+  apiHeaders?: string;
+  apiAuthType?: ApiAuthType;
+  apiKey?: string;
+  apiKeyHeader?: string;
+  bearerToken?: string;
+  requestBody?: string;
+  dataPath?: string;
+  timeout?: number;
+  // Kafka 字段
+  brokers?: string;
+  topic?: string;
+  consumerGroup?: string;
+  securityProtocol?: string;
+  saslMechanism?: string;
+  fieldParseMode?: KafkaFieldParseMode;
+  messageFormat?: string;
 }

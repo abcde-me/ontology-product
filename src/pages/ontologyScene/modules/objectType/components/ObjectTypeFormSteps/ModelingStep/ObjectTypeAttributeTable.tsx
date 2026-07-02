@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Button,
   Form,
@@ -21,8 +21,7 @@ import {
 import {
   createObjectTypeAttributeKey,
   getObjectTypeAttributeRowKey,
-  normalizeColumnTypeForPrimary,
-  VECTOR_FIELD_SUFFIX
+  normalizeColumnTypeForPrimary
 } from '../../ObjectTypeFormUtils/attributeFields';
 import { ObjectTypeAttributeField } from '../../ObjectTypeFormUtils/types';
 
@@ -110,8 +109,7 @@ function createEmptyAttribute(): ObjectTypeAttributeField {
     publicPropertyID: 0,
     isVector: 0,
     sourceColumnName: '',
-    sourceColumnComment: '',
-    _vectorizationOn: false
+    sourceColumnComment: ''
   };
 }
 
@@ -169,57 +167,6 @@ export default function ObjectTypeAttributeTable({
     setAttributeFields(nextFields);
     form.setFieldValue('objectTypeAttributes', nextFields);
   };
-
-  const handleVectorizationChange = useCallback(
-    (index: number, enabled: boolean) => {
-      setAttributeFields((prev) => {
-        const nextFields = prev.map((field, i) => {
-          if (!enabled) {
-            if (i !== index) return field;
-            return { ...field, _vectorizationOn: false };
-          }
-          if (i === index) {
-            const commentBase = field.propertyComment ?? '';
-            const defaultVecComment = `${commentBase}${VECTOR_FIELD_SUFFIX}`;
-            const preserved =
-              field._vectorComment != null && field._vectorComment !== ''
-                ? field._vectorComment
-                : defaultVecComment;
-            return {
-              ...field,
-              _vectorizationOn: true,
-              _vectorComment: preserved
-            };
-          }
-          return { ...field, _vectorizationOn: false };
-        });
-        form.setFieldValue('objectTypeAttributes', nextFields);
-        return nextFields;
-      });
-    },
-    [form, setAttributeFields]
-  );
-
-  const handleVectorCommentChange = useCallback(
-    (index: number, val: string) => {
-      setAttributeFields((prev) => {
-        const next = prev.map((f, i) =>
-          i === index ? { ...f, _vectorComment: val } : f
-        );
-        form.setFieldValue('objectTypeAttributes', next);
-        return next;
-      });
-    },
-    [form, setAttributeFields]
-  );
-
-  const vectorExpandedRowKeys = useMemo(
-    () =>
-      attributeFields
-        .filter((f) => f._vectorizationOn)
-        .map((f) => getObjectTypeAttributeRowKey(f)),
-    [attributeFields]
-  );
 
   const handleFieldChange = (
     index: number,
@@ -480,21 +427,6 @@ export default function ObjectTypeAttributeTable({
         }
       },
       {
-        title: '向量化',
-        dataIndex: '_vectorizationOn',
-        width: 100,
-        render: (_, record, index) => (
-          <Switch
-            size="small"
-            checked={Boolean(record._vectorizationOn)}
-            disabled={readOnly}
-            onChange={(checked) =>
-              handleVectorizationChange(index, Boolean(checked))
-            }
-          />
-        )
-      },
-      {
         title: '操作',
         dataIndex: 'operation',
         width: 80,
@@ -508,75 +440,7 @@ export default function ObjectTypeAttributeTable({
         )
       }
     ],
-    [
-      attributeFields,
-      storeAsPublicLoading,
-      propertyTypeOptions,
-      handleVectorizationChange,
-      readOnly
-    ]
-  );
-
-  const renderVectorExpandedRow = useCallback(
-    (record: ObjectTypeAttributeField, index: number) => {
-      if (!record._vectorizationOn) {
-        return null;
-      }
-      const vecPropertyId = `${record.propertyID}${VECTOR_FIELD_SUFFIX}`;
-      return (
-        <div className="bg-[#fff] p-[12px]">
-          <Table
-            border={false}
-            pagination={false}
-            data={[
-              {
-                key: `${getObjectTypeAttributeRowKey(record)}-vector`,
-                vecPropertyId,
-                vectorType: 'vector'
-              }
-            ]}
-            columns={[
-              {
-                title: '属性id',
-                dataIndex: 'vecPropertyId',
-                render: (value) => (
-                  <span className="text-[14px] text-[var(--color-text-2)]">
-                    {value}
-                  </span>
-                )
-              },
-              {
-                title: '属性名称',
-                dataIndex: 'vectorComment',
-                render: () => (
-                  <Input
-                    value={record._vectorComment ?? ''}
-                    placeholder={
-                      record.propertyID
-                        ? '请输入向量属性名称'
-                        : '请先填写属性id'
-                    }
-                    disabled={readOnly}
-                    onChange={(val) => handleVectorCommentChange(index, val)}
-                  />
-                )
-              },
-              {
-                title: '属性类型',
-                dataIndex: 'vectorType',
-                render: (value) => (
-                  <span className="text-[14px] text-[var(--color-text-2)]">
-                    {value}
-                  </span>
-                )
-              }
-            ]}
-            rowKey="key"
-          />
-        </div>
-      );
-    },
-    [handleVectorCommentChange, readOnly]
+    [attributeFields, storeAsPublicLoading, propertyTypeOptions, readOnly]
   );
 
   return (
@@ -631,13 +495,6 @@ export default function ObjectTypeAttributeTable({
           rowKey={(record) => getObjectTypeAttributeRowKey(record)}
           border={false}
           pagination={false}
-          expandedRowKeys={vectorExpandedRowKeys}
-          expandedRowRender={renderVectorExpandedRow}
-          expandProps={{
-            rowExpandable: (r) => Boolean(r._vectorizationOn),
-            icon: () => null,
-            width: 0
-          }}
         />
       </FormItem>
     </>

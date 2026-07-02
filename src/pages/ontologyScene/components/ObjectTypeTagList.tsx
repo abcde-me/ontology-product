@@ -7,6 +7,8 @@ export interface ObjectTypeTagListProps {
   tags: ObjectTypeTagProps[];
   /** 自定义类名 */
   className?: string;
+  /** 展示全部标签，不折叠为 +N */
+  showAll?: boolean;
 }
 
 /**
@@ -15,12 +17,13 @@ export interface ObjectTypeTagListProps {
  */
 const ObjectTypeTagList: React.FC<ObjectTypeTagListProps> = ({
   tags,
-  className = ''
+  className = '',
+  showAll = false
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 如果标签数量小于 2，直接显示所有标签
-  if (tags.length <= 2) {
+  // 如果标签数量小于 2，或要求展示全部，直接显示所有标签
+  if (showAll || tags.length <= 2) {
     return (
       <div className={`flex flex-wrap items-center gap-[4px] ${className}`}>
         {tags.map((tag, index) => (

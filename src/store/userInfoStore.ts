@@ -3,7 +3,24 @@ import { devtools } from 'zustand/middleware';
 import { GetProjOrg } from '@/api/modules/project';
 import { GetUser } from '@/api/modules/user';
 import { isRequestSuccess } from '@/api/utils';
-import { getLocalStorage } from '@/utils/storage';
+import { ProjectIdKey } from '@/utils/const';
+import { getLocalStorage, setLocalStorage } from '@/utils/storage';
+import {
+  applyDevAuthBootstrap,
+  getDevAdminActions,
+  getDevProjectList,
+  getDevRealProjectIdFromEnv,
+  getDevRealFsIdFromEnv,
+  isDevBypassEnabled,
+  isDevFallbackProjectId
+} from '@/utils/devFallback';
+import {
+  extractAndNormalizeProjOrgList,
+  getDefaultProjectId,
+  isValidProjectId,
+  type NormalizedOrgNode
+} from '@/utils/projOrg';
+import { resolveProjectFilesystemId } from '@/utils/projectFilesystem';
 
 // 用户信息类型定义
 export interface UserInfo {
@@ -47,7 +64,7 @@ interface UserInfoState {
   isLoading: boolean;
   error: string | null;
   isInitialized: boolean; // 标记是否已经初始化过
-  projectList: null | ProjectItem[]; // 项目列表，根据实际 API 返回的类型定义
+  projectList: null | NormalizedOrgNode[];
   projectId: string[]; // 当前项目 ID，根据实际需求定义
   orgId: string; // 当前组织 ID，根据实际需求定义
   userMenus: any[];
@@ -65,6 +82,16 @@ interface UserInfoActions {
   updateUserInfo: (userInfo: Partial<UserInfo>) => void;
   // 获取项目列表
   fetchProjectList: () => Promise<void>;
+  /** 刷新组织/项目树（与平台管理共用 GetProjOrg 数据源） */
+  refreshProjectList: () => Promise<void>;
+  // 初始化当前组织/项目（登录后、刷新时调用）
+  initializeProjects: () => Promise<void>;
+  // 创建/写入前确保已关联有效项目
+  ensureProjectReady: () => Promise<boolean>;
+  /** 获取可用于 API 请求的项目 ID（store 或环境变量） */
+  getEffectiveProjectId: () => string | undefined;
+  /** 获取分片上传用的文件存储 ID（项目元数据或环境变量） */
+  getEffectiveFilesystemId: () => string | undefined;
   // 获取用户权限点
   setUserActions: (params: {
     isAdmin: boolean;
@@ -86,6 +113,8 @@ interface UserInfoActions {
 // 合并状态和操作的类型
 type UserInfoStore = UserInfoState & UserInfoActions;
 
+let fetchUserInfoPromise: Promise<void> | null = null;
+
 // 创建 zustand store
 export const useUserInfoStore = create<UserInfoStore>()(
   devtools(
@@ -98,51 +127,108 @@ export const useUserInfoStore = create<UserInfoStore>()(
 
       // 获取用户信息
       fetchUserInfo: async () => {
-        const { isLoading } = get();
-
-        // 如果正在加载中，避免重复请求
-        if (isLoading) {
+        if (get().isInitialized) {
           return;
         }
 
-        try {
-          set({ isLoading: true, error: null });
+        if (fetchUserInfoPromise) {
+          return fetchUserInfoPromise;
+        }
 
-          const response = await GetUser();
-          console.log(response, 'response.data');
-
-          if (isRequestSuccess(response)) {
-            set({
-              userInfo: response.data,
-              isLoading: false,
-              error: null,
-              isInitialized: true
-            });
-            console.log('User info fetched successfully:', response.data);
-          } else {
-            // 当 success 为 false 时，记录错误信息
-            // 权限相关的跳转已经在请求拦截器中统一处理
-            const errorMessage = response.message || '获取用户信息失败';
+        fetchUserInfoPromise = (async () => {
+          const finishInit = (patch: Partial<UserInfoState> = {}) => {
+            const current = get();
             set({
               isLoading: false,
-              error: errorMessage,
-              isInitialized: true
+              isInitialized: true,
+              projectList: current.projectList ?? [],
+              userActions:
+                current.userActions.actions === null && isDevBypassEnabled()
+                  ? getDevAdminActions()
+                  : current.userActions,
+              ...patch
             });
-            console.warn('Failed to fetch user info:', errorMessage);
+          };
+
+          try {
+            set({ isLoading: true, error: null });
+
+            let userInfo: UserInfo | null = null;
+
+            try {
+              const response = await GetUser();
+              console.log(response, 'response.data');
+
+              if (isRequestSuccess(response) && response.data?.id) {
+                userInfo = response.data;
+                set({
+                  userInfo,
+                  isLoading: false,
+                  error: null
+                });
+              } else if (isDevBypassEnabled()) {
+                throw new Error(response?.message || 'GetUser failed');
+              } else {
+                finishInit({
+                  error: response?.message || '获取用户信息失败'
+                });
+                console.warn('Failed to fetch user info:', response?.message);
+                return;
+              }
+            } catch (error) {
+              if (!isDevBypassEnabled()) {
+                throw error;
+              }
+
+              console.warn('[dev] GetUser 不可用，启用本地开发兜底账号', error);
+              set({
+                userInfo: applyDevAuthBootstrap().userInfo,
+                userActions: getDevAdminActions(),
+                isLoading: false,
+                error: null
+              });
+              await get().initializeProjects();
+              finishInit();
+              return;
+            }
+
+            await get().initializeProjects();
+
+            if (isDevBypassEnabled()) {
+              const { userActions } = get();
+              if (userActions.actions === null) {
+                set({ userActions: getDevAdminActions() });
+              }
+            }
+
+            finishInit({ error: null });
+            console.log('User info fetched successfully:', userInfo);
+          } catch (error) {
+            console.error('Failed to fetch user info:', error);
+            const errorMessage =
+              error instanceof Error ? error.message : '获取用户信息失败';
+
+            if (isDevBypassEnabled()) {
+              console.warn('[dev] 初始化失败，启用本地开发兜底账号');
+              set({
+                userInfo: applyDevAuthBootstrap().userInfo,
+                userActions: getDevAdminActions(),
+                isLoading: false,
+                error: null
+              });
+              await get().initializeProjects();
+              finishInit();
+              return;
+            }
+
+            finishInit({ error: errorMessage });
           }
-        } catch (error) {
-          console.error('Failed to fetch user info:', error);
-          const errorMessage =
-            error instanceof Error ? error.message : '获取用户信息失败';
+        })();
 
-          set({
-            isLoading: false,
-            error: errorMessage,
-            isInitialized: true
-          });
-
-          // 权限相关的错误处理已经在请求拦截器中统一处理
-          // 这里只需要记录错误状态
+        try {
+          await fetchUserInfoPromise;
+        } finally {
+          fetchUserInfoPromise = null;
         }
       },
 
@@ -158,6 +244,133 @@ export const useUserInfoStore = create<UserInfoStore>()(
       },
 
       projectList: null,
+      initializeProjects: async () => {
+        const { userInfo, projectId: currentProjectId } = get();
+
+        const applyFallbackIfNeeded = () => {
+          if (!isDevBypassEnabled()) {
+            set({ projectList: [], projectId: [] });
+            return;
+          }
+
+          const devList = getDevProjectList();
+          const envProject = getDevRealProjectIdFromEnv();
+          const defaultProjectId =
+            envProject || getDefaultProjectId(devList) || [];
+
+          if (envProject) {
+            console.warn('[dev] 使用 REACT_APP_DEV_REAL_* 环境变量中的项目 ID');
+          } else if (defaultProjectId.length) {
+            console.warn('[dev] GetProjOrg 不可用，使用本地开发组织/项目');
+          } else {
+            console.warn(
+              '[dev] 未获取到可用项目，请在左侧选择项目，或配置 REACT_APP_DEV_REAL_ORG_ID / REACT_APP_DEV_REAL_PROJECT_ID'
+            );
+          }
+
+          if (defaultProjectId.length && userInfo?.id) {
+            setLocalStorage(`${ProjectIdKey}${userInfo.id}`, defaultProjectId);
+          }
+
+          set({
+            projectList: devList,
+            projectId: defaultProjectId,
+            userActions: getDevAdminActions()
+          });
+        };
+
+        if (!userInfo?.id) {
+          applyFallbackIfNeeded();
+          return;
+        }
+
+        const fullProjectIdKey = `${ProjectIdKey}${userInfo.id}`;
+        const cachedProjectId = getLocalStorage<string[]>(fullProjectIdKey);
+        if (isDevFallbackProjectId(cachedProjectId)) {
+          localStorage.removeItem(fullProjectIdKey);
+        }
+
+        try {
+          const response = await GetProjOrg({});
+          const result = extractAndNormalizeProjOrgList(response);
+
+          if (!result.length) {
+            applyFallbackIfNeeded();
+            return;
+          }
+
+          set({ projectList: result });
+
+          if (
+            Array.isArray(currentProjectId) &&
+            currentProjectId.length > 1 &&
+            !isDevFallbackProjectId(currentProjectId) &&
+            isValidProjectId(result, currentProjectId)
+          ) {
+            return;
+          }
+
+          const storedProjectId = getLocalStorage<string[]>(fullProjectIdKey);
+          if (
+            Array.isArray(storedProjectId) &&
+            !isDevFallbackProjectId(storedProjectId) &&
+            isValidProjectId(result, storedProjectId)
+          ) {
+            set({ projectId: storedProjectId });
+            return;
+          }
+
+          if (isDevFallbackProjectId(storedProjectId)) {
+            localStorage.removeItem(fullProjectIdKey);
+          }
+
+          const defaultProjectId = getDefaultProjectId(result);
+          if (defaultProjectId) {
+            setLocalStorage(fullProjectIdKey, defaultProjectId);
+            set({ projectId: defaultProjectId });
+            return;
+          }
+
+          applyFallbackIfNeeded();
+        } catch (error) {
+          console.error('Failed to initialize projects:', error);
+          applyFallbackIfNeeded();
+        }
+      },
+      ensureProjectReady: async () => {
+        const currentProjectId = get().projectId;
+        if (
+          currentProjectId?.[1] &&
+          !isDevFallbackProjectId(currentProjectId)
+        ) {
+          return true;
+        }
+
+        await get().initializeProjects();
+
+        const nextProjectId = get().projectId;
+        return !!(nextProjectId?.[1] && !isDevFallbackProjectId(nextProjectId));
+      },
+      getEffectiveProjectId: () => {
+        const { projectId: currentProjectId } = get();
+        const rawProjectId = currentProjectId?.[1];
+
+        if (rawProjectId && !isDevFallbackProjectId(currentProjectId)) {
+          return rawProjectId;
+        }
+
+        const envProject = getDevRealProjectIdFromEnv();
+        return envProject?.[1];
+      },
+      getEffectiveFilesystemId: () => {
+        const fromEnv = getDevRealFsIdFromEnv();
+        if (fromEnv) {
+          return fromEnv;
+        }
+
+        const { projectList, projectId: currentProjectId } = get();
+        return resolveProjectFilesystemId(projectList, currentProjectId);
+      },
       // 获取项目列表
       fetchProjectList: async () => {
         const { userInfo } = get();
@@ -176,6 +389,22 @@ export const useUserInfoStore = create<UserInfoStore>()(
           }
         } catch (error) {
           console.error('Failed to fetch project list:', error);
+        }
+      },
+
+      refreshProjectList: async () => {
+        if (isDevBypassEnabled()) {
+          return;
+        }
+
+        try {
+          const response = await GetProjOrg({});
+          const result = extractAndNormalizeProjOrgList(response);
+          if (result.length) {
+            set({ projectList: result });
+          }
+        } catch (error) {
+          console.error('Failed to refresh project list:', error);
         }
       },
 

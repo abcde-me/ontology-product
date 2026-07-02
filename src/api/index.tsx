@@ -2,6 +2,12 @@ import UAPI_CONFIG from './uapi';
 import { logout, isSingleApp, getLoginToken } from '@/utils/env';
 import { Message, Notification } from '@arco-design/web-react';
 import { useUserInfoStore } from '@/store/userInfoStore';
+import {
+  isDevBypassEnabled,
+  isDevFallbackProjectId,
+  isOntologyManagerApiUrl,
+  DEV_CEAI_USER_ID
+} from '@/utils/devFallback';
 
 const isNil = (o) => o === undefined || o === null;
 
@@ -20,10 +26,77 @@ const excludeUrl = [
   '/ceai/user-space/api/v1/GetUser',
   '/ceai/user-space/api/v1/GetProjOrg',
   '/ceai/user-space/api/v1/Login',
+  '/ceai/user-space/api/v1/GetLoginCaptcha',
+  '/ceai/user-space/api/v1/GetScanLoginQrCode',
+  '/ceai/user-space/api/v1/CheckScanLoginStatus',
   '/ceai/user-space/api/v1/GetUserInfo',
   '/ceai/user-space/api/v1/Logout',
   '/ceai/aimdp-manager/api/v1/UploadOntologyActionDataFile'
 ];
+
+const silentDevErrorUrls = [
+  '/ceai/auth-center/api/v1/GetResourcePermissionActions',
+  '/ceai/user-space/api/v1/GetProjOrg',
+  '/ceai/user-space/api/v1/GetUser',
+  '/ceai/ontology-manager/api/v1/CreateOntologyModel',
+  '/ceai/ontology-manager/api/v1/DeleteOntologyModel',
+  '/ceai/ontology-manager/api/v1/ListOntologyModel',
+  '/ceai/ontology-manager/api/v1/GetOntologyModelDetail',
+  '/ceai/ontology-manager/api/v1/ListOntologyObjectType',
+  '/ceai/ontology-manager/api/v1/CreateOntologyObjectType',
+  '/ceai/ontology-manager/api/v1/BindOntologyObjectType',
+  '/ceai/ontology-manager/api/v1/UpdateOntologyObjectType',
+  '/ceai/ontology-manager/api/v1/DeleteOntologyObjectType',
+  '/ceai/ontology-manager/api/v1/GetOntologyObjectType',
+  '/ceai/ontology-manager/api/v1/GetRuntimeOntologyObjectTypeMetadata',
+  '/ceai/ontology-manager/api/v1/RegisterOntologyObjectTypeMetadata',
+  '/ceai/ontology-manager/api/v1/ListTiDBTypes',
+  '/ceai/ontology-manager/api/v1/GetTemplateFile',
+  '/ceai/ontology-manager/api/v1/UploadOntologyEntityDataFile',
+  '/ceai/ontology-manager/api/v1/GetOntologyTopology',
+  '/ceai/ontology-manager/api/v1/ListOntologyPhysicalProperties',
+  '/ceai/ontology-manager/api/v1/ListOntologyObjectTypeData',
+  '/ceai/ontology-manager/api/v1/VectorSearchOntologyObjectTypeData',
+  '/ceai/ontology-manager/api/v1/SemanticSearchOntologyObjectTypeData',
+  '/ceai/ontology-manager/api/v1/ListOntologyLinkType',
+  '/ceai/ontology-manager/api/v1/GetOntologyLinkType',
+  '/ceai/ontology-manager/api/v1/CreateOntologyLinkType',
+  '/ceai/ontology-manager/api/v1/UpdateOntologyLinkType',
+  '/ceai/ontology-manager/api/v1/DeleteOntologyLinkType',
+  '/ceai/ontology-manager/api/v1/ListOntologyLinkTypeColumn',
+  '/ceai/ontology-manager/api/v1/ListOntologyLinkTypeData',
+  '/ceai/ontology-manager/api/v1/CreateOntologyAgent',
+  '/ceai/appforge/api/v1/ListConversation',
+  '/ceai/appforge/api/v1/ListMessage',
+  '/ceai/appforge/api/v1/CreateMessage',
+  '/ceai/appforge/api/v1/DeleteConversation',
+  '/ceai/appforge/api/v1/UpdateConversation',
+  '/ceai/appforge/api/v1/GetApp'
+];
+
+const isDevGatewayError = (errorMsg?: string) =>
+  !!errorMsg &&
+  (errorMsg.includes('status code 504') ||
+    errorMsg.includes('status code 502') ||
+    errorMsg.includes('status code 503') ||
+    errorMsg.includes('Gateway Timeout') ||
+    errorMsg.includes('Network Error'));
+
+const shouldSuppressDevApiError = (requestUrl: string, errorMsg?: string) => {
+  if (!isDevBypassEnabled()) {
+    return false;
+  }
+
+  if (errorMsg?.includes('权限') || errorMsg?.includes('项目')) {
+    return true;
+  }
+
+  if (isDevGatewayError(errorMsg)) {
+    return true;
+  }
+
+  return silentDevErrorUrls.some((url) => requestUrl.includes(url));
+};
 
 // UAPI默认配置(配置项和Axios配置项兼容)（示例）
 UAPI_CONFIG.setDefaultConfig({
@@ -41,13 +114,10 @@ UAPI_CONFIG.addRequestInterceptor(
     const consolePluginToken = getLoginToken();
     const projectId = useUserInfoStore.getState().projectId;
 
-    // 本地开发环境添加测试用户 header
-    if (
-      window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1'
-    ) {
+    // 开发环境添加测试用户 header（支持 localhost / 局域网 IP 访问）
+    if (isDevBypassEnabled()) {
       if (config.headers) {
-        config.headers['X-Ceai-User-Id'] = 'user-gqj121nu';
+        config.headers['X-Ceai-User-Id'] = DEV_CEAI_USER_ID;
       }
     }
 
@@ -62,9 +132,14 @@ UAPI_CONFIG.addRequestInterceptor(
     const shouldExclude = config.url && excludeUrl.includes(config.url);
 
     // 统一添加的公共参数（例如：设备信息、用户 Token 等）
-    const hasValidProjectId = projectId && projectId.length > 1 && projectId[1];
+    const rawProjectId = projectId?.[1];
+    const hasValidProjectId =
+      projectId &&
+      projectId.length > 1 &&
+      rawProjectId &&
+      !isDevFallbackProjectId(projectId);
     const commonParams = {
-      projectID: !shouldExclude && hasValidProjectId ? projectId[1] : undefined
+      projectID: !shouldExclude && hasValidProjectId ? rawProjectId : undefined
     };
     // console.log('commonParams', commonParams);
 
@@ -90,7 +165,7 @@ UAPI_CONFIG.addRequestInterceptor(
       !shouldExclude
     ) {
       config.params = config.params || {};
-      config.params.projectID = projectId[1];
+      config.params.projectID = rawProjectId;
     }
 
     return config;
@@ -199,7 +274,8 @@ UAPI_CONFIG.addResponseInterceptor(
         return res;
       } else {
         const errorMsg = res.message;
-        if (errorMsg) {
+        const requestUrl = response.config?.url || '';
+        if (errorMsg && !shouldSuppressDevApiError(requestUrl, errorMsg)) {
           Message.error({ id: 'api-error-msg', content: errorMsg });
           console.error('api error message', errorMsg);
         }
@@ -218,12 +294,19 @@ UAPI_CONFIG.addResponseInterceptor(
         ? error.response.data.status
         : error.response.status;
     } catch (e) {
-      if (error.toString().indexOf('Error: timeout') !== -1) {
-        Notification.error({
-          title: '网络请求超时',
-          content: '',
-          duration: 5000
-        });
+      if (error.toString().indexOf('timeout') !== -1) {
+        const requestUrl =
+          error.config?.url || error.response?.config?.url || '';
+        const suppressTimeoutNotice =
+          isDevBypassEnabled() && isOntologyManagerApiUrl(requestUrl);
+
+        if (!suppressTimeoutNotice) {
+          Notification.error({
+            title: '网络请求超时',
+            content: '',
+            duration: 5000
+          });
+        }
         return Promise.reject(error);
       }
     }
@@ -241,14 +324,19 @@ UAPI_CONFIG.addResponseInterceptor(
         // 临时注释，用于调试
         logout(error.response.data?.data?.content);
       } else if (code === 403) {
-        // 临时在这里全局加一下，实际需要按业务捕获
-        Message.error(
-          error?.response?.data?.message ?? '只读管理员无权限操作此内容！'
-        );
+        const errorMsg = error?.response?.data?.message;
+        const requestUrl = error.response?.config?.url || '';
+        if (!shouldSuppressDevApiError(requestUrl, errorMsg)) {
+          Message.error(errorMsg ?? '只读管理员无权限操作此内容！');
+        }
       } else {
         console.log('code 500: ', code);
         const errorMsg = error.response.data.message || error.message;
-        errorMsg && Message.error(errorMsg) && console.error(errorMsg);
+        const requestUrl = error.response?.config?.url || '';
+        if (errorMsg && !shouldSuppressDevApiError(requestUrl, errorMsg)) {
+          Message.error(errorMsg);
+          console.error(errorMsg);
+        }
         return Promise.reject(error);
       }
     } else if (!(code === 0 && error?.message === 'canceled')) {

@@ -3,7 +3,13 @@ import {
   OntologyPhysicalPropertiesList,
   SourceType
 } from '@/types/objectType';
-import { DataSourceType } from '@/pages/ontologyScene/common/constants';
+import {
+  DataSourceType,
+  InstanceSyncSourceType,
+  KafkaArrayHandleMode,
+  KafkaMessageParseMode,
+  KafkaStructuredParseRule
+} from '@/pages/ontologyScene/common/constants';
 
 export interface FileData {
   columnList: string[];
@@ -76,6 +82,8 @@ export interface InstanceSyncMappingField {
   propertyType: string;
   isPrimary: 1 | 0;
   isVector: 1 | 0;
+  _vectorComment?: string;
+  _vectorPropertyId?: string | number;
 }
 
 export interface ObjectTypeDataSourceState {
@@ -85,6 +93,12 @@ export interface ObjectTypeDataSourceState {
   connectorSubtype?: string;
   database?: string;
   table?: string;
+  /** 数据资源目录表 id（主表） */
+  dataResourceId?: string;
+  /** 数据资源目录表 id 列表（多选） */
+  dataResourceIds?: string[];
+  /** 已选数据资源表名列表 */
+  tables?: string[];
   file?: any;
   filePath?: string;
   queryMode?: 'selected' | 'sql';
@@ -92,6 +106,40 @@ export interface ObjectTypeDataSourceState {
 }
 
 export interface SyncSourceDataStrategyFormState {
+  /** 实例同步数据源类型 */
+  instanceSyncSourceType?: InstanceSyncSourceType;
+  /** CSV上传：实例数据文件路径 */
+  instanceCsvFilePath?: string;
+  /** 消息队列：连接器 id */
+  messageQueueConnectorId?: number;
+  /** 消息队列：Topic */
+  messageQueueTopic?: string;
+  /** 消息队列：解析模式（不解析 / 解析为结构化字段） */
+  messageQueueParseMode?: KafkaMessageParseMode;
+  /** 消息队列：结构化解析规则（默认规则 / AI生成 / 路径解析） */
+  messageQueueStructuredParseRule?: KafkaStructuredParseRule;
+  /** 消息队列：最大展平深度（解析模式下，默认 2） */
+  messageQueueMaxFlattenDepth?: number;
+  /** 消息队列：数组处理模式 */
+  messageQueueArrayHandleMode?: KafkaArrayHandleMode;
+  /** 消息队列：AI 规则生成提示词 */
+  messageQueueAiRulePrompt?: string;
+  /** 消息队列：AI 生成并已入库的解析规则（JSON 字符串） */
+  messageQueueAiRuleContent?: string;
+  /** 消息队列：AI 规则入库时间（ISO 8601） */
+  messageQueueAiRuleSavedAt?: string;
+  /** 消息队列：规则测试解析出的源字段（用于实例同步映射） */
+  messageQueueParseResultFields?: SourceTableField[];
+  /** API接口：连接器 id */
+  apiConnectorId?: number;
+  /** 文件解析：数据资源文件 id */
+  fileResourceId?: string;
+  /** 文件解析：提取要求 */
+  fileParseRequirement?: string;
+  /** 文件解析：已保存的解析结果行 */
+  fileParseResultRows?: Record<string, string>[];
+  /** 文件解析：与 rows 对应的解析上下文标识 */
+  fileParseResultRunKey?: string;
   sourceDataInfo: SqlSourceDataInfo;
   mode: string;
   conflictStrategy: string;
@@ -105,6 +153,12 @@ export interface SyncSourceDataStrategyFormState {
   jdbcPollingIntervalSeconds?: number;
   jdbcSyncSqlFull?: string;
   jdbcSyncSqlIncrement?: string;
+  /** API 定时拉取：增量时间参数名 */
+  apiIncrementalTimeParam?: string;
+  /** API 定时拉取：游标/断点参数名 */
+  apiCheckpointParam?: string;
+  /** API 定时拉取：响应体增量判定字段 */
+  apiIncrementalMarkerField?: string;
 }
 
 export interface ObjectTypeFormData {

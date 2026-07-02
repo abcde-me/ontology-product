@@ -6,6 +6,8 @@ import {
   AutoRuleDetail,
   ChangeConfigRes,
   ChangeType,
+  EXECUTION_MODE_LABEL_MAP,
+  ExecutionMode,
   InstanceScope,
   PeriodType
 } from '@/pages/ruleManagement/types';
@@ -78,9 +80,16 @@ const buildCronDes = (scheduleConfig: AutoRuleDetail['scheduleConfig']) => {
 const renderActionConfig = (ruleData?: AutoRuleDetail) => {
   const actionEmpty =
     isNil(ruleData?.actionConfig) || isEmpty(ruleData?.actionConfig.actionInfo);
+  const executionMode =
+    ruleData?.actionConfig?.executionMode || ExecutionMode.Auto;
+  const executionModeText = EXECUTION_MODE_LABEL_MAP[executionMode];
   return (
     <>
-      时，系统执行
+      时，系统
+      <div className={classNames(styles['rule-setting-tag'])}>
+        {executionModeText}
+      </div>
+      执行
       <div className={classNames(styles['rule-setting-tag'])}>
         <GlobalTooltip.Ellipsis
           text={

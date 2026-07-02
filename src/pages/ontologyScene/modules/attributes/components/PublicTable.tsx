@@ -341,7 +341,7 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
       {
         title: '绑定对象类型',
         dataIndex: 'ontologyObjectTypeList',
-        width: 200,
+        minWidth: 240,
         render: (value, record) => {
           const objectTypeList = record.ontologyObjectTypeList || [];
           if (objectTypeList.length === 0) {
@@ -350,6 +350,7 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
 
           // 转换为 ObjectTypeTagList 需要的格式
           const tags = objectTypeList.map((item) => ({
+            showFullName: true,
             ontologyObjectTypeName: item.name || '',
             ontologyObjectTypeId: item.id,
             ontologyObjectTypeIcon: item.icon, // API 返回的数据中没有 icon，使用默认图标
@@ -361,7 +362,7 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
             hoverClassName: 'hover-text-blue'
           }));
 
-          return <ObjectTypeTagList tags={tags} />;
+          return <ObjectTypeTagList tags={tags} showAll />;
         }
       },
       {

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import {
   Button,
   Form,
@@ -7,57 +7,36 @@ import {
   TableColumnProps,
   Pagination,
   Message,
-  Modal,
-  Popover,
   Checkbox
 } from '@arco-design/web-react';
-import {
-  IconPlus,
-  IconSearch,
-  IconRefresh,
-  IconQuestionCircle
-} from '@arco-design/web-react/icon';
+import { IconPlus } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
-  DotStatus,
   GlobalTooltip,
-  ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
 import useUrlState from '@ahooksjs/use-url-state';
 import { useHistory, useParams } from 'react-router-dom';
-import { debounce } from 'lodash-es';
 import { useWorkflowTable } from '../../hooks/useTable';
 import styles from './list.module.scss';
 import LinkDetailDrawer from './components/LinkDetailDrawer';
 import { listOntologyLinkType } from '@/api/ontologySceneLibrary/graph';
-import {
-  deleteOntologyLinkType,
-  getLinkTypeSyncTaskLog,
-  syncLinkTypeTask
-} from '@/api/ontologySceneLibrary/links';
+import { deleteOntologyLinkType } from '@/api/ontologySceneLibrary/links';
+import { isOntologyApiSuccess } from '@/utils/apiResponse';
 import {
   LinkInfo,
-  LinkType,
   ListOntologyLinkTypeReq,
   SyncStatus
 } from '@/types/graphApi';
 import ObjectTypeTag from '@/pages/ontologyScene/components/ObjectTypeTag';
-import dayjs from 'dayjs';
-import {
-  OBJECT_TYPE_SYNC_STATUS_CONFIG,
-  OBJECT_TYPE_SYNC_STATUS_FILTERS
-} from '../../common/constants';
 import { getLinkTypeText } from '../../utils';
 import ObjectTypeDetailDrawer from '@/pages/ontologyScene/components/ObjectTypeDetailDrawer';
-import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
-import type { ListOntologyObjectTypeReq, ObjectType } from '@/types/objectType';
+import { fetchSceneObjectTypes } from '@/utils/enrichLinkTypeObjectTypes';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
-import TaskLogDrawer from '@/pages/ontologyScene/components/TaskLogDrawer';
-import LogIcon from '@/pages/ontologyScene/assets/log-icon.svg';
 import { EllipsisPopover, OntoModal } from '@/pages/ontologyScene/components';
 import classNames from 'classnames';
+import { useOntologySceneDataSync } from '../../hooks/useOntologySceneDataSync';
 
 // 将 SyncStatus 枚举转换为 LinkDetailDrawer 期望的字符串类型
 const convertSyncStatusToString = (
@@ -76,21 +55,6 @@ const convertSyncStatusToString = (
       return 'success';
   }
 };
-
-// 链接类型筛选选项
-const LINK_TYPE_FILTERS = [
-  { text: '1:1', value: '1:1' },
-  { text: '1:N', value: '1:N' },
-  { text: 'N:N', value: 'N:N' }
-];
-
-// 同步状态筛选选项（本页面使用字符串值，便于表格回显）
-const LINK_SYNC_STATUS_FILTERS = OBJECT_TYPE_SYNC_STATUS_FILTERS.map(
-  (item) => ({
-    text: item.text,
-    value: String(item.value)
-  })
-);
 
 export default function OntologySceneLinksList() {
   const [form] = Form.useForm();
@@ -116,44 +80,27 @@ export default function OntologySceneLinksList() {
   const [targetObjectTypeFilterKeys, setTargetObjectTypeFilterKeys] = useState<
     string[]
   >([]);
-  // 链接类型和同步状态筛选值
-  const [typeFilterKeys, setTypeFilterKeys] = useState<string[]>([]);
-  const [syncStatusFilterKeys, setSyncStatusFilterKeys] = useState<string[]>(
-    []
-  );
+  // 获取对象类型列表用于源/目标对象类型筛选（与链接列表 enrich 共用去重请求）
+  const reloadObjectTypeFilters = useCallback(async () => {
+    if (!OSId) {
+      return;
+    }
 
-  const [logDrawerVisible, setLogDrawerVisible] = useState(false);
-  const [currentSyncTaskId, setCurrentSyncTaskId] = useState<number | null>(
-    null
-  );
-  const [currentTaskName, setCurrentTaskName] = useState<string>('');
-
-  // 获取对象类型列表用于源/目标对象类型筛选
-  useEffect(() => {
-    const fetchObjectTypes = async () => {
-      try {
-        const params: ListOntologyObjectTypeReq = {
-          ontologyModelID: OSId ? Number(OSId) : undefined,
-          pageNo: -1,
-          pageSize: -1
-        };
-        const res = await listOntologyObjectType(params);
-        const list: ObjectType[] = res.data?.result || [];
-        const filters = list.map((item) => ({
-          text: item.name || '',
-          value: String(item.id)
-        }));
-        setObjectTypeFilters(filters);
-      } catch (error) {
-        console.error('获取对象类型列表失败:', error);
-        Message.error('获取对象类型列表失败');
-      }
-    };
-
-    if (OSId) {
-      fetchObjectTypes();
+    try {
+      const list = await fetchSceneObjectTypes(Number(OSId));
+      const filters = list.map((item) => ({
+        text: item.name || '',
+        value: String(item.id)
+      }));
+      setObjectTypeFilters(filters);
+    } catch (error) {
+      console.error('获取对象类型列表失败:', error);
     }
   }, [OSId]);
+
+  useEffect(() => {
+    reloadObjectTypeFilters();
+  }, [reloadObjectTypeFilters]);
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
@@ -161,6 +108,17 @@ export default function OntologySceneLinksList() {
       service: async (params) => {
         try {
           const response = await listOntologyLinkType(params);
+
+          if (!isOntologyApiSuccess(response)) {
+            return {
+              data: {
+                items: [],
+                total: 0,
+                page: params.pageNo || 1,
+                page_size: params.pageSize || 10
+              }
+            };
+          }
 
           const linkInfos = response.data?.result || [];
           const totalCount = response.data?.totalCount || 0;
@@ -174,7 +132,7 @@ export default function OntologySceneLinksList() {
             }
           };
         } catch (error) {
-          Message.error('获取链接列表失败');
+          console.error('获取链接列表失败:', error);
           return {
             data: {
               items: [],
@@ -190,38 +148,6 @@ export default function OntologySceneLinksList() {
       formatParams: (formValues, pagination, sorter, filters) => {
         const keyword = formValues.keyword;
 
-        const syncStatusValues = filters?.syncStatus || [];
-        const typeFilterValues = filters?.type || [];
-
-        const syncStatusList = Array.isArray(syncStatusValues)
-          ? syncStatusValues
-              .map((v) => (typeof v === 'string' ? Number(v) : v))
-              .filter((v) => !isNaN(v))
-          : syncStatusValues !== undefined
-            ? [
-                typeof syncStatusValues === 'string'
-                  ? Number(syncStatusValues)
-                  : syncStatusValues
-              ].filter((v) => !isNaN(v))
-            : undefined;
-
-        const typeList: LinkType[] | undefined = Array.isArray(typeFilterValues)
-          ? typeFilterValues
-              .map((val) => {
-                switch (val) {
-                  case '1:1':
-                    return LinkType.ONE_TO_ONE;
-                  case '1:N':
-                    return LinkType.ONE_TO_MANY;
-                  case 'N:N':
-                    return LinkType.MANY_TO_MANY;
-                  default:
-                    return undefined;
-                }
-              })
-              .filter((v): v is LinkType => v !== undefined)
-          : undefined;
-
         const hasSorter = sorter && sorter.direction;
 
         const sourceObjectTypeIDList = sourceObjectTypeFilterKeys.map(Number);
@@ -232,10 +158,6 @@ export default function OntologySceneLinksList() {
           filter: keyword || undefined,
           pageNo: pagination.current || 1,
           pageSize: pagination.pageSize || 10,
-          ...(syncStatusList && syncStatusList.length
-            ? { syncStatusList }
-            : {}),
-          ...(typeList && typeList.length ? { typeList } : {}),
           sourceObjectTypeIDList,
           targetObjectTypeIDList,
           ...(hasSorter &&
@@ -246,6 +168,17 @@ export default function OntologySceneLinksList() {
         };
       }
     });
+
+  const handleSceneDataSync = useCallback(() => {
+    refresh();
+    reloadObjectTypeFilters();
+  }, [refresh, reloadObjectTypeFilters]);
+
+  useOntologySceneDataSync(
+    OSId ? Number(OSId) : 0,
+    ['objectType', 'link'],
+    handleSceneDataSync
+  );
 
   // 从 URL 参数同步到表单和筛选条件
   useEffect(() => {
@@ -268,13 +201,6 @@ export default function OntologySceneLinksList() {
     );
   };
 
-  // 处理属性点击
-  const handleAttributesClick = (record: LinkInfo) => {
-    setSelectedLink(record);
-    setDetailActiveTab('attributes');
-    setDetailDrawerVisible(true);
-  };
-
   // 处理编辑
   const handleEdit = (record: LinkInfo) => {
     history.push(
@@ -294,15 +220,21 @@ export default function OntologySceneLinksList() {
       content: `删除后，不可恢复`,
       onOk: async () => {
         try {
-          const response = await deleteOntologyLinkType({ id: record.id! });
-          if (response.status === 200 && response.code === '') {
+          const linkId = Number(record.id);
+          if (!Number.isFinite(linkId) || linkId <= 0) {
+            Message.error('链接ID无效');
+            return;
+          }
+
+          const response = await deleteOntologyLinkType({ id: linkId });
+          if (isOntologyApiSuccess(response)) {
             Message.success('删除成功');
             refresh();
           } else {
             Message.error(response.message || '删除失败');
           }
         } catch (error) {
-          Message.error('删除失败');
+          Message.error(typeof error === 'string' ? error : '删除失败');
         }
       }
     });
@@ -323,39 +255,6 @@ export default function OntologySceneLinksList() {
     setDetailActiveTab('instances');
     setDetailDrawerVisible(true);
   };
-
-  // 查看同步日志
-  const handleViewSyncLog = (record: LinkInfo) => {
-    if (!record.id) {
-      Message.error('链接ID无效');
-      return;
-    }
-
-    setCurrentSyncTaskId(record.id);
-    setCurrentTaskName(record.name || '');
-    setLogDrawerVisible(true);
-  };
-
-  // 失败重试（防抖处理）
-  const handleRetrySync = debounce(async (record: LinkInfo) => {
-    if (!record.id) {
-      Message.error('链接ID无效');
-      return;
-    }
-
-    try {
-      const res = await syncLinkTypeTask({ id: record.id });
-      if (res.status === 200 && res.code === '') {
-        Message.success('重新同步成功');
-        // 重新刷新列表，获取最新状态
-        refresh();
-      } else {
-        Message.error(res.message || '重新同步失败');
-      }
-    } catch (e) {
-      Message.error('重新同步失败');
-    }
-  }, 500);
 
   // 表格列定义
   const columns: TableColumnProps<LinkInfo>[] = [
@@ -389,7 +288,7 @@ export default function OntologySceneLinksList() {
     {
       title: '源对象类型',
       dataIndex: 'sourceObjectType',
-      width: 180,
+      minWidth: 200,
       filters: objectTypeFilters,
       filterDropdown: ({ confirm }: any) => {
         return (
@@ -405,11 +304,9 @@ export default function OntologySceneLinksList() {
                   direction="vertical"
                   options={objectTypeFilters.map((item) => ({
                     label: (
-                      <GlobalTooltip.Ellipsis
-                        text={item.text || '-'}
-                        // wrapperClassName="inline-flex max-w-[130px]"
-                        // className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
-                      />
+                      <span className="whitespace-nowrap text-[14px] leading-[22px] text-[var(--color-text-1)]">
+                        {item.text || '-'}
+                      </span>
                     ),
                     value: item.value
                   }))}
@@ -450,6 +347,7 @@ export default function OntologySceneLinksList() {
           <div>
             {record.sourceObjectTypeID ? (
               <ObjectTypeTag
+                showFullName
                 ontologyObjectTypeIcon={record.sourceObjectTypeIcon}
                 ontologyObjectTypeName={record.sourceObjectTypeName || ''}
                 ontologyObjectTypeId={record.sourceObjectTypeID}
@@ -465,7 +363,7 @@ export default function OntologySceneLinksList() {
     {
       title: '目标对象类型',
       dataIndex: 'targetObjectType',
-      width: 180,
+      minWidth: 200,
       filters: objectTypeFilters,
       filterDropdown: ({ confirm }: any) => {
         return (
@@ -481,11 +379,9 @@ export default function OntologySceneLinksList() {
                   direction="vertical"
                   options={objectTypeFilters.map((item) => ({
                     label: (
-                      <EllipsisPopover
-                        value={item.text || '-'}
-                        wrapperClassName="inline-flex max-w-[130px]"
-                        className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
-                      />
+                      <span className="whitespace-nowrap text-[14px] leading-[22px] text-[var(--color-text-1)]">
+                        {item.text || '-'}
+                      </span>
                     ),
                     value: item.value
                   }))}
@@ -526,6 +422,7 @@ export default function OntologySceneLinksList() {
           <div>
             {record.targetObjectTypeID ? (
               <ObjectTypeTag
+                showFullName
                 ontologyObjectTypeIcon={record.targetObjectTypeIcon}
                 ontologyObjectTypeName={record.targetObjectTypeName || ''}
                 ontologyObjectTypeId={record.targetObjectTypeID}
@@ -534,118 +431,6 @@ export default function OntologySceneLinksList() {
             ) : (
               <span>-</span>
             )}
-          </div>
-        );
-      }
-    },
-    {
-      title: '链接类型',
-      dataIndex: 'type',
-      width: 120,
-      filters: LINK_TYPE_FILTERS,
-      filteredValue: typeFilterKeys,
-      render: (value) => (
-        <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-          {getLinkTypeText(value)}
-        </div>
-      )
-    },
-    {
-      title: '同步状态',
-      dataIndex: 'syncStatus',
-      width: 120,
-      // filters: LINK_SYNC_STATUS_FILTERS,
-      // filteredValue: syncStatusFilterKeys,
-      render: (value: SyncStatus, record: LinkInfo) => {
-        if (value === undefined || value === null) {
-          return '-';
-        }
-        const config = OBJECT_TYPE_SYNC_STATUS_CONFIG[value];
-        const isFailed = value === SyncStatus.FAILED;
-
-        return (
-          <div className="flex items-center gap-[4px]">
-            <DotStatus text={config.text} color={config.color} />
-            {isFailed && (
-              <Popover
-                trigger="hover"
-                position="top"
-                content={
-                  <div className="flex items-center gap-[12px]">
-                    <span
-                      className="flex cursor-pointer items-center text-[#184FF2]"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleViewSyncLog(record);
-                      }}
-                    >
-                      <LogIcon className="mr-[4px] h-[14px] w-[14px]" />
-                      查看日志
-                    </span>
-                    <span
-                      className="flex cursor-pointer items-center text-[#184FF2]"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRetrySync(record);
-                      }}
-                    >
-                      <IconRefresh className="mr-[4px] h-[14px] w-[14px]" />
-                      重试
-                    </span>
-                  </div>
-                }
-              >
-                <IconQuestionCircle className="h-[14px] w-[14px] cursor-pointer text-[var(--color-text-4)] hover:text-[#184FF2]" />
-              </Popover>
-            )}
-          </div>
-        );
-      }
-    },
-    {
-      title: '同步时间',
-      dataIndex: 'syncTime',
-      width: 180,
-      render: (value) => (
-        <div>{value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-'}</div>
-      )
-    },
-    {
-      title: '属性',
-      dataIndex: 'ontologyLinkTypeColumnList',
-      width: 150,
-      render: (value, record) => {
-        const attributeList = value?.filter((item) => item.isUse === 1) || [];
-
-        if (!attributeList || attributeList.length === 0) {
-          return '-';
-        }
-
-        // 解析属性列表（可能是逗号分隔的字符串）
-        const attributes = attributeList.map((item) => item.name);
-
-        // 如果属性数量大于等于2，显示第一个名称 + "等n个"
-        if (attributes.length >= 2) {
-          const firstAttribute = attributes[0];
-          return (
-            <div
-              className="hover-blue cursor-pointer text-[14px] font-normal leading-[22px] text-[#23293b]"
-              onClick={() => handleAttributesClick(record)}
-            >
-              {firstAttribute} 等{attributes.length}个
-            </div>
-          );
-        }
-
-        // 如果只有1个或0个属性，直接显示
-        return (
-          <div
-            className={`text-[14px] font-normal leading-[22px] text-[#23293b] ${
-              attributes.length === 1 ? 'hover-blue cursor-pointer' : ''
-            }`}
-            onClick={() => handleAttributesClick(record)}
-          >
-            {attributes[0]}
           </div>
         );
       }
@@ -754,34 +539,6 @@ export default function OntologySceneLinksList() {
           pagination: false,
           scroll: { x: true },
           onChange: (pagination, sorter, filters) => {
-            // 更新链接类型筛选
-            if ('type' in (filters || {})) {
-              const typeValue = filters?.type;
-              const typeValues =
-                typeValue === null || typeValue === undefined
-                  ? []
-                  : Array.isArray(typeValue)
-                    ? typeValue
-                    : [typeValue];
-              setTypeFilterKeys(typeValues);
-            } else {
-              setTypeFilterKeys([]);
-            }
-
-            // 更新同步状态筛选
-            if ('syncStatus' in (filters || {})) {
-              const syncStatusValue = filters?.syncStatus;
-              const syncStatusValues =
-                syncStatusValue === null || syncStatusValue === undefined
-                  ? []
-                  : Array.isArray(syncStatusValue)
-                    ? syncStatusValue.map(String)
-                    : [String(syncStatusValue)];
-              setSyncStatusFilterKeys(syncStatusValues);
-            } else {
-              setSyncStatusFilterKeys([]);
-            }
-
             onChange(pagination, sorter, filters);
           }
         }}
@@ -830,19 +587,6 @@ export default function OntologySceneLinksList() {
             setObjectTypeDetailDrawerVisible(false);
             setSelectedObjectType(null);
           }}
-        />
-      )}
-      {logDrawerVisible && currentSyncTaskId && (
-        <TaskLogDrawer
-          visible={logDrawerVisible}
-          taskInstanceId={currentSyncTaskId}
-          taskName={currentTaskName}
-          onClose={() => {
-            setLogDrawerVisible(false);
-            setCurrentSyncTaskId(null);
-            setCurrentTaskName('');
-          }}
-          fetchLog={getLinkTypeSyncTaskLog}
         />
       )}
     </div>

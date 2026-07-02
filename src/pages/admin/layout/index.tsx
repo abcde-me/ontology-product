@@ -7,7 +7,7 @@ import * as React from 'react';
 import 'github-markdown-css/github-markdown-light.css';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, useLocation } from 'react-router-dom';
 import { SWRConfig } from 'swr';
 import { getFlatRoutes, routes } from '../route';
 import Bread from './Bread';
@@ -15,12 +15,14 @@ import { LayoutWithSider } from './Sider';
 import { useUserInfoStore } from '@/store/userInfoStore';
 import { Page403, Page404 } from '@/pages/errorPages';
 import PermissionRoute from './PermissionRoute';
+import { scheduleOverlayCleanup } from '@/utils/removeStaleArcoOverlays';
 
 type LayoutPageProps = {
   history: any;
 };
 
 const LayoutPage: React.FC<LayoutPageProps> = () => {
+  const location = useLocation();
   const { t } = useTranslation('plugin__console-plugin-aidp');
   const { sidebarIsReady } = useSelector((state: any) => {
     return state?.plugins?.consolePluginSidebar || {};
@@ -94,6 +96,17 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
     }
   }, [dispatch, sidebarIsReady, t]);
 
+  React.useEffect(() => {
+    if (!isInitialized) {
+      return undefined;
+    }
+    return scheduleOverlayCleanup();
+  }, [isInitialized]);
+
+  React.useEffect(() => {
+    return scheduleOverlayCleanup();
+  }, [location.pathname]);
+
   // 如果用户信息还未初始化完成，显示全局loading
   if (!isInitialized) {
     return (
@@ -111,11 +124,11 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
 
   return (
     <LayoutWithSider>
-      <Layout className="flex h-full overflow-auto">
+      <Layout className="flex h-full min-h-0 flex-1 flex-col overflow-auto">
         <Bread />
-        <Layout.Content className="flex-auto overflow-auto">
+        <Layout.Content className="min-h-0 flex-auto overflow-auto">
           <div
-            className="layout-detail h-full overflow-auto bg-[#FFFFFF] text-[var(--color-text-2)]"
+            className="layout-detail h-full min-h-[100vh] overflow-auto bg-[#FFFFFF] text-[var(--color-text-2)]"
             data-user-loaded
           >
             <SWRConfig value={{ revalidateOnFocus: false }}>

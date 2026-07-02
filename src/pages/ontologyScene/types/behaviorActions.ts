@@ -191,6 +191,8 @@ export interface OntologyActionParam {
    * 参数显示名称
    */
   name: string;
+  description?: string;
+  defaultValue?: unknown;
   /**
    * 参数数据类型
    */

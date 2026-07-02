@@ -3,12 +3,124 @@ import {
   CreateOntologyPhysicalProperty,
   OntologyPhysicalPropertiesList
 } from '@/types/objectType';
+import { INSTANCE_SYNC_SOURCE_TYPE } from '@/pages/ontologyScene/common/constants';
+import { isStreamParseSettingsConfigured } from './instanceSyncStreamParse';
 import {
   AttributeField,
   InstanceSyncMappingField,
   ObjectTypeAttributeField,
-  SourceTableField
+  SourceTableField,
+  SqlSourceDataInfo,
+  SyncSourceDataStrategyFormState
 } from './types';
+
+export const INSTANCE_SYNC_SOURCE_UNCONFIGURED_MESSAGE = '请配置实例数据信息';
+
+export function isDatabaseSyncSourceConfigured(
+  sourceDataInfo: SqlSourceDataInfo,
+  options?: { isDataResource?: boolean }
+): boolean {
+  const queryMode = sourceDataInfo.queryMode || 'selected';
+  if (queryMode === 'sql') {
+    if (!String(sourceDataInfo.sql ?? '').trim()) {
+      return false;
+    }
+    return options?.isDataResource ? true : !!sourceDataInfo.connectorId;
+  }
+  const hasTable = Boolean(
+    sourceDataInfo.databaseName?.trim() && sourceDataInfo.tableName?.trim()
+  );
+  if (!hasTable) {
+    return false;
+  }
+  return options?.isDataResource ? true : !!sourceDataInfo.connectorId;
+}
+
+export function isInstanceSyncSourceConfigured(
+  strategy: Pick<
+    SyncSourceDataStrategyFormState,
+    | 'instanceSyncSourceType'
+    | 'instanceCsvFilePath'
+    | 'messageQueueConnectorId'
+    | 'messageQueueTopic'
+    | 'messageQueueParseMode'
+    | 'messageQueueStructuredParseRule'
+    | 'messageQueueMaxFlattenDepth'
+    | 'messageQueueArrayHandleMode'
+    | 'messageQueueAiRuleContent'
+    | 'apiConnectorId'
+    | 'fileResourceId'
+    | 'sourceDataInfo'
+  >,
+  options?: { isDataResource?: boolean }
+): boolean {
+  const sourceType =
+    strategy.instanceSyncSourceType || INSTANCE_SYNC_SOURCE_TYPE.DATABASE;
+
+  if (sourceType === INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD) {
+    return !!strategy.instanceCsvFilePath?.trim();
+  }
+
+  if (sourceType === INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE) {
+    const hasBasic =
+      !!strategy.messageQueueConnectorId &&
+      !!strategy.messageQueueTopic?.trim();
+    if (!hasBasic) {
+      return false;
+    }
+    return isStreamParseSettingsConfigured(strategy);
+  }
+
+  if (sourceType === INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE) {
+    if (!strategy.apiConnectorId) {
+      return false;
+    }
+    return isStreamParseSettingsConfigured(strategy);
+  }
+
+  if (sourceType === INSTANCE_SYNC_SOURCE_TYPE.FILE_PARSE) {
+    return !!strategy.fileResourceId?.trim();
+  }
+
+  return isDatabaseSyncSourceConfigured(strategy.sourceDataInfo, options);
+}
+
+export function clearInstanceSyncMappingSourceFields(
+  mapping: InstanceSyncMappingField
+): InstanceSyncMappingField {
+  return {
+    ...mapping,
+    sourceColumnName: undefined,
+    sourceColumnComment: undefined,
+    sourceColumnType: undefined,
+    sourceCoumnOriginName: undefined
+  };
+}
+
+export function buildSyncMappingFieldsFromAttributes(
+  attributes: ObjectTypeAttributeField[],
+  options?: {
+    existingByPropertyID?: Map<string, InstanceSyncMappingField>;
+    preserveSourceFields?: boolean;
+  }
+): InstanceSyncMappingField[] {
+  const existing = options?.existingByPropertyID;
+  const preserveSource = options?.preserveSourceFields ?? true;
+  return attributes.map((attribute) => {
+    const base = objectTypeAttributeToSyncMapping(attribute);
+    const merged = {
+      ...base,
+      ...(existing?.get(attribute.propertyID) || {}),
+      propertyID: attribute.propertyID,
+      propertyComment: attribute.propertyComment,
+      propertyType: attribute.propertyType,
+      isPrimary: attribute.isPrimary
+    };
+    return preserveSource
+      ? merged
+      : clearInstanceSyncMappingSourceFields(merged);
+  });
+}
 
 /** 向量列表字段 / 属性名称后缀（与后端约定一致） */
 export const VECTOR_FIELD_SUFFIX = '_vector';
@@ -251,7 +363,9 @@ export function objectTypeAttributeToSyncMapping(
     propertyComment: field.propertyComment,
     propertyType: field.propertyType,
     isPrimary: field.isPrimary,
-    isVector: field.isVector === 1 ? 1 : field._vectorizationOn ? 1 : 0
+    isVector: field.isVector === 1 ? 1 : field._vectorizationOn ? 1 : 0,
+    _vectorComment: field._vectorComment,
+    _vectorPropertyId: field._vectorPropertyId
   };
 }
 

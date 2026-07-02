@@ -5,12 +5,20 @@ import styles from './ObjectTypeForm.module.scss';
 import {
   DATA_SOURCE_TYPE,
   DataSourceType,
+  INSTANCE_SYNC_SOURCE_TYPE,
   OBJECT_TYPE_ICON_OPTIONS
 } from '@/pages/ontologyScene/common/constants';
 import ObjectTypeIconSelector from './ObjectTypeIconSelector';
 import ModelingStep from './ObjectTypeFormSteps/ModelingStep';
 import InstanceSyncStep from './ObjectTypeFormSteps/InstanceSyncStep';
 import { syncStrategyStateToFormValues } from './ObjectTypeFormSteps/common/SyncSourceDataStrategyFormSection';
+import {
+  isApiPollingIncrementalScope,
+  isApiPollingMode,
+  applyInstanceSyncStrategyDefaults
+} from './ObjectTypeFormSteps/common/instanceSyncStrategyConfig';
+import { DEFAULT_OBJECT_TYPE_FILE_PARSE_REQUIREMENT } from '../services/extractObjectTypeFileParse';
+import { normalizeKafkaTopicName } from '../services/kafkaTopicNames';
 import { syncScopeRequiresIncrementalPollingFields } from './ObjectTypeFormUtils/syncScopeRequiresIncrementalPollingFields';
 import ObjectTypeFormSteps from './ObjectTypeFormSteps/ObjectTypeFormSteps';
 import {
@@ -22,13 +30,32 @@ import {
   SqlSourceDataInfo,
   SyncSourceDataStrategyFormState
 } from './ObjectTypeFormUtils/types';
+import { normalizeSqlConnectorId } from './ObjectTypeFormUtils/normalizeSqlConnectorId';
 import {
+  INSTANCE_SYNC_SOURCE_UNCONFIGURED_MESSAGE,
+  isInstanceSyncSourceConfigured,
   legacyFieldToObjectTypeAttribute,
   mergeOntologyPhysicalPropertiesForForm,
   mergeOntologyPhysicalPropertiesListForForm
 } from './ObjectTypeFormUtils/attributeFields';
+import { buildStreamParseFormValidateFields } from './ObjectTypeFormUtils/instanceSyncStreamParse';
 import { buildObjectTypeFormData } from './ObjectTypeFormHooks/useObjectTypeSubmit';
+import { resolveManualObjectTypeSchemaFilePath } from '../services/resolveManualObjectTypeSchemaFilePath';
 import type { OntologyPhysicalPropertiesList } from '@/types/objectType';
+import { useAutoOntologyObjectTypeCodeFromName } from '@/pages/ontologyScene/hooks/useAutoOntologyObjectTypeCodeFromName';
+import {
+  OBJECT_TYPE_CODE_EXTRA,
+  objectTypeCodeValidatorRule
+} from '@/utils/generateOntologyObjectTypeCodeName';
+import { isDevSchemaFilePath } from '@/utils/ontologyCsvTemplate';
+import {
+  generateObjectTypeCsvTemplate,
+  resolveGeneratedObjectTypeParsedSchema
+} from '../services/generateObjectTypeCsvTemplate';
+import { applyObjectTypeParsedSchema } from './ObjectTypeFormUtils/applyObjectTypeParsedSchema';
+import type { DataResourceTable } from '@/pages/dataResource/types';
+import { buildDataResourceObjectTypeDescriptionFromTables } from '../services/dataResourceMapping';
+import { fetchSceneObjectTypeCodes } from '@/pages/ontologyScene/modules/graph/services/graphCreateServices';
 
 export type { ObjectTypeFormData } from './ObjectTypeFormUtils/types';
 
@@ -43,9 +70,13 @@ const clampStep = (step: number, maxStep: number) =>
   Math.min(maxStep, Math.max(BASIC_STEP, step));
 
 const maxStepForDataSourceType = (type: DataSourceType | undefined) =>
-  type === DATA_SOURCE_TYPE.LOCAL_CSV ? MODELING_STEP : INSTANCE_SYNC_STEP;
+  type === DATA_SOURCE_TYPE.MANUAL_CREATION ||
+  type === DATA_SOURCE_TYPE.LOCAL_CSV ||
+  type === DATA_SOURCE_TYPE.DATA_RESOURCE
+    ? MODELING_STEP
+    : INSTANCE_SYNC_STEP;
 
-const CSV_FORM_STEPS = ['基本信息', '对象类型建模'] as const;
+const CREATE_TWO_STEPS = ['基本信息', '属性信息'] as const;
 
 type BasicInfoValues = Partial<
   Pick<
@@ -66,6 +97,7 @@ const DEFAULT_INSTANCE_SYNC_VALUES = {
 };
 
 const DEFAULT_SYNC_SOURCE_DATA_STRATEGY: SyncSourceDataStrategyFormState = {
+  instanceSyncSourceType: INSTANCE_SYNC_SOURCE_TYPE.DATABASE,
   sourceDataInfo: {
     queryMode: 'selected'
   },
@@ -88,15 +120,18 @@ function mergeSyncStrategyFromInitialValues(
   }
   const initialSyncSourceDataInfo =
     initial.syncSourceDataStrategy.sourceDataInfo;
-  return {
+  return applyInstanceSyncStrategyDefaults({
     ...DEFAULT_SYNC_SOURCE_DATA_STRATEGY,
     ...initial.syncSourceDataStrategy,
+    messageQueueTopic: normalizeKafkaTopicName(
+      initial.syncSourceDataStrategy.messageQueueTopic
+    ),
     sourceDataInfo: {
       ...(initialSyncSourceDataInfo || { queryMode: 'selected' }),
       queryMode:
         initialSyncSourceDataInfo?.queryMode === 'sql' ? 'sql' : 'selected'
     }
-  };
+  });
 }
 
 /** Form.Item 绑定 field 时会用表单值覆盖子组件的 value，需与 SqlSourceDataInfo 一致才能回显 */
@@ -113,14 +148,15 @@ function buildSqlSourceSelectorFormFields(
     return {};
   }
   const queryMode = info.queryMode === 'sql' ? 'sql' : 'selected';
-  const rawId = info.connectorId;
-  const numeric = rawId === undefined || rawId === null ? NaN : Number(rawId);
-  const connectorId = Number.isFinite(numeric) ? numeric : undefined;
+  const connectorId = normalizeSqlConnectorId(info.connectorId);
   return {
     [`${prefix}Connector`]: connectorId,
     [`${prefix}QueryMode`]: queryMode,
     [`${prefix}DatabaseTable`]:
-      queryMode === 'selected' && info.databaseName && info.tableName
+      queryMode === 'selected' &&
+      connectorId !== undefined &&
+      info.databaseName &&
+      info.tableName
         ? [info.databaseName, info.tableName]
         : undefined,
     [`${prefix}Sql`]: info.sql
@@ -161,7 +197,7 @@ function applySyncSourceFromModelingInfo(
 ) {
   const queryMode = info.queryMode === 'sql' ? 'sql' : 'selected';
   const sourceDataInfo: SqlSourceDataInfo = {
-    connectorId: info.connectorId,
+    connectorId: normalizeSqlConnectorId(info.connectorId),
     connectorName: info.connectorName,
     connectorSubtype: info.connectorSubtype,
     databaseName: info.databaseName,
@@ -185,10 +221,14 @@ interface ObjectTypeFormProps {
   showFooter?: boolean;
   isEdit?: boolean;
   initialStep?: number;
+  /** 受控步骤（编辑态由父组件持有，避免回退时被 initialValues 刷新重置） */
+  step?: number;
   /** 编辑态下一步/上一步后调用，可在此重新请求 GetOntologyObjectType 刷新 initialValues */
   onStepChange?: (stepIndex: number) => void | Promise<void>;
   /** 编辑态下是否允许配置/保存第 3 步实例同步（列表「配置」?step=3） */
   allowInstanceSyncEdit?: boolean;
+  /** 创建态仅两步：基本信息 + 属性信息，不进入实例同步 */
+  twoStepOnly?: boolean;
 }
 
 export interface ObjectTypeFormRef {
@@ -205,8 +245,10 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       showFooter = true,
       isEdit = false,
       initialStep,
+      step: controlledStep,
       onStepChange,
-      allowInstanceSyncEdit = false
+      allowInstanceSyncEdit = false,
+      twoStepOnly = false
     },
     ref
   ) => {
@@ -215,7 +257,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       initialValues?.icon || ''
     );
     const [dataSource, setDataSource] = useState<ObjectTypeDataSourceState>({
-      type: DATA_SOURCE_TYPE.LOCAL_CSV,
+      type: DATA_SOURCE_TYPE.MANUAL_CREATION,
       queryMode: 'selected'
     });
     const [modelingSourceDataInfo, setModelingSourceDataInfo] =
@@ -237,21 +279,48 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const [syncMappingFields, setSyncMappingFields] = useState<
       InstanceSyncMappingField[]
     >([]);
+    const [generatingSchema, setGeneratingSchema] = useState(false);
     const [fieldsLoading, setFieldsLoading] = useState(false);
     const [, setFileUploaded] = useState(false);
     const [isReUpload, setIsReUpload] = useState(false);
     const [initialFileList, setInitialFileList] = useState<any[]>([]);
-    const [currentStep, setCurrentStep] = useState(() => {
+    const initialValuesHydratedRef = useRef(false);
+    const [internalStep, setInternalStep] = useState(() => {
       const initialDsType =
-        initialValues?._dataSource?.type ?? DATA_SOURCE_TYPE.LOCAL_CSV;
-      return clampStep(
-        initialStep ?? BASIC_STEP,
-        maxStepForDataSourceType(initialDsType)
-      );
+        initialValues?._dataSource?.type ?? DATA_SOURCE_TYPE.MANUAL_CREATION;
+      const maxStep = twoStepOnly
+        ? MODELING_STEP
+        : allowInstanceSyncEdit
+          ? INSTANCE_SYNC_STEP
+          : maxStepForDataSourceType(initialDsType);
+      return clampStep(initialStep ?? BASIC_STEP, maxStep);
     });
+    const isStepControlled = controlledStep !== undefined;
+    const currentStep = isStepControlled ? controlledStep : internalStep;
+
+    const updateCurrentStep = (
+      nextStep: number | ((prev: number) => number)
+    ) => {
+      const resolved =
+        typeof nextStep === 'function' ? nextStep(currentStep) : nextStep;
+      if (isStepControlled) {
+        onStepChange?.(resolved);
+        return;
+      }
+      setInternalStep(resolved);
+    };
+    const isManualCreation =
+      dataSource.type === DATA_SOURCE_TYPE.MANUAL_CREATION;
     const isLocalCsv = dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV;
-    /** 编辑态：数据库/表建模只读；本地 CSV 允许改文件与属性 */
-    const modelingReadOnly = isEdit && !isLocalCsv;
+    const isDataResource = dataSource.type === DATA_SOURCE_TYPE.DATA_RESOURCE;
+    const isSimpleModelingSource =
+      isManualCreation || isLocalCsv || isDataResource;
+    const useTwoStepFlow =
+      (twoStepOnly || (!isEdit && isSimpleModelingSource)) &&
+      !allowInstanceSyncEdit;
+    const formSteps = useTwoStepFlow ? [...CREATE_TWO_STEPS] : undefined;
+    /** 编辑态：数据库/表建模只读；本地 CSV / 数据资源允许改表与属性 */
+    const modelingReadOnly = isEdit && !isSimpleModelingSource;
     const instanceSyncReadOnly = isEdit && !allowInstanceSyncEdit;
     const [basicInfoValues, setBasicInfoValues] = useState<BasicInfoValues>(
       () => ({
@@ -263,21 +332,59 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       })
     );
 
+    const watchedOntologyModelID = Form.useWatch('ontologyModelID', form);
+    const ontologyModelIDForId =
+      Number(watchedOntologyModelID) || initialValues?.ontologyModelID;
+
+    useAutoOntologyObjectTypeCodeFromName({
+      form,
+      ontologyModelID: ontologyModelIDForId,
+      nameField: 'name',
+      codeField: 'code',
+      enabled: !isEdit && !initialValues?.code
+    });
+
     useEffect(() => {
-      form.setFieldsValue(DEFAULT_INSTANCE_SYNC_VALUES);
-
       if (initialValues) {
-        setBasicInfoValues((prev) => ({
-          code: isEdit ? initialValues.code : (initialValues.code ?? prev.code),
-          name: isEdit ? initialValues.name : (initialValues.name ?? prev.name),
-          description: isEdit
-            ? initialValues.description
-            : (initialValues.description ?? prev.description),
-          icon: isEdit ? initialValues.icon : (initialValues.icon ?? prev.icon),
-          ontologyModelID: initialValues.ontologyModelID ?? prev.ontologyModelID
-        }));
-        const formData = form.getFieldsValue();
+        const isSubsequentHydration = initialValuesHydratedRef.current;
+        initialValuesHydratedRef.current = true;
 
+        setBasicInfoValues((prev) => {
+          if (isSubsequentHydration && isEdit) {
+            return prev;
+          }
+
+          return {
+            code: isEdit
+              ? initialValues.code
+              : (initialValues.code ?? prev.code),
+            name: isEdit
+              ? initialValues.name
+              : (initialValues.name ?? prev.name),
+            description: isEdit
+              ? initialValues.description
+              : (initialValues.description ?? prev.description),
+            icon: isEdit
+              ? initialValues.icon
+              : (initialValues.icon ?? prev.icon),
+            ontologyModelID:
+              initialValues.ontologyModelID ?? prev.ontologyModelID
+          };
+        });
+        const formData = form.getFieldsValue();
+        const preservedBasicInfo =
+          isSubsequentHydration && isEdit
+            ? {
+                code: basicInfoValues.code ?? initialValues.code,
+                name: basicInfoValues.name ?? initialValues.name,
+                description:
+                  basicInfoValues.description ?? initialValues.description,
+                icon: basicInfoValues.icon ?? initialValues.icon ?? selectedIcon
+              }
+            : null;
+
+        const isDataResourceModeling =
+          initialValues._dataSource?.type === DATA_SOURCE_TYPE.DATA_RESOURCE;
         const isDirectorySyncModeling =
           initialValues._dataSource?.type ===
           DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC;
@@ -322,19 +429,55 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         const syncStrategyFormPatch = mergedSyncStrategyForForm
           ? syncStrategyStateToFormValues(mergedSyncStrategyForForm)
           : {};
+        const syncSourceTypeFormPatch = {
+          syncSourceType:
+            mergedSyncStrategyForForm?.instanceSyncSourceType ||
+            INSTANCE_SYNC_SOURCE_TYPE.DATABASE,
+          syncInstanceCsvFile: mergedSyncStrategyForForm?.instanceCsvFilePath,
+          syncMessageQueueConnector:
+            mergedSyncStrategyForForm?.messageQueueConnectorId,
+          syncMessageQueueTopic: mergedSyncStrategyForForm?.messageQueueTopic,
+          syncMessageQueueParseMode:
+            mergedSyncStrategyForForm?.messageQueueParseMode,
+          syncMessageQueueStructuredParseRule:
+            mergedSyncStrategyForForm?.messageQueueStructuredParseRule,
+          syncMessageQueueMaxFlattenDepth:
+            mergedSyncStrategyForForm?.messageQueueMaxFlattenDepth,
+          syncMessageQueueArrayHandleMode:
+            mergedSyncStrategyForForm?.messageQueueArrayHandleMode,
+          syncMessageQueueAiRulePrompt:
+            mergedSyncStrategyForForm?.messageQueueAiRulePrompt,
+          syncMessageQueueAiRuleContent:
+            mergedSyncStrategyForForm?.messageQueueAiRuleContent,
+          syncMessageQueueAiRuleSavedAt:
+            mergedSyncStrategyForForm?.messageQueueAiRuleSavedAt,
+          syncApiConnector: mergedSyncStrategyForForm?.apiConnectorId,
+          syncFileResourceId: mergedSyncStrategyForForm?.fileResourceId,
+          syncFileParseRequirement:
+            mergedSyncStrategyForForm?.fileParseRequirement ||
+            DEFAULT_OBJECT_TYPE_FILE_PARSE_REQUIREMENT
+        };
 
         if (isEdit) {
           form.setFieldsValue({
             ...formData,
             ...DEFAULT_INSTANCE_SYNC_VALUES,
             ...initialValues,
+            ...(preservedBasicInfo ?? {}),
             dataSourceType:
               initialValues._dataSource?.type || DATA_SOURCE_TYPE.LOCAL_CSV,
             database: initialValues._dataSource?.database,
             table: initialValues._dataSource?.table,
+            dataResourceTableId: isDataResourceModeling
+              ? initialValues._dataSource?.dataResourceIds ||
+                (initialValues._dataSource?.dataResourceId
+                  ? [initialValues._dataSource.dataResourceId]
+                  : undefined)
+              : undefined,
             ...modelingSqlSourcePatch,
             ...syncSqlSourcePatch,
-            ...syncStrategyFormPatch
+            ...syncStrategyFormPatch,
+            ...syncSourceTypeFormPatch
           });
         } else {
           form.setFieldsValue({
@@ -342,10 +485,11 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             ...DEFAULT_INSTANCE_SYNC_VALUES,
             ...initialValues,
             dataSourceType:
-              formData.dataSourceType || DATA_SOURCE_TYPE.LOCAL_CSV,
+              formData.dataSourceType || DATA_SOURCE_TYPE.MANUAL_CREATION,
             ...modelingSqlSourcePatch,
             ...syncSqlSourcePatch,
-            ...syncStrategyFormPatch
+            ...syncStrategyFormPatch,
+            ...syncSourceTypeFormPatch
           });
         }
 
@@ -425,7 +569,11 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         if (initialValues.syncMappingFields) {
           setSyncMappingFields(initialValues.syncMappingFields);
         }
-        if (initialValues.filePath && initialValues.filePath.trim()) {
+        if (
+          initialValues.filePath &&
+          initialValues.filePath.trim() &&
+          !isDevSchemaFilePath(initialValues.filePath)
+        ) {
           const fileName = initialValues.filePath.split('/').pop() || '';
           if (fileName && fileName.trim()) {
             setInitialFileList([
@@ -450,33 +598,48 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       } else {
         form.setFieldsValue({
           ...DEFAULT_INSTANCE_SYNC_VALUES,
-          dataSourceType: DATA_SOURCE_TYPE.LOCAL_CSV
+          dataSourceType: DATA_SOURCE_TYPE.MANUAL_CREATION
         });
         setSyncSourceDataStrategy(DEFAULT_SYNC_SOURCE_DATA_STRATEGY);
       }
     }, [initialValues, form, isEdit, allowInstanceSyncEdit]);
 
     useEffect(() => {
-      if (
-        dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV &&
-        currentStep === INSTANCE_SYNC_STEP
-      ) {
-        setCurrentStep(MODELING_STEP);
+      if (twoStepOnly && currentStep === INSTANCE_SYNC_STEP) {
+        updateCurrentStep(MODELING_STEP);
       }
-    }, [dataSource.type, currentStep]);
+    }, [twoStepOnly, currentStep]);
 
-    /** 编辑态：任意方式切换 currentStep 后刷新详情（比仅在点击里 await 更稳妥，避免遗漏分支） */
-    const skipStepChangeRefetchRef = useRef(true);
     useEffect(() => {
-      if (!isEdit || !onStepChange) {
+      if (!twoStepOnly) {
+        return;
+      }
+      updateCurrentStep((step) => clampStep(step, MODELING_STEP));
+    }, [twoStepOnly, dataSource.type]);
+
+    /** 编辑态（非受控）：切换 currentStep 后刷新详情 */
+    const skipStepChangeRefetchRef = useRef(true);
+    const previousStepRef = useRef<number | null>(null);
+    useEffect(() => {
+      if (isStepControlled || !isEdit || !onStepChange) {
+        previousStepRef.current = currentStep;
         return;
       }
       if (skipStepChangeRefetchRef.current) {
         skipStepChangeRefetchRef.current = false;
+        previousStepRef.current = currentStep;
         return;
       }
+
+      const prevStep = previousStepRef.current;
+      previousStepRef.current = currentStep;
+
+      if (prevStep !== null && currentStep < prevStep) {
+        return;
+      }
+
       void onStepChange(currentStep);
-    }, [currentStep, onStepChange, isEdit]);
+    }, [currentStep, onStepChange, isEdit, isStepControlled]);
 
     const handleIconChange = (iconValue: string) => {
       setSelectedIcon(iconValue);
@@ -490,13 +653,24 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const syncBasicInfoValues = () => {
       setBasicInfoValues((prev) => ({
         ...prev,
-        code: form.getFieldValue('code'),
-        name: form.getFieldValue('name'),
-        description: form.getFieldValue('description'),
-        icon: form.getFieldValue('icon') || selectedIcon,
+        code: form.getFieldValue('code') ?? prev.code,
+        name: form.getFieldValue('name') ?? prev.name,
+        description: form.getFieldValue('description') ?? prev.description,
+        icon: form.getFieldValue('icon') || selectedIcon || prev.icon,
         ontologyModelID:
           form.getFieldValue('ontologyModelID') ||
-          initialValues?.ontologyModelID
+          initialValues?.ontologyModelID ||
+          prev.ontologyModelID
+      }));
+    };
+
+    const handleBasicInfoFieldChange = (
+      field: keyof BasicInfoValues,
+      value: BasicInfoValues[keyof BasicInfoValues]
+    ) => {
+      setBasicInfoValues((prev) => ({
+        ...prev,
+        [field]: value
       }));
     };
 
@@ -504,35 +678,123 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       const formValues = form.getFieldsValue();
       return {
         ...formValues,
-        code: formValues.code ?? basicInfoValues.code,
-        name: formValues.name ?? basicInfoValues.name,
-        description: formValues.description ?? basicInfoValues.description,
-        icon: formValues.icon ?? basicInfoValues.icon,
+        code: basicInfoValues.code ?? formValues.code,
+        name: basicInfoValues.name ?? formValues.name,
+        description: basicInfoValues.description ?? formValues.description,
+        icon: basicInfoValues.icon ?? formValues.icon ?? selectedIcon,
         ontologyModelID:
-          formValues.ontologyModelID ??
           basicInfoValues.ontologyModelID ??
+          formValues.ontologyModelID ??
           initialValues?.ontologyModelID
       };
+    };
+
+    const resolveDataSourceForSubmit =
+      async (): Promise<ObjectTypeDataSourceState | null> => {
+        if (dataSource.type !== DATA_SOURCE_TYPE.MANUAL_CREATION) {
+          return dataSource;
+        }
+
+        const values = getSubmitValues();
+        try {
+          const filePath = await resolveManualObjectTypeSchemaFilePath(
+            String(values.code || ''),
+            objectTypeAttributes
+          );
+          if (!filePath) {
+            Message.error('生成 Schema 失败，请重试');
+            return null;
+          }
+          const nextDataSource = { ...dataSource, filePath };
+          setDataSource(nextDataSource);
+          return nextDataSource;
+        } catch (error) {
+          console.error('手动创建 Schema 上传失败:', error);
+          Message.error('生成 Schema 失败，请重试');
+          return null;
+        }
+      };
+
+    const buildSubmitFormData = async (
+      enableSyncSourceData: boolean
+    ): Promise<ObjectTypeFormData | null> => {
+      const submitDataSource = await resolveDataSourceForSubmit();
+      if (!submitDataSource) {
+        return null;
+      }
+
+      return buildObjectTypeFormData({
+        values: getSubmitValues(),
+        selectedIcon,
+        initialOntologyModelID: initialValues?.ontologyModelID,
+        dataSource: submitDataSource,
+        attributeFields,
+        objectTypeAttributes,
+        syncSourceDataStrategy,
+        syncMappingFields,
+        enableSyncSourceData,
+        isReUpload
+      });
     };
 
     const validateBasicInfo = async () => {
       try {
         await form.validate(['name', 'code']);
-        return true;
       } catch (error) {
         return false;
       }
+
+      if (isEdit) {
+        return true;
+      }
+
+      const code = String(form.getFieldValue('code') || '').trim();
+      if (!code || !ontologyModelIDForId) {
+        return true;
+      }
+
+      try {
+        const sceneCodes =
+          await fetchSceneObjectTypeCodes(ontologyModelIDForId);
+        const normalized = code.toLowerCase();
+        const isDuplicate = sceneCodes.some(
+          (existing) => existing.trim().toLowerCase() === normalized
+        );
+        if (isDuplicate) {
+          const duplicateMessage =
+            '该对象类型 id 在当前场景中已存在，请修改后重试';
+          form.setFields({
+            code: {
+              error: { message: duplicateMessage }
+            }
+          });
+          Message.warning(duplicateMessage);
+          return false;
+        }
+      } catch (error) {
+        console.warn('[ObjectType] 校验对象类型 id 唯一性失败', error);
+        Message.warning('校验对象类型 id 失败，请稍后重试');
+        return false;
+      }
+
+      return true;
     };
 
     const validateModeling = async () => {
+      const fieldsToValidate: string[] = [
+        'dataSourceType',
+        'objectTypeAttributes'
+      ];
+      if (dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV) {
+        fieldsToValidate.push('file');
+      } else if (dataSource.type === DATA_SOURCE_TYPE.DATA_RESOURCE) {
+        fieldsToValidate.push('dataResourceTableId');
+      } else if (dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC) {
+        fieldsToValidate.push('modelingConnector', 'modelingDatabaseTable');
+      }
+
       try {
-        await form.validate([
-          'dataSourceType',
-          'file',
-          'modelingConnector',
-          'modelingDatabaseTable',
-          'objectTypeAttributes'
-        ]);
+        await form.validate(fieldsToValidate);
       } catch (error) {
         return false;
       }
@@ -545,9 +807,17 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         return false;
       }
 
+      if (dataSource.type === DATA_SOURCE_TYPE.DATA_RESOURCE) {
+        const selectedCount = dataSource.dataResourceIds?.length || 0;
+        if (!dataSource.table && selectedCount === 0) {
+          Message.warning('请选择数据资源表');
+          return false;
+        }
+      }
+
       if (dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC) {
         if (!dataSource.connectorId) {
-          Message.warning('请选择数据源链接');
+          Message.warning('请选择数据源连接');
           return false;
         }
         const isModelingSqlMode = dataSource.queryMode === 'sql';
@@ -557,13 +827,17 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             return false;
           }
         } else if (!dataSource.database || !dataSource.table) {
-          Message.warning('请选择数据源链接和数据表');
+          Message.warning('请选择数据源连接和数据表');
           return false;
         }
       }
 
       if (objectTypeAttributes.length === 0) {
-        Message.warning('请先上传文件或选择数据源');
+        Message.warning(
+          dataSource.type === DATA_SOURCE_TYPE.MANUAL_CREATION
+            ? '请先添加对象类型属性'
+            : '请先上传文件或选择数据源'
+        );
         return false;
       }
 
@@ -586,8 +860,19 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
 
     const validateInstanceSync = async () => {
       const syncSource = syncSourceDataStrategy.sourceDataInfo;
-      const isPollingMode = syncSourceDataStrategy.mode === 'JDBC_POLLING';
-      const isSqlPolling = isPollingMode && syncSource.queryMode === 'sql';
+      const syncSourceType =
+        syncSourceDataStrategy.instanceSyncSourceType ||
+        INSTANCE_SYNC_SOURCE_TYPE.DATABASE;
+      const isDatabaseSyncSource =
+        syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.DATABASE;
+      const isDatabasePollingMode =
+        isDatabaseSyncSource && syncSourceDataStrategy.mode === 'JDBC_POLLING';
+      const isSqlPolling =
+        isDatabasePollingMode && syncSource.queryMode === 'sql';
+      const requiresPollingParams =
+        isDatabasePollingMode ||
+        (syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE &&
+          isApiPollingMode(syncSourceDataStrategy.mode));
       const s = syncSourceDataStrategy;
 
       if (!s.mode) {
@@ -595,11 +880,23 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         return false;
       }
       if (!s.conflictStrategy) {
-        Message.warning('请选择冲突策略');
-        return false;
+        const csvRequiresConflict =
+          syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD &&
+          s.syncScope === 'INCREMENTAL';
+        if (
+          syncSourceType !== INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD ||
+          csvRequiresConflict
+        ) {
+          Message.warning('请选择冲突策略');
+          return false;
+        }
       }
       if (!s.syncScope) {
-        Message.warning('请选择同步范围');
+        Message.warning(
+          syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD
+            ? '请选择导入范围'
+            : '请选择同步范围'
+        );
         return false;
       }
       if (!s.exceptionStrategy) {
@@ -608,9 +905,28 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       }
 
       const validateFields = [
-        'syncConnector',
-        'syncDatabaseTable',
-        'syncMappingFields'
+        'syncSourceType',
+        'syncMappingFields',
+        ...(syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD
+          ? ['syncInstanceCsvFile']
+          : []),
+        ...(syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE
+          ? [
+              'syncMessageQueueConnector',
+              'syncMessageQueueTopic',
+              ...buildStreamParseFormValidateFields(syncSourceDataStrategy)
+            ]
+          : []),
+        ...(syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE
+          ? [
+              'syncApiConnector',
+              ...buildStreamParseFormValidateFields(syncSourceDataStrategy)
+            ]
+          : []),
+        ...(syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.FILE_PARSE
+          ? ['syncFileResourceId', 'syncFileParseRequirement']
+          : []),
+        ...(isDatabaseSyncSource ? ['syncConnector', 'syncDatabaseTable'] : [])
       ];
 
       try {
@@ -619,25 +935,48 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         return false;
       }
 
+      const isDataResource = dataSource.type === DATA_SOURCE_TYPE.DATA_RESOURCE;
       if (
-        !syncSource.connectorId ||
-        (syncSource.queryMode !== 'sql' &&
-          (!syncSource.databaseName || !syncSource.tableName))
+        !isInstanceSyncSourceConfigured(syncSourceDataStrategy, {
+          isDataResource
+        })
       ) {
-        Message.warning('请选择实例同步数据源');
+        Message.warning(INSTANCE_SYNC_SOURCE_UNCONFIGURED_MESSAGE);
         return false;
       }
 
       if (
-        isPollingMode &&
+        requiresPollingParams &&
         (!syncSourceDataStrategy.jdbcPollingIntervalSeconds ||
           !syncSourceDataStrategy.pollFetchSize)
       ) {
-        Message.warning('请完整填写轮询参数');
+        Message.warning(
+          syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE
+            ? '请完整填写定时拉取参数'
+            : '请完整填写轮询参数'
+        );
         return false;
       }
 
+      const isApiPollingIncremental =
+        syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE &&
+        isApiPollingMode(s.mode) &&
+        isApiPollingIncrementalScope(s.syncScope);
+      if (isApiPollingIncremental) {
+        const hasIncrementalParam =
+          !!s.apiIncrementalTimeParam?.trim() || !!s.apiCheckpointParam?.trim();
+        if (!hasIncrementalParam) {
+          Message.warning('请至少填写增量时间参数或游标参数之一');
+          return false;
+        }
+        if (!s.apiIncrementalMarkerField?.trim()) {
+          Message.warning('请填写增量判定字段');
+          return false;
+        }
+      }
+
       if (
+        isDatabasePollingMode &&
         syncScopeRequiresIncrementalPollingFields(syncSourceDataStrategy) &&
         (!syncSourceDataStrategy.jdbcIncrementalTimeField?.trim() ||
           !syncSourceDataStrategy.jdbcCheckpointField?.trim())
@@ -691,20 +1030,20 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const validateBeforeSubmit = async (validateSyncStep = true) => {
       const basicValid = await validateBasicInfo();
       if (!basicValid) {
-        setCurrentStep(BASIC_STEP);
+        updateCurrentStep(BASIC_STEP);
         return false;
       }
 
       const modelingValid = await validateModeling();
       if (!modelingValid) {
-        setCurrentStep(MODELING_STEP);
+        updateCurrentStep(MODELING_STEP);
         return false;
       }
 
       if (validateSyncStep) {
         const syncValid = await validateInstanceSync();
         if (!syncValid) {
-          setCurrentStep(INSTANCE_SYNC_STEP);
+          updateCurrentStep(INSTANCE_SYNC_STEP);
           return false;
         }
       }
@@ -723,33 +1062,86 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       );
     };
 
+    const handleGenerateSchemaFromBasicInfo = async () => {
+      if (dataSource.type !== DATA_SOURCE_TYPE.LOCAL_CSV || modelingReadOnly) {
+        return;
+      }
+
+      if (!isEdit && dataSource.filePath && objectTypeAttributes.length > 0) {
+        Message.warning('请先删除已上传的附件后再执行此操作');
+        return;
+      }
+
+      const values = getSubmitValues();
+      const objectTypeName = String(values.name ?? '').trim();
+      if (!objectTypeName) {
+        Message.warning('请先在基本信息中填写对象类型名称');
+        return;
+      }
+
+      setGeneratingSchema(true);
+      try {
+        const displayFileName = `${values.code || 'object_type'}_schema.csv`;
+        const { definition, source } = await generateObjectTypeCsvTemplate({
+          name: objectTypeName,
+          description: values.description
+        });
+        const parsed = await resolveGeneratedObjectTypeParsedSchema(
+          definition,
+          displayFileName
+        );
+        applyObjectTypeParsedSchema({
+          parsed,
+          form,
+          setModelingSourceDataInfo,
+          setDataSource,
+          setObjectTypeAttributes,
+          setFileUploaded,
+          setInitialFileList,
+          displayFileName
+        });
+
+        setIsReUpload(true);
+
+        if (source === 'llm') {
+          Message.success('已根据名称与描述生成建模模板，可继续编辑');
+        } else {
+          Message.info('已填充标准模板数据，可继续编辑或重新上传 CSV');
+        }
+      } catch {
+        Message.warning('生成建模模板失败，请手动上传 Schema 文件');
+      } finally {
+        setGeneratingSchema(false);
+      }
+    };
+
     const handleNextStep = async () => {
       if (currentStep === BASIC_STEP) {
         if (await validateBasicInfo()) {
           syncBasicInfoValues();
-          setCurrentStep(MODELING_STEP);
+          updateCurrentStep(MODELING_STEP);
         }
         return;
       }
 
       if (currentStep === MODELING_STEP) {
-        if (dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV) {
+        if (twoStepOnly) {
           return;
         }
         if (modelingReadOnly) {
           syncInstanceSourceFromModeling();
-          setCurrentStep(INSTANCE_SYNC_STEP);
+          updateCurrentStep(INSTANCE_SYNC_STEP);
           return;
         }
         if (await validateModeling()) {
           syncInstanceSourceFromModeling();
-          setCurrentStep(INSTANCE_SYNC_STEP);
+          updateCurrentStep(INSTANCE_SYNC_STEP);
         }
       }
     };
 
     const handlePrevStep = () => {
-      setCurrentStep((step) => Math.max(BASIC_STEP, step - 1));
+      updateCurrentStep((step) => Math.max(BASIC_STEP, step - 1));
     };
 
     const handleSubmit = async () => {
@@ -759,19 +1151,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           return;
         }
 
-        const values = getSubmitValues();
-        const formData = buildObjectTypeFormData({
-          values,
-          selectedIcon,
-          initialOntologyModelID: initialValues?.ontologyModelID,
-          dataSource,
-          attributeFields,
-          objectTypeAttributes,
-          syncSourceDataStrategy,
-          syncMappingFields,
-          enableSyncSourceData: true,
-          isReUpload
-        });
+        const formData = await buildSubmitFormData(true);
 
         if (!formData) {
           return;
@@ -791,19 +1171,9 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         }
 
         syncBasicInfoValues();
-        const values = getSubmitValues();
-        const formData = buildObjectTypeFormData({
-          values,
-          selectedIcon,
-          initialOntologyModelID: initialValues?.ontologyModelID,
-          dataSource,
-          attributeFields,
-          objectTypeAttributes,
-          syncSourceDataStrategy,
-          syncMappingFields,
-          enableSyncSourceData: initialValues?.enableSyncSourceData === true,
-          isReUpload
-        });
+        const formData = await buildSubmitFormData(
+          initialValues?.enableSyncSourceData === true
+        );
 
         if (!formData) {
           return;
@@ -828,19 +1198,9 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           return;
         }
 
-        const values = getSubmitValues();
-        const formData = buildObjectTypeFormData({
-          values,
-          selectedIcon,
-          initialOntologyModelID: initialValues?.ontologyModelID,
-          dataSource,
-          attributeFields,
-          objectTypeAttributes,
-          syncSourceDataStrategy,
-          syncMappingFields,
-          enableSyncSourceData: initialValues?.enableSyncSourceData === true,
-          isReUpload
-        });
+        const formData = await buildSubmitFormData(
+          initialValues?.enableSyncSourceData === true
+        );
 
         if (!formData) {
           return;
@@ -859,19 +1219,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           return;
         }
 
-        const values = getSubmitValues();
-        const formData = buildObjectTypeFormData({
-          values,
-          selectedIcon,
-          initialOntologyModelID: initialValues?.ontologyModelID,
-          dataSource,
-          attributeFields,
-          objectTypeAttributes,
-          syncSourceDataStrategy,
-          syncMappingFields,
-          enableSyncSourceData: true,
-          isReUpload
-        });
+        const formData = await buildSubmitFormData(true);
 
         if (!formData) {
           return;
@@ -890,19 +1238,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           return;
         }
 
-        const values = getSubmitValues();
-        const formData = buildObjectTypeFormData({
-          values,
-          selectedIcon,
-          initialOntologyModelID: initialValues?.ontologyModelID,
-          dataSource,
-          attributeFields,
-          objectTypeAttributes,
-          syncSourceDataStrategy,
-          syncMappingFields,
-          enableSyncSourceData: false,
-          isReUpload
-        });
+        const formData = await buildSubmitFormData(false);
 
         if (!formData) {
           return;
@@ -937,6 +1273,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             maxLength={50}
             showWordLimit
             allowClear
+            onChange={(value) => handleBasicInfoFieldChange('name', value)}
           />
         </FormItem>
 
@@ -948,36 +1285,16 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             // 编辑且 code 不可改：沿用后端历史编码，不做字母数字格式校验
             ...(isEdit && initialValues?.code
               ? []
-              : [
-                  {
-                    validator: (value, callback) => {
-                      if (!value) {
-                        callback();
-                        return;
-                      }
-                      if (!/^[a-zA-Z]/.test(value)) {
-                        callback('首字符必须为英文字母');
-                        return;
-                      }
-                      if (!/^[a-zA-Z0-9]+$/.test(value)) {
-                        callback(
-                          '仅允许英文字母与数字(不允许下划线及特殊符号)'
-                        );
-                        return;
-                      }
-                      callback();
-                    }
-                  }
-                ])
+              : [objectTypeCodeValidatorRule])
           ]}
           extra={
             <div className="text-[12px] text-[var(--color-text-4)]">
-              首字符必须为英文字母;仅允许英文字母与数字(不允许下划线及特殊符号)
+              {OBJECT_TYPE_CODE_EXTRA}
             </div>
           }
         >
           <Input
-            placeholder="请输入id。用于 API 调用，全局唯一"
+            placeholder="根据名称自动生成，可修改"
             allowClear
             disabled={!!initialValues?.code}
           />
@@ -989,6 +1306,9 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             autoSize={{ minRows: 3 }}
             maxLength={500}
             showWordLimit
+            onChange={(value) =>
+              handleBasicInfoFieldChange('description', value)
+            }
           />
         </FormItem>
 
@@ -1001,6 +1321,33 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         </FormItem>
       </>
     );
+
+    const handleDataResourceSelected = (tables: DataResourceTable[]) => {
+      const tableComment = tables[0]?.tableComment?.trim();
+      const description = buildDataResourceObjectTypeDescriptionFromTables(
+        tables
+      ).slice(0, 200);
+      const patch: {
+        name?: string;
+        description?: string;
+      } = {};
+
+      if (tableComment) {
+        patch.name = tableComment;
+      }
+      if (description) {
+        patch.description = description;
+      }
+      if (!Object.keys(patch).length) {
+        return;
+      }
+
+      form.setFieldsValue(patch);
+      setBasicInfoValues((prev) => ({
+        ...prev,
+        ...patch
+      }));
+    };
 
     const renderModeling = () => (
       <ModelingStep
@@ -1020,6 +1367,12 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         setInitialFileList={setInitialFileList}
         styles={styles}
         readOnly={modelingReadOnly}
+        onGenerateSchema={handleGenerateSchemaFromBasicInfo}
+        generatingSchema={generatingSchema}
+        showGenerateSchemaButton={
+          !modelingReadOnly && dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV
+        }
+        onDataResourceSelected={handleDataResourceSelected}
       />
     );
 
@@ -1035,14 +1388,12 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         setFieldsLoading={setFieldsLoading}
         styles={styles}
         readOnly={instanceSyncReadOnly}
+        isDataResource={dataSource.type === DATA_SOURCE_TYPE.DATA_RESOURCE}
       />
     );
 
     const renderStepContent = () => {
-      if (
-        dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV &&
-        currentStep === INSTANCE_SYNC_STEP
-      ) {
+      if (twoStepOnly && currentStep === INSTANCE_SYNC_STEP) {
         return renderModeling();
       }
 
@@ -1066,7 +1417,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
 
       if (isEdit) {
         return (
-          <div className="absolute bottom-0 left-0 right-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">
+          <div className={styles['object-type-form-footer']}>
             <div className="flex justify-start gap-[8px]">
               {isFirstStep && (
                 <>
@@ -1085,14 +1436,19 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
 
               {isModelingStep && (
                 <>
-                  {isLocalCsv ? (
-                    <Button
-                      type="primary"
-                      onClick={handleEditSaveFromModelingWithoutSync}
-                      loading={loading}
-                    >
-                      保存
-                    </Button>
+                  {isSimpleModelingSource ? (
+                    <>
+                      <Button
+                        type="primary"
+                        onClick={handleEditSaveFromModelingWithoutSync}
+                        loading={loading}
+                      >
+                        保存
+                      </Button>
+                      <Button onClick={handleNextStep} disabled={loading}>
+                        下一步
+                      </Button>
+                    </>
                   ) : (
                     <Button
                       type="primary"
@@ -1134,12 +1490,13 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       }
 
       return (
-        <div className="absolute bottom-0 left-0 right-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">
+        <div className={styles['object-type-form-footer']}>
           <div className="flex justify-start gap-[8px]">
             {isFirstStep && (
               <Button
                 type="primary"
                 onClick={handleNextStep}
+                loading={loading}
                 disabled={loading}
               >
                 下一步
@@ -1148,7 +1505,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
 
             {isModelingStep && (
               <>
-                {isLocalCsv ? (
+                {twoStepOnly || isSimpleModelingSource ? (
                   <Button
                     type="primary"
                     onClick={handleSkipInstanceSyncAndSubmit}
@@ -1168,7 +1525,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                 <Button onClick={handlePrevStep} disabled={loading}>
                   上一步
                 </Button>
-                {!isLocalCsv && (
+                {!twoStepOnly && !isSimpleModelingSource && (
                   <Button
                     onClick={handleSkipInstanceSyncAndSubmit}
                     loading={loading}
@@ -1179,7 +1536,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
               </>
             )}
 
-            {isInstanceSyncStep && (
+            {isInstanceSyncStep && !twoStepOnly && (
               <>
                 <Button type="primary" onClick={handleSubmit} loading={loading}>
                   {submitText}
@@ -1207,15 +1564,19 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     return (
       <div
         className={classNames(
-          'flex flex-col px-[24px] pb-[16px]',
-          showFooter ? 'flex-1 pb-24' : ''
+          'relative flex min-h-0 flex-col',
+          showFooter ? 'h-full flex-1 pb-0' : 'px-[24px] pb-[16px]'
         )}
       >
-        <ObjectTypeFormSteps
-          currentStep={currentStep}
-          steps={isLocalCsv ? [...CSV_FORM_STEPS] : undefined}
-        />
-        <div className={showFooter ? 'flex-1' : ''}>
+        <div className={styles['object-type-form-steps-wrap']}>
+          <ObjectTypeFormSteps currentStep={currentStep} steps={formSteps} />
+        </div>
+        <div
+          className={classNames(
+            styles['object-type-form-scroll'],
+            !showFooter && styles['object-type-form-scroll-no-footer']
+          )}
+        >
           <Form
             form={form}
             autoComplete="off"

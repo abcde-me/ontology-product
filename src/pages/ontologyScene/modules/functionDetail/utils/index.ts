@@ -530,6 +530,110 @@ export const buildReturnCode = (outputs: OntologyFunctionParam[]) => {
   return `return {${outputs.map((item) => `"${item.name}":${item.name}`).join(',')}}`;
 };
 
+const FUNCTION_BODY_BASE_INDENT = '    ';
+const BLOCK_HEADER_PATTERN =
+  /^(for|while|if|elif|else|try|except|finally|with|def|class)\b.*:\s*(#.*)?$/;
+
+const getLineIndent = (line: string) => line.length - line.trimStart().length;
+
+/**
+ * 将 LLM 返回的函数体规范为 def 下一级的 4 空格缩进，并保留 for/if 等块内相对缩进。
+ */
+export const normalizeFunctionBody = (body: string): string => {
+  const trimmed = body.trim();
+  if (!trimmed) {
+    return `${FUNCTION_BODY_BASE_INDENT}pass`;
+  }
+
+  const lines = trimmed.split('\n');
+  const nonEmptyLines = lines.filter((line) => line.trim());
+  if (!nonEmptyLines.length) {
+    return `${FUNCTION_BODY_BASE_INDENT}pass`;
+  }
+
+  const minIndent = Math.min(
+    ...nonEmptyLines.map((line) => getLineIndent(line))
+  );
+
+  const normalized = lines
+    .map((line) => {
+      if (!line.trim()) {
+        return '';
+      }
+      return `${FUNCTION_BODY_BASE_INDENT}${line.slice(minIndent)}`;
+    })
+    .join('\n');
+
+  return ensureControlFlowBlocks(normalized);
+};
+
+/** 为 for/if/while 等缺少代码块的语句补 pass，避免 Python 语法错误 */
+const ensureControlFlowBlocks = (body: string): string => {
+  const lines = body.split('\n');
+  const result: string[] = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    result.push(line);
+
+    const trimmed = line.trim();
+    if (
+      !trimmed ||
+      trimmed.startsWith('#') ||
+      !BLOCK_HEADER_PATTERN.test(trimmed)
+    ) {
+      continue;
+    }
+
+    const currentIndent = getLineIndent(line);
+    let nextIndex = index + 1;
+    while (nextIndex < lines.length && !lines[nextIndex].trim()) {
+      nextIndex += 1;
+    }
+
+    const nextIndent =
+      nextIndex < lines.length ? getLineIndent(lines[nextIndex]) : -1;
+    const needsBlock = nextIndex >= lines.length || nextIndent <= currentIndent;
+
+    if (needsBlock) {
+      result.push(`${' '.repeat(currentIndent + 4)}pass`);
+    }
+  }
+
+  return result
+    .filter((line, index, all) => {
+      if (line.trim()) {
+        return true;
+      }
+      return index > 0 && index < all.length - 1;
+    })
+    .join('\n');
+};
+
+/** 将智能生成的函数体与入参/出参组装为完整 Python 脚本 */
+export function buildFunctionContentFromBody(meta: {
+  code: string;
+  input: OntologyFunctionParam[];
+  output: OntologyFunctionParam[];
+  body: string;
+}): string {
+  const { code, input, output, body } = meta;
+  const functionSignature = buildFUnctionSignature({
+    name: code,
+    input,
+    output
+  });
+  const returnCode = buildReturnCode(output);
+  const normalizedBody = normalizeFunctionBody(body);
+
+  return `# 智能生成，可继续编辑函数逻辑
+# 修改左侧的输入参数、输出参数，编辑区变量会自动修改
+
+${functionSignature} # 只读
+${normalizedBody}
+    ${returnCode} #只读`;
+}
+
 /**
  * 根据函数元数据生成 Python 脚本
  *
@@ -732,6 +836,14 @@ export function buildFunctionDetail(
   };
 }
 
+/** 从 Python 脚本中解析 def 函数名，供试运行 logic_function 与 target 对齐 */
+export const extractPythonFunctionNameFromContent = (
+  content: string
+): string | undefined => {
+  const match = content.match(/^\s*def\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/m);
+  return match?.[1];
+};
+
 /**
  *
  * @param formData
@@ -742,17 +854,19 @@ export const buildTestFunctionData = (
   config: Record<string, any> = {}
 ): TestFunction => {
   const { content, code, name, description = '', input, output } = formData;
+  const logicFunctionName =
+    extractPythonFunctionNameFromContent(content) || code;
   const res: TestFunction = {
     list_data: [],
     run_action_with_validate: true,
     run_type: 'function',
-    target: [code]
+    target: [logicFunctionName]
   };
   const testData: TestFunctionItem = {
     arguments: [],
     code: code,
     content: content,
-    logic_function: [code],
+    logic_function: [logicFunctionName],
     name: name,
     params: [],
     description,

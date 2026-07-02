@@ -86,6 +86,9 @@ export interface OntologyFunctionParam {
    * 参数名称
    */
   name: string;
+  description?: string;
+  defaultValue?: unknown;
+  required?: boolean;
   /**
    * 参数类型
    */
@@ -342,6 +345,7 @@ export interface FunctionListQuery {
    * 页码，从1开始
    */
   pageNum?: number;
+  pageNo?: number;
   /**
    * 每页数量
    */

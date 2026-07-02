@@ -1,0 +1,52 @@
+.panel {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.title {
+  color: var(--color-text-1);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.help {
+  color: var(--color-text-3);
+  font-size: 14px;
+  cursor: help;
+}
+
+.stats {
+  margin-left: 4px;
+}
+
+.tooltip-btn-wrap {
+  display: inline-block;
+}
+
+.instance-id {
+  color: rgb(var(--primary-6));
+  font-weight: 500;
+}
+
+.instance-name {
+  color: var(--color-text-1);
+  font-weight: 600;
+}

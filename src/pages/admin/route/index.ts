@@ -10,7 +10,9 @@ import {
   USER_GROUP_PERMISSIONS,
   PROJECT_PERMISSIONS,
   API_KEY_PERMISSIONS,
-  DATA_SOURCE_PERMISSIONS
+  DATA_SOURCE_PERMISSIONS,
+  MODEL_MANAGEMENT_PERMISSIONS,
+  TAG_PERMISSIONS
 } from '@/config/permissions';
 import { ONTOLOGY_SCENE_MENU_ITEM_KEYS } from '@/common/constants';
 
@@ -33,13 +35,19 @@ export type IRoute = AuthParams & {
 
 // 路由配置
 export const routes: IRoute[] = [
-  // 首页
+  // 首页（登录后默认落地页，无需业务权限）
   {
     name: 'home',
     key: '/tenant/compute/onto/home',
     component: React.lazy(async () => import('../../home')),
-    children: [],
-    permission: ONTOLOGY_PERMISSIONS.LIST
+    children: []
+  },
+  // 首页 - 本体概览
+  {
+    name: 'ontologyOverview',
+    key: '/tenant/compute/onto/home/ontologyOverview',
+    component: React.lazy(async () => import('../../home/ontologyOverview')),
+    children: []
   },
   // AI 本体工作台
   {
@@ -47,6 +55,15 @@ export const routes: IRoute[] = [
     key: '/tenant/compute/onto/aiOntologyWorkbench',
     component: React.lazy(async () => import('../../aiOntologyWorkbench')),
     permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
+  // 本体要素
+  {
+    name: 'ontologyElements',
+    key: '/tenant/compute/onto/ontologyElements',
+    component: React.lazy(async () => import('../../ontologyElements')),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    exact: false,
     children: []
   },
   // 本体场景库
@@ -166,6 +183,183 @@ export const routes: IRoute[] = [
     permission: DATA_SOURCE_PERMISSIONS.LIST,
     children: []
   },
+  // 数据资源
+  {
+    name: 'dataResourceManagement',
+    key: '/tenant/compute/onto/dataConnection/dataResource',
+    component: React.lazy(async () => import('../../dataResource')),
+    permission: DATA_SOURCE_PERMISSIONS.LIST,
+    children: []
+  },
+  {
+    name: 'dataResourceDetail',
+    key: '/tenant/compute/onto/dataConnection/dataResource/detail/:id',
+    component: React.lazy(async () => import('../../dataResource/detail')),
+    permission: DATA_SOURCE_PERMISSIONS.LIST,
+    children: []
+  },
+  {
+    name: 'dataResourceExtractTaskList',
+    key: '/tenant/compute/onto/dataConnection/dataResource/extract',
+    component: React.lazy(
+      async () => import('../../dataResource/extractTaskList')
+    ),
+    permission: DATA_SOURCE_PERMISSIONS.LIST,
+    children: []
+  },
+  {
+    name: 'dataResourceExtractResult',
+    key: '/tenant/compute/onto/dataConnection/dataResource/extract/:taskId',
+    component: React.lazy(
+      async () => import('../../dataResource/extractResult')
+    ),
+    permission: DATA_SOURCE_PERMISSIONS.LIST,
+    children: []
+  },
+  // 数据任务（概览列表）
+  {
+    name: 'dataTaskOverview',
+    key: '/tenant/compute/onto/dataConnection/dataTask',
+    component: React.lazy(async () => import('../../dataTaskOverview')),
+    permission: DATA_SOURCE_PERMISSIONS.LIST,
+    children: []
+  },
+  // 数据任务 - 执行记录
+  {
+    name: 'dataTaskExecutionLog',
+    key: '/tenant/compute/onto/dataConnection/dataTask/executionLog/:taskId',
+    component: React.lazy(async () => import('../../dataTask/executionLog')),
+    permission: DATA_SOURCE_PERMISSIONS.LIST,
+    children: []
+  },
+  // 数据任务2（任务管理）
+  {
+    name: 'dataTaskManagement2',
+    key: '/tenant/compute/onto/dataConnection/dataTask2',
+    component: React.lazy(async () => import('../../dataTask')),
+    permission: DATA_SOURCE_PERMISSIONS.LIST,
+    children: []
+  },
+  // 数据任务2 - 执行记录
+  {
+    name: 'dataTask2ExecutionLog',
+    key: '/tenant/compute/onto/dataConnection/dataTask2/executionLog/:taskId',
+    component: React.lazy(async () => import('../../dataTask/executionLog')),
+    permission: DATA_SOURCE_PERMISSIONS.LIST,
+    children: []
+  },
+  // 探索分析 - 本体查询
+  {
+    name: 'ontologyQuery',
+    key: '/tenant/compute/onto/exploreAnalysis/ontologyQuery',
+    component: React.lazy(
+      async () => import('../../exploreAnalysis/ontologyQuery')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
+  // 探索分析 - 对象浏览
+  {
+    name: 'objectBrowse',
+    key: '/tenant/compute/onto/exploreAnalysis/objectBrowse',
+    component: React.lazy(
+      async () => import('../../exploreAnalysis/objectBrowse')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
+  // 探索分析 - 关系洞察
+  {
+    name: 'relationInsight',
+    key: '/tenant/compute/onto/exploreAnalysis/relationInsight',
+    component: React.lazy(
+      async () => import('../../exploreAnalysis/relationInsight')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
+  // 探索分析 - 隐性关系
+  {
+    name: 'implicitRelation',
+    key: '/tenant/compute/onto/exploreAnalysis/implicitRelation',
+    component: React.lazy(
+      async () => import('../../exploreAnalysis/implicitRelation')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: [
+      {
+        name: 'implicitRelationDetail',
+        key: '/tenant/compute/onto/exploreAnalysis/implicitRelation/detail/:id',
+        component: React.lazy(
+          async () => import('../../exploreAnalysis/implicitRelation/detail')
+        ),
+        permission: ONTOLOGY_PERMISSIONS.LIST,
+        ignore: true
+      }
+    ]
+  },
+  // 应用中心 - 应用场景
+  {
+    name: 'applicationScene',
+    key: '/tenant/compute/onto/sceneCenter/applicationScene',
+    component: React.lazy(async () => import('../../applicationScene')),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: [
+      {
+        name: 'applicationSceneDetail',
+        key: '/tenant/compute/onto/sceneCenter/applicationScene/detail/:id',
+        component: React.lazy(
+          async () => import('../../applicationScene/detail')
+        ),
+        permission: ONTOLOGY_PERMISSIONS.LIST,
+        ignore: true
+      }
+    ]
+  },
+  // 场景中心 - 情报分析
+  {
+    name: 'intelligenceAnalysis',
+    key: '/tenant/compute/onto/sceneCenter/intelligenceAnalysis',
+    component: React.lazy(
+      async () => import('../../sceneCenter/intelligenceAnalysis')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
+  // 场景中心 - 跨域火力协同
+  {
+    name: 'jointOperations',
+    key: '/tenant/compute/onto/sceneCenter/jointOperations',
+    component: React.lazy(
+      async () => import('../../sceneCenter/jointOperations')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
+  // 模型管理
+  {
+    name: 'modelManagement',
+    key: '/tenant/compute/onto/platformResource/modelManagement',
+    component: React.lazy(async () => import('../../modelManagement')),
+    permission: MODEL_MANAGEMENT_PERMISSIONS.LIST,
+    children: []
+  },
+  // API 管理
+  {
+    name: 'apiManagement',
+    key: '/tenant/compute/onto/platformResource/apiManagement',
+    component: React.lazy(async () => import('../../apiManagement')),
+    anyPermission: [API_KEY_PERMISSIONS.MENU, TAG_PERMISSIONS.LIST],
+    children: [
+      {
+        name: 'apiManagementDetail',
+        key: '/tenant/compute/onto/platformResource/apiManagement/detail/:id',
+        component: React.lazy(async () => import('../../apiManagement/detail')),
+        anyPermission: [API_KEY_PERMISSIONS.MENU, TAG_PERMISSIONS.LIST],
+        ignore: true
+      }
+    ]
+  },
   // 运营中心页面
   {
     name: 'operationCenter',
@@ -179,7 +373,9 @@ export const routes: IRoute[] = [
       USER_GROUP_PERMISSIONS.MENU,
       ROLE_PERMISSIONS.MENU,
       PROJECT_PERMISSIONS.MENU,
-      API_KEY_PERMISSIONS.MENU
+      API_KEY_PERMISSIONS.MENU,
+      TAG_PERMISSIONS.LIST,
+      MODEL_MANAGEMENT_PERMISSIONS.LIST
     ]
   }
 ];

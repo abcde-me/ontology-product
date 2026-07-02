@@ -41,8 +41,7 @@ import { FunctionDetailDrawer } from '@/pages/ontologyScene/modules/functionDeta
 import { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
-
-// 函数
+import { FunctionVersionPanel } from './components/FunctionVersionPanel';
 export default function OntologySceneFunctions() {
   const [form] = Form.useForm();
   const { id: ontologyModelID } = useParams<{
@@ -51,6 +50,8 @@ export default function OntologySceneFunctions() {
   }>();
   // 当前查看的函数
   const [currentFunction, setCurrentFunction] =
+    useState<OntologyFunctionItem>();
+  const [versionFunction, setVersionFunction] =
     useState<OntologyFunctionItem>();
   const history = useHistory();
   const [functionsEmpty, setFunctionsEmpty] = useState(false);
@@ -212,6 +213,23 @@ export default function OntologySceneFunctions() {
               编辑
             </Button>
           </PermissionWrapper>
+          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.MODIFY}>
+            <Button
+              type={'text'}
+              className={
+                'p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary'
+              }
+              onClick={() => {
+                if (!record.id) {
+                  Message.warning('函数 ID 无效');
+                  return;
+                }
+                setVersionFunction(record);
+              }}
+            >
+              版本
+            </Button>
+          </PermissionWrapper>
           <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.DELETE}>
             <Button
               type={'text'}
@@ -227,7 +245,7 @@ export default function OntologySceneFunctions() {
           </PermissionWrapper>
         </Space>
       ),
-      width: 150
+      width: 200
     }
   ];
 
@@ -282,13 +300,19 @@ export default function OntologySceneFunctions() {
               columns,
               border: false,
               scroll: {
-                x: 1000
+                x: 1060
               }
             }}
             className={styles['function-table']}
           />
         </div>
       </div>
+      <FunctionVersionPanel
+        visible={!!versionFunction}
+        functionId={versionFunction?.id}
+        functionName={versionFunction?.name}
+        onClose={() => setVersionFunction(undefined)}
+      />
       <FunctionDetailDrawer
         data={currentFunction?.id}
         visible={!!currentFunction}

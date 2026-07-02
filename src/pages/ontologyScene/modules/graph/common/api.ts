@@ -1,50 +1,79 @@
-let draft = null;
-
 const computeHashSync = (jsonObject: any) => {
-  // 将对象序列化为标准JSON字符串
   const jsonString = JSON.stringify(jsonObject);
 
   let hash = 0;
 
-  // 简单的哈希算法实现
   for (let i = 0; i < jsonString.length; i++) {
     const char = jsonString.charCodeAt(i);
     hash = (hash << 5) - hash + char;
-    hash = hash & hash; // 转换为32位整数
+    hash = hash & hash;
   }
 
-  // 转换为32位无符号整数，然后转为十六进制
   const unsignedHash = hash >>> 0;
   return unsignedHash.toString(16).padStart(8, '0');
 };
 
-const setDraft = (d) => {
-  draft = d;
+const draftBySceneId = new Map<number, Record<string, unknown>>();
+let activeSceneId: number | null = null;
+
+const notFoundResponse = () =>
+  Promise.resolve({
+    code: 'ResourceNotFound',
+    data: null,
+    message: ''
+  });
+
+export const setActiveWorkflowSceneId = (sceneId: number | null) => {
+  activeSceneId =
+    sceneId != null && Number.isFinite(sceneId) && sceneId > 0 ? sceneId : null;
+};
+
+export const setDraft = (
+  draft: Record<string, unknown> | null,
+  sceneId?: number
+) => {
+  const resolvedSceneId = sceneId ?? activeSceneId;
+  if (resolvedSceneId == null) {
+    return;
+  }
+
+  if (draft == null) {
+    draftBySceneId.delete(resolvedSceneId);
+    return;
+  }
+
+  draftBySceneId.set(resolvedSceneId, draft);
 };
 
 const getWorkflow = () => {
-  return !draft
-    ? Promise.resolve({
-        code: 'ResourceNotFound',
-        data: null,
-        message: '资源不存在'
-      })
-    : Promise.resolve({ data: draft as any });
+  if (activeSceneId == null) {
+    return notFoundResponse();
+  }
+
+  const draft = draftBySceneId.get(activeSceneId);
+  return draft ? Promise.resolve({ data: draft as any }) : notFoundResponse();
 };
-const createWorkflow = (args: any) => {
-  draft = { ...args, updated_at: Math.ceil(Date.now() / 1000) };
-  // @ts-expect-error
+
+const persistDraft = (args: Record<string, unknown>) => {
+  if (activeSceneId == null) {
+    return Promise.resolve({ data: args as any });
+  }
+
+  const draft = {
+    ...args,
+    updated_at: Math.ceil(Date.now() / 1000)
+  } as Record<string, unknown> & { hash?: string };
   draft.hash = computeHashSync(draft);
-  console.log('createWorkflow', draft);
+  draftBySceneId.set(activeSceneId, draft);
   return Promise.resolve({ data: draft as any });
 };
 
-const updateWorkflow = (args: any) => {
-  draft = { ...args, updated_at: Math.ceil(Date.now() / 1000) };
-  // @ts-expect-error
-  draft.hash = computeHashSync(draft);
-  console.log('updateWorkflow', draft);
-  return Promise.resolve({ data: draft as any });
+const createWorkflow = (args: Record<string, unknown>) => {
+  return persistDraft(args);
 };
 
-export { setDraft, getWorkflow, createWorkflow, updateWorkflow };
+const updateWorkflow = (args: Record<string, unknown>) => {
+  return persistDraft(args);
+};
+
+export { getWorkflow, createWorkflow, updateWorkflow };

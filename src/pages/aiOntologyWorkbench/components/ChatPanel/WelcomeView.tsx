@@ -1,20 +1,20 @@
 import React from 'react';
-import { Sender } from '@ceai-front/chat';
-import { UploadProps, Spin } from '@arco-design/web-react';
+import { UploadProps } from '@arco-design/web-react';
 import WelcomeSection from './components/WelcomeSection';
 import Introduction from './components/Introduction';
 import PromptsSection from './components/PromptsSection';
+import WorkbenchChatSender, {
+  WorkbenchSendParams
+} from './WorkbenchChatSender';
 import { PromptItem } from './types';
 import styles from './ChatPanel.module.scss';
 
 interface WelcomeViewProps {
   prompts: PromptItem[];
+  agentSending?: boolean;
+  isChatting?: boolean;
   onPromptSelect: (params: { id: string; text: string }) => void;
-  onSend: (params: {
-    text: string;
-    files?: any[];
-    enableDeepThink: boolean;
-  }) => void;
+  onSend: (params: WorkbenchSendParams) => void;
   uploaderProps?: Partial<UploadProps>;
   GetFile?: (params: { id: string }) => Promise<any>;
   GetAudioText: (
@@ -24,6 +24,8 @@ interface WelcomeViewProps {
 
 const WelcomeView: React.FC<WelcomeViewProps> = ({
   prompts,
+  agentSending = false,
+  isChatting = false,
   onPromptSelect,
   onSend,
   uploaderProps,
@@ -32,7 +34,6 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({
 }) => {
   return (
     <div className="flex h-full flex-col">
-      {/* 内容区域 - 可滚动，隐藏滚动条 */}
       <div className={`flex-1 overflow-y-auto ${styles.scrollbarHide}`}>
         <div className="flex min-h-full flex-col items-center justify-center px-[20px] py-8">
           <div className="flex w-full flex-col items-center gap-6">
@@ -43,20 +44,13 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({
         </div>
       </div>
 
-      {/* Sender 组件 - 固定在底部 */}
       <div className="w-full flex-shrink-0 px-[20px] pb-[8px]">
-        <Sender
+        <WorkbenchChatSender
           placeholder="您好，有什么可以帮您？"
           onSend={onSend}
-          showDeepThink={false}
-          showFileUpload={true}
-          showAudioRecord={false}
-          showAITips={true}
-          uploaderProps={{
-            ...uploaderProps
-          }}
-          singleFileLimit={60 * 1024 * 1024}
-          totalFileLimit={60 * 1024 * 1024}
+          isChatting={isChatting}
+          agentSending={agentSending}
+          uploaderProps={uploaderProps}
           GetFile={GetFile}
           GetAudioText={GetAudioText}
         />

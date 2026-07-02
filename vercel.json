@@ -1,0 +1,10 @@
+{
+  "buildCommand": "yarn build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/onto/:path*",
+      "destination": "/onto/index.html"
+    }
+  ]
+}

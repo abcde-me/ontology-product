@@ -3,4 +3,5 @@ dist
 public
 config
 !/src/config/
+!/src/pages/aiOntologyWorkbench/config/
 integration-tests-cypress

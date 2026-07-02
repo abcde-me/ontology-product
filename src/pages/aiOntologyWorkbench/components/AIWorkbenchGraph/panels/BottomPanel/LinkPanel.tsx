@@ -229,10 +229,10 @@ function LinkPanel({ linkId }: LinkPanelProps) {
     {
       title: '属性名称',
       dataIndex: 'comment',
-      width: 120,
-      render: (text: string) => {
-        return <EllipsisPopover value={text || '-'} />;
-      }
+      width: 200,
+      render: (text: string) => (
+        <span className="whitespace-normal break-words">{text || '-'}</span>
+      )
     },
     {
       title: '表字段',

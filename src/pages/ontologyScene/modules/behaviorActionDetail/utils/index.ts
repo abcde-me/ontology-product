@@ -25,6 +25,8 @@ export function buildActionSchema(action: BehaviorActionDetail): ActionSchema {
     description,
     functionId,
     objectTypeId,
+    objectTypeName,
+    objectTypeIcon,
     functionContent,
     functionCode,
     functionName
@@ -35,6 +37,8 @@ export function buildActionSchema(action: BehaviorActionDetail): ActionSchema {
     description,
     functionId,
     objectTypeId: objectTypeId || -1,
+    objectTypeName,
+    objectTypeIcon,
     function_content: functionContent,
     function_code: functionCode,
     function_name: functionName,
@@ -84,11 +88,14 @@ export function buildFunctionSchema(
     (p, param) => {
       const { name, code, type, inputType } = param;
       if (inputType === InputType.Input) {
+        const uiOptions = type ? TYPE2COMP_OPTIONS[type] : undefined;
         p.function_params!.push({
           name,
           code: code ?? name,
           type,
-          uiType: TYPE2COMP_OPTIONS[type!][0].value
+          uiType:
+            uiOptions?.[0]?.value ??
+            TYPE2COMP_OPTIONS[ParamType.String][0].value
         });
         if (
           [ParamType.Float, ParamType.String, ParamType.Integer].includes(type!)
@@ -164,17 +171,26 @@ export function buildActionDetail(action: ActionSchema): BehaviorActionDetail {
     description,
     functionId,
     objectTypeId,
+    objectTypeName,
+    objectTypeIcon,
     function_params = [],
     validationRules = []
   } = action;
-  const res = {
+  const normalizedObjectTypeId = objectTypeId ?? -1;
+  const res: BehaviorActionDetail = {
     code,
     name,
     description,
     functionId,
-    objectTypeId,
+    objectTypeId: normalizedObjectTypeId,
     params: getActionParams({ function_params, validationRules })
   };
+
+  if (normalizedObjectTypeId > 0) {
+    res.objectTypeName = objectTypeName;
+    res.objectTypeIcon = objectTypeIcon;
+  }
+
   return res;
 }
 

@@ -3,6 +3,32 @@
  */
 import UAPI from '@/api';
 import { ModaForgeResourceEndpoints } from '../endpoints';
+import {
+  buildCreateOntologyAgentLlmPayload,
+  isAIWorkbenchLlmConfigured
+} from '@/pages/aiOntologyWorkbench/config/llm';
+import { DIRECT_LLM_APP_ID } from '@/pages/aiOntologyWorkbench/services/directLlmChat';
+import {
+  extractConversationResult,
+  isOntologyApiSuccess
+} from '@/utils/apiResponse';
+import { isDevBypassEnabled } from '@/utils/devFallback';
+import {
+  devCreateLocalLlmAgent,
+  devCreateOntologyAgent,
+  devClearOntologyAgentId,
+  devGetOntologyAgentId,
+  devSetOntologyAgentId,
+  isLocalLlmAppId,
+  isPermissionRelatedError
+} from '@/utils/devOntologyStore';
+import {
+  devDeleteConversation,
+  devGetConversationList,
+  devGetConversationMessages,
+  devRenameConversation,
+  isDevAppId
+} from '@/utils/devChatStore';
 
 const {
   GetAIChatHistoryApi,
@@ -11,22 +37,164 @@ const {
   GetCurrentAIChatApi
 } = ModaForgeResourceEndpoints;
 
+const emptyConversationListResponse = () => ({
+  status: 200,
+  code: 'Success',
+  message: '',
+  requestId: '',
+  data: {
+    result: [],
+    totalCount: 0
+  }
+});
+
+const emptyConversationMessagesResponse = () => ({
+  status: 200,
+  code: 'Success',
+  message: '',
+  requestId: '',
+  data: {
+    result: []
+  }
+});
+
+const normalizeConversationListResponse = (response: any) => {
+  const result = extractConversationResult(response);
+
+  return {
+    ...(response || emptyConversationListResponse()),
+    data: {
+      ...(response?.data || {}),
+      result,
+      totalCount: response?.data?.totalCount ?? result.length
+    }
+  };
+};
+
+const normalizeConversationMessagesResponse = (response: any) => {
+  const result = extractConversationResult(response);
+
+  return {
+    ...(response || emptyConversationMessagesResponse()),
+    data: {
+      ...(response?.data || {}),
+      result
+    }
+  };
+};
+
+const CREATE_AGENT_DEV_TIMEOUT_MS = 20000;
+
+const withDevTimeout = <T>(promise: Promise<T>, label: string): Promise<T> => {
+  if (!isDevBypassEnabled()) {
+    return promise;
+  }
+
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      window.setTimeout(() => {
+        reject(new Error(`${label} timeout`));
+      }, CREATE_AGENT_DEV_TIMEOUT_MS);
+    })
+  ]);
+};
+
 /**
  * 创建本体 Agent
  */
 export const createOntologyAgent = async (params: {
   ontologyModelId: number;
+  /** Agent 按钮场景：不走 local-llm / dev-app 兜底 */
+  skipDevFallback?: boolean;
 }) => {
-  const { ontologyModelId } = params;
+  const { ontologyModelId, skipDevFallback = false } = params;
+  const llmConfigured = isAIWorkbenchLlmConfigured();
 
-  const response = await UAPI.RES.CreateOntologyAgentApi({})
-    .post({
-      ontologyModelID: ontologyModelId
-    })
-    .inRegion()
-    .do();
+  if (isDevBypassEnabled()) {
+    const cachedAppId = devGetOntologyAgentId(ontologyModelId);
+    if (cachedAppId) {
+      if (isLocalLlmAppId(cachedAppId) && !skipDevFallback) {
+        return {
+          status: 200,
+          code: '',
+          message: '',
+          requestId: '',
+          data: { appID: cachedAppId }
+        };
+      }
+      // 仅复用真实后端 appID，dev-app-* 必须重新创建
+      if (!isDevAppId(cachedAppId) && !isLocalLlmAppId(cachedAppId)) {
+        return {
+          status: 200,
+          code: '',
+          message: '',
+          requestId: '',
+          data: { appID: cachedAppId }
+        };
+      }
+    }
+  }
 
-  return response;
+  if (isDevAppId(devGetOntologyAgentId(ontologyModelId))) {
+    devClearOntologyAgentId(ontologyModelId);
+  }
+
+  try {
+    const llmPayload = buildCreateOntologyAgentLlmPayload();
+    console.log('[createOntologyAgent] 创建 Agent，LLM 配置:', {
+      ontologyModelId,
+      apiName: llmPayload.apiName,
+      model: llmPayload.model,
+      baseUrl: llmPayload.baseUrl,
+      hasApiKey: !!llmPayload.apiKey
+    });
+
+    const response = await withDevTimeout(
+      UAPI.RES.CreateOntologyAgentApi({})
+        .post({
+          ontologyModelID: ontologyModelId,
+          ...llmPayload
+        })
+        .inRegion()
+        .do(),
+      'CreateOntologyAgent'
+    );
+
+    if (isOntologyApiSuccess(response) && response.data?.appID) {
+      if (isDevBypassEnabled()) {
+        devSetOntologyAgentId(ontologyModelId, response.data.appID);
+      }
+      return response;
+    }
+
+    if (isDevBypassEnabled()) {
+      if (llmConfigured && !skipDevFallback) {
+        console.warn('[dev] CreateOntologyAgent 失败，使用本地 LLM 直连 Agent');
+        return devCreateLocalLlmAgent(ontologyModelId);
+      }
+      if (
+        !skipDevFallback &&
+        (isPermissionRelatedError(response?.message) || !llmConfigured)
+      ) {
+        console.warn('[dev] CreateOntologyAgent 失败，使用本地 Agent 缓存');
+        return devCreateOntologyAgent(ontologyModelId);
+      }
+    }
+
+    return response;
+  } catch (error) {
+    if (isDevBypassEnabled() && !skipDevFallback) {
+      if (llmConfigured) {
+        console.warn('[dev] CreateOntologyAgent 异常，使用本地 LLM 直连 Agent');
+        return devCreateLocalLlmAgent(ontologyModelId);
+      }
+      console.warn('[dev] CreateOntologyAgent 异常，使用本地 Agent 缓存');
+      return devCreateOntologyAgent(ontologyModelId);
+    }
+
+    throw error;
+  }
 };
 
 /**
@@ -95,19 +263,41 @@ export const getConversationList = async (params: {
   projectId?: string;
 }) => {
   const { appId, pageNo = 1, pageSize = 20 } = params;
-  // 注意：不传递 projectId，由 HTTP 拦截器统一添加
 
-  const response = await UAPI.RES.GetAIChatHistoryApi({})
-    .post({
-      appId,
-      pageNo,
-      pageSize
-      // 移除 projectId，由拦截器统一添加
-    })
-    .inRegion()
-    .do();
+  if (isDevAppId(appId)) {
+    return devGetConversationList(appId);
+  }
 
-  return response;
+  try {
+    const response = await UAPI.RES.GetAIChatHistoryApi({})
+      .post({
+        appID: appId,
+        pageNo,
+        pageSize
+      })
+      .inRegion()
+      .do();
+
+    const normalized = normalizeConversationListResponse(response);
+    if (normalized.data.result.length > 0) {
+      return normalized;
+    }
+
+    if (isDevBypassEnabled()) {
+      console.warn('[dev] 会话列表接口无数据，回退为空列表');
+      return devGetConversationList(appId);
+    }
+
+    return normalized;
+  } catch (error) {
+    console.warn('[getConversationList] 请求失败:', error);
+
+    if (isDevBypassEnabled()) {
+      return devGetConversationList(appId);
+    }
+
+    return emptyConversationListResponse();
+  }
 };
 
 /**
@@ -116,14 +306,21 @@ export const getConversationList = async (params: {
 export const deleteConversation = async (params: { id: string }) => {
   const { id } = params;
 
-  const response = await UAPI.RES.DeleteAIChatApi({})
-    .post({
-      id
-    })
-    .inRegion()
-    .do();
+  try {
+    const response = await UAPI.RES.DeleteAIChatApi({})
+      .post({
+        id
+      })
+      .inRegion()
+      .do();
 
-  return response;
+    return response;
+  } catch (error) {
+    if (isDevBypassEnabled()) {
+      return devDeleteConversation(id);
+    }
+    throw error;
+  }
 };
 
 /**
@@ -135,15 +332,22 @@ export const renameConversation = async (params: {
 }) => {
   const { id, name } = params;
 
-  const response = await UAPI.RES.RenameAIChatApi({})
-    .post({
-      id,
-      name
-    })
-    .inRegion()
-    .do();
+  try {
+    const response = await UAPI.RES.RenameAIChatApi({})
+      .post({
+        id,
+        name
+      })
+      .inRegion()
+      .do();
 
-  return response;
+    return response;
+  } catch (error) {
+    if (isDevBypassEnabled()) {
+      return devRenameConversation(id, name);
+    }
+    throw error;
+  }
 };
 
 /**
@@ -154,20 +358,32 @@ export const getConversationMessages = async (params: {
   conversationID: string;
 }) => {
   const { appId, conversationID } = params;
-  // 注意：不传递 projectId，由 HTTP 拦截器统一添加
 
-  const response = await UAPI.RES.GetCurrentAIChatApi({})
-    .post({
-      appId,
-      conversationID,
-      fileIncluded: true,
-      order: 'desc'
-      // 移除 projectId，由拦截器统一添加
-    })
-    .inRegion()
-    .do();
+  if (isDevAppId(appId)) {
+    return devGetConversationMessages();
+  }
 
-  return response;
+  try {
+    const response = await UAPI.RES.GetCurrentAIChatApi({})
+      .post({
+        appID: appId,
+        conversationID,
+        fileIncluded: true,
+        order: 'desc'
+      })
+      .inRegion()
+      .do();
+
+    return normalizeConversationMessagesResponse(response);
+  } catch (error) {
+    console.warn('[getConversationMessages] 请求失败:', error);
+
+    if (isDevBypassEnabled()) {
+      return devGetConversationMessages();
+    }
+
+    return emptyConversationMessagesResponse();
+  }
 };
 
 /**
@@ -176,15 +392,38 @@ export const getConversationMessages = async (params: {
 export const getAgentInfo = async (params: { id: string; status: string }) => {
   const { id, status } = params;
 
-  const response = await UAPI.RES.GetAgentApi({})
-    .post({
-      id,
-      status
-    })
-    .inRegion()
-    .do();
+  if (isLocalLlmAppId(id) || id === DIRECT_LLM_APP_ID) {
+    return {
+      code: 'Success',
+      data: {
+        appConfig: {
+          suggestedQuestions: []
+        }
+      }
+    };
+  }
 
-  return response;
+  try {
+    const response = await UAPI.RES.GetAgentApi({})
+      .post({
+        id,
+        status
+      })
+      .inRegion()
+      .do();
+
+    return response;
+  } catch (error) {
+    console.warn('[getAgentInfo] 请求失败:', error);
+    return {
+      code: 'Success',
+      data: {
+        appConfig: {
+          suggestedQuestions: []
+        }
+      }
+    };
+  }
 };
 
 /**

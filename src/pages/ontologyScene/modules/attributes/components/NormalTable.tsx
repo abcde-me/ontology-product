@@ -18,22 +18,16 @@ import { ObjectTypeTag } from '@/pages/ontologyScene/components';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
 import type { PhysicalProperties } from '@/types/graphApi';
 import { useParams } from 'react-router';
-import { useHistory } from 'react-router-dom';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import type { ListOntologyPhysicalPropertiesReq } from '@/types/graphApi';
-import { openNewPage } from '@/utils/env';
 import { EllipsisPopover } from '@/pages/ontologyScene/components';
 import classNames from 'classnames';
+import { repairScenePhysicalProperties } from '@/pages/ontologyScene/services/repairScenePhysicalProperties';
 
-export interface NormalTableProps {
-  /** total 变化时的回调函数 */
-  onTotalChange?: (total: number) => void;
-}
-
-export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
+export default function NormalTable() {
   const [form] = Form.useForm();
   const { id: ontologyModelID } = useParams<{ id: string }>();
-  const [urlState, setUrlState] = useUrlState({ search: '', tab: 'normal' });
+  const [urlState, setUrlState] = useUrlState({ search: '' });
   const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
   const [selectedObjectType, setSelectedObjectType] = useState<{
     id: string;
@@ -41,16 +35,12 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
   const [activeTab, setActiveTab] = useState<
     'instances' | 'attributes' | 'links'
   >('attributes');
-  const history = useHistory();
   const [objectTypeFilters, setObjectTypeFilters] = useState<
     Array<{ text: string; value: string }>
   >([]);
   const [objectTypeFilterKeys, setObjectTypeFilterKeys] = useState<string[]>(
     []
   );
-  // 不随搜索和筛选变化的物理属性总数（用于 Tab 上展示）
-  const [allTotal, setAllTotal] = useState<number | undefined>(undefined);
-
   // 获取对象类型列表用于“所属对象类型”筛选
   useEffect(() => {
     const fetchObjectTypes = async () => {
@@ -89,12 +79,6 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
 
           if (response.status === 200 && response.data) {
             const totalCount = response.data.totalCount || 0;
-
-            // 只有在“无搜索关键词且无对象类型筛选”时，才更新全量总数，
-            // 确保 Tab 上展示的是物理属性总数，而不是搜索/筛选后的数量。
-            if (!params.filter && objectTypeFilterKeys.length === 0) {
-              setAllTotal(totalCount);
-            }
 
             return {
               data: {
@@ -148,15 +132,47 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
       }
     });
 
+  // 进入属性页时自动修复数据资源对象类型的空壳/缺失属性
+  useEffect(() => {
+    const sceneId = Number(ontologyModelID);
+    if (!Number.isFinite(sceneId)) {
+      return;
+    }
+
+    let canceled = false;
+
+    const runRepair = async () => {
+      try {
+        const repairResult = await repairScenePhysicalProperties(sceneId);
+        if (canceled) {
+          return;
+        }
+
+        if (repairResult.repairedObjectTypes.length) {
+          Message.success(
+            `已补全 ${repairResult.repairedObjectTypes.length} 个对象类型的属性`
+          );
+          refresh();
+        } else if (repairResult.errors.length) {
+          console.warn('[attributes] 属性补全未完成', repairResult.errors);
+        }
+      } catch (error) {
+        console.error('属性补全失败:', error);
+      }
+    };
+
+    void runRepair();
+
+    return () => {
+      canceled = true;
+    };
+  }, [ontologyModelID, refresh]);
+
   // 从 URL 的 search 参数同步到表单
   useEffect(() => {
     const currentKeyword = form.getFieldValue('keyword');
     const searchValue = urlState.search || '';
-    if (
-      searchValue !== '' &&
-      searchValue !== currentKeyword &&
-      urlState.tab === 'normal'
-    ) {
+    if (searchValue !== '' && searchValue !== currentKeyword) {
       form.setFieldsValue({ keyword: searchValue });
       // 延迟提交，确保表单值已设置
       setTimeout(() => {
@@ -166,19 +182,6 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlState.search]);
 
-  // 当 total / 全量 total 变化时，通知父组件
-  useEffect(() => {
-    if (!onTotalChange) return;
-    // Tab 上展示的数量：优先使用“全量总数”，退化为当前分页 total
-    const totalForDisplay =
-      allTotal !== undefined
-        ? allTotal
-        : pagination?.total !== undefined
-          ? pagination.total
-          : 0;
-    onTotalChange(totalForDisplay);
-  }, [allTotal, pagination?.total, onTotalChange]);
-
   // 处理查看详情：打开对象类型详情抽屉
   const handleViewDetail = (record: PhysicalProperties) => {
     setSelectedObjectType({ id: String(record.ontologyObjectTypeId) });
@@ -186,30 +189,22 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
     setDetailDrawerVisible(true);
   };
 
-  const handleViewPublicAttribute = (record: PhysicalProperties) => {
-    if (!record.ontologyPublicPropertiesName) {
-      return;
-    }
-
-    const url = `/onto/tenant/compute/onto/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
-    openNewPage(url);
-  };
-
-  // 表格列定义
+  // 表格列定义（5 列布局）
   const columns: TableColumnProps<PhysicalProperties>[] = [
     {
       title: '属性名称',
       dataIndex: 'comment',
-      fixed: 'left',
-      width: 150,
-      render: (value, record) => (
-        <EllipsisPopover value={value || '-'} className="font-[600]" />
+      width: 240,
+      render: (value) => (
+        <span className="whitespace-nowrap text-[14px] font-[600] leading-[22px] text-[var(--color-text-1)]">
+          {value || '-'}
+        </span>
       )
     },
     {
       title: '所属对象类型',
       dataIndex: 'ontologyObjectTypeName',
-      width: 180,
+      width: 280,
       filters: objectTypeFilters,
       filterDropdown: ({ setFilterKeys, confirm, clearFilters }: any) => {
         return (
@@ -219,17 +214,15 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
               'rounded-[4px] bg-white shadow-md'
             )}
           >
-            <div className="max-h-[214px] max-w-[184px] overflow-auto py-[8px] pl-[7px] pr-[12px]">
+            <div className="max-h-[214px] max-w-[280px] overflow-auto py-[8px] pl-[7px] pr-[12px]">
               <div className="flex gap-[8px]">
                 <Checkbox.Group
                   direction="vertical"
                   options={objectTypeFilters.map((item) => ({
                     label: (
-                      <EllipsisPopover
-                        value={item.text || '-'}
-                        wrapperClassName="inline-flex max-w-[130px]"
-                        className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
-                      />
+                      <span className="whitespace-nowrap text-[14px] leading-[22px] text-[var(--color-text-1)]">
+                        {item.text || '-'}
+                      </span>
                     ),
                     value: item.value
                   }))}
@@ -273,6 +266,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
         <div>
           {value ? (
             <ObjectTypeTag
+              showFullName
               ontologyObjectTypeIcon={record.ontologyObjectTypeIcon}
               ontologyObjectTypeName={value}
               ontologyObjectTypeId={String(
@@ -289,7 +283,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
     {
       title: '属性id',
       dataIndex: 'name',
-      width: 150,
+      width: 160,
       render: (value) => (
         <div className="flex items-center gap-[4px]">
           <EllipsisPopover
@@ -310,26 +304,16 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
     {
       title: '数据源',
       dataIndex: 'dataSourceName',
-      width: 180,
+      width: 220,
       render: (value) => <EllipsisPopover value={value || '-'} />
-    },
-    {
-      title: '关联公共属性',
-      dataIndex: 'ontologyPublicPropertiesName',
-      width: 150,
-      render: (value, record) => (
-        <span onClick={() => handleViewPublicAttribute(record)}>
-          <EllipsisPopover
-            value={value || '-'}
-            className={value ? 'hover-blue' : ''}
-          />
-        </span>
-      )
     },
     {
       title: '字段类型',
       dataIndex: 'columnType',
-      width: 120
+      width: 140,
+      render: (value) => (
+        <span className="whitespace-nowrap">{value || '-'}</span>
+      )
     }
   ];
 
@@ -365,7 +349,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
           rowKey: (record) => String(record.id || ''),
           border: false,
           pagination: false,
-          scroll: { x: true },
+          scroll: { x: 1040 },
           onChange: (pagination, sorter, filters) => {
             onChange(pagination, sorter, filters);
           }

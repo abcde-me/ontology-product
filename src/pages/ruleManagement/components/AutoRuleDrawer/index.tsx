@@ -23,6 +23,8 @@ import classNames from 'classnames';
 import {
   AutoRuleDetail,
   ChangeType,
+  EXECUTION_MODE_LABEL_MAP,
+  ExecutionMode,
   InstanceScope,
   MonthDayMode,
   PeriodType,
@@ -384,6 +386,15 @@ export const AutoRuleDrawer = (
                     <div className={styles['info-item-label']}>绑定行为：</div>
                     <div className={styles['info-item-value']}>
                       {ruleDetail?.actionConfig?.actionInfo?.name || '-'}
+                    </div>
+                  </div>
+                  <div className={`${styles['info-item']} mb-4`}>
+                    <div className={styles['info-item-label']}>执行模式：</div>
+                    <div className={styles['info-item-value']}>
+                      {EXECUTION_MODE_LABEL_MAP[
+                        ruleDetail?.actionConfig?.executionMode ||
+                          ExecutionMode.Auto
+                      ] || '-'}
                     </div>
                   </div>
                   <div className={`${styles['info-item']}`}>

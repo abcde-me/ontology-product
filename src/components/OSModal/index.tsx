@@ -1,93 +1,45 @@
 import React, { useEffect, ComponentProps } from 'react';
 import { Modal } from '@arco-design/web-react';
 import { ConfirmProps } from '@arco-design/web-react/lib/Modal/confirm';
-
-const isFirefoxBrowser = () =>
-  typeof navigator !== 'undefined' && /firefox/i.test(navigator.userAgent);
-
-const getLatestModalMask = (container: Element) => {
-  const masks = container.querySelectorAll('.arco-modal-mask');
-  return masks[masks.length - 1] as HTMLElement | undefined;
-};
-
-const removeModalMaskDisplay = (container?: Element) => {
-  const masks = (container || document).querySelectorAll('.arco-modal-mask');
-  masks.forEach((mask) => {
-    (mask as HTMLElement).style.removeProperty('display');
-  });
-};
+import { scheduleOverlayCleanup } from '@/utils/removeStaleArcoOverlays';
 
 type OsModalComponent = React.FC<ComponentProps<typeof Modal>> & {
   confirm: (props: ConfirmProps) => ReturnType<typeof Modal.confirm>;
 };
 
 /**
- * 兼容火狐浏览器遮罩
- * @param props
- * @constructor
+ * 业务弹窗封装：关闭后清理可能残留的 Arco 全屏 wrapper
  */
 export const OntoModal: OsModalComponent = (props) => {
-  const { getPopupContainer, visible, mask = true } = props;
-  const isFirefox = isFirefoxBrowser();
+  const { visible = false, mask = true } = props;
 
   useEffect(() => {
-    if (!isFirefox || !mask) return;
+    if (!visible) {
+      scheduleOverlayCleanup();
+    }
+  }, [visible]);
 
-    let frameId = 0;
-    const syncMaskDisplay = () => {
-      const container = getPopupContainer?.() || document.body;
-      const currentMask = getLatestModalMask(container);
-      if (!currentMask) return;
-      currentMask.style.setProperty(
-        'display',
-        visible ? 'block' : 'none',
-        'important'
-      );
-    };
+  if (!visible) {
+    return null;
+  }
 
-    frameId = window.requestAnimationFrame(syncMaskDisplay);
-    return () => window.cancelAnimationFrame(frameId);
-  }, [visible, mask]);
-
-  return <Modal {...props} />;
+  return <Modal {...props} unmountOnExit mask={mask} />;
 };
 
 OntoModal.confirm = (props: ConfirmProps) => {
   const { afterOpen, afterClose } = props;
-  let frameId = 0;
-
-  const getContainer = () => props.getPopupContainer?.() || document.body;
-  const showMaskInFirefox = () => {
-    if (!isFirefoxBrowser() || props.mask === false) return;
-
-    const currentMask = getLatestModalMask(getContainer());
-    currentMask?.style.setProperty('display', 'block', 'important');
-  };
-
-  const removeMaskDisplay = () => {
-    window.cancelAnimationFrame(frameId);
-    if (!isFirefoxBrowser() || props.mask === false) return;
-
-    removeModalMaskDisplay(getContainer());
-    frameId = window.requestAnimationFrame(() => {
-      removeModalMaskDisplay(getContainer());
-    });
-  };
 
   const modal = Modal.confirm({
     ...props,
+    unmountOnExit: true,
     afterOpen: () => {
-      showMaskInFirefox();
       afterOpen?.();
     },
     afterClose: () => {
-      removeMaskDisplay();
       afterClose?.();
-    },
-    unmountOnExit: true
+      scheduleOverlayCleanup();
+    }
   });
-
-  frameId = window.requestAnimationFrame(showMaskInFirefox);
 
   return modal;
 };

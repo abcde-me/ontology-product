@@ -9,6 +9,19 @@ import {
   ExceptionStrategy
 } from '../CollapsibleSection/types';
 import { SyncSourceDataStrategy } from '@/types/objectType';
+import { resolveKafkaSyncScopeDisplayLabel } from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormSteps/common/KafkaSyncStrategyCommonFields';
+import { resolveApiSyncScopeDisplayLabel } from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormSteps/common/ApiSyncStrategyCommonFields';
+import {
+  API_SYNC_MODE,
+  isApiPollingMode,
+  isApiSyncMode,
+  isCsvIncrementalImportScope,
+  isCsvSyncMode,
+  isApiPollingIncrementalScope,
+  isKafkaSyncMode,
+  resolveCsvImportScopeDisplayLabel,
+  resolveSyncModeLabel
+} from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormSteps/common/instanceSyncStrategyConfig';
 import QuestionIcon from '../../assets/question.svg';
 
 interface SyncStrategyInfoProps {
@@ -25,7 +38,6 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
 }) => {
   const [sqlModalVisible, setSqlModalVisible] = useState(false);
 
-  // 渲染字段行
   const renderField = (
     label: string,
     value: React.ReactNode,
@@ -61,7 +73,6 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
     );
   };
 
-  // 未启用同步源数据（仅在不跳过检查时生效）
   if (!skipEnableCheck && !enableSyncSourceData) {
     return (
       <div className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
@@ -70,7 +81,6 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
     );
   }
 
-  // 无同步策略配置
   if (!syncSourceDataStrategy) {
     return (
       <div className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
@@ -78,14 +88,6 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
       </div>
     );
   }
-
-  // 获取枚举显示文本
-  const getSyncModeText = (mode?: string) => {
-    if (mode === SyncMode.BINLOG_CDC || mode === 'BINLOG_CDC') return 'CDC';
-    if (mode === SyncMode.JDBC_POLLING || mode === 'JDBC_POLLING')
-      return '轮询';
-    return mode || '-';
-  };
 
   const getConflictStrategyText = (strategy?: string) => {
     if (strategy === ConflictStrategy.KEEP_SOURCE || strategy === 'KEEP_SOURCE')
@@ -95,7 +97,25 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
     return strategy || '-';
   };
 
+  const syncMode = syncSourceDataStrategy.mode;
+  const isKafkaMode = isKafkaSyncMode(syncMode);
+  const isApiMode = isApiSyncMode(syncMode);
+  const isCsvMode = isCsvSyncMode(syncMode);
+  const isDatabasePollingMode =
+    syncMode === SyncMode.JDBC_POLLING || syncMode === 'JDBC_POLLING';
+  const isApiPolling = isApiPollingMode(syncMode);
+  const isGenericPollingMode = isDatabasePollingMode || isApiPolling;
+
   const getSyncScopeText = (scope?: string) => {
+    if (isKafkaSyncMode(syncMode)) {
+      return resolveKafkaSyncScopeDisplayLabel(syncMode, scope);
+    }
+    if (isApiSyncMode(syncMode)) {
+      return resolveApiSyncScopeDisplayLabel(syncMode, scope);
+    }
+    if (isCsvSyncMode(syncMode)) {
+      return resolveCsvImportScopeDisplayLabel(scope);
+    }
     if (scope === SyncScope.INCREMENTAL || scope === 'INCREMENTAL')
       return '增量';
     if (scope === SyncScope.FULL || scope === 'FULL') return '全量';
@@ -117,22 +137,22 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
       strategy === ExceptionStrategy.LOG_ERROR_AND_CONTINUE ||
       strategy === 'LOG_ERROR_AND_CONTINUE'
     )
-      return '继续消费';
+      return isApiSyncMode(syncMode)
+        ? '继续同步'
+        : isCsvSyncMode(syncMode)
+          ? '继续导入'
+          : '继续消费';
     return strategy || '-';
   };
 
-  const syncMode = syncSourceDataStrategy.mode;
-  const isPollingMode =
-    syncMode === SyncMode.JDBC_POLLING || syncMode === 'JDBC_POLLING';
   const queryMode = syncSourceDataStrategy.sourceDataInfo?.queryMode;
   const isSqlMode = queryMode === 'sql';
 
-  // 同步模式显示（轮询模式且查询模式为sql时需要添加SQL详情链接）
   const syncModeDisplay =
-    isPollingMode && isSqlMode ? (
+    isDatabasePollingMode && isSqlMode ? (
       <div className="flex items-center gap-[8px]">
         <span className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
-          {getSyncModeText(syncMode)}
+          {resolveSyncModeLabel(syncMode)}
         </span>
         <span
           className="cursor-pointer text-[14px] leading-[22px] text-[rgba(var(--primary-6))] hover:underline"
@@ -142,86 +162,205 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
         </span>
       </div>
     ) : (
-      getSyncModeText(syncMode)
+      resolveSyncModeLabel(syncMode)
     );
 
-  return (
+  const syncModeTooltip = (() => {
+    if (syncMode === API_SYNC_MODE.API_PUSH) {
+      return '通过 Webhook 实时接收 API 数据';
+    }
+    if (syncMode === API_SYNC_MODE.API_POLLING) {
+      return '按间隔定时调用 API 拉取数据';
+    }
+    if (syncMode === SyncMode.BINLOG_CDC || syncMode === 'BINLOG_CDC') {
+      return '监听数据库变更日志，实时捕获增删改';
+    }
+    if (isDatabasePollingMode) {
+      return '定时执行查询，按配置条件分批拉取数据';
+    }
+    return undefined;
+  })();
+
+  const scopeFieldLabel = isKafkaMode ? '起始位点' : '同步范围';
+  const parallelismFieldLabel = isKafkaMode
+    ? '消费并行数'
+    : isApiMode
+      ? '请求并行数'
+      : '并行数';
+
+  const commonTail = (
     <>
-      {/* CDC 模式 */}
-      {!isPollingMode && (
-        <>
-          {/* 第一行：同步模式、冲突策略 */}
+      <div className="mb-[12px] flex gap-[16px]">
+        {renderField(
+          scopeFieldLabel,
+          getSyncScopeText(syncSourceDataStrategy.syncScope)
+        )}
+        {renderField(
+          parallelismFieldLabel,
+          syncSourceDataStrategy.parallelism?.toString()
+        )}
+      </div>
+      <div className="flex gap-[16px]">
+        {renderField(
+          '异常策略',
+          getExceptionStrategyText(syncSourceDataStrategy.exceptionStrategy),
+          'w-[418px]',
+          '立即停止：出现异常后任务停止，等待人工处理。继续同步：异常数据记录日志，任务继续处理后续数据。'
+        )}
+      </div>
+    </>
+  );
+
+  if (isKafkaMode) {
+    return (
+      <>
+        <div className="mb-[12px] flex gap-[16px]">
+          {renderField(
+            '单次消费批大小',
+            syncSourceDataStrategy.pollFetchSize?.toString()
+          )}
+          {renderField(
+            '冲突策略',
+            getConflictStrategyText(syncSourceDataStrategy.conflictStrategy)
+          )}
+        </div>
+        <div className="mb-[12px] flex gap-[16px]">
+          {renderField(
+            '起始位点',
+            getSyncScopeText(syncSourceDataStrategy.syncScope)
+          )}
+          {renderField(
+            '消费并行数',
+            syncSourceDataStrategy.parallelism?.toString()
+          )}
+        </div>
+        <div className="flex gap-[16px]">
+          {renderField(
+            '异常策略',
+            getExceptionStrategyText(syncSourceDataStrategy.exceptionStrategy),
+            'w-[418px]',
+            '立即停止：出现异常后任务停止，等待人工处理。继续同步：异常数据记录日志，任务继续处理后续数据。'
+          )}
+        </div>
+      </>
+    );
+  }
+
+  if (isCsvMode) {
+    const isIncrementalImport = isCsvIncrementalImportScope(
+      syncSourceDataStrategy.syncScope
+    );
+    return (
+      <>
+        <div className="mb-[12px] flex gap-[16px]">
+          {renderField(
+            '导入范围',
+            getSyncScopeText(syncSourceDataStrategy.syncScope)
+          )}
+        </div>
+        {isIncrementalImport && (
           <div className="mb-[12px] flex gap-[16px]">
-            {renderField(
-              '同步模式',
-              syncModeDisplay,
-              'w-[418px]',
-              '监听数据库变更日志，实时捕获增删改'
-            )}
             {renderField(
               '冲突策略',
               getConflictStrategyText(syncSourceDataStrategy.conflictStrategy)
             )}
           </div>
+        )}
+        <div className="flex gap-[16px]">
+          {renderField(
+            '异常策略',
+            getExceptionStrategyText(syncSourceDataStrategy.exceptionStrategy),
+            'w-[418px]',
+            '立即停止：出现异常后任务停止，等待人工处理。继续导入：异常数据记录日志，任务继续处理后续数据。'
+          )}
+        </div>
+      </>
+    );
+  }
 
-          {/* 第二行：同步范围、并行数 */}
-          <div className="mb-[12px] flex gap-[16px]">
-            {renderField(
-              '同步范围',
-              getSyncScopeText(syncSourceDataStrategy.syncScope)
-            )}
-            {renderField(
-              '并行数',
-              syncSourceDataStrategy.parallelism?.toString()
-            )}
-          </div>
+  if (isApiMode && !isApiPolling) {
+    return (
+      <>
+        <div className="mb-[12px] flex gap-[16px]">
+          {renderField(
+            '同步模式',
+            syncModeDisplay,
+            'w-[418px]',
+            syncModeTooltip
+          )}
+          {renderField(
+            '冲突策略',
+            getConflictStrategyText(syncSourceDataStrategy.conflictStrategy)
+          )}
+        </div>
+        <div className="mb-[12px] flex gap-[16px]">
+          {renderField(
+            '单次接收批大小',
+            syncSourceDataStrategy.pollFetchSize?.toString()
+          )}
+        </div>
+        <div className="flex gap-[16px]">
+          {renderField(
+            '异常策略',
+            getExceptionStrategyText(syncSourceDataStrategy.exceptionStrategy),
+            'w-[418px]',
+            '立即停止：出现异常后任务停止，等待人工处理。继续同步：异常数据记录日志，任务继续处理后续请求。'
+          )}
+        </div>
+      </>
+    );
+  }
 
-          {/* 第三行：异常策略 */}
-          <div className="flex gap-[16px]">
-            {renderField(
-              '异常策略',
-              getExceptionStrategyText(
-                syncSourceDataStrategy.exceptionStrategy
-              ),
-              'w-[418px]',
-              '立即停止：出现异常后任务停止，等待人工处理。继续同步：异常数据记录日志，任务继续处理后续数据。'
-            )}
-          </div>
-        </>
-      )}
+  if (!isGenericPollingMode) {
+    return (
+      <>
+        <div className="mb-[12px] flex gap-[16px]">
+          {renderField(
+            '同步模式',
+            syncModeDisplay,
+            'w-[418px]',
+            syncModeTooltip
+          )}
+          {renderField(
+            '冲突策略',
+            getConflictStrategyText(syncSourceDataStrategy.conflictStrategy)
+          )}
+        </div>
+        {commonTail}
+      </>
+    );
+  }
 
-      {/* 轮询模式 */}
-      {isPollingMode && (
-        <>
-          {/* 第一行：同步模式、轮询间隔 */}
-          <div className="mb-[12px] flex gap-[16px]">
-            {renderField(
-              '同步模式',
-              syncModeDisplay,
-              'w-[418px]',
-              '定时执行查询，按配置条件分批拉取数据'
-            )}
-            {renderField(
-              '轮询间隔',
-              syncSourceDataStrategy.jdbcPollingIntervalSeconds
-                ? `${syncSourceDataStrategy.jdbcPollingIntervalSeconds}秒`
-                : undefined
-            )}
-          </div>
+  return (
+    <>
+      <div className="mb-[12px] flex gap-[16px]">
+        {renderField('同步模式', syncModeDisplay, 'w-[418px]', syncModeTooltip)}
+        {renderField(
+          isApiPolling ? '拉取间隔' : '轮询间隔',
+          syncSourceDataStrategy.jdbcPollingIntervalSeconds
+            ? `${syncSourceDataStrategy.jdbcPollingIntervalSeconds}秒`
+            : undefined
+        )}
+      </div>
 
-          {/* 第二行：单次拉取数量、增量时间列 */}
-          <div className="mb-[12px] flex gap-[16px]">
-            {renderField(
-              '单次拉取数量',
-              syncSourceDataStrategy.pollFetchSize?.toString()
-            )}
-            {renderField(
+      <div className="mb-[12px] flex gap-[16px]">
+        {renderField(
+          '单次拉取数量',
+          syncSourceDataStrategy.pollFetchSize?.toString()
+        )}
+        {isDatabasePollingMode
+          ? renderField(
               '增量时间列',
               syncSourceDataStrategy.jdbcIncrementalTimeField
+            )
+          : renderField(
+              '冲突策略',
+              getConflictStrategyText(syncSourceDataStrategy.conflictStrategy)
             )}
-          </div>
+      </div>
 
-          {/* 第三行：断点辅助列、冲突策略 */}
+      {isDatabasePollingMode ? (
+        <>
           <div className="mb-[12px] flex gap-[16px]">
             {renderField(
               '断点辅助列',
@@ -232,35 +371,60 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
               getConflictStrategyText(syncSourceDataStrategy.conflictStrategy)
             )}
           </div>
-
-          {/* 第四行：同步范围、并行数 */}
+          {commonTail}
+        </>
+      ) : isApiPolling ? (
+        <>
           <div className="mb-[12px] flex gap-[16px]">
+            {renderField(
+              '冲突策略',
+              getConflictStrategyText(syncSourceDataStrategy.conflictStrategy)
+            )}
             {renderField(
               '同步范围',
               getSyncScopeText(syncSourceDataStrategy.syncScope)
             )}
+          </div>
+          {isApiPollingIncrementalScope(syncSourceDataStrategy.syncScope) && (
+            <>
+              <div className="mb-[12px] flex gap-[16px]">
+                {renderField(
+                  '增量时间参数',
+                  syncSourceDataStrategy.apiIncrementalTimeParam
+                )}
+                {renderField(
+                  '游标参数',
+                  syncSourceDataStrategy.apiCheckpointParam
+                )}
+              </div>
+              <div className="mb-[12px] flex gap-[16px]">
+                {renderField(
+                  '增量判定字段',
+                  syncSourceDataStrategy.apiIncrementalMarkerField
+                )}
+              </div>
+            </>
+          )}
+          <div className="flex gap-[16px]">
             {renderField(
-              '并行数',
+              '请求并行数',
               syncSourceDataStrategy.parallelism?.toString()
             )}
-          </div>
-
-          {/* 第五行：异常策略 */}
-          <div className="flex gap-[16px]">
             {renderField(
               '异常策略',
               getExceptionStrategyText(
                 syncSourceDataStrategy.exceptionStrategy
               ),
               'w-[418px]',
-              '立即停止：出现异常后任务停止，等待人工处理。继续同步：异常数据记录日志，任务继续处理后续数据。'
+              '立即停止：出现异常后任务停止，等待人工处理。继续同步：异常数据记录日志，任务继续处理后续请求。'
             )}
           </div>
         </>
+      ) : (
+        commonTail
       )}
 
-      {/* SQL详情弹窗（仅轮询模式且查询模式为sql） */}
-      {isPollingMode && isSqlMode && (
+      {isDatabasePollingMode && isSqlMode && (
         <SqlDetailModal
           visible={sqlModalVisible}
           onClose={() => setSqlModalVisible(false)}

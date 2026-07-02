@@ -76,6 +76,13 @@ export const TAG_PERMISSIONS = {
   UPDATE: 'common:tag:manage:fullupdatetag'
 } as const;
 
+// 模型管理（大模型环节配置）
+export const MODEL_MANAGEMENT_PERMISSIONS = {
+  LIST: 'common:llm_scenario:read:list',
+  GET: 'common:llm_scenario:read:get',
+  UPDATE: 'common:llm_scenario:manage:update'
+} as const;
+
 // 聚合所有权限
 export const ALL_PERMISSIONS = {
   USER: USER_PERMISSIONS,

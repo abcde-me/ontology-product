@@ -4,6 +4,11 @@ import { useNodes } from 'reactflow';
 import { useDemoStore } from '../common/store';
 import IconLink from '../../../assets/graph-link-icon.svg';
 import { EllipsisPopover } from '@/pages/ontologyScene/components';
+import {
+  isSameLinkIdentity,
+  resolveLinkIdentityFromEdge
+} from '../utils/resolveLinkTypeId';
+import classNames from 'classnames';
 
 export default function CustomLabel(props: any) {
   const { labelX, labelY, defaultLabelRenderer, source, target, data, id } =
@@ -13,6 +18,7 @@ export default function CustomLabel(props: any) {
   const setSourceNode = useDemoStore((s) => s.setSourceNode);
   const setTargetNode = useDemoStore((s) => s.setTargetNode);
   const setSelectedEdgeId = useDemoStore((s) => s.setSelectedEdgeId);
+  const selectedEdgeId = useDemoStore((s) => s.selectedEdgeId);
   const { nodesReadOnly } = useNodesReadOnly();
   const nodes = useNodes<any>();
 
@@ -23,6 +29,9 @@ export default function CustomLabel(props: any) {
   const targetNode = useMemo(() => {
     return nodes.find((node) => node.id === target);
   }, [nodes, target]);
+
+  const linkIdentity = resolveLinkIdentityFromEdge(data, id);
+  const isSelected = isSameLinkIdentity(linkIdentity, selectedEdgeId);
 
   // 如果是空态边，不显示标签
   if (data?.isEmptyState) {
@@ -40,16 +49,22 @@ export default function CustomLabel(props: any) {
             transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
             pointerEvents: 'all'
           }}
-          onClick={() => {
-            // 保存边的ID（链接ID）和节点信息
-            // 边的 id 是字符串格式的链接ID，需要转换为数字
-            setSelectedEdgeId(data?.id ?? null);
+          onClick={(event) => {
+            event.stopPropagation();
+            setSelectedEdgeId(linkIdentity);
             setSourceNode(sourceNode);
             setTargetNode(targetNode);
-            setShowCustomEdgePanel((s) => !s);
+            setShowCustomEdgePanel(true);
           }}
         >
-          <div className="flex h-[24px] max-w-[198px] items-center justify-center gap-[6px] rounded-[4px] border border-[var(--color-border-1)] bg-[#fff] px-[6px] hover:shadow-[0px_2px_8px_0px_#00000014]">
+          <div
+            className={classNames(
+              'flex h-[24px] max-w-[198px] items-center justify-center gap-[6px] rounded-[4px] border bg-[#fff] px-[6px] hover:shadow-[0px_2px_8px_0px_#00000014]',
+              isSelected
+                ? 'border-[#184FF2] shadow-[0px_2px_8px_0px_#184FF24D]'
+                : 'border-[var(--color-border-1)]'
+            )}
+          >
             <IconLink className="h-[18px] w-[18px] flex-shrink-0" />
             <EllipsisPopover
               className="min-w-0 text-[var(--color-text-1)]"

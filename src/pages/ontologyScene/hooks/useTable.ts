@@ -125,8 +125,8 @@ export function useWorkflowTable<TData = any, TParams = any>(
 
   // 请求数据
   const { data, loading, run } = useRequest(
-    async () => {
-      const params = buildParams();
+    async (pageOverride?: number, pageSizeOverride?: number) => {
+      const params = buildParams(pageOverride, pageSizeOverride);
       const result = await service(params);
       return result;
     },
@@ -193,8 +193,8 @@ export function useWorkflowTable<TData = any, TParams = any>(
   // 提交搜索（重置到第一页）
   const submit = useCallback(() => {
     setPagination((prev) => ({ ...prev, current: 1 }));
-    run();
-  }, []);
+    run(1, pagination.pageSize);
+  }, [run, pagination.pageSize]);
 
   // 重置搜索
   const reset = useCallback(() => {

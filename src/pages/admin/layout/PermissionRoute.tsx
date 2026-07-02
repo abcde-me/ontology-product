@@ -6,7 +6,8 @@ import React, { useEffect, useRef } from 'react';
 
 // 带权限检查的路由组件
 const PermissionRoute: React.FC<{ route: any }> = ({ route }) => {
-  const { userActions, projectId, isInitialized } = useUserInfoStore();
+  const { userActions, projectId, isInitialized, projectList } =
+    useUserInfoStore();
   const { setUserPermissions, hasAnyPermission, hasAllPermissions } =
     usePermission();
   const permissionLoadedRef = useRef(false);
@@ -58,6 +59,10 @@ const PermissionRoute: React.FC<{ route: any }> = ({ route }) => {
 
   // 如果没有项目ID，显示403页面
   if (!projectId || !projectId[1]) {
+    // 项目列表尚未加载完成时，避免误报 403
+    if (projectList === null) {
+      return <AuthLoad />;
+    }
     return <Page403 />;
   }
 

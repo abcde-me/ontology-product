@@ -9,15 +9,19 @@ import {
   Button,
   Space
 } from '@arco-design/web-react';
-import { DataSourceType } from '../types';
+import { DataSourceType, ApiAuthType, ApiHttpMethod } from '../types';
 import type { DataSourceFormData, DataSourceItem } from '../types';
+import { addDataSource, updateDataSource } from '../services/api';
+import { connectorConfigToFormData } from '../services/connectorTransform';
 import {
-  testConnection,
-  addDataSource,
-  updateDataSource
-} from '../services/api';
+  DATA_SOURCE_TYPE_META,
+  isApiDataSourceType,
+  isKafkaDataSourceType,
+  isSqlDataSourceType
+} from '../constants';
 
 const FormItem = Form.Item;
+const TextArea = Input.TextArea;
 
 interface DataSourceDrawerProps {
   visible: boolean;
@@ -32,14 +36,17 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
   onClose,
   onSuccess
 }) => {
-  const [form] = Form.useForm<DataSourceFormData>();
+  const [form] = Form.useForm();
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [testLoading, setTestLoading] = useState(false);
   const [passwordChanged, setPasswordChanged] = useState(false);
-  const [originalPassword, setOriginalPassword] = useState<string>(''); // 保存原始加密密码
+  const [originalPassword, setOriginalPassword] = useState<string>('');
   const isEdit = !!editingRecord;
 
-  // Base64 编码函数
+  const dataSourceType = Form.useWatch('dataSourceType', form);
+  const apiAuthType = Form.useWatch('apiAuthType', form);
+  const apiMethod = Form.useWatch('apiMethod', form);
+  const securityProtocol = Form.useWatch('securityProtocol', form);
+
   const encodePassword = (password: string): string => {
     try {
       return btoa(password);
@@ -51,92 +58,50 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
 
   useEffect(() => {
     if (visible && editingRecord) {
-      // 编辑模式：直接使用传入的记录数据
-      // 从连接信息中解析出主机、端口、数据库名
-      const connectionInfo = editingRecord.connectionInfo;
-      let host = '';
-      let port = 3306;
-      let database = '';
-      let username = '';
-      let password = '';
-
-      // 简单解析连接字符串
-      try {
-        const match = connectionInfo.match(/\/\/([^:]+):(\d+)(?:\/(.+))?/);
-        if (match) {
-          host = match[1];
-          port = parseInt(match[2]);
-          database = match[3] || '';
-        }
-      } catch (e) {
-        console.error('解析连接信息失败', e);
-      }
-
-      // 从 editingRecord 中获取用户名和密码（如果有的话）
-      // 注意：这里需要确保 editingRecord 包含完整的配置信息
-      if ((editingRecord as any).config) {
-        username = (editingRecord as any).config.user || '';
-        password = (editingRecord as any).config.password || '';
-      }
-
-      // 保存原始加密密码，用于提交时如果未修改则传回
+      const formValues = connectorConfigToFormData(editingRecord);
+      const password = formValues.password || '';
       setOriginalPassword(password);
-
-      form.setFieldsValue({
-        name: editingRecord.name,
-        dataSourceType: editingRecord.dataSourceType,
-        host: host || 'localhost',
-        port: port || 3306,
-        database: database || '',
-        username: username || '',
-        // 编辑模式下，密码显示为 ******，表示已加密
-        password: password ? '******' : ''
-      });
-
-      // 重置密码修改状态
+      form.setFieldsValue(formValues);
       setPasswordChanged(false);
     } else if (visible && !editingRecord) {
-      // 新增模式：重置表单
       form.resetFields();
+      form.setFieldsValue({
+        dataSourceType: DataSourceType.MYSQL,
+        apiMethod: ApiHttpMethod.GET,
+        apiAuthType: ApiAuthType.NONE,
+        apiKeyHeader: 'X-API-Key',
+        securityProtocol: 'PLAINTEXT',
+        timeout: 30
+      });
       setPasswordChanged(false);
       setOriginalPassword('');
     }
   }, [visible, editingRecord, form]);
 
+  const handlePasswordField = (
+    values: DataSourceFormData
+  ): DataSourceFormData => {
+    if (isEdit && !passwordChanged && values.password === '******') {
+      return { ...values, password: originalPassword };
+    }
+    if (values.password && values.password !== '******') {
+      return { ...values, password: encodePassword(values.password) };
+    }
+    return values;
+  };
+
   const handleSubmit = async () => {
     try {
       const values = await form.validate();
       setSubmitLoading(true);
-
-      // 处理密码加密
-      const submitData: Partial<DataSourceFormData> = (() => {
-        if (isEdit && !passwordChanged) {
-          // 编辑模式且密码未修改，传递原始加密密码
-          return {
-            ...values,
-            password: originalPassword
-          };
-        }
-
-        // 新增模式或密码已修改，进行 base64 编码
-        if (values.password && values.password !== '******') {
-          return {
-            ...values,
-            password: encodePassword(values.password)
-          };
-        }
-        return values;
-      })();
+      const submitData = handlePasswordField(values);
 
       if (isEdit && editingRecord) {
-        await updateDataSource(
-          editingRecord.id,
-          submitData as DataSourceFormData
-        );
+        await updateDataSource(editingRecord.id, submitData);
         Message.success('数据源更新成功');
       } else {
-        await addDataSource(submitData as DataSourceFormData);
-        Message.success('数据源链接成功');
+        await addDataSource(submitData);
+        Message.success('数据源创建成功');
       }
 
       form.resetFields();
@@ -146,10 +111,8 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
       onClose();
     } catch (error: any) {
       if (error?.errors) {
-        // 表单验证错误，不需要提示
         return;
       }
-      // 显示后端返回的错误消息
       const errorMessage = error?.message || (isEdit ? '更新失败' : '新增失败');
       Message.error(errorMessage);
       console.error(error);
@@ -165,31 +128,234 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
     onClose();
   };
 
-  const handleTestConnection = async () => {
-    try {
-      if (isEdit && editingRecord) {
-        setTestLoading(true);
-        const result = await testConnection(editingRecord.id);
-
-        if (result.success) {
-          Message.success(result.message);
-        } else {
-          Message.error(result.message);
+  const renderPasswordInput = (label = '密码', field = 'password') => (
+    <FormItem
+      label={label}
+      field={field}
+      required
+      rules={[
+        { required: true, message: `请输入${label}` },
+        {
+          validator: (value, callback) => {
+            if (isEdit && value === '******' && !passwordChanged) {
+              return callback();
+            }
+            if (!value) {
+              return callback(`请输入${label}`);
+            }
+            return callback();
+          }
         }
-      }
-    } catch (error: any) {
-      // 显示后端返回的错误消息
-      const errorMessage = error?.message || '连接测试失败';
-      Message.error(errorMessage);
-      console.error(error);
-    } finally {
-      setTestLoading(false);
-    }
-  };
+      ]}
+    >
+      <Input.Password
+        placeholder={isEdit ? '不修改请保持 ****** 不变' : `请输入${label}`}
+        onChange={(value) => {
+          if (isEdit && value !== '******') {
+            setPasswordChanged(true);
+          }
+        }}
+      />
+    </FormItem>
+  );
+
+  const renderSqlFields = () => (
+    <>
+      <FormItem
+        label="服务地址"
+        field="host"
+        required
+        rules={[{ required: true, message: '请输入服务地址' }]}
+      >
+        <Input placeholder="请输入服务地址，如：localhost" />
+      </FormItem>
+      <FormItem
+        label="端口"
+        field="port"
+        required
+        rules={[{ required: true, message: '请输入端口' }]}
+      >
+        <InputNumber
+          placeholder="请输入端口"
+          style={{ width: '100%' }}
+          min={1}
+          max={65535}
+        />
+      </FormItem>
+      <FormItem
+        label="数据库名"
+        field="database"
+        required
+        rules={[{ required: true, message: '请输入数据库名' }]}
+      >
+        <Input placeholder="请输入数据库名" />
+      </FormItem>
+      <FormItem
+        label="用户名"
+        field="username"
+        required
+        rules={[{ required: true, message: '请输入用户名' }]}
+      >
+        <Input placeholder="请输入用户名" />
+      </FormItem>
+      {renderPasswordInput()}
+    </>
+  );
+
+  const renderApiFields = () => (
+    <>
+      <FormItem
+        label="API 地址"
+        field="apiUrl"
+        required
+        rules={[
+          { required: true, message: '请输入 API 地址' },
+          { type: 'url', message: '请输入有效的 URL 地址' }
+        ]}
+      >
+        <Input placeholder="https://api.example.com/v1/data" />
+      </FormItem>
+      <FormItem
+        label="请求方法"
+        field="apiMethod"
+        required
+        rules={[{ required: true, message: '请选择请求方法' }]}
+      >
+        <Select placeholder="请选择请求方法">
+          <Select.Option value={ApiHttpMethod.GET}>GET</Select.Option>
+          <Select.Option value={ApiHttpMethod.POST}>POST</Select.Option>
+          <Select.Option value={ApiHttpMethod.PUT}>PUT</Select.Option>
+          <Select.Option value={ApiHttpMethod.DELETE}>DELETE</Select.Option>
+        </Select>
+      </FormItem>
+      <FormItem label="请求头" field="apiHeaders">
+        <TextArea
+          placeholder='可选，JSON 格式，如：{"Content-Type":"application/json"}'
+          autoSize={{ minRows: 2, maxRows: 4 }}
+        />
+      </FormItem>
+      <FormItem
+        label="鉴权方式"
+        field="apiAuthType"
+        required
+        rules={[{ required: true, message: '请选择鉴权方式' }]}
+      >
+        <Select placeholder="请选择鉴权方式">
+          <Select.Option value={ApiAuthType.NONE}>无鉴权</Select.Option>
+          <Select.Option value={ApiAuthType.API_KEY}>API Key</Select.Option>
+          <Select.Option value={ApiAuthType.BEARER}>Bearer Token</Select.Option>
+          <Select.Option value={ApiAuthType.BASIC}>Basic Auth</Select.Option>
+        </Select>
+      </FormItem>
+      {apiAuthType === ApiAuthType.API_KEY && (
+        <>
+          <FormItem label="Key 请求头" field="apiKeyHeader">
+            <Input placeholder="默认 X-API-Key" />
+          </FormItem>
+          <FormItem
+            label="API Key"
+            field="apiKey"
+            required
+            rules={[{ required: true, message: '请输入 API Key' }]}
+          >
+            <Input.Password placeholder="请输入 API Key" />
+          </FormItem>
+        </>
+      )}
+      {apiAuthType === ApiAuthType.BEARER && (
+        <FormItem
+          label="Bearer Token"
+          field="bearerToken"
+          required
+          rules={[{ required: true, message: '请输入 Bearer Token' }]}
+        >
+          <Input.Password placeholder="请输入 Bearer Token" />
+        </FormItem>
+      )}
+      {apiAuthType === ApiAuthType.BASIC && (
+        <>
+          <FormItem
+            label="用户名"
+            field="username"
+            required
+            rules={[{ required: true, message: '请输入用户名' }]}
+          >
+            <Input placeholder="请输入用户名" />
+          </FormItem>
+          {renderPasswordInput()}
+        </>
+      )}
+      {(apiMethod === ApiHttpMethod.POST ||
+        apiMethod === ApiHttpMethod.PUT) && (
+        <FormItem label="请求体" field="requestBody">
+          <TextArea
+            placeholder="可选，JSON 格式请求体"
+            autoSize={{ minRows: 3, maxRows: 6 }}
+          />
+        </FormItem>
+      )}
+      <FormItem label="数据路径" field="dataPath">
+        <Input placeholder="可选，JSONPath，如：$.data.items" />
+      </FormItem>
+      <FormItem label="超时时间" field="timeout">
+        <InputNumber
+          placeholder="秒"
+          style={{ width: '100%' }}
+          min={1}
+          max={300}
+          suffix="秒"
+        />
+      </FormItem>
+    </>
+  );
+
+  const renderKafkaFields = () => (
+    <>
+      <FormItem
+        label="Broker 地址"
+        field="brokers"
+        required
+        rules={[{ required: true, message: '请输入 Broker 地址' }]}
+      >
+        <Input placeholder="host1:9092,host2:9092" />
+      </FormItem>
+      <FormItem
+        label="消费组"
+        field="consumerGroup"
+        required
+        rules={[{ required: true, message: '请输入消费组 ID' }]}
+      >
+        <Input placeholder="请输入 Consumer Group ID" />
+      </FormItem>
+      <FormItem label="安全协议" field="securityProtocol">
+        <Select placeholder="请选择安全协议">
+          <Select.Option value="PLAINTEXT">PLAINTEXT</Select.Option>
+          <Select.Option value="SASL_PLAINTEXT">SASL_PLAINTEXT</Select.Option>
+          <Select.Option value="SASL_SSL">SASL_SSL</Select.Option>
+          <Select.Option value="SSL">SSL</Select.Option>
+        </Select>
+      </FormItem>
+      {securityProtocol && securityProtocol !== 'PLAINTEXT' && (
+        <>
+          <FormItem label="SASL 机制" field="saslMechanism">
+            <Select placeholder="请选择 SASL 机制" allowClear>
+              <Select.Option value="PLAIN">PLAIN</Select.Option>
+              <Select.Option value="SCRAM-SHA-256">SCRAM-SHA-256</Select.Option>
+              <Select.Option value="SCRAM-SHA-512">SCRAM-SHA-512</Select.Option>
+            </Select>
+          </FormItem>
+          <FormItem label="用户名" field="username">
+            <Input placeholder="SASL 用户名" />
+          </FormItem>
+          {renderPasswordInput('SASL 密码')}
+        </>
+      )}
+    </>
+  );
 
   return (
     <Drawer
-      width={600}
+      width={640}
       title={isEdit ? '编辑数据源' : '新增数据源'}
       visible={visible}
       onCancel={handleCancel}
@@ -197,11 +363,10 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
         <div
           style={{
             display: 'flex',
-            justifyContent: isEdit ? 'space-between' : 'flex-end',
+            justifyContent: 'flex-end',
             alignItems: 'center'
           }}
         >
-          {isEdit && <div></div>}
           <Space>
             <Button onClick={handleCancel}>取消</Button>
             <Button
@@ -209,7 +374,7 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
               loading={submitLoading}
               onClick={handleSubmit}
             >
-              测试并创建
+              {isEdit ? '保存' : '测试并创建'}
             </Button>
           </Space>
         </div>
@@ -240,84 +405,31 @@ export const DataSourceDrawer: React.FC<DataSourceDrawerProps> = ({
           required
           rules={[{ required: true, message: '请选择数据源类型' }]}
         >
-          <Select placeholder="请选择数据源类型">
-            <Select.Option value={DataSourceType.MYSQL}>MySQL</Select.Option>
-            <Select.Option value={DataSourceType.DAMENG}>
-              达梦数据库
-            </Select.Option>
-            <Select.Option value={DataSourceType.POSTGRESQL}>
-              PostgreSQL
-            </Select.Option>
+          <Select
+            placeholder="请选择数据源类型"
+            disabled={isEdit}
+            onChange={() => {
+              setPasswordChanged(false);
+              setOriginalPassword('');
+            }}
+          >
+            {Object.entries(DATA_SOURCE_TYPE_META).map(([value, meta]) => (
+              <Select.Option key={value} value={value}>
+                {meta.label}
+              </Select.Option>
+            ))}
           </Select>
         </FormItem>
-        <FormItem
-          label="服务地址"
-          field="host"
-          required
-          rules={[{ required: true, message: '请输入服务地址' }]}
-        >
-          <Input placeholder="请输入服务地址，如：localhost" />
-        </FormItem>
-        <FormItem
-          label="端口"
-          field="port"
-          required
-          rules={[{ required: true, message: '请输入端口' }]}
-        >
-          <InputNumber
-            placeholder="请输入端口"
-            style={{ width: '100%' }}
-            min={1}
-            max={65535}
-          />
-        </FormItem>
-        <FormItem
-          label="数据库名"
-          field="database"
-          required
-          rules={[{ required: true, message: '请输入数据库名' }]}
-        >
-          <Input placeholder="请输入数据库名" />
-        </FormItem>
-        <FormItem
-          label="用户名"
-          field="username"
-          required
-          rules={[{ required: true, message: '请输入用户名' }]}
-        >
-          <Input placeholder="请输入用户名" />
-        </FormItem>
-        <FormItem
-          label="密码"
-          field="password"
-          required
-          rules={[
-            { required: true, message: '请输入密码' },
-            {
-              validator: (value, callback) => {
-                // 编辑模式下，如果是 ******，表示未修改，允许通过
-                if (isEdit && value === '******' && !passwordChanged) {
-                  return callback();
-                }
-                // 其他情况正常验证
-                if (!value) {
-                  return callback('请输入密码');
-                }
-                return callback();
-              }
-            }
-          ]}
-        >
-          <Input.Password
-            placeholder={isEdit ? '不修改请保持 ****** 不变' : '请输入密码'}
-            onChange={(value) => {
-              // 监听密码变化，如果用户修改了密码（不是 ******），标记为已修改
-              if (isEdit && value !== '******') {
-                setPasswordChanged(true);
-              }
-            }}
-          />
-        </FormItem>
+
+        {dataSourceType &&
+          isSqlDataSourceType(dataSourceType) &&
+          renderSqlFields()}
+        {dataSourceType &&
+          isApiDataSourceType(dataSourceType) &&
+          renderApiFields()}
+        {dataSourceType &&
+          isKafkaDataSourceType(dataSourceType) &&
+          renderKafkaFields()}
       </Form>
     </Drawer>
   );

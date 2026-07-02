@@ -30,6 +30,10 @@ export interface StreamCallbacks {
   onOpen?: (response: Response) => void;
   onMessage?: (event: StreamEvent) => void;
   onClose?: () => void;
+  /** 连接关闭且事件队列处理完毕后触发 */
+  onFinished?: () => void;
+  /** 任意原始 SSE 数据到达时触发（含心跳/未解析数据），用于重置空闲超时 */
+  onActivity?: () => void;
   onError?: (error: Error) => void;
   onReconnect?: (attempt: number) => void;
 }

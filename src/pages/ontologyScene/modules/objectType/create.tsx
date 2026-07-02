@@ -7,6 +7,9 @@ import ObjectTypeForm, {
 import { createOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import { buildCreateObjectTypeRequest } from './components/ObjectTypeFormHooks/useObjectTypeSubmit';
 import { IconLeft } from '@arco-design/web-react/icon';
+import { isOntologyApiSuccess } from '@/utils/apiResponse';
+import { isDevBypassEnabled } from '@/utils/devFallback';
+import formStyles from './components/ObjectTypeForm.module.scss';
 
 export default function OntologySceneObjectTypeCreate() {
   const history = useHistory();
@@ -30,8 +33,10 @@ export default function OntologySceneObjectTypeCreate() {
         })
       );
 
-      if (response.status === 200 && response.code === '') {
-        Message.success('创建成功');
+      if (isOntologyApiSuccess(response)) {
+        Message.success(
+          isDevBypassEnabled() ? '创建成功（已保存到本地开发缓存）' : '创建成功'
+        );
         history.push(
           `/tenant/compute/onto/ontologyScene/detail/${OSId}/objectType/list`
         );
@@ -39,7 +44,9 @@ export default function OntologySceneObjectTypeCreate() {
         Message.error(response.message || '创建失败，请重试');
       }
     } catch (error) {
-      Message.error('创建失败，请重试');
+      const message =
+        typeof error === 'string' && error.trim() ? error : '创建失败，请重试';
+      Message.error(message);
       console.error('创建对象类型失败:', error);
     } finally {
       setLoading(false);
@@ -59,25 +66,25 @@ export default function OntologySceneObjectTypeCreate() {
   };
 
   return (
-    <div className="relative flex h-[calc(100vh-56px)] w-full flex-col bg-[#fff]">
-      <div className="flex items-center gap-[16px] border-b border-[##EBEEF5] p-[24px] text-[20px] font-[600] leading-[32px] text-[var(--color-text-1)]">
+    <div className="relative flex h-[calc(100vh-56px)] w-full flex-col overflow-hidden bg-[#fff]">
+      <div className={formStyles['object-type-form-page-header']}>
         <Button
           icon={<IconLeft />}
-          size={'default'}
-          type={'default'}
+          size="small"
+          type="default"
           onClick={goBack}
         />
         创建对象类型
       </div>
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="overflow-y-auto pb-[65px]">
-          <ObjectTypeForm
-            initialValues={initialValues}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            loading={loading}
-          />
-        </div>
+
+      <div className={formStyles['object-type-form-shell']}>
+        <ObjectTypeForm
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+          loading={loading}
+          twoStepOnly
+        />
       </div>
     </div>
   );

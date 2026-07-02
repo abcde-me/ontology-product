@@ -23,6 +23,7 @@ import {
   listOntologyLinkTypeData,
   listOntologyLinkTypeColumn
 } from '@/api/ontologySceneLibrary/links';
+import { listOntologyLinkType } from '@/api/ontologySceneLibrary/graph';
 import { GetOntologyLinkTypeRes } from '@/types/links';
 import {
   OBJECT_TYPE_ICON_OPTIONS,
@@ -31,6 +32,10 @@ import {
 import { LinkType, SyncStatus } from '@/types/graphApi';
 import { isNil } from 'lodash-es';
 import { EllipsisPopover } from '@/pages/ontologyScene/components';
+import {
+  buildFieldCommentMap,
+  formatFieldDisplayLabel
+} from '@/pages/exploreAnalysis/objectBrowse/utils/fieldDisplayLabel';
 
 const TabPane = Tabs.TabPane;
 const defaultPageSize = 10;
@@ -40,15 +45,17 @@ function EdgePanel() {
   const { id: OSId } = useParams<{ id: string }>();
   const setShowCustomEdgePanel = useDemoStore((s) => s.setShowCustomEdgePanel);
   const selectedEdgeId = useDemoStore((s) => s.selectedEdgeId);
+  const sourceNode = useDemoStore((s) => s.sourceNode);
+  const targetNode = useDemoStore((s) => s.targetNode);
   const showCustomEdgePanel = useDemoStore((s) => s.showCustomEdgePanel);
   const { hideNodePanel } = useHideNodePanel();
 
   // 当 EdgePanel 显示时，隐藏节点面板
   useEffect(() => {
-    if (showCustomEdgePanel) {
+    if (typeof showCustomEdgePanel === 'boolean' && showCustomEdgePanel) {
       hideNodePanel();
     }
-  }, [showCustomEdgePanel]);
+  }, [showCustomEdgePanel, hideNodePanel]);
 
   const [basicInfo, setBasicInfo] = useState<GetOntologyLinkTypeRes | null>(
     null
@@ -73,12 +80,74 @@ function EdgePanel() {
     total: 0
   });
 
+  const [resolvedLinkId, setResolvedLinkId] = useState<number | null>(null);
+
+  const resolveLinkId = useCallback(async (): Promise<number | null> => {
+    if (typeof selectedEdgeId === 'number' && selectedEdgeId > 0) {
+      return selectedEdgeId;
+    }
+
+    const selectedLinkCode =
+      typeof selectedEdgeId === 'string' ? selectedEdgeId.trim() : '';
+
+    const sourceObjectTypeId = Number(sourceNode?.id);
+    const targetObjectTypeId = Number(targetNode?.id);
+
+    if (!OSId) {
+      return null;
+    }
+
+    try {
+      const res = await listOntologyLinkType({
+        ontologyModelID: Number(OSId),
+        pageNo: -1,
+        pageSize: -1
+      });
+
+      if (res.status === 200 && res.code === '' && res.data?.result) {
+        const links = res.data.result;
+
+        if (selectedLinkCode) {
+          const matchedByCode = links.find(
+            (link) => link.code?.trim() === selectedLinkCode
+          );
+          if (matchedByCode?.id) {
+            return matchedByCode.id;
+          }
+        }
+
+        if (
+          Number.isFinite(sourceObjectTypeId) &&
+          Number.isFinite(targetObjectTypeId) &&
+          sourceObjectTypeId > 0 &&
+          targetObjectTypeId > 0
+        ) {
+          const matchedLinks = links.filter(
+            (link) =>
+              link.sourceObjectTypeID === sourceObjectTypeId &&
+              link.targetObjectTypeID === targetObjectTypeId
+          );
+          if (matchedLinks.length === 1) {
+            return matchedLinks[0].id ?? null;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('根据关系对解析链接 ID 失败:', error);
+    }
+
+    return null;
+  }, [OSId, selectedEdgeId, sourceNode?.id, targetNode?.id]);
+
   // 加载链接详情
   const loadBasicInfo = useCallback(async () => {
-    if (!selectedEdgeId) return;
+    const linkId = await resolveLinkId();
+    setResolvedLinkId(linkId);
+    if (!linkId) return;
+
     setBasicInfoLoading(true);
     try {
-      const res = await getOntologyLinkType({ id: selectedEdgeId });
+      const res = await getOntologyLinkType({ id: linkId });
       if (res.status === 200 && res.code === '' && res.data) {
         setBasicInfo(res.data);
       } else {
@@ -90,16 +159,18 @@ function EdgePanel() {
     } finally {
       setBasicInfoLoading(false);
     }
-  }, [selectedEdgeId]);
+  }, [resolveLinkId]);
 
   // 加载实例列表
   const loadInstances = useCallback(
     async (page: number, pageSize: number) => {
-      if (!selectedEdgeId) return;
+      const linkId = resolvedLinkId ?? (await resolveLinkId());
+      if (!linkId) return;
+
       setInstancesLoading(true);
       try {
         const res = await listOntologyLinkTypeData({
-          id: selectedEdgeId,
+          id: linkId,
           page,
           pageSize
         });
@@ -120,17 +191,19 @@ function EdgePanel() {
         setInstancesLoading(false);
       }
     },
-    [selectedEdgeId]
+    [resolvedLinkId, resolveLinkId]
   );
 
   // 加载属性列表
   const loadAttributes = useCallback(
     async (page: number, pageSize: number) => {
-      if (!selectedEdgeId) return;
+      const linkId = resolvedLinkId ?? (await resolveLinkId());
+      if (!linkId) return;
+
       setAttributesLoading(true);
       try {
         const res = await listOntologyLinkTypeColumn({
-          linkTypeID: selectedEdgeId,
+          linkTypeID: linkId,
           pageNo: page,
           pageSize,
           isUse: 1
@@ -152,12 +225,13 @@ function EdgePanel() {
         setAttributesLoading(false);
       }
     },
-    [selectedEdgeId]
+    [resolvedLinkId, resolveLinkId]
   );
 
   useEffect(() => {
-    if (selectedEdgeId) {
+    if (selectedEdgeId || sourceNode || targetNode) {
       // 重置状态
+      setResolvedLinkId(null);
       setBasicInfo(null);
       setInstancesData([]);
       setAttributesData([]);
@@ -194,7 +268,7 @@ function EdgePanel() {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedEdgeId]);
+  }, [selectedEdgeId, sourceNode, targetNode]);
 
   const handleCopy = async (value: string) => {
     const result = await copyToClipboard(value);
@@ -204,9 +278,10 @@ function EdgePanel() {
   };
 
   const handleEdit = () => {
-    if (!selectedEdgeId || !OSId) return;
+    const linkId = resolvedLinkId ?? selectedEdgeId;
+    if (!linkId || !OSId) return;
     history.push(
-      `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/edit/${selectedEdgeId}`
+      `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/edit/${linkId}`
     );
   };
 
@@ -272,6 +347,11 @@ function EdgePanel() {
     );
   };
 
+  const fieldCommentMap = useMemo(
+    () => buildFieldCommentMap(attributesData),
+    [attributesData]
+  );
+
   // 动态生成实例表格列
   const instanceColumns = useMemo(() => {
     if (!instancesData || instancesData.length === 0) {
@@ -298,7 +378,12 @@ function EdgePanel() {
 
     // 生成列配置
     return keys.map((key) => ({
-      title: <EllipsisPopover value={key} className="pointer-events-auto" />,
+      title: (
+        <EllipsisPopover
+          value={formatFieldDisplayLabel(key, fieldCommentMap)}
+          className="pointer-events-auto"
+        />
+      ),
       dataIndex: key,
       width: columnWidth,
       ellipsis: true,
@@ -306,17 +391,17 @@ function EdgePanel() {
         return <EllipsisPopover value={text} />;
       }
     }));
-  }, [instancesData]);
+  }, [fieldCommentMap, instancesData]);
 
   // 属性表格列
   const attributeColumns: TableColumnProps<any>[] = [
     {
       title: '属性名称',
       dataIndex: 'comment',
-      width: 120,
-      render: (text: string) => {
-        return <EllipsisPopover value={text || '-'} />;
-      }
+      width: 200,
+      render: (text: string) => (
+        <span className="whitespace-normal break-words">{text || '-'}</span>
+      )
     },
     {
       title: '表字段',
@@ -334,7 +419,7 @@ function EdgePanel() {
     }
   ];
 
-  if (!selectedEdgeId) {
+  if (!selectedEdgeId && !sourceNode && !targetNode) {
     return (
       <div className="flex h-full w-[400px] flex-col overflow-auto rounded-[12px] bg-white">
         <div className="flex items-center justify-between border-b border-gray-300 px-[16px] py-[20px] text-[16px]/[24px] font-semibold text-[#1E293B]">

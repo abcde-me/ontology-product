@@ -1,5 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
+import styles from '../ObjectTypeForm.module.scss';
 
 interface ObjectTypeFormStepsProps {
   currentStep: number;
@@ -8,7 +9,7 @@ interface ObjectTypeFormStepsProps {
   steps?: string[];
 }
 
-const DEFAULT_STEPS = ['基本信息', '对象类型建模', '实例同步'];
+const DEFAULT_STEPS = ['基本信息', '属性信息', '实例同步'];
 
 export default function ObjectTypeFormSteps({
   currentStep,
@@ -18,12 +19,7 @@ export default function ObjectTypeFormSteps({
   const steps = stepsProp ?? DEFAULT_STEPS;
 
   return (
-    <div
-      className={classNames(
-        'mx-auto flex w-full max-w-[760px] items-center py-[24px]',
-        className
-      )}
-    >
+    <div className={classNames(styles['object-type-form-steps'], className)}>
       {steps.map((label, index) => {
         const isCompleted = index < currentStep;
         const isActive = index === currentStep;
@@ -46,9 +42,11 @@ export default function ObjectTypeFormSteps({
               <span
                 className={classNames(
                   'whitespace-nowrap text-[14px]',
-                  isActive || isCompleted
-                    ? 'font-[500] text-[var(--color-text-1)]'
-                    : 'text-[var(--color-text-3)]'
+                  isActive
+                    ? 'font-[600] text-[#165DFF]'
+                    : isCompleted
+                      ? 'font-[400] text-[#165DFF]'
+                      : 'font-[400] text-[var(--color-text-3)]'
                 )}
               >
                 {label}

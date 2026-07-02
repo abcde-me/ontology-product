@@ -1,3 +1,9 @@
+/** 应用默认首页（刷新、切换项目后的落地页） */
+export const ONTO_DEFAULT_HOME_PATH = '/tenant/compute/onto/home';
+
+export const AI_ONTOLOGY_WORKBENCH_PATH =
+  '/tenant/compute/onto/aiOntologyWorkbench';
+
 // 菜单分组 key
 export const ONTOLOGY_SCENE_MENU_GROUP_KEYS = {
   ENTITIES: 'entities', // 实体与关系

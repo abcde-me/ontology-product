@@ -1,14 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, Form, Input, Button } from '@arco-design/web-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Form,
+  Input,
+  Button,
+  Radio,
+  Upload,
+  Message
+} from '@arco-design/web-react';
+import { IconUpload } from '@arco-design/web-react/icon';
+import { OntoModal } from '@/components/OSModal';
 import { ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
 import IconSelector from '@/pages/ontologyScene/components/IconSelector';
+import type { OntologySceneExportPackage } from '@/types/ontologySceneMigration';
+import { parseOntologySceneExportFile } from '@/pages/ontologyScene/services/importOntologyScene';
 
 const { TextArea } = Input;
+
+export type SceneCreateMode = 'blank' | 'import';
 
 export interface SceneFormData {
   name: string;
   description: string;
   icon?: string;
+  createMode?: SceneCreateMode;
+  importPackage?: OntologySceneExportPackage;
 }
 
 interface SceneModalProps {
@@ -18,10 +33,9 @@ interface SceneModalProps {
   onSubmit: (data: SceneFormData) => Promise<void> | void;
   onCancel: () => void;
   loading?: boolean;
-  existingSceneIcons?: string[]; // 已存在的场景图标列表，用于随机选择时避免重复
+  existingSceneIcons?: string[];
 }
 
-// 获取随机图标（排除已使用的图标）
 const getRandomIcon = (excludeIcons: string[] = []): string => {
   const availableIcons = ICON_OPTIONS.filter(
     (opt) => !excludeIcons.includes(opt.value)
@@ -46,53 +60,117 @@ const SceneModal: React.FC<SceneModalProps> = ({
   const [selectedIcon, setSelectedIcon] = useState<string>(
     ICON_OPTIONS[0].value
   );
-  const getModalContainer = () =>
-    document.querySelector('#root') || document.body;
-  const isFirefox =
-    typeof navigator !== 'undefined' && /firefox/i.test(navigator.userAgent);
+  const [createMode, setCreateMode] = useState<SceneCreateMode>('blank');
+  const [importPackage, setImportPackage] =
+    useState<OntologySceneExportPackage>();
+  const [importFileName, setImportFileName] = useState('');
+
+  const importSummary = useMemo(() => {
+    if (!importPackage) {
+      return null;
+    }
+
+    return {
+      objectTypes: importPackage.objectTypes.length,
+      linkTypes: importPackage.linkTypes.length,
+      actions: importPackage.actions.length,
+      functions: importPackage.functions.length
+    };
+  }, [importPackage]);
 
   useEffect(() => {
+    if (!visible) {
+      return;
+    }
+
     if (mode === 'create') {
-      // 创建模式：随机选择一个与其他场景不同的图标
       const randomIcon = getRandomIcon(existingSceneIcons);
       setSelectedIcon(randomIcon);
+      setCreateMode('blank');
+      setImportPackage(undefined);
+      setImportFileName('');
+      form.setFieldsValue({
+        name: '',
+        description: ''
+      });
     } else if (mode === 'edit' && initialValues) {
       form.setFieldsValue({
         name: initialValues.name || '',
         description: initialValues.description || ''
       });
-      setSelectedIcon(initialValues.icon || '');
+      setSelectedIcon(initialValues.icon || ICON_OPTIONS[0].value);
+      setCreateMode('blank');
+      setImportPackage(undefined);
+      setImportFileName('');
     }
-  }, [mode]);
+  }, [visible, mode, initialValues, existingSceneIcons, form]);
 
-  useEffect(() => {
-    if (!isFirefox) return;
+  const applyImportPackage = (
+    pkg: OntologySceneExportPackage,
+    fileName: string
+  ) => {
+    setImportPackage(pkg);
+    setImportFileName(fileName);
 
-    let frameId = 0;
-    const syncMaskDisplay = () => {
-      const container = getModalContainer();
-      const masks = container.querySelectorAll('.arco-modal-mask');
-      const currentMask = masks[masks.length - 1] as HTMLElement | undefined;
-      if (!currentMask) return;
-      currentMask.style.setProperty(
-        'display',
-        visible ? 'block' : 'none',
-        'important'
-      );
-    };
+    const currentName = String(form.getFieldValue('name') || '').trim();
+    const currentDescription = String(
+      form.getFieldValue('description') || ''
+    ).trim();
 
-    frameId = window.requestAnimationFrame(syncMaskDisplay);
-    return () => window.cancelAnimationFrame(frameId);
-  }, [isFirefox, visible]);
+    form.setFieldsValue({
+      name: currentName || pkg.scene.name || '',
+      description: currentDescription || pkg.scene.description || ''
+    });
+
+    if (pkg.scene.icon) {
+      setSelectedIcon(pkg.scene.icon);
+    }
+  };
+
+  const handleImportFile = async (file: File) => {
+    try {
+      const pkg = await parseOntologySceneExportFile(file);
+      applyImportPackage(pkg, file.name);
+      Message.success('导入文件解析成功');
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : '导入文件解析失败';
+      Message.error(message);
+    }
+    return false;
+  };
 
   const handleSubmit = async () => {
     try {
       const values = await form.validate();
+      const sceneName = String(values.name || '').trim();
+      const sceneDescription = String(values.description || '').trim();
+
+      if (mode === 'create' && createMode === 'import' && !importPackage) {
+        Message.warning('请先上传本体场景导出文件');
+        return;
+      }
+
+      const resolvedImportPackage =
+        mode === 'create' && createMode === 'import' && importPackage
+          ? {
+              ...importPackage,
+              scene: {
+                ...importPackage.scene,
+                name: sceneName,
+                description: sceneDescription,
+                icon: selectedIcon
+              }
+            }
+          : undefined;
+
       await onSubmit({
-        ...values,
-        icon: selectedIcon
+        name: sceneName,
+        description: sceneDescription,
+        icon: selectedIcon,
+        createMode: mode === 'create' ? createMode : undefined,
+        importPackage: resolvedImportPackage
       });
-      // 不在提交成功后立即重置表单，等待 Modal 关闭时由 useEffect 处理
     } catch (error) {
       console.error('表单验证失败:', error);
     }
@@ -101,13 +179,21 @@ const SceneModal: React.FC<SceneModalProps> = ({
   const handleCancel = () => {
     form.resetFields();
     setSelectedIcon(ICON_OPTIONS[0].value);
+    setCreateMode('blank');
+    setImportPackage(undefined);
+    setImportFileName('');
     onCancel();
   };
 
+  if (!visible) {
+    return null;
+  }
+
   return (
-    <Modal
+    <OntoModal
       title={mode === 'create' ? '创建本体场景' : '编辑本体场景'}
       visible={visible}
+      unmountOnExit
       onCancel={handleCancel}
       footer={
         <div className="flex justify-end gap-2">
@@ -117,11 +203,62 @@ const SceneModal: React.FC<SceneModalProps> = ({
           </Button>
         </div>
       }
-      getPopupContainer={getModalContainer}
+      getPopupContainer={() => document.getElementById('root') || document.body}
       style={{ width: 600 }}
       closable
     >
       <Form form={form} autoComplete="off" labelAlign="left">
+        {mode === 'create' && (
+          <Form.Item label="创建方式：">
+            <Radio.Group
+              value={createMode}
+              onChange={(value) => {
+                setCreateMode(value);
+                if (value === 'blank') {
+                  setImportPackage(undefined);
+                  setImportFileName('');
+                }
+              }}
+            >
+              <Radio value="blank">空白创建</Radio>
+              <Radio value="import">外部导入</Radio>
+            </Radio.Group>
+          </Form.Item>
+        )}
+
+        {mode === 'create' && createMode === 'import' && (
+          <Form.Item label="导入文件：">
+            <div className="flex flex-col gap-[8px]">
+              <Upload
+                accept=".json,application/json"
+                showUploadList={false}
+                beforeUpload={handleImportFile}
+              >
+                <Button icon={<IconUpload />} type="outline">
+                  选择导出文件
+                </Button>
+              </Upload>
+              {importFileName ? (
+                <div className="text-[13px] leading-[20px] text-[var(--color-text-3)]">
+                  已选择：{importFileName}
+                </div>
+              ) : (
+                <div className="text-[13px] leading-[20px] text-[var(--color-text-3)]">
+                  请上传从其他环境导出的 JSON 文件
+                </div>
+              )}
+              {importSummary && (
+                <div className="rounded-[4px] bg-[#F7F8FA] px-[12px] py-[8px] text-[13px] leading-[20px] text-[var(--color-text-2)]">
+                  将导入 {importSummary.objectTypes} 个对象、
+                  {importSummary.linkTypes} 个链接、
+                  {importSummary.actions} 个行为、
+                  {importSummary.functions} 个函数
+                </div>
+              )}
+            </div>
+          </Form.Item>
+        )}
+
         <Form.Item
           label="本体场景名称："
           field="name"
@@ -154,7 +291,7 @@ const SceneModal: React.FC<SceneModalProps> = ({
           />
         </Form.Item>
       </Form>
-    </Modal>
+    </OntoModal>
   );
 };
 

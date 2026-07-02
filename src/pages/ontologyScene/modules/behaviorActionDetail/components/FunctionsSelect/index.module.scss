@@ -22,6 +22,15 @@
   }
 }
 
+.recommend-btn {
+  flex-shrink: 0;
+  color: rgb(var(--primary-6)) !important;
+
+  &:hover {
+    color: rgb(var(--primary-5)) !important;
+  }
+}
+
 .function-select {
   :global {
     .arco-select-view-value {

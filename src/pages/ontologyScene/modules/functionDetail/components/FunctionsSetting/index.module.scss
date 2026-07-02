@@ -7,6 +7,17 @@ $border-color: #dfe2eb;
   height: 100%;
   min-height: 0;
 
+  :global {
+    .arco-message-wrapper {
+      flex-shrink: 0;
+      padding: 8px 16px 0;
+    }
+
+    .arco-message {
+      width: 100%;
+    }
+  }
+
   .left,
   .right,
   .sdk {

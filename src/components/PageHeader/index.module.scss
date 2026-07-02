@@ -2,8 +2,19 @@
   padding: 24px 24px 0 24px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
   overflow: hidden;
+
+  .page-header-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    overflow: hidden;
+  }
+
+  .page-header-extra {
+    flex-shrink: 0;
+  }
 
   .page-header-title {
     display: flex;
@@ -11,25 +22,35 @@
     gap: 16px;
     overflow: hidden;
 
-    .page-header-title-text {
-      color: var(--text-1);
-
-      /* 20 数字指标/600 */
-      font-family: 'PingFang SC';
-      font-size: 20px;
-      font-weight: 600;
-      line-height: 30px; /* 150% */
+    :global(.arco-btn) {
+      flex-shrink: 0;
     }
   }
 
-  .page-header-sub-title {
+  .page-header-title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
     overflow: hidden;
-    color: var(--color-text-3);
+  }
 
-    /* 14 正文&二级标题/400 */
+  .page-header-title-text {
+    color: var(--text-1);
+    flex: 0 1 auto;
+    min-width: 0;
+
+    /* 20 数字指标/600 */
     font-family: 'PingFang SC';
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 22px; /* 157.143% */
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 30px; /* 150% */
+  }
+
+  .page-header-info-icon {
+    flex-shrink: 0;
+    font-size: 16px;
+    color: var(--color-text-3);
+    cursor: help;
   }
 }

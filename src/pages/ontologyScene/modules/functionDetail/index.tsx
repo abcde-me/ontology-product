@@ -1,11 +1,12 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './index.module.scss';
 import { Button, Form, Input, Message } from '@arco-design/web-react';
 import { ProButton } from '@ceai-front/arco-material';
 import { useHistory, useParams } from 'react-router-dom';
 import { FormItem } from '@/pages/ontologyScene/components';
 import { FunctionsSetting } from '@/pages/ontologyScene/modules/functionDetail/components';
-import { useDebounceFn, useRequest } from 'ahooks';
+import { useRequest } from 'ahooks';
+import { IconRobot } from '@arco-design/web-react/icon';
 import {
   DEFAULT_FUNCTION_CONTENT,
   DEFAULT_FUNCTION_SCHEMA,
@@ -26,11 +27,13 @@ import {
   getFunctionList,
   saveFunction
 } from '@/api/ontologySceneLibrary/ontologyFunction';
+import { generateOntologyFunctionCode } from '@/pages/ontologyScene/modules/functionDetail/services/generateOntologyFunctionCode';
 import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
 import { IconLeft } from '@arco-design/web-react/icon';
 import { usePermission } from '@/hooks';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
+import { useAutoOntologyFunctionCodeFromName } from '@/pages/ontologyScene/hooks/useAutoOntologyFunctionCodeFromName';
 
 const { TextArea } = Input;
 
@@ -45,6 +48,17 @@ export default function OSFunctionDetailPage() {
   } = useParams<Record<string, string>>();
 
   const { hasAnyPermission } = usePermission();
+  const [generatingCode, setGeneratingCode] = useState(false);
+  const generateAbortRef = useRef<AbortController | null>(null);
+
+  const { generating: generatingFunctionCode } =
+    useAutoOntologyFunctionCodeFromName({
+      form,
+      ontologyModelID: +OSId,
+      nameField: 'name',
+      codeField: 'code',
+      enabled: functionId === '_NEW_'
+    });
 
   const { data: functionDetail, loading } = useRequest(
     () => {
@@ -146,6 +160,66 @@ export default function OSFunctionDetailPage() {
     form.setFieldsValue(buildFunctionSchema(functionDetail));
   }, [form, functionDetail, functionId]);
 
+  useEffect(() => {
+    return () => {
+      generateAbortRef.current?.abort();
+    };
+  }, []);
+
+  const handleSmartGenerate = async () => {
+    if (functionDetail?.boundAction) {
+      Message.warning('该函数已被行为绑定，不可智能生成');
+      return;
+    }
+
+    const values = form.getFieldsValue() as OntologyFunctionSchema;
+    const functionCode = String(values.code ?? '').trim();
+    const description = String(values.description ?? '').trim();
+
+    if (!functionCode) {
+      Message.warning('请先填写函数名称(id)');
+      return;
+    }
+    if (!description) {
+      Message.warning('请先填写描述说明，说明函数要实现的能力');
+      return;
+    }
+
+    generateAbortRef.current?.abort();
+    const controller = new AbortController();
+    generateAbortRef.current = controller;
+    setGeneratingCode(true);
+
+    try {
+      const generated = await generateOntologyFunctionCode({
+        name: values.name,
+        code: functionCode,
+        description,
+        sceneId: +OSId,
+        signal: controller.signal
+      });
+
+      form.setFieldsValue({
+        input: generated.input,
+        output: generated.output,
+        content: generated.content
+      });
+
+      Message.success(
+        '已根据描述与当前场景库本体结构生成函数代码，可继续编辑后保存'
+      );
+    } catch (error) {
+      if ((error as Error)?.name === 'AbortError') {
+        return;
+      }
+      Message.error(
+        (error as Error)?.message || '智能生成函数代码失败，请稍后重试'
+      );
+    } finally {
+      setGeneratingCode(false);
+    }
+  };
+
   const getParamNames = () => {
     const { input, output } = form.getFieldsValue(['input', 'output']);
     // 默认校验code
@@ -243,7 +317,9 @@ export default function OSFunctionDetailPage() {
             field="code"
             tooltip={'函数名称将作为本体语义下的唯一标识'}
             required
-            extra={'支持英文、数字、下划线，2～100字符，不可与已有名称重复'}
+            extra={
+              '支持英文、数字、下划线，2～100字符，不可与已有名称重复；新建时根据显示名称自动生成'
+            }
             rules={[
               {
                 validator(v, onError) {
@@ -266,12 +342,13 @@ export default function OSFunctionDetailPage() {
             ]}
           >
             <Input
-              placeholder="请输入id用于唯一标识符，如infer_affiliation"
+              placeholder="请输入id用于唯一标识符，如 fn_a1b2_infer_relation"
               maxLength={100}
               showWordLimit
               disabled={pageMode === 'edit'}
               allowClear
               className={'w-[640px]'}
+              suffix={generatingFunctionCode ? '生成中...' : undefined}
               onBlur={(e) => {
                 if (!!e.target.value?.trim()) validateSameValue('code');
               }}
@@ -280,7 +357,7 @@ export default function OSFunctionDetailPage() {
 
           <FormItem label="描述说明" field="description" required={false}>
             <TextArea
-              placeholder="请输入描述说明"
+              placeholder="请描述函数要实现的能力，例如：根据输入的对象实例查询其关联对象并返回统计结果"
               autoSize={{ minRows: 3, maxRows: 6 }}
               maxLength={500}
               showWordLimit
@@ -288,6 +365,22 @@ export default function OSFunctionDetailPage() {
               wrapperStyle={{ width: '640px' }}
             />
           </FormItem>
+          <div className={styles['smart-generate-row']}>
+            <Button
+              type="text"
+              className={styles['smart-generate-btn']}
+              icon={<IconRobot />}
+              loading={generatingCode}
+              disabled={loading || !!functionDetail?.boundAction}
+              onClick={handleSmartGenerate}
+            >
+              {generatingCode ? '生成中...' : '智能生成函数代码'}
+            </Button>
+            <span className={styles['smart-generate-hint']}>
+              将根据描述说明与 SDK
+              开发文档自动生成入参、出参与函数逻辑，生成后可在编辑器中修改并保存
+            </span>
+          </div>
           <div className={styles['params-setting-container']}>
             <div className={'module-title'}>函数配置与校验</div>
             <FormItem

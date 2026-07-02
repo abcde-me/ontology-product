@@ -6,7 +6,7 @@
 
 import { useRef, useCallback, useState } from 'react';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
-import { parseJson } from '../utils';
+import { parseStreamEventData } from '../utils';
 import {
   StreamConfig,
   StreamCallbacks,
@@ -35,6 +35,10 @@ export const useXStream = (): UseStreamReturn => {
   const configRef = useRef<StreamConfig | null>(null);
   const callbacksRef = useRef<StreamCallbacks | null>(null);
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const openTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isConnectingRef = useRef(false);
+  const isConnectedRef = useRef(false);
+  const userAbortRef = useRef(false);
 
   // ==================== 清空队列 ====================
   const clearQueue = useCallback(() => {
@@ -52,9 +56,9 @@ export const useXStream = (): UseStreamReturn => {
   // ==================== 处理事件队列 ====================
   const processQueue = useCallback(() => {
     if (eventQueueRef.current.length === 0) {
-      // 队列处理完毕
       if (connectionClosedRef.current) {
         clearQueue();
+        callbacksRef.current?.onFinished?.();
       } else {
         processingStateRef.current = PROCESSING_STATE.IDLE;
       }
@@ -90,10 +94,15 @@ export const useXStream = (): UseStreamReturn => {
 
   // ==================== 断开连接 ====================
   const disconnect = useCallback(() => {
-    // 清理定时器
+    userAbortRef.current = true;
     if (reconnectTimerRef.current) {
       clearTimeout(reconnectTimerRef.current);
       reconnectTimerRef.current = null;
+    }
+
+    if (openTimeoutRef.current) {
+      clearTimeout(openTimeoutRef.current);
+      openTimeoutRef.current = null;
     }
 
     // 中止连接
@@ -110,6 +119,8 @@ export const useXStream = (): UseStreamReturn => {
       reconnectAttempts: 0,
       queueSize: 0
     });
+    isConnectingRef.current = false;
+    isConnectedRef.current = false;
 
     console.log('[useXStream] Disconnected');
   }, [clearQueue]);
@@ -117,43 +128,95 @@ export const useXStream = (): UseStreamReturn => {
   // ==================== 连接函数 ====================
   const connect = useCallback(
     async (config: StreamConfig, callbacks: StreamCallbacks) => {
-      // 保存配置和回调
       configRef.current = { ...DEFAULT_CONFIG, ...config };
       callbacksRef.current = callbacks;
+      userAbortRef.current = false;
 
-      // 如果已经在连接，先断开
-      if (state.isConnecting || state.isConnected) {
-        disconnect();
+      if (isConnectingRef.current || isConnectedRef.current) {
+        abortControllerRef.current?.abort();
+        if (reconnectTimerRef.current) {
+          clearTimeout(reconnectTimerRef.current);
+          reconnectTimerRef.current = null;
+        }
+        if (openTimeoutRef.current) {
+          clearTimeout(openTimeoutRef.current);
+          openTimeoutRef.current = null;
+        }
+        eventQueueRef.current = [];
+        processingStateRef.current = PROCESSING_STATE.IDLE;
+        connectionClosedRef.current = false;
+        isConnectingRef.current = false;
+        isConnectedRef.current = false;
       }
 
+      isConnectingRef.current = true;
+      isConnectedRef.current = false;
       setState((prev) => ({ ...prev, isConnecting: true }));
 
-      // 创建新的 AbortController
       abortControllerRef.current = new AbortController();
+      const activeSignal = abortControllerRef.current.signal;
 
-      // 构建请求头
       const headers = {
         ...DEFAULT_HEADERS,
         ...config.headers
       };
 
-      // 构建请求体
       const body = config.body ? JSON.stringify(config.body) : undefined;
+      const requestUrl = config.url.startsWith('http')
+        ? config.url
+        : `${window.location.origin}${config.url}`;
 
-      console.log('[useXStream] Connecting to:', config.url);
+      console.log(
+        '[useXStream] Connecting to:',
+        requestUrl,
+        'method:',
+        config.method || 'POST'
+      );
+
+      const notifyError = (error: Error) => {
+        if (userAbortRef.current) {
+          return;
+        }
+        callbacks.onError?.(error);
+      };
+
+      openTimeoutRef.current = setTimeout(() => {
+        console.error('[useXStream] Connection open timeout');
+        abortControllerRef.current?.abort();
+        notifyError(new Error('连接模型服务超时，请稍后重试'));
+      }, 30000);
 
       try {
-        await fetchEventSource(config.url, {
+        await fetchEventSource(requestUrl, {
           method: config.method || DEFAULT_CONFIG.method,
           headers,
           body,
-          signal: abortControllerRef.current.signal,
+          signal: activeSignal,
           credentials: 'include',
+          openWhenHidden: true,
+
+          fetch: (input, init) => {
+            console.log('[useXStream] fetch 已发起:', input);
+            return window.fetch(input, init);
+          },
 
           onopen: async (response) => {
             const contentType = response.headers?.get('content-type') || '';
 
-            if (response.ok && contentType.includes('text/event-stream')) {
+            if (
+              response.ok &&
+              (contentType.includes('text/event-stream') ||
+                contentType.includes('application/stream+json') ||
+                contentType.includes('text/plain') ||
+                contentType.includes('application/octet-stream'))
+            ) {
+              if (openTimeoutRef.current) {
+                clearTimeout(openTimeoutRef.current);
+                openTimeoutRef.current = null;
+              }
+
+              isConnectingRef.current = false;
+              isConnectedRef.current = true;
               setState((prev) => ({
                 ...prev,
                 isConnected: true,
@@ -166,32 +229,91 @@ export const useXStream = (): UseStreamReturn => {
               return;
             }
 
+            if (response.ok && contentType.includes('application/json')) {
+              try {
+                const data = await response.clone().json();
+                const errMsg =
+                  data?.message ||
+                  data?.msg ||
+                  data?.error_detail ||
+                  data?.error;
+                const code = data?.code != null ? String(data.code) : '';
+                if (
+                  errMsg ||
+                  (code &&
+                    code !== 'Success' &&
+                    code !== 'success' &&
+                    code !== '0' &&
+                    code !== '200' &&
+                    code !== '')
+                ) {
+                  throw new Error(
+                    errMsg ||
+                      `CreateMessage 请求失败 (${code || response.status})`
+                  );
+                }
+              } catch (parseError) {
+                if (
+                  parseError instanceof Error &&
+                  parseError.message !== 'Connection failed'
+                ) {
+                  throw parseError;
+                }
+              }
+              throw new Error(
+                '服务端返回 JSON 而非 SSE 流，请检查 Agent 是否已发布并配置大模型'
+              );
+            }
+
             // 处理错误响应
             let errorMsg = 'Connection failed';
-            if (response.headers.get('content-type') === 'application/json') {
+            const responseContentType =
+              response.headers.get('content-type') || '';
+
+            if (responseContentType.includes('application/json')) {
               try {
                 const data = await response.json();
-                errorMsg = data?.msg || data?.message || errorMsg;
+                errorMsg =
+                  data?.msg || data?.message || data?.error || errorMsg;
               } catch (e) {
                 // 忽略解析错误
               }
+            } else {
+              try {
+                const text = await response.text();
+                if (text) {
+                  try {
+                    const data = JSON.parse(text);
+                    errorMsg =
+                      data?.msg || data?.message || data?.error || errorMsg;
+                  } catch {
+                    errorMsg = text.slice(0, 200);
+                  }
+                }
+              } catch (e) {
+                // 忽略解析错误
+              }
+            }
+
+            if (response.status) {
+              errorMsg = `${errorMsg} (${response.status})`;
             }
 
             throw new Error(errorMsg);
           },
 
           onmessage: (msg) => {
+            callbacks.onActivity?.();
+
             try {
-              const event = parseJson<StreamEvent>(msg.data);
+              const event = parseStreamEventData(msg.data, msg.event);
               if (event) {
-                // 添加到队列
                 eventQueueRef.current.push(event);
                 setState((prev) => ({
                   ...prev,
                   queueSize: eventQueueRef.current.length
                 }));
 
-                // 如果队列处理器空闲，启动处理
                 if (processingStateRef.current === PROCESSING_STATE.IDLE) {
                   processQueue();
                 }
@@ -205,6 +327,8 @@ export const useXStream = (): UseStreamReturn => {
             console.log('[useXStream] Connection closed');
             connectionClosedRef.current = true;
 
+            isConnectingRef.current = false;
+            isConnectedRef.current = false;
             setState((prev) => ({
               ...prev,
               isConnected: false,
@@ -217,7 +341,8 @@ export const useXStream = (): UseStreamReturn => {
                 processQueue();
               }
             } else {
-              clearQueue();
+              processingStateRef.current = PROCESSING_STATE.IDLE;
+              callbacks.onFinished?.();
             }
 
             callbacks.onClose?.();
@@ -228,65 +353,50 @@ export const useXStream = (): UseStreamReturn => {
             console.error('[useXStream] SSE Error:', error);
             connectionClosedRef.current = true;
 
+            isConnectingRef.current = false;
+            isConnectedRef.current = false;
             setState((prev) => ({
               ...prev,
               isConnected: false,
               isConnecting: false
             }));
 
-            clearQueue();
-            callbacks.onError?.(error);
-            abortControllerRef.current?.abort();
-
-            // 如果启用自动重连，尝试重连
-            const currentConfig = configRef.current;
-            if (
-              currentConfig?.autoReconnect &&
-              state.reconnectAttempts <
-                (currentConfig.maxReconnectAttempts ||
-                  DEFAULT_CONFIG.maxReconnectAttempts)
-            ) {
-              const nextAttempt = state.reconnectAttempts + 1;
-              setState((prev) => ({
-                ...prev,
-                isReconnecting: true,
-                reconnectAttempts: nextAttempt
-              }));
-
-              console.log(
-                `[useXStream] Auto reconnecting... (${nextAttempt}/${currentConfig.maxReconnectAttempts})`
-              );
-              callbacks.onReconnect?.(nextAttempt);
-
-              reconnectTimerRef.current = setTimeout(() => {
-                connect(currentConfig, callbacks);
-              }, currentConfig.reconnectInterval || DEFAULT_CONFIG.reconnectInterval);
+            if (openTimeoutRef.current) {
+              clearTimeout(openTimeoutRef.current);
+              openTimeoutRef.current = null;
             }
 
-            throw error;
+            notifyError(
+              error instanceof Error ? error : new Error('SSE 连接失败')
+            );
+            abortControllerRef.current?.abort();
           }
         });
       } catch (error: any) {
-        if (error.name !== 'AbortError') {
-          console.error('[useXStream] Connect error:', error);
-          setState((prev) => ({
-            ...prev,
-            isConnected: false,
-            isConnecting: false,
-            isReconnecting: false
-          }));
-          callbacks.onError?.(error);
+        if (openTimeoutRef.current) {
+          clearTimeout(openTimeoutRef.current);
+          openTimeoutRef.current = null;
         }
+
+        isConnectingRef.current = false;
+        isConnectedRef.current = false;
+        setState((prev) => ({
+          ...prev,
+          isConnected: false,
+          isConnecting: false,
+          isReconnecting: false
+        }));
+
+        if (error?.name === 'AbortError') {
+          notifyError(new Error('连接被中断，请重试'));
+          return;
+        }
+
+        console.error('[useXStream] Connect error:', error);
+        notifyError(error instanceof Error ? error : new Error('连接失败'));
       }
     },
-    [
-      state.isConnecting,
-      state.isConnected,
-      state.reconnectAttempts,
-      disconnect,
-      processQueue,
-      clearQueue
-    ]
+    [disconnect, processQueue]
   );
 
   // ==================== 重新连接 ====================

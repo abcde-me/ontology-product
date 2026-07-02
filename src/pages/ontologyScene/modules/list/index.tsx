@@ -4,12 +4,16 @@ import {
   Button,
   Input,
   Message,
-  Modal,
   Pagination,
   Popover,
   Spin
 } from '@arco-design/web-react';
-import { IconPlus, IconDelete } from '@arco-design/web-react/icon';
+import {
+  IconPlus,
+  IconDelete,
+  IconDownload
+} from '@arco-design/web-react/icon';
+import PageHeader from '@/components/PageHeader';
 import {
   ExpandableProcessFlow,
   ProcessStep,
@@ -40,8 +44,19 @@ import { ICON_OPTIONS } from '../../common/constants';
 import dayjs from 'dayjs';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
-import { useHasPermission } from '@/store/userInfoStore';
+import { useHasPermission, useUserInfoStore } from '@/store/userInfoStore';
 import { EllipsisPopover, OntoModal } from '@/pages/ontologyScene/components';
+import { scheduleOverlayCleanup } from '@/utils/removeStaleArcoOverlays';
+import { isOntologyApiSuccess } from '@/utils/apiResponse';
+import { isDevBypassEnabled } from '@/utils/devFallback';
+import {
+  buildDevListResponse,
+  cacheOntologySceneDetailSnapshot
+} from '@/utils/devOntologyStore';
+import { enrichOntologySceneCounts } from '@/utils/enrichOntologySceneCounts';
+import { exportOntologyScene } from '@/pages/ontologyScene/services/exportOntologyScene';
+import { importOntologyScenePackage } from '@/pages/ontologyScene/services/importOntologyScene';
+import { sortOntologyScenesByCreateTimeDesc } from '@/utils/sortOntologyScenes';
 
 // 扩展 ProcessStep 类型，使 description 支持 ReactNode
 interface SceneProcessStep extends Omit<ProcessStep, 'description'> {
@@ -51,11 +66,16 @@ interface SceneProcessStep extends Omit<ProcessStep, 'description'> {
 // 场景卡片数据接口，直接使用 OntologScene
 export type SceneCardItem = OntologScene;
 
+const SCENE_LIST_PAGE_SUBTITLE =
+  '将离散的底层数据映射为可视、可管、可执行的业务对象,构建面向AI时代的语义基础设施';
+
 // 场景卡片组件
 interface SceneCardProps {
   item: SceneCardItem;
   onEdit?: (item: SceneCardItem) => void;
   onDelete?: (item: SceneCardItem) => void;
+  onExport?: (item: SceneCardItem) => void;
+  exporting?: boolean;
   onCardClick?: (item: SceneCardItem) => void;
   onIconClick?: (
     item: SceneCardItem,
@@ -67,6 +87,8 @@ const SceneCard: React.FC<SceneCardProps> = ({
   item,
   onEdit,
   onDelete,
+  onExport,
+  exporting = false,
   onCardClick,
   onIconClick
 }) => {
@@ -93,6 +115,14 @@ const SceneCard: React.FC<SceneCardProps> = ({
       onDelete?.(item);
     },
     [item, onDelete]
+  );
+
+  const handleExport = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onExport?.(item);
+    },
+    [item, onExport]
   );
 
   const handleIconClick = useCallback(
@@ -154,12 +184,19 @@ const SceneCard: React.FC<SceneCardProps> = ({
 
             {isHovered && (
               <div className="ml-[16px] flex items-center gap-[8px]">
-                {/* <Popover content="编辑">
-                  <IconEdit
-                    className="h-4 w-4 cursor-pointer text-[#4e5969] transition-colors hover:text-[#165dff]"
-                    onClick={handleEdit}
-                  />
-                </Popover> */}
+                <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.GET}>
+                  <Popover content="导出">
+                    <IconDownload
+                      className={classNames(
+                        'h-4 w-4 cursor-pointer text-[#4e5969] transition-colors hover:text-[#165dff]',
+                        {
+                          'pointer-events-none opacity-50': exporting
+                        }
+                      )}
+                      onClick={exporting ? undefined : handleExport}
+                    />
+                  </Popover>
+                </PermissionWrapper>
                 <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.DELETE}>
                   <Popover content="删除">
                     <IconDelete
@@ -253,6 +290,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
           </div>
         </div>
       </div>
+
       {/* 更新日期 */}
       <div className="flex items-center">
         {item.updateUser && (
@@ -281,6 +319,7 @@ export default function OntologySceneList() {
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [editingScene, setEditingScene] = useState<SceneCardItem | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [exportingSceneId, setExportingSceneId] = useState<number>();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   // 加载场景列表
@@ -295,23 +334,52 @@ export default function OntologySceneList() {
         order: 'desc'
       });
 
-      if (response.status === 200 && response.code === '') {
-        const result = response.data?.result || [];
+      if (isOntologyApiSuccess(response)) {
+        const result = sortOntologyScenesByCreateTimeDesc(
+          response.data?.result || []
+        );
         setSceneList(result);
         setTotalCount(response.data?.totalCount || 0);
-      } else {
-        Message.error(response.message || '加载失败');
+        return;
       }
+
+      if (isDevBypassEnabled()) {
+        const devResponse = buildDevListResponse(filter ?? '');
+        const enriched = sortOntologyScenesByCreateTimeDesc(
+          await enrichOntologySceneCounts(devResponse.data?.result || [])
+        );
+        setSceneList(enriched);
+        setTotalCount(enriched.length);
+        if (!enriched.length) {
+          Message.warning('后端接口不可用，且本地暂无缓存的场景数据');
+        }
+        return;
+      }
+
+      Message.error(response.message || '加载失败');
     } catch (error) {
+      if (isDevBypassEnabled()) {
+        const devResponse = buildDevListResponse(filter ?? '');
+        const enriched = sortOntologyScenesByCreateTimeDesc(
+          await enrichOntologySceneCounts(devResponse.data?.result || [])
+        );
+        setSceneList(enriched);
+        setTotalCount(enriched.length);
+        return;
+      }
+
       console.error('加载场景列表失败:', error);
       Message.error('加载场景列表失败');
     } finally {
       setLoading(false);
+      scheduleOverlayCleanup();
     }
   }, [currentPage, pageSize, filter]);
 
   useEffect(() => {
+    const cancelCleanup = scheduleOverlayCleanup();
     loadSceneList();
+    return cancelCleanup;
   }, [loadSceneList]);
 
   // 处理创建场景
@@ -333,6 +401,10 @@ export default function OntologySceneList() {
   const handleModalSubmit = async (data: SceneFormData) => {
     setSubmitLoading(true);
     try {
+      const projectReady = await useUserInfoStore
+        .getState()
+        .ensureProjectReady();
+
       if (modalMode === 'create') {
         const response = await createOntologyModel({
           name: data.name,
@@ -341,14 +413,57 @@ export default function OntologySceneList() {
           tagIdList: []
         });
 
-        if (response.status === 200 && response.code === '') {
-          Message.success('创建成功');
-          // 创建成功后跳转到详情页
-          history.push(
-            `/tenant/compute/onto/ontologyScene/detail/${response.data.id}`
-          );
+        if (isOntologyApiSuccess(response) && response.data?.id) {
+          const sceneId = response.data.id;
+
+          if (data.createMode === 'import' && data.importPackage) {
+            const importResult = await importOntologyScenePackage(
+              sceneId,
+              data.importPackage
+            );
+
+            const updateResponse = await updateOntologyModel({
+              id: sceneId,
+              name: data.name,
+              description: data.description || '',
+              icon: data.icon || ''
+            });
+
+            if (!isOntologyApiSuccess(updateResponse)) {
+              Message.warning(
+                updateResponse.message ||
+                  '导入完成，但场景名称更新失败，请在详情页手动修改'
+              );
+            }
+
+            cacheOntologySceneDetailSnapshot({
+              id: sceneId,
+              name: data.name,
+              description: data.description,
+              icon: data.icon,
+              createTime: new Date().toISOString(),
+              updateTime: new Date().toISOString()
+            });
+
+            Message.success(
+              `导入成功：${importResult.counts.objectTypes} 个对象、${importResult.counts.linkTypes} 个链接、${importResult.counts.actions} 个行为、${importResult.counts.functions} 个函数`
+            );
+          } else {
+            Message.success(
+              projectReady ? '创建成功' : '创建成功（开发环境本地缓存）'
+            );
+          }
+
+          setModalVisible(false);
+          if (projectReady) {
+            history.push(
+              `/tenant/compute/onto/ontologyScene/detail/${sceneId}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH}`
+            );
+          } else {
+            await loadSceneList();
+          }
         } else {
-          Message.error(response.message || '创建失败');
+          Message.error(response?.message || '创建失败');
         }
       } else if (editingScene && editingScene.id) {
         const response = await updateOntologyModel({
@@ -358,17 +473,38 @@ export default function OntologySceneList() {
           icon: data.icon || ''
         });
 
-        if (response.status === 200 && response.code === '') {
+        if (isOntologyApiSuccess(response)) {
           Message.success('修改成功');
-          // 重新加载列表
+          setModalVisible(false);
+          setEditingScene(null);
+          setSceneList((prev) =>
+            prev.map((scene) =>
+              scene.id === editingScene.id
+                ? {
+                    ...scene,
+                    name: data.name,
+                    description: data.description || '',
+                    icon: data.icon || '',
+                    updateTime: new Date().toISOString()
+                  }
+                : scene
+            )
+          );
           await loadSceneList();
         } else {
-          Message.error(response.message || '修改失败');
+          Message.error(response?.message || '修改失败');
         }
       }
-      setModalVisible(false);
     } catch (error) {
-      Message.error(modalMode === 'create' ? '创建失败' : '修改失败');
+      const errorMessage =
+        typeof error === 'string'
+          ? error
+          : error instanceof Error
+            ? error.message
+            : '';
+      Message.error(
+        errorMessage || (modalMode === 'create' ? '创建失败' : '修改失败')
+      );
       console.error('提交失败:', error);
     } finally {
       setSubmitLoading(false);
@@ -379,6 +515,26 @@ export default function OntologySceneList() {
   const handleModalCancel = () => {
     setModalVisible(false);
     setEditingScene(null);
+    scheduleOverlayCleanup();
+  };
+
+  // 处理导出场景
+  const handleExport = async (item: SceneCardItem) => {
+    if (!item.id || exportingSceneId === item.id) {
+      return;
+    }
+
+    setExportingSceneId(item.id);
+    try {
+      await exportOntologyScene(item.id);
+      Message.success('导出成功');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '导出失败';
+      Message.error(errorMessage);
+      console.error('导出失败:', error);
+    } finally {
+      setExportingSceneId(undefined);
+    }
   };
 
   // 处理删除场景
@@ -397,9 +553,8 @@ export default function OntologySceneList() {
 
           const response = await deleteOntologyModel({ id: item.id });
 
-          if (response.status === 200 && response.code === '') {
+          if (isOntologyApiSuccess(response)) {
             Message.success('删除成功');
-            // 重新加载列表
             await loadSceneList();
           } else {
             Message.error(response.message || '删除失败');
@@ -414,7 +569,12 @@ export default function OntologySceneList() {
 
   // 处理卡片点击
   const handleCardClick = (item: SceneCardItem) => {
-    history.push(`/tenant/compute/onto/ontologyScene/detail/${item.id || ''}`);
+    if (item.id) {
+      cacheOntologySceneDetailSnapshot(item);
+    }
+    history.push(
+      `/tenant/compute/onto/ontologyScene/detail/${item.id || ''}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH}`
+    );
   };
 
   // 处理搜索（回车或点击搜索图标时触发）
@@ -480,9 +640,14 @@ export default function OntologySceneList() {
       )}
     >
       {/* 头部流程 */}
-      <ExpandableProcessFlow
+      <PageHeader
+        className="!px-0 !pb-0 !pt-0"
         title="本体场景库"
-        description="将离散的底层数据映射为可视、可管、可执行的业务对象,构建面向AI时代的语义基础设施"
+        subTitle={SCENE_LIST_PAGE_SUBTITLE}
+      />
+      <ExpandableProcessFlow
+        title=""
+        description=""
         toggleText="操作引导"
         defaultExpanded={true}
         steps={processSteps as any}
@@ -523,6 +688,8 @@ export default function OntologySceneList() {
               item={item}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onExport={handleExport}
+              exporting={exportingSceneId === item.id}
               onCardClick={handleCardClick}
             />
           ))}

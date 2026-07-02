@@ -104,6 +104,7 @@
     "pdfjs-dist": "^3.0.279",
     "pinyin-pro": "^3.25.0",
     "prettier-plugin-tailwindcss": "^0.5.11",
+    "qrcode.react": "^4.2.0",
     "query-string": "^6.13.8",
     "rc-textarea": "^1.8.2",
     "react-18-input-autosize": "^3.0.0",
@@ -320,6 +321,7 @@
     ],
     "modulePaths": [],
     "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1",
       "^react-native$": "react-native-web",
       "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy"
     },
@@ -350,7 +352,8 @@
     "extends": "react-app"
   },
   "resolutions": {
-    "mockjs/commander": "~9.4.1"
+    "mockjs/commander": "~9.4.1",
+    "@types/d3-dispatch": "3.0.6"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx,js,jsx}": [

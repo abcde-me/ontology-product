@@ -110,20 +110,115 @@ export const OBJECT_TYPE_SYNC_STATUS_FILTERS = [
 
 // 数据源类型枚举
 export const DATA_SOURCE_TYPE = {
+  /** 手动填写属性，无模板导入 */
+  MANUAL_CREATION: 'manual_creation',
   /** 本地CSV导入 */
   LOCAL_CSV: 'local_csv',
   /** 数据目录同步 */
-  DATA_DIRECTORY_SYNC: 'data_directory_sync'
+  DATA_DIRECTORY_SYNC: 'data_directory_sync',
+  /** 数据资源列表选表 */
+  DATA_RESOURCE: 'data_resource'
 } as const;
 
 export type DataSourceType =
   (typeof DATA_SOURCE_TYPE)[keyof typeof DATA_SOURCE_TYPE];
+
+/** 实例同步数据源类型 */
+export const INSTANCE_SYNC_SOURCE_TYPE = {
+  CSV_UPLOAD: 'csv_upload',
+  DATABASE: 'database',
+  MESSAGE_QUEUE: 'message_queue',
+  API_INTERFACE: 'api_interface',
+  FILE_PARSE: 'file_parse'
+} as const;
+
+export type InstanceSyncSourceType =
+  (typeof INSTANCE_SYNC_SOURCE_TYPE)[keyof typeof INSTANCE_SYNC_SOURCE_TYPE];
+
+/** Kafka 消息解析模式 */
+export const KAFKA_MESSAGE_PARSE_MODE = {
+  NONE: 'none',
+  STRUCTURED: 'structured'
+} as const;
+
+export type KafkaMessageParseMode =
+  (typeof KAFKA_MESSAGE_PARSE_MODE)[keyof typeof KAFKA_MESSAGE_PARSE_MODE];
+
+/** Kafka 消息解析模式选项文案（禁止浏览器自动翻译，避免「结构化」被误译为「构造」） */
+export const KAFKA_MESSAGE_PARSE_MODE_LABEL: Record<
+  KafkaMessageParseMode,
+  string
+> = {
+  [KAFKA_MESSAGE_PARSE_MODE.NONE]: '不解析',
+  [KAFKA_MESSAGE_PARSE_MODE.STRUCTURED]: '解析为结构化字段'
+};
+
+/** Kafka 数组处理模式 */
+export const KAFKA_ARRAY_HANDLE_MODE = {
+  INDEX_FLATTEN: 'index_flatten',
+  SPLIT_RECORDS: 'split_records',
+  RAW_STRING: 'raw_string'
+} as const;
+
+export type KafkaArrayHandleMode =
+  (typeof KAFKA_ARRAY_HANDLE_MODE)[keyof typeof KAFKA_ARRAY_HANDLE_MODE];
+
+export const DEFAULT_KAFKA_MAX_FLATTEN_DEPTH = 2;
+
+/** Kafka 专业术语：界面统一展示 Topic，不做中文翻译 */
+export const KAFKA_TOPIC_LABEL = 'Topic';
+export const KAFKA_TOPIC_SELECT_PLACEHOLDER = '请选择 Topic';
+export const KAFKA_TOPIC_REQUIRED_MESSAGE = '请选择 Topic';
+
+/** Kafka 结构化解析规则 */
+export const KAFKA_STRUCTURED_PARSE_RULE = {
+  DEFAULT: 'default',
+  AI_GENERATED: 'ai_generated',
+  /** 手动填写 JSONPath 映射 */
+  PATH_MANUAL: 'path_manual'
+} as const;
+
+export type KafkaStructuredParseRule =
+  (typeof KAFKA_STRUCTURED_PARSE_RULE)[keyof typeof KAFKA_STRUCTURED_PARSE_RULE];
+
+/** 默认规则：固定最大展平深度 */
+export const DEFAULT_KAFKA_DEFAULT_RULE_MAX_FLATTEN_DEPTH = 1;
+
+export const KAFKA_ARRAY_HANDLE_MODE_LABEL: Record<
+  KafkaArrayHandleMode,
+  string
+> = {
+  [KAFKA_ARRAY_HANDLE_MODE.INDEX_FLATTEN]: '下标展平',
+  [KAFKA_ARRAY_HANDLE_MODE.SPLIT_RECORDS]: '拆成多条记录',
+  [KAFKA_ARRAY_HANDLE_MODE.RAW_STRING]: '原样存字符串'
+};
+
+/** Kafka AI 规则生成默认提示词 */
+export const DEFAULT_KAFKA_AI_RULE_GENERATION_PROMPT = `任务：根据【原始JSON样本】和【目标输出结构】，生成标准化 JSONPath 解析规则。
+要求：
+1. 输出固定 JSON 格式，不要多余解释、不要 markdown；
+2. 规则包含 field_mapping（字段映射）、default_value（默认值，可选）；
+3. JSONPath 使用多层级路径，根节点用 $，需兼容 Go 库 github.com/vmware-labs/yaml-jsonpath；
+4. 字符串内嵌 JSON 的场景（如 payload 字段）直接写完整路径，例如 $.payload.temperature，不要使用 need_deserialize；
+5. 严格对齐目标字段名与类型；
+6. 如果是 Canal CDC 数组格式，data 字段是数组，需要设置 array_iterate_path=$.data 并逐条解析。`;
+
+export function resolveKafkaAiRulePrompt(prompt?: string): string {
+  const trimmed = prompt?.trim();
+  return trimmed || DEFAULT_KAFKA_AI_RULE_GENERATION_PROMPT;
+}
+
+/** 详情页：来源类型为手动创建时「数据来源」展示文案 */
+export const DETAIL_MANUAL_CREATION_SOURCE_LABEL = '手动创建';
 
 /** 详情页：来源类型为本地 CSV 时「数据来源」展示文案 */
 export const DETAIL_LOCAL_CSV_SOURCE_LABEL = '本地CSV导入';
 
 /** 详情页：来源类型为数据库/表 时「数据来源」展示文案 */
 export const DETAIL_DATABASE_TABLE_SOURCE_LABEL = '数据库/表';
+
+/** 详情页：来源类型为数据资源选表 时「数据来源」展示文案 */
+export const DETAIL_DATA_RESOURCE_SOURCE_LABEL = '数据资源';
 
 export const COLUMN_TYPE_OPTIONS = [
   {

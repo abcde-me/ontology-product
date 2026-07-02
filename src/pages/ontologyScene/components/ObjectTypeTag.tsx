@@ -16,6 +16,8 @@ export interface ObjectTypeTagProps {
   className?: string;
   /** 悬浮类名 */
   hoverClassName?: string;
+  /** 列表场景展示完整名称，不截断 */
+  showFullName?: boolean;
 }
 
 /**
@@ -29,7 +31,8 @@ const ObjectTypeTag: React.FC<ObjectTypeTagProps> = ({
   onClick,
   className = '',
   hoverClassName = 'hover-blue',
-  showIcon = true
+  showIcon = true,
+  showFullName = false
 }) => {
   // 根据 icon 字段匹配对应的图标
   const iconOption = ontologyObjectTypeIcon
@@ -42,9 +45,9 @@ const ObjectTypeTag: React.FC<ObjectTypeTagProps> = ({
   const objTypeName = ontologyObjectTypeName || '全局行为';
   return (
     <div
-      className={`object-type-tag inline-flex h-[26px] min-w-0 max-w-[110px] items-center gap-[4px] overflow-hidden rounded border border-[#EBEEF5] bg-[#F5F7FC] px-[4px] ${
-        onClick ? 'cursor-pointer' : ''
-      } ${className}`}
+      className={`object-type-tag inline-flex h-[26px] items-center gap-[4px] rounded border border-[#EBEEF5] bg-[#F5F7FC] px-[4px] ${
+        showFullName ? 'max-w-none' : 'min-w-0 max-w-[110px] overflow-hidden'
+      } ${onClick ? 'cursor-pointer' : ''} ${className}`}
       onClick={onClick}
     >
       {/* 图标区域 */}
@@ -54,13 +57,27 @@ const ObjectTypeTag: React.FC<ObjectTypeTagProps> = ({
         </div>
       )}
       {/* 名称区域 */}
-      <div className="flex-shrink-1 object-type-tag-name min-w-0">
-        <EllipsisPopover
-          value={objTypeName}
-          className={`text-[14px] leading-[26px] text-[var(--color-text-1)] ${
-            onClick ? `${hoverClassName}` : ''
-          }`}
-        />
+      <div
+        className={`object-type-tag-name ${
+          showFullName ? 'whitespace-nowrap' : 'min-w-0 flex-shrink'
+        }`}
+      >
+        {showFullName ? (
+          <span
+            className={`text-[14px] leading-[26px] text-[var(--color-text-1)] ${
+              onClick ? hoverClassName : ''
+            }`}
+          >
+            {objTypeName}
+          </span>
+        ) : (
+          <EllipsisPopover
+            value={objTypeName}
+            className={`text-[14px] leading-[26px] text-[var(--color-text-1)] ${
+              onClick ? `${hoverClassName}` : ''
+            }`}
+          />
+        )}
       </div>
     </div>
   );

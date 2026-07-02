@@ -1,15 +1,24 @@
 import React, { useState, useRef } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { Message, Button } from '@arco-design/web-react';
-import LinkForm, { LinkFormData, LinkFormRef } from './components/LinkForm';
+import LinkForm, {
+  LinkCreateFormData,
+  LinkFormData,
+  LinkFormRef,
+  LinkPairFormItem
+} from './components/LinkForm';
 import { createOntologyLinkType } from '@/api/ontologySceneLibrary/links';
-import { LinkType } from '@/types/graphApi';
 import { CreateOntologyLinkTypeReq } from '@/types/links';
-import { buildOntologyLinkTypeColumnList } from './components/linkForm/utils/linkAttributeFields';
-import { LinkType as FormLinkType } from '../../types/link';
+import {
+  mapFormLinkTypeToApi,
+  mapLinkDirectionToFormLinkType
+} from './components/linkForm/constants';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
-import { ProButton } from '@ceai-front/arco-material';
 import { IconLeft } from '@arco-design/web-react/icon';
+
+const isLinkCreateFormData = (
+  data: LinkFormData | LinkCreateFormData
+): data is LinkCreateFormData => 'linkPairs' in data;
 
 export default function OntologySceneLinksCreate() {
   const history = useHistory();
@@ -17,7 +26,8 @@ export default function OntologySceneLinksCreate() {
   const [loading, setLoading] = useState(false);
   const formRef = useRef<LinkFormRef>(null);
 
-  // 根据属性ID获取属性名称
+  const listPath = `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/list`;
+
   const getAttributeNameById = async (
     attributeId: string,
     objectTypeId: number,
@@ -50,54 +60,39 @@ export default function OntologySceneLinksCreate() {
     }
   };
 
-  // 将表单 LinkType 转换为 API LinkType
-  const getApiLinkType = (formType: FormLinkType): number => {
-    const typeMap: Record<FormLinkType, number> = {
-      [FormLinkType.ONE_TO_ONE]: LinkType.ONE_TO_ONE,
-      [FormLinkType.ONE_TO_MANY]: LinkType.ONE_TO_MANY,
-      [FormLinkType.MANY_TO_MANY]: LinkType.MANY_TO_MANY
+  const buildCreateRequest = async (
+    pair: LinkPairFormItem,
+    ontologyModelID: number
+  ): Promise<CreateOntologyLinkTypeReq> => {
+    const linkType = mapLinkDirectionToFormLinkType(pair.linkDirection);
+    const requestData: CreateOntologyLinkTypeReq = {
+      code: pair.id,
+      name: pair.name,
+      type: mapFormLinkTypeToApi(linkType),
+      ontologyModelID,
+      sourceObjectTypeID: pair.sourceObjectType!,
+      targetObjectTypeID: pair.targetObjectType!
     };
-    return typeMap[formType] || LinkType.ONE_TO_ONE;
+
+    if (pair.targetObjectAttribute && pair.targetObjectType) {
+      const targetAttrName = await getAttributeNameById(
+        pair.targetObjectAttribute,
+        pair.targetObjectType,
+        ontologyModelID
+      );
+      if (targetAttrName) {
+        requestData.linkTargetColumnName = targetAttrName;
+      }
+    }
+
+    return requestData;
   };
 
-  const buildSourceDataInfo = (
-    source?: NonNullable<
-      LinkFormData['syncSourceDataStrategy']
-    >['sourceDataInfo']
-  ): CreateOntologyLinkTypeReq['sourceDataInfo'] => {
-    if (!source?.connectorId) return undefined;
-    return {
-      connectorId: source.connectorId,
-      databaseName: source.databaseName,
-      tableName: source.tableName,
-      queryMode: source.queryMode || 'selected',
-      sql: source.sql
-    };
-  };
+  const handleSubmit = async (data: LinkFormData | LinkCreateFormData) => {
+    if (!isLinkCreateFormData(data)) {
+      return;
+    }
 
-  const buildSyncSourceDataStrategy = (
-    strategy?: LinkFormData['syncSourceDataStrategy']
-  ): CreateOntologyLinkTypeReq['syncSourceDataStrategy'] => {
-    if (!strategy) return undefined;
-    const sourceDataInfo = buildSourceDataInfo(strategy.sourceDataInfo);
-    if (!sourceDataInfo) return undefined;
-    return {
-      mode: strategy.mode,
-      conflictStrategy: strategy.conflictStrategy,
-      syncScope: strategy.syncScope,
-      pollFetchSize: strategy.pollFetchSize,
-      parallelism: strategy.parallelism || 1,
-      exceptionStrategy: strategy.exceptionStrategy,
-      jdbcCheckpointField: strategy.jdbcCheckpointField,
-      jdbcIncrementalTimeField: strategy.jdbcIncrementalTimeField,
-      jdbcPollingIntervalSeconds: strategy.jdbcPollingIntervalSeconds,
-      jdbcSyncSqlFull: strategy.jdbcSyncSqlFull,
-      jdbcSyncSqlIncrement: strategy.jdbcSyncSqlIncrement,
-      sourceDataInfo
-    };
-  };
-
-  const handleSubmit = async (data: LinkFormData) => {
     setLoading(true);
     try {
       const ontologyModelID = OSId ? Number(OSId) : undefined;
@@ -106,81 +101,28 @@ export default function OntologySceneLinksCreate() {
         return;
       }
 
-      // 使用接口定义的类型
-      const requestData: CreateOntologyLinkTypeReq = {
-        code: data.id,
-        name: data.name,
-        type: getApiLinkType(data.linkType),
-        ontologyModelID,
-        sourceObjectTypeID: data.sourceObjectType,
-        targetObjectTypeID: data.targetObjectType
-      };
+      const { linkPairs } = data;
+      let successCount = 0;
 
-      // 如果是 N:N 类型，需要处理中间表相关字段
-      if (
-        data.linkType === FormLinkType.MANY_TO_MANY &&
-        data.intermediateTable
-      ) {
-        if (data.intermediateTable.type === 'local_csv') {
-          requestData.sourceType = 2; // 文件上传
-          requestData.filePath = data.intermediateTable.filePath;
-        } else if (data.intermediateTable.type === 'data_lake_sync') {
-          const sourceDataInfo = buildSourceDataInfo(
-            data.syncSourceDataStrategy?.sourceDataInfo ||
-              data.intermediateTable.sourceDataInfo
+      for (const pair of linkPairs) {
+        const requestData = await buildCreateRequest(pair, ontologyModelID);
+        const response = await createOntologyLinkType(requestData);
+        if (response.status === 200 && response.code === '') {
+          successCount += 1;
+        } else {
+          Message.error(
+            response.message ||
+              `链接「${pair.name || pair.id}」创建失败，请重试`
           );
-          requestData.sourceType = 1; // 来自iceberg
-          requestData.linkDbName =
-            sourceDataInfo?.databaseName || data.intermediateTable.database;
-          requestData.linkTableName =
-            sourceDataInfo?.tableName || data.intermediateTable.table;
-          requestData.syncSourceDataStrategy = buildSyncSourceDataStrategy(
-            data.syncSourceDataStrategy
-          );
-        }
-
-        if (data.attributeFields && data.attributeFields.length > 0) {
-          requestData.ontologyLinkTypeColumnList =
-            buildOntologyLinkTypeColumnList(data, 0);
-        }
-
-        // 处理源属性和目标属性
-        if (data.sourceAttribute && data.sourceObjectType) {
-          requestData.linkSourceColumnName = data.sourceAttribute;
-        }
-        if (data.targetAttribute && data.targetObjectType) {
-          requestData.linkTargetColumnName = data.targetAttribute;
-        }
-      } else {
-        // 1:1 和 1:N 类型，处理目标对象属性
-        if (data.linkTargetColumnName) {
-          requestData.linkTargetColumnName = data.linkTargetColumnName;
-          if (data.linkSourceColumnName) {
-            requestData.linkSourceColumnName = data.linkSourceColumnName;
-          }
-        } else if (data.targetObjectAttribute && data.targetObjectType) {
-          if (data.linkSourceColumnName) {
-            requestData.linkSourceColumnName = data.linkSourceColumnName;
-          }
-          const targetAttrName = await getAttributeNameById(
-            data.targetObjectAttribute,
-            data.targetObjectType,
-            ontologyModelID
-          );
-          if (targetAttrName) {
-            requestData.linkTargetColumnName = targetAttrName;
-          }
+          return;
         }
       }
 
-      const response = await createOntologyLinkType(requestData);
-      if (response.status === 200 && response.code === '') {
-        Message.success('创建成功');
-        history.push(
-          `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/list`
+      if (successCount === linkPairs.length) {
+        Message.success(
+          linkPairs.length > 1 ? `成功创建 ${successCount} 个链接` : '创建成功'
         );
-      } else {
-        Message.error(response.message || '创建失败，请重试');
+        history.push(listPath);
       }
     } catch (error: any) {
       console.error('Create link error:', error);
@@ -191,15 +133,11 @@ export default function OntologySceneLinksCreate() {
   };
 
   const handleCancel = () => {
-    history.push(
-      `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/list`
-    );
+    history.push(listPath);
   };
 
   const goBack = () => {
-    history.replace(
-      `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/list`
-    );
+    history.replace(listPath);
   };
 
   return (
@@ -207,8 +145,8 @@ export default function OntologySceneLinksCreate() {
       <div className="flex items-center gap-[16px] border-b border-[##EBEEF5] p-[24px] text-[20px] font-[600] leading-[32px] text-[var(--color-text-1)]">
         <Button
           icon={<IconLeft />}
-          size={'default'}
-          type={'default'}
+          size="default"
+          type="default"
           onClick={goBack}
         />
         创建链接
@@ -217,13 +155,13 @@ export default function OntologySceneLinksCreate() {
         <div className="overflow-y-auto pb-[65px]">
           <LinkForm
             ref={formRef}
+            createMode
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             loading={loading}
             showFooter={false}
           />
         </div>
-        {/* 底部操作按钮 - 使用sticky */}
         <div className="absolute bottom-0 left-0 right-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">
           <div className="flex justify-start gap-[8px]">
             <Button

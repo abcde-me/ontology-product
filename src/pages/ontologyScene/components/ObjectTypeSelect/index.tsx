@@ -30,6 +30,8 @@ export interface ObjectTypeSelectProps {
   getPopupContainer?: (node: HTMLElement) => HTMLElement;
   /** 是否显示全部 */
   showAll?: boolean;
+  /** 下拉中排除的对象类型 id */
+  excludeIds?: number[];
   primaryKey?: keyof ObjectType;
   selectProps?: Partial<SelectProps>;
 }
@@ -49,6 +51,7 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
   label = '',
   getPopupContainer,
   showAll = false,
+  excludeIds,
   primaryKey = 'id',
   selectProps = {}
 }) => {
@@ -188,10 +191,13 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
           // 匹配对象类型的名称、描述或 ID
           const nameMatch =
             item.name?.toLowerCase().includes(searchText) ?? false;
+          const codeMatch =
+            item.code?.toLowerCase().includes(searchText) ?? false;
           const descriptionMatch =
             item.description?.toLowerCase().includes(searchText) ?? false;
+          const idMatch = String(item.id).includes(searchText);
 
-          return nameMatch || descriptionMatch;
+          return nameMatch || codeMatch || descriptionMatch || idMatch;
         }}
         renderFormat={(option, value) => {
           if (!value || !option) return null;
@@ -225,11 +231,13 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
           ...selectProps?.triggerProps
         }}
       >
-        {objectTypeList.map((item) => (
-          <Select.Option key={item.id} value={item[primaryKey] as any}>
-            {renderOption(item)}
-          </Select.Option>
-        ))}
+        {objectTypeList
+          .filter((item) => !excludeIds?.includes(item.id))
+          .map((item) => (
+            <Select.Option key={item.id} value={item[primaryKey] as any}>
+              {renderOption(item)}
+            </Select.Option>
+          ))}
       </Select>
     </div>
   );

@@ -37,6 +37,13 @@ import {
 } from '@/pages/ontologyScene/components';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
+import { useRequest } from 'ahooks';
+import { fetchSceneObjectTypes } from '@/utils/enrichLinkTypeObjectTypes';
+import {
+  buildBehaviorObjectTypeLookup,
+  isGlobalBehaviorObjectType,
+  resolveBehaviorObjectTypeDisplay
+} from '@/pages/ontologyScene/modules/behaviorActions/services/resolveBehaviorObjectType';
 
 const baseUrl = '/tenant/compute/onto/ontologyScene/detail';
 
@@ -56,6 +63,19 @@ export const ActionList = (props: {
   const [urlState, setUrlState] = useUrlState({ search: '' });
 
   const history = useHistory();
+
+  const { data: objectTypeLookup } = useRequest(
+    async () => {
+      if (isNil(OSId)) {
+        return new Map<number, { name: string; icon?: string }>();
+      }
+      const objectTypes = await fetchSceneObjectTypes(+OSId);
+      return buildBehaviorObjectTypeLookup(objectTypes);
+    },
+    {
+      refreshDeps: [OSId]
+    }
+  );
 
   const { tableProps, onSubmit, refresh } = useArcoTable(
     ({ pagination, query = {} }) => {
@@ -161,26 +181,38 @@ export const ActionList = (props: {
       filters: [],
       width: 200,
       onFilter: (value, record) => record.objectType === value,
-      render: (value, actionDetail) => (
-        <ObjectTypeTag
-          ontologyObjectTypeIcon={actionDetail?.objectTypeIcon || '-'}
-          ontologyObjectTypeName={actionDetail?.objectTypeName || '全局行为'}
-          ontologyObjectTypeId={String(
-            actionDetail?.ontologyObjectTypeId ||
-              actionDetail?.objectTypeId ||
-              ''
-          )}
-          onClick={
-            actionDetail.objectTypeId! < 0
-              ? undefined
-              : () => {
-                  closeDrawer();
-                  setCurrentObj((actionDetail.objectTypeId || '').toString());
-                }
-          }
-          className={styles['obj-tag']}
-        />
-      )
+      render: (_, actionDetail) => {
+        const objectTypeDisplay = resolveBehaviorObjectTypeDisplay(
+          actionDetail,
+          objectTypeLookup
+        );
+
+        const displayName =
+          objectTypeDisplay.objectTypeName ||
+          (isGlobalBehaviorObjectType(objectTypeDisplay.objectTypeId)
+            ? '全局行为'
+            : '-');
+
+        return (
+          <ObjectTypeTag
+            ontologyObjectTypeIcon={objectTypeDisplay.objectTypeIcon || '-'}
+            ontologyObjectTypeName={displayName}
+            ontologyObjectTypeId={String(objectTypeDisplay.objectTypeId ?? '')}
+            onClick={
+              isGlobalBehaviorObjectType(objectTypeDisplay.objectTypeId)
+                ? undefined
+                : () => {
+                    closeDrawer();
+                    setCurrentObj(
+                      (objectTypeDisplay.objectTypeId || '').toString()
+                    );
+                  }
+            }
+            className={styles['obj-tag']}
+            showFullName
+          />
+        );
+      }
     },
     {
       title: '函数',

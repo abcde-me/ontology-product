@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect, useMemo, useRef } from 'react';
 import { Spin } from '@arco-design/web-react';
 import { useAIWorkbenchStore } from './store';
 import { useOntologyManagement } from './hooks/useOntologyManagement';
@@ -7,10 +7,20 @@ import SceneModal from '@/pages/ontologyScene/modules/list/components/SceneModal
 import EmptyState from './components/EmptyState';
 import OntologySelector from './components/OntologySelector';
 import ChatPanel from './components/ChatPanel';
-import GraphPanel from './components/GraphPanel';
 import ResizableLayout from './components/ResizableLayout';
 import { useAIWorkbenchGraphStore } from './components/AIWorkbenchGraph/store';
 import { OntologyAction, OntologyTargetType } from '@/hooks/chat/types';
+import { isDevAppId } from '@/utils/devChatStore';
+import { shouldUseDirectLlmChat } from './config/llm';
+import { DIRECT_LLM_APP_ID } from './services/directLlmChat';
+
+const GraphPanel = React.lazy(() => import('./components/GraphPanel'));
+
+const GraphPanelPlaceholder: React.FC = () => (
+  <div className="flex h-full w-full items-center justify-center bg-[#f8f9fc]">
+    <Spin />
+  </div>
+);
 
 /**
  * AI 本体工作台
@@ -23,7 +33,6 @@ const AIOntoWorkbench: React.FC = () => {
     setCurrentOntology
   } = useAIWorkbenchStore();
 
-  // 从 userInfoStore 获取 projectId
   const projectId = useUserInfoStore((state) => state.projectId);
 
   const {
@@ -36,238 +45,193 @@ const AIOntoWorkbench: React.FC = () => {
     ensureOntologyAgent
   } = useOntologyManagement();
 
-  // 图谱刷新 key
   const [graphRefreshKey, setGraphRefreshKey] = React.useState(0);
-
-  // 当前本体的 appID
-  const [currentAppID, setCurrentAppID] = React.useState<string | undefined>(
+  const [graphReady, setGraphReady] = React.useState(false);
+  const [agentAppId, setAgentAppId] = React.useState<string | undefined>(
     undefined
   );
-
-  // Agent 创建错误状态
   const [agentError, setAgentError] = React.useState<string | null>(null);
 
-  // 图谱刷新回调
+  const isFirstProjectEffectRef = useRef(true);
+
+  const resolvedAppId = useMemo(() => {
+    if (!currentOntology) {
+      return undefined;
+    }
+    if (shouldUseDirectLlmChat()) {
+      return DIRECT_LLM_APP_ID;
+    }
+    if (currentOntology.appID && !isDevAppId(currentOntology.appID)) {
+      return currentOntology.appID;
+    }
+    return agentAppId;
+  }, [currentOntology, agentAppId]);
+
+  const needsAsyncAgentInit = useMemo(() => {
+    if (!currentOntology || shouldUseDirectLlmChat()) {
+      return false;
+    }
+    return !currentOntology.appID || isDevAppId(currentOntology.appID);
+  }, [currentOntology]);
+
   const handleGraphRefresh = React.useCallback(() => {
-    console.log('[AIOntoWorkbench] 触发图谱刷新');
     setGraphRefreshKey((prev) => prev + 1);
   }, []);
 
-  // 节点定位回调
   const handleLocateNode = React.useCallback((code: string) => {
-    console.log('[AIOntoWorkbench] 定位节点，code:', code);
-    // 通过图谱 store 触发高亮，并设置缩放比例为 75%
     const { highlightNode } = useAIWorkbenchGraphStore.getState();
     highlightNode(code, { zoom: 0.75 });
   }, []);
 
-  // 节点查看回调 - 根据 target_type 跳转到不同路由
   const handleViewNode = React.useCallback(
     (action: OntologyAction) => {
-      console.log('[AIOntoWorkbench] 查看节点，action:', action);
-
       if (!currentOntology?.id) {
-        console.warn('[AIOntoWorkbench] 没有当前本体，无法跳转');
         return;
       }
 
       const { target_type, name } = action;
       const ontologyId = currentOntology.id;
-
-      // 根据 target_type 生成不同的路由
       let targetPath = '';
 
       switch (target_type) {
         case OntologyTargetType.OBJECT_TYPE:
-          // 对象类型：/onto/tenant/compute/onto/ontologyScene/detail/{ontologyId}/objectType/list?search={name}
           targetPath = `/onto/tenant/compute/onto/ontologyScene/detail/${ontologyId}/objectType/list?search=${encodeURIComponent(name)}`;
           break;
-
         case OntologyTargetType.LINK:
-          // 链接：/onto/tenant/compute/onto/ontologyScene/detail/{ontologyId}/links/list?search={name}
           targetPath = `/onto/tenant/compute/onto/ontologyScene/detail/${ontologyId}/links/list?search=${encodeURIComponent(name)}`;
           break;
-
         case OntologyTargetType.FUNCTION:
-          // 函数：/onto/tenant/compute/onto/ontologyScene/detail/{ontologyId}/functions?search={name}
           targetPath = `/onto/tenant/compute/onto/ontologyScene/detail/${ontologyId}/functions?search=${encodeURIComponent(name)}`;
           break;
-
         case OntologyTargetType.ACTION:
-          // 行为：/onto/tenant/compute/onto/ontologyScene/detail/{ontologyId}/behaviorActions?search={name}
           targetPath = `/onto/tenant/compute/onto/ontologyScene/detail/${ontologyId}/behaviorActions?search=${encodeURIComponent(name)}`;
           break;
-
         default:
-          console.warn('[AIOntoWorkbench] 未知的 target_type:', target_type);
           return;
       }
 
-      console.log('[AIOntoWorkbench] 跳转路由:', targetPath);
-
-      // 在新窗口打开
       window.open(targetPath, '_blank');
     },
     [currentOntology]
   );
 
-  // 初始化
   useEffect(() => {
-    // TODO: 收起左侧菜单 - 需要与布局组件集成
-    // setLeftMenuCollapsed(true);
-
-    // 加载本体列表（初始加载时自动选择第一个）
     loadOntologyList(1, 20, true);
+    void useUserInfoStore.getState().ensureProjectReady();
 
-    // 组件卸载时的清理工作
     return () => {
-      // 清理图谱面板状态（关闭底部面板、清除高亮等）
       useAIWorkbenchGraphStore.getState().reset();
-      console.log('[AIOntoWorkbench] 组件卸载，已清理图谱面板状态');
-
-      // TODO: 恢复左侧菜单
-      // setLeftMenuCollapsed(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // 只在组件挂载时执行一次
+  }, []);
 
-  // 监听 projectId 变化，重新加载本体列表
   useEffect(() => {
-    // 跳过初始加载（projectId 为 undefined 或空数组）
+    if (isFirstProjectEffectRef.current) {
+      isFirstProjectEffectRef.current = false;
+      return;
+    }
+
     if (!projectId || projectId.length === 0) {
       return;
     }
 
-    console.log(
-      '[AIOntoWorkbench] projectId 变化，重新加载本体列表:',
-      projectId
-    );
-
-    // 清空当前本体
-    useAIWorkbenchStore.setState({ currentOntology: null });
-
-    // 清空图谱数据
     useAIWorkbenchStore.setState({ graphData: null });
-
-    // 清理图谱面板状态（关闭底部面板、清除高亮等）
     useAIWorkbenchGraphStore.getState().reset();
-    console.log('[AIOntoWorkbench] 项目切换，已清理图谱面板状态');
 
-    // 重新加载本体列表（项目切换时不自动选择第一个）
-    loadOntologyList(1, 20, false);
+    loadOntologyList(1, 20, false).then((result) => {
+      const current = useAIWorkbenchStore.getState().currentOntology;
+      if (!current && result.list.length > 0) {
+        setCurrentOntology(result.list[0]);
+        return;
+      }
+
+      if (current) {
+        const stillExists = result.list.some((item) => item.id === current.id);
+        if (!stillExists && result.list.length > 0) {
+          setCurrentOntology(result.list[0]);
+        }
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId?.[1]]); // 只监听实际的 projectId（数组的第二个元素）
+  }, [projectId?.[1]]);
 
-  // 监听当前本体变化，检查并创建 Agent
   useEffect(() => {
-    // 使用 AbortController 来中止未完成的请求
-    const abortController = new AbortController();
-    let isCancelled = false;
+    const timer = window.setTimeout(() => setGraphReady(true), 150);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  const agentInitSeqRef = useRef(0);
+
+  useEffect(() => {
+    if (!needsAsyncAgentInit || !currentOntology) {
+      setAgentAppId(undefined);
+      setAgentError(null);
+      return;
+    }
+
+    const initSeq = ++agentInitSeqRef.current;
+    let timeoutId: number | undefined;
 
     const initializeAgent = async () => {
-      if (!currentOntology) {
-        console.log('[AIOntoWorkbench] 没有当前本体，清空 appID');
-        setCurrentAppID(undefined);
-        setAgentError(null);
-        return;
-      }
+      setAgentAppId(undefined);
+      setAgentError(null);
 
-      console.log(
-        '[AIOntoWorkbench] 当前本体变化:',
-        currentOntology.id,
-        currentOntology.name,
-        'appID:',
-        currentOntology.appID
-      );
-
-      // 如果本体已经有 appID，直接使用
-      if (currentOntology.appID) {
-        console.log(
-          '[AIOntoWorkbench] 本体已有 appID，直接使用:',
-          currentOntology.appID
-        );
-        setCurrentAppID(currentOntology.appID);
-        setAgentError(null);
-        return;
-      }
-
-      // 如果没有 appID，调用接口创建
-      console.log('[AIOntoWorkbench] 本体没有 appID，开始创建...');
-      setCurrentAppID(undefined); // 先清空，显示 loading
-      setAgentError(null); // 清空之前的错误
+      timeoutId = window.setTimeout(() => {
+        if (initSeq !== agentInitSeqRef.current) {
+          return;
+        }
+        setAgentError('Agent 初始化超时，请检查网络后重试');
+      }, 45000);
 
       try {
         const appID = await ensureOntologyAgent(currentOntology);
 
-        // 检查是否已被取消
-        if (isCancelled || abortController.signal.aborted) {
-          console.log('[AIOntoWorkbench] 操作已取消，忽略结果');
+        if (initSeq !== agentInitSeqRef.current) {
           return;
         }
 
-        console.log(
-          '[AIOntoWorkbench] ensureOntologyAgent 返回，appID:',
-          appID
-        );
-
         if (appID) {
-          console.log('[AIOntoWorkbench] Agent 创建成功，设置 appID:', appID);
-
-          // 直接设置 appID
-          setCurrentAppID(appID);
+          setAgentAppId(appID);
           setAgentError(null);
 
-          // 等待 loadOntologyList 完成（在 ensureOntologyAgent 内部已调用）
-          // 然后从最新的列表中获取更新后的本体
           const updatedOntology = useAIWorkbenchStore
             .getState()
             .ontologyList.find((o) => o.id === currentOntology.id);
 
-          console.log(
-            '[AIOntoWorkbench] 从 ontologyList 中查找更新后的本体:',
-            updatedOntology
-          );
-
-          if (updatedOntology && updatedOntology.appID) {
-            console.log(
-              '[AIOntoWorkbench] 找到更新后的本体，更新 currentOntology'
-            );
+          if (updatedOntology?.appID) {
             setCurrentOntology(updatedOntology);
-          } else {
-            console.warn(
-              '[AIOntoWorkbench] 未找到更新后的本体或本体没有 appID'
-            );
           }
         } else {
-          console.error('[AIOntoWorkbench] Agent 创建失败');
-          setCurrentAppID(undefined);
+          setAgentAppId(undefined);
           setAgentError('Agent 创建失败，请重试');
         }
       } catch (error: any) {
-        if (!isCancelled && !abortController.signal.aborted) {
-          console.error('[AIOntoWorkbench] Agent 初始化异常:', error);
-          setCurrentAppID(undefined);
-          setAgentError(error?.message || 'Agent 初始化失败，请重试');
+        if (initSeq !== agentInitSeqRef.current) {
+          return;
+        }
+        setAgentAppId(undefined);
+        setAgentError(error?.message || 'Agent 初始化失败，请重试');
+      } finally {
+        if (timeoutId) {
+          window.clearTimeout(timeoutId);
         }
       }
     };
 
-    initializeAgent();
+    void initializeAgent();
 
-    // 清理函数：组件卸载或依赖变化时取消操作
     return () => {
-      isCancelled = true;
-      abortController.abort();
-      console.log('[AIOntoWorkbench] 清理：取消 Agent 初始化操作');
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentOntology?.id]); // 只依赖 id，避免因 appID 变化触发重复执行
+  }, [currentOntology?.id, projectId?.[1], needsAsyncAgentInit]);
 
-  // 判断是否为空状态
+  const isInitialLoading = ontologyListLoading && ontologyList.length === 0;
   const isEmpty = !ontologyListLoading && ontologyList.length === 0;
 
-  // Loading 状态
-  if (ontologyListLoading) {
+  if (isInitialLoading) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-white">
         <Spin />
@@ -275,7 +239,6 @@ const AIOntoWorkbench: React.FC = () => {
     );
   }
 
-  // 空状态
   if (isEmpty) {
     return (
       <>
@@ -292,10 +255,8 @@ const AIOntoWorkbench: React.FC = () => {
     );
   }
 
-  // 有数据状态
   return (
     <div className="flex h-full w-full flex-col bg-white">
-      {/* 顶部工具栏 */}
       <div
         className="flex h-[56px] items-center border-b border-solid border-[#dfe2eb] px-[24px]"
         style={{ filter: 'drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.08))' }}
@@ -303,15 +264,7 @@ const AIOntoWorkbench: React.FC = () => {
         <OntologySelector />
       </div>
 
-      {/* 主内容区域 */}
       <div className="flex flex-1 overflow-hidden">
-        {console.log('[AIOntoWorkbench] currentOntology:', currentOntology)}
-        {console.log('[AIOntoWorkbench] projectId from store:', projectId)}
-        {console.log(
-          '[AIOntoWorkbench] projectId[1] (实际projectId):',
-          projectId?.[1]
-        )}
-        {console.log('[AIOntoWorkbench] currentAppID:', currentAppID)}
         <ResizableLayout
           leftContent={
             agentError ? (
@@ -325,11 +278,10 @@ const AIOntoWorkbench: React.FC = () => {
                     onClick={() => {
                       if (currentOntology) {
                         setAgentError(null);
-                        setCurrentAppID(undefined);
-                        // 触发重新初始化
+                        setAgentAppId(undefined);
                         ensureOntologyAgent(currentOntology).then((appID) => {
                           if (appID) {
-                            setCurrentAppID(appID);
+                            setAgentAppId(appID);
                             setAgentError(null);
                           } else {
                             setAgentError('Agent 创建失败，请重试');
@@ -342,30 +294,39 @@ const AIOntoWorkbench: React.FC = () => {
                   </button>
                 </div>
               </div>
-            ) : currentAppID ? (
+            ) : resolvedAppId ? (
               <ChatPanel
-                key={currentAppID} // 添加 key，确保 appId 变化时重新挂载组件
-                appId={currentAppID}
-                // appId="app-4th0ybq9"
+                key={resolvedAppId}
+                appId={resolvedAppId}
                 appConfigId={null}
                 projectId={projectId?.[1]}
-                channel="WebPage"
+                channel="Preview"
                 source="debugger"
-                onConversationCreated={(conversationId) => {
-                  console.log('会话创建:', conversationId);
-                  // TODO: 保存会话 ID
-                }}
+                ensureOntologyAgent={ensureOntologyAgent}
+                onConversationCreated={() => {}}
                 onGraphRefresh={handleGraphRefresh}
                 onLocateNode={handleLocateNode}
                 onViewNode={handleViewNode}
               />
+            ) : !currentOntology ? (
+              <div className="flex h-full w-full items-center justify-center text-[14px] text-[#86909c]">
+                请选择本体
+              </div>
             ) : (
               <div className="flex h-full w-full items-center justify-center">
                 <Spin tip="正在初始化 Agent..." />
               </div>
             )
           }
-          rightContent={<GraphPanel key={graphRefreshKey} />}
+          rightContent={
+            graphReady ? (
+              <Suspense fallback={<GraphPanelPlaceholder />}>
+                <GraphPanel key={graphRefreshKey} />
+              </Suspense>
+            ) : (
+              <GraphPanelPlaceholder />
+            )
+          }
           defaultLeftWidth={400}
           minLeftWidth={400}
           maxLeftWidth={500}

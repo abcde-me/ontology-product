@@ -136,18 +136,69 @@ $border-color: #dfe2eb;
     }
   }
 
-  .run-log-wrapper {
-    padding: 0 8px 12px 12px;
-    width: 100%;
+  .run-log-body {
+    display: flex;
+    flex-direction: column;
     flex: 1;
     overflow: auto;
     background: white;
     border-bottom-right-radius: 4px;
+  }
+
+  .run-log-wrapper {
+    padding: 0 8px 12px 12px;
+    width: 100%;
+    margin: 0;
     white-space: pre !important;
     font-family: Monaco !important;
     font-weight: 400 !important;
     font-size: 14px !important;
     line-height: 22px !important;
+  }
+
+  .smart-fix-btn {
+    padding: 0 4px;
+    height: 24px;
+    color: #184ff2;
+  }
+
+  .fix-result-panel {
+    margin: 0 8px 12px 12px;
+    padding: 10px 12px;
+    border: 1px solid #e8f3ff;
+    border-radius: 4px;
+    background: #f7fbff;
+  }
+
+  .fix-result-title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 22px;
+    color: #0f131f;
+    margin-bottom: 8px;
+  }
+
+  .fix-result-summary {
+    font-size: 13px;
+    line-height: 20px;
+    color: #1e293b;
+    margin-bottom: 8px;
+  }
+
+  .fix-result-label {
+    font-weight: 500;
+    color: #0f131f;
+  }
+
+  .fix-result-details {
+    margin: 0;
+    white-space: pre-wrap;
+    font-family:
+      PingFang SC,
+      sans-serif !important;
+    font-size: 13px !important;
+    line-height: 20px !important;
+    color: #334155;
   }
 
   .copy-btn {

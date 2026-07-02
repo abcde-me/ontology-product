@@ -5,6 +5,17 @@ import React, {
   useRef,
   useState
 } from 'react';
+import {
+  ensureFunctionObjectTypeMetadata,
+  isDatasetEmptyTableSqlError
+} from '@/pages/ontologyScene/modules/functionDetail/services/ensureFunctionObjectTypeMetadata';
+import { fetchSceneObjectTypeQueryProfiles } from '@/pages/ontologyScene/modules/functionDetail/services/fetchSceneOntologyContext';
+import { sanitizeOntologyFunctionRuntimeApi } from '@/pages/ontologyScene/modules/functionDetail/services/sanitizeOntologyFunctionRuntimeApi';
+import { stripQueryObjectsWhere } from '@/pages/ontologyScene/modules/functionDetail/services/stripQueryObjectsWhere';
+import {
+  fixOntologyFunctionCode,
+  type FixedOntologyFunctionCode
+} from '@/pages/ontologyScene/modules/functionDetail/services/fixOntologyFunctionCode';
 import styles from './index.module.scss';
 import { ProButton } from '@ceai-front/arco-material';
 import {
@@ -95,6 +106,7 @@ export const FunctionsSetting = (props: {
     right: ''
   });
   const functionScriptRef = useRef();
+  const smartFixAbortRef = useRef<AbortController | null>(null);
 
   const {
     startTest,
@@ -104,6 +116,11 @@ export const FunctionsSetting = (props: {
   } = useTestFunction();
 
   const [closeParamsSetting, setCloseParamsSetting] = useState(false);
+  const [smartFixing, setSmartFixing] = useState(false);
+  const [fixResult, setFixResult] = useState<Pick<
+    FixedOntologyFunctionCode,
+    'changeSummary' | 'changeDetails'
+  > | null>(null);
 
   const disabled = readonly || testIng || props.disabled;
 
@@ -132,20 +149,161 @@ export const FunctionsSetting = (props: {
     ];
   };
 
-  const handleTest = () => {
-    form
-      .validate()
-      .then((res: Required<OntologyFunctionSchema>) => {
-        const functionTest = buildTestFunctionData(res, {
-          pk: functionId ? +functionId : undefined
-        });
-        startTest({ ...functionTest, id: +OSid });
-      })
-      .catch((e) => {
-        console.error(e);
-        setCloseParamsSetting(false);
+  const currentRunLog =
+    runLogInfo?.runLog?.map((item) => item.run_log).join('\n') || '';
+
+  const handleTest = async () => {
+    setFixResult(null);
+
+    try {
+      const res = (await form.validate()) as Required<OntologyFunctionSchema>;
+
+      const queryProfiles = await fetchSceneObjectTypeQueryProfiles(+OSid);
+      let runtimeSanitized = sanitizeOntologyFunctionRuntimeApi(
+        String(res.content ?? ''),
+        { queryProfiles }
+      );
+      let sanitizedContent = runtimeSanitized.content;
+
+      // 最终兜底：只要函数使用了 query_objects，就彻底剥离 where（后端 where 不可用）
+      if (/query_objects/i.test(sanitizedContent)) {
+        const finalStrip = stripQueryObjectsWhere(sanitizedContent);
+        if (finalStrip.changed) {
+          sanitizedContent = finalStrip.content;
+          runtimeSanitized = {
+            ...runtimeSanitized,
+            content: sanitizedContent,
+            changed: true,
+            notes: [...runtimeSanitized.notes, ...finalStrip.notes]
+          };
+        }
+      }
+
+      const testPayload = { ...res, content: sanitizedContent };
+
+      if (runtimeSanitized.changed) {
+        form.setFieldValue('content', sanitizedContent);
+        Message.info(
+          runtimeSanitized.notes[0] ||
+            '已校正 query_objects 调用（含 select 字段或改写 ObjectRef.Type），正在测试'
+        );
+      }
+
+      Message.loading({
+        content: '正在检查并准备 dataset 实例同步环境…',
+        duration: 0
       });
+
+      const metadataCheck = await ensureFunctionObjectTypeMetadata(
+        +OSid,
+        String(testPayload.content ?? ''),
+        testPayload.input || []
+      );
+
+      Message.clear();
+
+      if (!metadataCheck.ready) {
+        Message.error(metadataCheck.message || '函数执行环境未就绪');
+        return;
+      }
+
+      if (metadataCheck.syncTriggered && metadataCheck.message) {
+        Message.success(metadataCheck.message);
+      }
+
+      const functionTest = buildTestFunctionData(testPayload, {
+        pk: functionId ? +functionId : undefined
+      });
+      startTest({ ...functionTest, id: +OSid });
+    } catch (error) {
+      Message.clear();
+      console.error(error);
+      setCloseParamsSetting(false);
+    }
   };
+
+  const handleSmartFix = async () => {
+    if (props.disabled) {
+      Message.warning('该函数已被行为绑定，不可智能修改');
+      return;
+    }
+
+    const values = form.getFieldsValue() as OntologyFunctionSchema;
+    const functionCodeValue = String(values.code ?? '').trim();
+    const content = String(values.content ?? '').trim();
+
+    if (!functionCodeValue) {
+      Message.warning('请先填写函数名称(id)');
+      return;
+    }
+    if (!content) {
+      Message.warning('函数代码为空，无法智能修改');
+      return;
+    }
+    if (!currentRunLog) {
+      Message.warning('暂无运行报错信息');
+      return;
+    }
+
+    smartFixAbortRef.current?.abort();
+    const controller = new AbortController();
+    smartFixAbortRef.current = controller;
+    setSmartFixing(true);
+
+    try {
+      const fixed = await fixOntologyFunctionCode({
+        name: values.name,
+        code: functionCodeValue,
+        description: values.description,
+        input: values.input || [],
+        output: values.output || [],
+        content,
+        errorLog: currentRunLog,
+        sceneId: +OSid,
+        signal: controller.signal
+      });
+
+      form.setFieldsValue({
+        input: fixed.input,
+        output: fixed.output,
+        content: fixed.content
+      });
+      setFixResult({
+        changeSummary: fixed.changeSummary,
+        changeDetails: fixed.changeDetails
+      });
+      Message.success(
+        '已根据报错信息与当前场景库本体结构完成智能修改，请查看修改说明后重新运行'
+      );
+    } catch (error) {
+      if ((error as Error)?.name === 'AbortError') {
+        return;
+      }
+      Message.error(
+        (error as Error)?.message || '智能修改函数代码失败，请稍后重试'
+      );
+    } finally {
+      setSmartFixing(false);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      smartFixAbortRef.current?.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (runLogInfo?.run_status !== 3 || !currentRunLog) {
+      return;
+    }
+
+    if (isDatasetEmptyTableSqlError(currentRunLog)) {
+      Message.warning(
+        'query_objects 查询失败：对象类型尚未在 dataset 注册物理表（SQL Error 1064）。请前往场景库「对象类型」列表，对引用类型执行「配置实例同步」，待同步成功后再测试'
+      );
+    }
+  }, [runLogInfo?.run_status, currentRunLog]);
 
   const getPopoverContainer = () => {
     return isFullscreen ? ref.current || document.body : document.body;
@@ -538,7 +696,7 @@ export const FunctionsSetting = (props: {
             onClick={testIng ? stopTest : handleTest}
             type={'outline'}
           >
-            {testIng ? '停止运行' : '运行'}
+            {testIng ? '停止测试' : '测试'}
           </Button>
         </div>
         <FormItemWithTooltip
@@ -555,6 +713,9 @@ export const FunctionsSetting = (props: {
             runInfo={runLogInfo}
             disabled={disabled}
             isFullscreen={isFullscreen}
+            smartFixing={smartFixing}
+            fixResult={fixResult}
+            onSmartFix={handleSmartFix}
           />
         </FormItemWithTooltip>
       </div>

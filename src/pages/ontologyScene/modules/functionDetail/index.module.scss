@@ -83,6 +83,29 @@
   }
 }
 
+.smart-generate-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: -8px 0 8px 140px;
+  flex-wrap: wrap;
+}
+
+.smart-generate-btn {
+  padding-left: 0;
+  color: #007dfa;
+
+  &:disabled {
+    color: var(--color-text-4);
+  }
+}
+
+.smart-generate-hint {
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--color-text-3);
+}
+
 .params-setting-container {
   height: calc(100vh - 210px);
   max-height: calc(100vh - 210px);

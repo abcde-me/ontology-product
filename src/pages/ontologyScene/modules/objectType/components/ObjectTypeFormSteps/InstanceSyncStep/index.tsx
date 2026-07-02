@@ -1,7 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Message } from '@arco-design/web-react';
-import { getSqlConnectorTableSchemaToTIDB } from '@/api/ontologySceneLibrary/objectType';
-import { mapOntologyObjectTypeColumns } from '@/api/ontologySceneLibrary/attributes';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Form, Message } from '@arco-design/web-react';
+import { fetchSqlConnectorTableSchema } from '../../../services/ontologySqlConnectorService';
 import type { ConnectorAnalyseFinkSqlColumnItem } from '@/types/objectType';
 import { useUserInfoStore } from '@/store/userInfoStore';
 import {
@@ -12,22 +11,39 @@ import {
   SyncSourceDataStrategyFormState
 } from '../../ObjectTypeFormUtils/types';
 import {
+  buildSyncMappingFieldsFromAttributes,
   finkSqlParsedColumnsToSourceTableFields,
+  isInstanceSyncSourceConfigured,
   objectTypeAttributeToSyncMapping
 } from '../../ObjectTypeFormUtils/attributeFields';
 import {
   isOntologyApiSuccessResponse,
   normalizeSourceFieldsFromTiDBSchema
 } from '../../ObjectTypeFormUtils/sqlConnectorTiDBSchema';
-import SqlSourceSelector from '../common/SqlSourceSelector';
+import {
+  INSTANCE_SYNC_SOURCE_TYPE,
+  InstanceSyncSourceType
+} from '@/pages/ontologyScene/common/constants';
+import { applyInstanceSyncStrategyDefaults } from '../common/instanceSyncStrategyConfig';
+import { fuzzyMatchInstanceSyncByEnglishName } from '../../../services/fuzzyMatchInstanceSyncByEnglishName';
+import {
+  extractSourceFieldsFromKafkaRule,
+  mergeKafkaSourceFields
+} from '../../../services/kafkaJsonPathRule/parseResultToSourceFields';
+import { smartMatchInstanceSyncColumns } from '../../../services/smartMatchInstanceSyncMapping';
+import ApiSyncStrategyFormSection from '../common/ApiSyncStrategyFormSection';
+import CsvSyncStrategyFormSection from '../common/CsvSyncStrategyFormSection';
+import MessageQueueSyncStrategyFormSection from '../common/MessageQueueSyncStrategyFormSection';
 import SyncSourceDataStrategyFormSection, {
   STRATEGY_FORM_FIELD_MAP
 } from '../common/SyncSourceDataStrategyFormSection';
 import InstanceSyncMappingTable from './InstanceSyncMappingTable';
+import InstanceSyncSourceSection from './InstanceSyncSourceSection';
 
 interface InstanceSyncStepProps {
   form: any;
   objectTypeAttributes: ObjectTypeAttributeField[];
+  objectTypeName?: string;
   syncSourceDataStrategy: SyncSourceDataStrategyFormState;
   setSyncSourceDataStrategy: React.Dispatch<
     React.SetStateAction<SyncSourceDataStrategyFormState>
@@ -40,11 +56,13 @@ interface InstanceSyncStepProps {
   setFieldsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   styles: Record<string, string>;
   readOnly?: boolean;
+  isDataResource?: boolean;
 }
 
 export default function InstanceSyncStep({
   form,
   objectTypeAttributes,
+  objectTypeName,
   syncSourceDataStrategy,
   setSyncSourceDataStrategy,
   syncMappingFields,
@@ -52,29 +70,126 @@ export default function InstanceSyncStep({
   fieldsLoading,
   setFieldsLoading,
   styles,
-  readOnly = false
+  readOnly = false,
+  isDataResource = false
 }: InstanceSyncStepProps) {
+  const watchedObjectTypeName = Form.useWatch('name', form) as
+    | string
+    | undefined;
+  const resolvedObjectTypeName = objectTypeName || watchedObjectTypeName;
   const currentProjectID = useUserInfoStore((state) => state.projectId?.[1]);
   const [sourceFields, setSourceFields] = useState<SourceTableField[]>([]);
+  const [smartMatchLoading, setSmartMatchLoading] = useState(false);
   const loadedSchemaKeyRef = useRef('');
+  const loadedKafkaFieldsKeyRef = useRef('');
+  const sourceConfigured = useMemo(
+    () =>
+      isInstanceSyncSourceConfigured(syncSourceDataStrategy, {
+        isDataResource
+      }),
+    [syncSourceDataStrategy, isDataResource]
+  );
+
+  const watchedSyncSourceType = Form.useWatch('syncSourceType', form) as
+    | InstanceSyncSourceType
+    | undefined;
+  const syncSourceType =
+    syncSourceDataStrategy.instanceSyncSourceType ||
+    watchedSyncSourceType ||
+    INSTANCE_SYNC_SOURCE_TYPE.DATABASE;
+  const isDatabaseSourceType =
+    syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.DATABASE;
+  const isKafkaSourceType =
+    syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE;
+  const isApiSourceType =
+    syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE;
+  const isStreamParseSourceType = isKafkaSourceType || isApiSourceType;
+  const isCsvSourceType =
+    syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD;
+
+  useEffect(() => {
+    if (
+      watchedSyncSourceType !== INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE ||
+      syncSourceDataStrategy.instanceSyncSourceType ===
+        INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE
+    ) {
+      return;
+    }
+    setSyncSourceDataStrategy((prev) =>
+      applyInstanceSyncStrategyDefaults({
+        ...prev,
+        instanceSyncSourceType: INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE
+      })
+    );
+  }, [
+    watchedSyncSourceType,
+    syncSourceDataStrategy.instanceSyncSourceType,
+    setSyncSourceDataStrategy
+  ]);
+
+  useEffect(() => {
+    if (
+      watchedSyncSourceType !== INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE ||
+      syncSourceDataStrategy.instanceSyncSourceType ===
+        INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE
+    ) {
+      return;
+    }
+    setSyncSourceDataStrategy((prev) =>
+      applyInstanceSyncStrategyDefaults({
+        ...prev,
+        instanceSyncSourceType: INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE
+      })
+    );
+  }, [
+    watchedSyncSourceType,
+    syncSourceDataStrategy.instanceSyncSourceType,
+    setSyncSourceDataStrategy
+  ]);
+
+  useEffect(() => {
+    if (
+      watchedSyncSourceType !== INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD ||
+      syncSourceDataStrategy.instanceSyncSourceType ===
+        INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD
+    ) {
+      return;
+    }
+    setSyncSourceDataStrategy((prev) =>
+      applyInstanceSyncStrategyDefaults({
+        ...prev,
+        instanceSyncSourceType: INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD
+      })
+    );
+  }, [
+    watchedSyncSourceType,
+    syncSourceDataStrategy.instanceSyncSourceType,
+    setSyncSourceDataStrategy
+  ]);
+
+  useEffect(() => {
+    if (!sourceConfigured) {
+      setSourceFields([]);
+      loadedSchemaKeyRef.current = '';
+    }
+  }, [sourceConfigured]);
 
   useEffect(() => {
     setSyncMappingFields((prev) => {
       const existingByPropertyID = new Map(
         prev.map((field) => [field.propertyID, field])
       );
-      const nextFields = objectTypeAttributes.map((attribute) => ({
-        ...objectTypeAttributeToSyncMapping(attribute),
-        ...existingByPropertyID.get(attribute.propertyID),
-        propertyID: attribute.propertyID,
-        propertyComment: attribute.propertyComment,
-        propertyType: attribute.propertyType,
-        isPrimary: attribute.isPrimary
-      }));
+      const nextFields = buildSyncMappingFieldsFromAttributes(
+        objectTypeAttributes,
+        {
+          existingByPropertyID,
+          preserveSourceFields: sourceConfigured
+        }
+      );
       form.setFieldValue('syncMappingFields', nextFields);
       return nextFields;
     });
-  }, [objectTypeAttributes, form, setSyncMappingFields]);
+  }, [objectTypeAttributes, sourceConfigured, form, setSyncMappingFields]);
 
   const updateStrategy = (
     updates: Partial<SyncSourceDataStrategyFormState>
@@ -92,64 +207,117 @@ export default function InstanceSyncStep({
     });
   };
 
+  const clearSyncMappingSourceFields = () => {
+    loadedSchemaKeyRef.current = '';
+    setSourceFields([]);
+    const cleared = buildSyncMappingFieldsFromAttributes(objectTypeAttributes, {
+      preserveSourceFields: false
+    });
+    setSyncMappingFields(cleared);
+    form.setFieldValue('syncMappingFields', cleared);
+  };
+
   const handleSourceChange = (sourceDataInfo: SqlSourceDataInfo) => {
-    setSyncSourceDataStrategy((prev) => ({
-      ...prev,
+    const next = {
+      ...syncSourceDataStrategy,
       sourceDataInfo
-    }));
-    if (sourceDataInfo.queryMode === 'sql') {
-      setSourceFields([]);
-      setSyncMappingFields(
-        objectTypeAttributes.map(objectTypeAttributeToSyncMapping)
-      );
+    };
+    setSyncSourceDataStrategy(next);
+    const configured = isInstanceSyncSourceConfigured(next, { isDataResource });
+    if (!configured || sourceDataInfo.queryMode === 'sql') {
+      clearSyncMappingSourceFields();
     }
   };
 
-  const applyAutoMapping = async (fields: SourceTableField[]) => {
-    if (!objectTypeAttributes.length || !fields.length) {
+  const handleSourceTypeChange = () => {
+    clearSyncMappingSourceFields();
+  };
+
+  const handleCsvColumnsParsed = (fields: SourceTableField[]) => {
+    setSourceFields(fields);
+    if (!readOnly && fields.length) {
+      void applyAutoMapping(fields);
+    } else if (!fields.length) {
+      clearSyncMappingSourceFields();
+    }
+  };
+
+  const handleKafkaParseFieldsReady = (fields: SourceTableField[]) => {
+    if (!fields.length) {
       return;
     }
 
+    const mergedFields = mergeKafkaSourceFields(
+      fields,
+      syncSourceDataStrategy.messageQueueParseResultFields || []
+    );
+
+    setSourceFields(mergedFields);
+    setSyncSourceDataStrategy((prev) => ({
+      ...prev,
+      messageQueueParseResultFields: mergedFields
+    }));
+
+    if (!readOnly) {
+      const shouldAutoMap = !syncMappingFields.some(
+        (field) => field.sourceColumnName
+      );
+      void applyAutoMapping(mergedFields, {
+        preferEnglishNameMatch: true,
+        showFeedback: shouldAutoMap
+      });
+    }
+  };
+
+  const resolveKafkaSourceFields = (): SourceTableField[] => {
+    const savedFields =
+      syncSourceDataStrategy.messageQueueParseResultFields || [];
+    const ruleFields = extractSourceFieldsFromKafkaRule(
+      syncSourceDataStrategy.messageQueueAiRuleContent
+    );
+    return mergeKafkaSourceFields(savedFields, ruleFields);
+  };
+
+  useEffect(() => {
+    if (!isStreamParseSourceType || !sourceConfigured) {
+      loadedKafkaFieldsKeyRef.current = '';
+      return;
+    }
+
+    const fields = resolveKafkaSourceFields();
+    if (!fields.length) {
+      return;
+    }
+
+    const fieldsKey = fields.map((field) => field.fieldId).join('|');
+    if (loadedKafkaFieldsKeyRef.current === fieldsKey) {
+      return;
+    }
+    loadedKafkaFieldsKeyRef.current = fieldsKey;
+    setSourceFields(fields);
+  }, [
+    isStreamParseSourceType,
+    sourceConfigured,
+    syncSourceDataStrategy.messageQueueAiRuleContent,
+    syncSourceDataStrategy.messageQueueParseResultFields
+  ]);
+
+  const applyMappingRelations = (
+    fields: SourceTableField[],
+    relations: Array<{
+      objectTypeColumnName: string;
+      sourceTableColumnName: string;
+    }>
+  ) => {
     const sourceFieldMap = new Map(
       fields.map((field) => [field.fieldId, field])
     );
-    const objectTypeColumns = objectTypeAttributes
-      .map((attribute) => attribute.propertyID)
-      .filter((propertyID): propertyID is string => !!propertyID);
-    const sourceTableColumns = fields
-      .map((field) => field.fieldId)
-      .filter((fieldId): fieldId is string => !!fieldId);
-
-    const relationMap = new Map<string, string>();
-    if (objectTypeColumns.length && sourceTableColumns.length) {
-      try {
-        const response = await mapOntologyObjectTypeColumns({
-          objectTypeColumns,
-          sourceTableColumns
-        });
-        if (
-          isOntologyApiSuccessResponse(response) &&
-          Array.isArray(response.data?.mapRelations)
-        ) {
-          response.data.mapRelations.forEach((relation) => {
-            if (
-              relation?.objectTypeColumnName &&
-              relation?.sourceTableColumnName
-            ) {
-              relationMap.set(
-                relation.objectTypeColumnName,
-                relation.sourceTableColumnName
-              );
-            }
-          });
-        } else {
-          Message.error(response?.message || '自动匹配字段映射失败');
-        }
-      } catch (error) {
-        console.error('自动匹配字段映射失败:', error);
-        Message.error('自动匹配字段映射失败');
-      }
-    }
+    const relationMap = new Map(
+      relations.map((relation) => [
+        relation.objectTypeColumnName,
+        relation.sourceTableColumnName
+      ])
+    );
 
     const nextFields = objectTypeAttributes.map((attribute) => {
       const mappedSourceFieldId = relationMap.get(attribute.propertyID);
@@ -168,6 +336,86 @@ export default function InstanceSyncStep({
     form.setFieldValue('syncMappingFields', nextFields);
   };
 
+  const applyAutoMapping = async (
+    fields: SourceTableField[],
+    options?: { showFeedback?: boolean; preferEnglishNameMatch?: boolean }
+  ) => {
+    if (!objectTypeAttributes.length || !fields.length) {
+      return;
+    }
+
+    setSmartMatchLoading(true);
+    try {
+      if (options?.preferEnglishNameMatch || isStreamParseSourceType) {
+        const relations = fuzzyMatchInstanceSyncByEnglishName({
+          attributes: objectTypeAttributes,
+          sourceFields: fields
+        });
+
+        if (!relations.length) {
+          if (options?.showFeedback) {
+            Message.warning('未能根据英文字段名自动匹配，请手动选择表字段');
+          }
+          return;
+        }
+
+        applyMappingRelations(fields, relations);
+        if (options?.showFeedback) {
+          Message.success('已根据英文字段名完成自动匹配');
+        }
+        return;
+      }
+
+      const { relations, source } = await smartMatchInstanceSyncColumns({
+        attributes: objectTypeAttributes,
+        sourceFields: fields
+      });
+
+      if (!relations.length) {
+        if (options?.showFeedback) {
+          Message.warning('未能自动匹配到字段映射，请手动配置');
+        }
+        return;
+      }
+
+      applyMappingRelations(fields, relations);
+
+      if (!options?.showFeedback) {
+        return;
+      }
+
+      if (source === 'llm') {
+        Message.success('已根据字段注释完成智能匹配');
+      } else if (source === 'api') {
+        Message.success('已根据字段名完成自动匹配');
+      }
+    } catch (error) {
+      console.error('自动匹配字段映射失败:', error);
+      if (options?.showFeedback) {
+        Message.error(
+          error instanceof Error ? error.message : '自动匹配字段映射失败'
+        );
+      }
+    } finally {
+      setSmartMatchLoading(false);
+    }
+  };
+
+  const handleSmartMatch = () => {
+    if (!sourceFields.length) {
+      Message.warning(
+        isStreamParseSourceType
+          ? '请先在规则测试中执行解析，或完成规则入库'
+          : '请先配置并加载数据源表字段'
+      );
+      return;
+    }
+    void applyAutoMapping(sourceFields, {
+      showFeedback: true,
+      preferEnglishNameMatch: isKafkaSourceType
+    });
+  };
+
   const loadTableSchema = async ({
     connectorId,
     databaseName,
@@ -180,7 +428,7 @@ export default function InstanceSyncStep({
   }) => {
     setFieldsLoading(true);
     try {
-      const response = await getSqlConnectorTableSchemaToTIDB({
+      const response = await fetchSqlConnectorTableSchema({
         id: connectorId,
         database_name: databaseName,
         table_name: tableName,
@@ -206,6 +454,10 @@ export default function InstanceSyncStep({
   };
 
   useEffect(() => {
+    if (!sourceConfigured || !isDatabaseSourceType) {
+      return;
+    }
+
     const sourceDataInfo = syncSourceDataStrategy.sourceDataInfo;
     const {
       connectorId,
@@ -238,6 +490,8 @@ export default function InstanceSyncStep({
       projectID
     });
   }, [
+    isDatabaseSourceType,
+    sourceConfigured,
     syncSourceDataStrategy.sourceDataInfo.connectorId,
     syncSourceDataStrategy.sourceDataInfo.databaseName,
     currentProjectID,
@@ -262,39 +516,71 @@ export default function InstanceSyncStep({
 
   return (
     <>
-      <div className="my-[16px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
-        数据源
+      <div className={styles['modeling-section']}>
+        <div className={styles['modeling-section-title']}>数据源</div>
+        <InstanceSyncSourceSection
+          form={form}
+          syncSourceDataStrategy={syncSourceDataStrategy}
+          syncMappingFields={syncMappingFields}
+          objectTypeAttributes={objectTypeAttributes}
+          setSyncMappingFields={setSyncMappingFields}
+          onStrategyUpdate={updateStrategy}
+          onSourceDataInfoChange={handleSourceChange}
+          onTableSelected={loadTableSchema}
+          onSqlColumnsParsed={handleSqlColumnsParsed}
+          onCsvColumnsParsed={handleCsvColumnsParsed}
+          onKafkaParseFieldsReady={handleKafkaParseFieldsReady}
+          onSourceTypeChange={handleSourceTypeChange}
+          objectTypeName={resolvedObjectTypeName}
+          styles={styles}
+          readOnly={readOnly}
+        />
       </div>
-      <SqlSourceSelector
-        form={form}
-        value={syncSourceDataStrategy.sourceDataInfo}
-        onChange={handleSourceChange}
-        onTableSelected={loadTableSchema}
-        onSqlColumnsParsed={handleSqlColumnsParsed}
-        fieldPrefix="sync"
-        styles={styles}
-        ontologySqlTestTaskType="TABLE_REALTIME_SYNC"
-        syncSourceDataStrategyForSqlTest={syncSourceDataStrategy}
-        readOnly={readOnly}
-      />
 
-      <div className="my-[16px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
-        同步策略
+      <div className={styles['modeling-section']}>
+        <div className={styles['modeling-section-title']}>同步策略</div>
+        {isKafkaSourceType ? (
+          <MessageQueueSyncStrategyFormSection
+            syncSourceDataStrategy={syncSourceDataStrategy}
+            onStrategyUpdate={updateStrategy}
+            readOnly={readOnly}
+          />
+        ) : isApiSourceType ? (
+          <ApiSyncStrategyFormSection
+            syncSourceDataStrategy={syncSourceDataStrategy}
+            onStrategyUpdate={updateStrategy}
+            readOnly={readOnly}
+          />
+        ) : isCsvSourceType ? (
+          <CsvSyncStrategyFormSection
+            syncSourceDataStrategy={syncSourceDataStrategy}
+            onStrategyUpdate={updateStrategy}
+            readOnly={readOnly}
+          />
+        ) : (
+          <SyncSourceDataStrategyFormSection
+            styles={styles}
+            syncSourceDataStrategy={syncSourceDataStrategy}
+            onStrategyUpdate={updateStrategy}
+            readOnly={readOnly}
+          />
+        )}
       </div>
-
-      <SyncSourceDataStrategyFormSection
-        styles={styles}
-        syncSourceDataStrategy={syncSourceDataStrategy}
-        onStrategyUpdate={updateStrategy}
-        readOnly={readOnly}
-      />
 
       <InstanceSyncMappingTable
         form={form}
         mappingFields={syncMappingFields}
         setMappingFields={setSyncMappingFields}
         sourceFields={sourceFields}
-        loading={fieldsLoading}
+        sourceConfigured={sourceConfigured}
+        loading={fieldsLoading || smartMatchLoading}
+        onSmartMatch={readOnly ? undefined : handleSmartMatch}
+        smartMatchLoading={smartMatchLoading}
+        smartMatchTooltip={
+          isStreamParseSourceType
+            ? '根据属性 id 与解析字段英文名进行模糊匹配'
+            : undefined
+        }
         styles={styles}
         readOnly={readOnly}
       />

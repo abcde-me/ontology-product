@@ -1,0 +1,133 @@
+.compact-panel {
+  background: #ecfdf5;
+  font-size: 12px;
+
+  .basic-section {
+    gap: 6px;
+    padding: 8px 10px 10px;
+  }
+
+  .section-title {
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  .field-label {
+    width: 68px;
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  .field-value {
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  .tabs-wrap {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .empty-wrap {
+    padding-top: 36px;
+    padding-bottom: 36px;
+  }
+
+  .pagination-wrap {
+    margin-top: 8px;
+  }
+
+  .link-card {
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border-color: #a7f3d0;
+    background: rgb(255 255 255 / 45%);
+  }
+
+  .link-title {
+    margin-bottom: 4px;
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  .link-meta {
+    margin-bottom: 4px;
+    gap: 4px;
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  .link-graph {
+    padding: 6px 8px;
+    background: rgb(209 250 229 / 55%);
+  }
+
+  .object-type-card {
+    gap: 6px;
+    min-height: 40px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: rgb(255 255 255 / 55%) !important;
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  :global(.arco-tabs),
+  :global(.arco-tabs-content),
+  :global(.arco-tabs-content-inner),
+  :global(.arco-tabs-pane),
+  :global(.arco-tabs-content-item) {
+    background: transparent !important;
+  }
+
+  :global(.arco-tabs-header-title) {
+    padding: 4px 0;
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  :global(.arco-table),
+  :global(.arco-table-container),
+  :global(.arco-table-content-inner),
+  :global(.arco-table-body),
+  :global(.arco-table-header),
+  :global(.arco-table-content-scroll),
+  :global(.arco-table-scroll-position),
+  :global(.arco-table-element) {
+    background: transparent !important;
+  }
+
+  :global(.arco-table-th),
+  :global(.arco-table-td) {
+    padding: 4px 6px;
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  :global(.arco-table-th) {
+    background: rgb(209 250 229 / 55%) !important;
+  }
+
+  :global(.arco-table-td) {
+    background: transparent !important;
+  }
+
+  :global(.arco-table-tr:hover .arco-table-td) {
+    background: rgb(209 250 229 / 35%) !important;
+  }
+
+  :global(.arco-table-size-small .arco-table-th),
+  :global(.arco-table-size-small .arco-table-td) {
+    padding: 3px 6px;
+  }
+
+  :global(.arco-pagination) {
+    font-size: 12px;
+  }
+
+  :global(.arco-tag) {
+    font-size: 11px;
+    line-height: 16px;
+  }
+}

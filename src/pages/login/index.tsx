@@ -1,60 +1,17 @@
-import { Login } from '@/api/modules/user';
-import { isRequestSuccess } from '@/api/utils';
 import LoginBgPng from '@/assets/LOGINbg.png';
 import LogoPng from '@/assets/logo.png';
-import { Button, Card, Form, Input, Space } from '@arco-design/web-react';
+import { Card, Tabs } from '@arco-design/web-react';
 import React, { useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { PasswordLoginForm } from './components/PasswordLoginForm';
+import { ScanLoginPanel } from './components/ScanLoginPanel';
+import styles from './index.module.scss';
+import type { LoginMode, ScanLoginProvider } from './types';
 
-const baseName = 'noto';
+const TabPane = Tabs.TabPane;
 
 const LoginCard = () => {
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-  const history = useHistory();
-  const location = useLocation();
-
-  // 获取重定向URL
-  const getRedirectPath = () => {
-    const params = new URLSearchParams(location.search);
-    const redirectUri = params.get('redirect_uri');
-    if (redirectUri) {
-      try {
-        const url = new URL(redirectUri);
-        // 只返回路径部分，不包括域名
-        let path = url.pathname + url.search + url.hash;
-        const prefix = `/${baseName}`;
-        if (path === prefix) {
-          path = '/';
-        } else if (path.startsWith(prefix + '/')) {
-          path = path.slice(prefix.length);
-        }
-        return path;
-      } catch (e) {
-        console.error('Invalid redirect URL:', e);
-      }
-    }
-    // 默认重定向到首页
-    return '/';
-  };
-
-  const handleSubmit = async (values: any) => {
-    try {
-      setLoading(true);
-      const res = await Login(values);
-      console.log('登录结果', res);
-      if (isRequestSuccess(res)) {
-        // 重定向到之前的页面或默认页面
-        const redirectPath = getRedirectPath();
-        console.log('Redirecting to:', redirectPath);
-        history.push(redirectPath);
-      }
-    } catch (error) {
-      console.error('登录失败:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [loginMode, setLoginMode] = useState<LoginMode>('password');
+  const [scanProvider, setScanProvider] = useState<ScanLoginProvider>('lanxin');
 
   return (
     <div
@@ -66,56 +23,32 @@ const LoginCard = () => {
       }}
     >
       <Card
-        className="mx-4 w-full max-w-md p-4"
+        className={`mx-4 w-full max-w-lg p-4 ${styles.cardWrapper}`}
         bordered={false}
         style={{
           borderRadius: '12px',
           boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
         }}
       >
-        {/* Logo 和标题部分 */}
         <Header />
 
-        {/* 表单部分 */}
-        <Form
-          form={form}
-          requiredSymbol={false}
-          layout="vertical"
-          onSubmit={handleSubmit}
+        <Tabs
+          activeTab={loginMode}
+          onChange={(key) => setLoginMode(key as LoginMode)}
+          className={styles.loginTabs}
+          type="rounded"
         >
-          <Form.Item
-            label={
-              <div className="text-[14px] font-bold text-gray-800">用户名</div>
-            }
-            field="account"
-            rules={[{ required: true, message: '请输入用户名' }]}
-          >
-            <Input placeholder="请输入用户名" />
-          </Form.Item>
-
-          <Form.Item
-            label={
-              <div className="text-[14px] font-bold text-gray-800">密码</div>
-            }
-            field="password"
-            rules={[{ required: true, message: '请输入密码' }]}
-          >
-            <Input.Password placeholder="请输入密码" />
-          </Form.Item>
-
-          <Form.Item>
-            <Button
-              type="primary"
-              long
-              htmlType="submit"
-              className="mt-4"
-              loading={loading}
-              disabled={loading}
-            >
-              {loading ? '登录中...' : '登录'}
-            </Button>
-          </Form.Item>
-        </Form>
+          <TabPane key="password" title="账号登录">
+            <PasswordLoginForm />
+          </TabPane>
+          <TabPane key="scan" title="扫码登录">
+            <ScanLoginPanel
+              provider={scanProvider}
+              onProviderChange={setScanProvider}
+              enabled={loginMode === 'scan'}
+            />
+          </TabPane>
+        </Tabs>
       </Card>
     </div>
   );
@@ -125,14 +58,14 @@ export default LoginCard;
 
 function Header() {
   return (
-    <div className="flex justify-center">
-      <Space className="mb-8">
-        <img className="w-48 object-contain" src={LogoPng} />
-        <div className="mx-[6px] h-6 w-[1px] bg-gray-400"></div>
-        <div className="text-[17px] font-bold text-gray-800">
+    <div className="mb-8 flex items-center justify-center">
+      <div className="flex flex-nowrap items-center gap-3">
+        <img className="h-8 w-auto shrink-0 object-contain" src={LogoPng} />
+        <div className="h-6 w-px shrink-0 bg-gray-400" />
+        <div className="shrink-0 whitespace-nowrap text-[17px] font-bold text-gray-800">
           本体构建与运营平台
         </div>
-      </Space>
+      </div>
     </div>
   );
 }

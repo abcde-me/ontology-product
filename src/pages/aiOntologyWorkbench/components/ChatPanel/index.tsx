@@ -23,6 +23,22 @@ import {
   getAgentInfo,
   convertToPDF
 } from '@/api/aiOntologyWorkbench/chat';
+import SystemPromptSettings from '../SystemPromptSettings';
+import PluginSettings from '../PluginSettings';
+import SecuritySettings from '../SecuritySettings';
+import {
+  resolveDirectLlmRequestUrl,
+  DIRECT_LLM_APP_ID
+} from '../../services/directLlmChat';
+import { useUserInfoStore } from '@/store/userInfoStore';
+import { isDevAppId } from '@/utils/devChatStore';
+import { isLocalLlmAppId } from '@/utils/devOntologyStore';
+import type { OntologScene } from '@/types/ontologySceneApi';
+import type { WorkbenchSendParams } from './WorkbenchChatSender';
+import {
+  formatUploadErrorMessage,
+  UPLOAD_PROJECT_REQUIRED_HINT
+} from '@/utils/projectFilesystem';
 
 interface PromptItem {
   id: string;
@@ -43,6 +59,11 @@ interface ChatPanelProps {
   onLocateNode?: (code: string) => void;
   /** 节点查看回调 */
   onViewNode?: (action: OntologyAction) => void;
+  /** 确保本体 Agent 已创建（Agent SSE 模式使用） */
+  ensureOntologyAgent?: (
+    ontology: OntologScene,
+    options?: { requireRealBackend?: boolean }
+  ) => Promise<string | undefined>;
 }
 
 const ChatPanel: React.FC<ChatPanelProps> = ({
@@ -55,19 +76,45 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   onConversationCreated,
   onGraphRefresh,
   onLocateNode,
-  onViewNode
+  onViewNode,
+  ensureOntologyAgent
 }) => {
   // 获取图谱状态管理和当前本体
-  const { setGraphData, currentOntology } = useAIWorkbenchStore();
+  const {
+    setGraphData,
+    currentOntology,
+    getActiveSystemPromptContent,
+    loadSystemPromptForOntology,
+    getPluginConfigPayload,
+    loadPluginConfigForOntology,
+    loadSecurityProtectionForOntology,
+    checkInputSecurity
+  } = useAIWorkbenchStore();
+
+  const [systemPromptSettingsVisible, setSystemPromptSettingsVisible] =
+    useState(false);
+  const [pluginSettingsVisible, setPluginSettingsVisible] = useState(false);
+  const [securitySettingsVisible, setSecuritySettingsVisible] = useState(false);
 
   // 推荐问题状态
   const [suggestedQuestions, setSuggestedQuestions] = useState<PromptItem[]>(
     []
   );
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [agentSending, setAgentSending] = useState(false);
 
   // 文件上传相关 - 启用自动取消机制
   const uploader = useMultipartUploader({ autoCancelOnUnmount: true });
+  const getEffectiveProjectId = useUserInfoStore(
+    (s) => s.getEffectiveProjectId
+  );
+  const getEffectiveFilesystemId = useUserInfoStore(
+    (s) => s.getEffectiveFilesystemId
+  );
+  const effectiveProjectId =
+    getEffectiveProjectId() ||
+    (projectId != null ? String(projectId) : undefined);
+  const effectiveFsId = getEffectiveFilesystemId();
 
   // 组件卸载时的清理工作
   useEffect(() => {
@@ -87,8 +134,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   // 加载推荐问题
   const loadSuggestedQuestions = useCallback(async () => {
-    if (!appId) {
-      console.log('[ChatPanel] 没有 appId，跳过加载推荐问题');
+    if (!appId || String(appId) === DIRECT_LLM_APP_ID) {
+      console.log('[ChatPanel] 直连模式，跳过加载推荐问题');
+      setSuggestedQuestions([]);
       return;
     }
 
@@ -127,10 +175,42 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     }
   }, [appId]);
 
-  // 监听 appId 变化，加载推荐问题
+  // 延迟加载推荐问题，优先渲染聊天主界面
   useEffect(() => {
-    loadSuggestedQuestions();
+    let cancelled = false;
+    const run = () => {
+      if (!cancelled) {
+        void loadSuggestedQuestions();
+      }
+    };
+
+    if (typeof window.requestIdleCallback === 'function') {
+      const idleId = window.requestIdleCallback(run, { timeout: 2000 });
+      return () => {
+        cancelled = true;
+        window.cancelIdleCallback(idleId);
+      };
+    }
+
+    const timerId = window.setTimeout(run, 300);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timerId);
+    };
   }, [loadSuggestedQuestions]);
+
+  useEffect(() => {
+    if (currentOntology?.id) {
+      loadSystemPromptForOntology(currentOntology.id);
+      loadPluginConfigForOntology(currentOntology.id);
+      loadSecurityProtectionForOntology(currentOntology.id);
+    }
+  }, [
+    currentOntology?.id,
+    loadSystemPromptForOntology,
+    loadPluginConfigForOntology,
+    loadSecurityProtectionForOntology
+  ]);
 
   // 稳定 API 配置对象的引用，避免无限循环
   const conversationApiConfig = useMemo(
@@ -176,9 +256,21 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   // 稳定 Chat API 配置对象的引用，避免无限循环
   const chatApiConfig = useMemo(
     () => ({
-      // 注入获取聊天 URL 的函数
+      useDirectLlmChat: true,
       getChatUrl: (appId: string) => getChatApiUrl(appId),
-      // 注入获取历史消息的函数
+      buildDirectLlmMessages: ({ query }: { query: string }) => {
+        const systemPrompt = getActiveSystemPromptContent();
+        const messages: Array<{
+          role: 'system' | 'user' | 'assistant';
+          content: string;
+        }> = [];
+
+        if (systemPrompt?.trim()) {
+          messages.push({ role: 'system', content: systemPrompt.trim() });
+        }
+        messages.push({ role: 'user', content: query });
+        return messages;
+      },
       getHistoryMessages: async (params: {
         appId: string;
         conversationId: string;
@@ -199,20 +291,46 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         appConfigId?: string;
         channel?: string;
         source?: string;
-      }) => ({
-        responseMode: 'Streaming',
-        status: 'Published',
-        channel: params.channel,
-        appID: params.appId,
-        appConfigID: params.appConfigId,
-        projectID: params.projectId,
-        conversationID: params.conversationId,
-        enableDeepThink: params.enableDeepThink,
-        query: params.query,
-        inputs: params.files ? { files: params.files } : {}
-      })
+        useAgentSse?: boolean;
+      }) => {
+        const systemPrompt = getActiveSystemPromptContent();
+        const pluginPayload = getPluginConfigPayload();
+        const inputs: Record<string, unknown> = {
+          ...(params.files ? { files: params.files } : {}),
+          ...pluginPayload
+        };
+
+        if (systemPrompt) {
+          inputs.system_prompt = systemPrompt;
+          inputs.pre_prompt = systemPrompt;
+        }
+
+        const body: Record<string, unknown> = {
+          responseMode: 'Streaming',
+          status: params.useAgentSse
+            ? 'Published'
+            : params.source === 'published'
+              ? 'Published'
+              : 'Unpublished',
+          channel: params.channel || 'Preview',
+          appID: params.appId,
+          projectID: params.projectId,
+          enableDeepThink: params.enableDeepThink,
+          query: params.query,
+          inputs
+        };
+
+        if (params.appConfigId) {
+          body.appConfigID = params.appConfigId;
+        }
+        if (params.conversationId) {
+          body.conversationID = params.conversationId;
+        }
+
+        return body;
+      }
     }),
-    []
+    [getActiveSystemPromptContent, getPluginConfigPayload]
   );
 
   // 使用会话管理 hook，注入项目特定的 API
@@ -266,7 +384,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       );
     },
     onError: (error) => {
-      Message.error(error.message || '发送失败');
+      if (!error.message?.includes('未收到模型回复')) {
+        Message.error(error.message || '发送失败');
+      }
     }
   });
 
@@ -407,13 +527,28 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       accept:
         '.pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.xls,.xlsx,.csv,.wps,.ofd,.wav,.mp3,.ogg,.webm,.m4a,.amr,.mpga,.pcm,.bmp,.tif,.tiff',
       multiple: true,
+      beforeUpload: () => {
+        if (!effectiveProjectId) {
+          Message.warning(UPLOAD_PROJECT_REQUIRED_HINT);
+          return false;
+        }
+        return true;
+      },
       data: () => ({
-        projectID: projectId ? String(projectId) : undefined,
+        projectID: effectiveProjectId,
+        fsID: effectiveFsId,
         source: 'AIWorkbench',
         batch: new Date().getTime().toString()
       }),
       customRequest: (option: any) => {
         const { file, onProgress, onSuccess, onError } = option;
+
+        if (!effectiveProjectId) {
+          const err = new Error(UPLOAD_PROJECT_REQUIRED_HINT);
+          Message.warning(UPLOAD_PROJECT_REQUIRED_HINT);
+          onError?.(err, file);
+          return;
+        }
 
         // 用于存储文件的 objectURI
         let objectURI = '';
@@ -422,7 +557,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
           .uploadFile({
             file,
             uploadParams: {
-              projectID: projectId ? String(projectId) : undefined,
+              projectID: effectiveProjectId,
+              fsID: effectiveFsId,
               isInternal: false,
               fileName: file.name
             },
@@ -485,19 +621,21 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
             },
             onError: (err) => {
               console.error('[ChatPanel] 文件上传失败:', err);
-              Message.error(err?.message || '文件上传失败');
-              onError?.(err, file);
+              const message = formatUploadErrorMessage(err);
+              Message.error(message);
+              onError?.(new Error(message), file);
             }
           })
           .catch((err) => {
             console.error('[ChatPanel] 文件上传异常:', err);
-            Message.error(err?.message || '文件上传失败');
-            onError?.(err, file);
+            const message = formatUploadErrorMessage(err);
+            Message.error(message);
+            onError?.(new Error(message), file);
           });
       }
       // 注意：不要设置 onChange，让 Sender 组件内部的 FileUploader 管理文件列表
     }),
-    [uploader, projectId]
+    [uploader, effectiveProjectId, effectiveFsId]
   );
 
   // 获取文件的函数
@@ -524,10 +662,40 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   };
 
   const handleSend = useCallback(
-    (params: { text: string; files?: any[]; enableDeepThink: boolean }) => {
-      const { text, files = [], enableDeepThink } = params;
+    async (params: WorkbenchSendParams) => {
+      const { text, files = [], enableDeepThink, useAgentSse = false } = params;
 
-      console.log('[ChatPanel] 发送消息:', { text, files, enableDeepThink });
+      console.log('[ChatPanel] 发送消息:', {
+        text,
+        files,
+        enableDeepThink,
+        useAgentSse,
+        appId,
+        deepseekUrl: useAgentSse ? undefined : resolveDirectLlmRequestUrl()
+      });
+
+      if (!text.trim()) {
+        if (useAgentSse) {
+          Message.warning('请先输入消息');
+        }
+        return;
+      }
+
+      const securityResult = checkInputSecurity(text);
+      if (securityResult.matched) {
+        Message.warning({
+          content: securityResult.message,
+          duration: 4000
+        });
+
+        const shouldBlock =
+          useAIWorkbenchStore.getState().securityProtectionConfig
+            ?.blockOnMatch !== false;
+
+        if (shouldBlock) {
+          return;
+        }
+      }
 
       // 清除新建会话标记（用户开始发送消息）
       isUserNewSession.current = false;
@@ -541,34 +709,90 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
             name: file.name || file.originFile?.name,
             size: file.size || file.originFile?.size,
             type: file.type || file.originFile?.type,
-            // 使用 presignedUrl 作为预览 URL（用于图片显示）
-            // 使用 objectURI 作为存储路径（用于后端处理）
             url:
               file.response?.data?.presignedUrl ||
               file.response?.data?.objectURI ||
               '',
             objectURI: file.response?.data?.objectURI || ''
           };
-          console.log('[ChatPanel] 文件数据:', fileData);
           return fileData;
         });
 
-      console.log('[ChatPanel] 已上传文件:', uploadedFiles);
+      try {
+        if (useAgentSse) {
+          setAgentSending(true);
 
-      // 调用 sendMessage，传递对象参数
-      sendMessage({
-        text,
-        files: uploadedFiles,
-        enableDeepThink
-      });
+          let realAppId = currentOntology?.appID;
+          const needsRealAgent =
+            !realAppId ||
+            isDevAppId(realAppId) ||
+            isLocalLlmAppId(realAppId) ||
+            realAppId === DIRECT_LLM_APP_ID;
 
-      // 注意：不需要手动清空文件列表，Sender 组件会自己处理
+          if (needsRealAgent) {
+            if (!currentOntology || !ensureOntologyAgent) {
+              Message.error('无法创建 Agent，请确认已选择本体');
+              return;
+            }
+            Message.loading({ content: '正在初始化 Agent...', duration: 0 });
+            realAppId = await ensureOntologyAgent(currentOntology, {
+              requireRealBackend: true
+            });
+            Message.clear();
+          }
+
+          if (
+            !realAppId ||
+            isDevAppId(realAppId) ||
+            isLocalLlmAppId(realAppId)
+          ) {
+            Message.error(
+              'Agent 未就绪，请确认 CreateOntologyAgent 接口已成功返回 appID'
+            );
+            return;
+          }
+
+          await sendMessage({
+            text,
+            files: uploadedFiles,
+            enableDeepThink,
+            useAgentSse: true,
+            agentAppId: realAppId
+          });
+          return;
+        }
+
+        await sendMessage({
+          text,
+          files: uploadedFiles,
+          enableDeepThink,
+          useAgentSse: false
+        });
+      } catch (error) {
+        Message.clear();
+        console.error('[ChatPanel] sendMessage 失败:', error);
+        Message.error(
+          error instanceof Error ? error.message : '发送失败，请查看 Console'
+        );
+      } finally {
+        setAgentSending(false);
+      }
     },
-    [sendMessage]
+    [
+      sendMessage,
+      appId,
+      currentOntology,
+      ensureOntologyAgent,
+      checkInputSecurity
+    ]
   );
 
   const handlePromptSelect = (params: { id: string; text: string }) => {
-    handleSend({ text: params.text, enableDeepThink: true });
+    handleSend({
+      text: params.text,
+      enableDeepThink: true,
+      useAgentSse: false
+    });
   };
 
   const handleNewSession = () => {
@@ -675,6 +899,21 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         onSelectConversation={handleSelectConversation}
         onDeleteConversation={handleDeleteConversation}
         onRenameConversation={handleRenameConversation}
+        onOpenSystemPromptSettings={() => setSystemPromptSettingsVisible(true)}
+        onOpenPluginSettings={() => setPluginSettingsVisible(true)}
+        onOpenSecuritySettings={() => setSecuritySettingsVisible(true)}
+      />
+      <SystemPromptSettings
+        visible={systemPromptSettingsVisible}
+        onClose={() => setSystemPromptSettingsVisible(false)}
+      />
+      <PluginSettings
+        visible={pluginSettingsVisible}
+        onClose={() => setPluginSettingsVisible(false)}
+      />
+      <SecuritySettings
+        visible={securitySettingsVisible}
+        onClose={() => setSecuritySettingsVisible(false)}
       />
       <div className="flex flex-1 flex-col overflow-hidden">
         {showWelcome ? (
@@ -682,6 +921,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
             prompts={suggestedQuestions}
             onPromptSelect={handlePromptSelect}
             onSend={handleSend}
+            isChatting={isLoading || isStreaming}
+            agentSending={agentSending}
             uploaderProps={uploaderProps}
             GetFile={GetFile}
             GetAudioText={GetAudioText}
@@ -691,6 +932,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
             messages={messages}
             isLoading={isLoading}
             isStreaming={isStreaming}
+            agentSending={agentSending}
             isLoadingHistory={isLoadingHistory}
             ontologyId={currentOntology?.id}
             onSend={handleSend}

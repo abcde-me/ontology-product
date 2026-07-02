@@ -57,7 +57,11 @@ import styles from './index.module.scss';
 import { isNil } from 'lodash-es';
 import { getLinkTypeText } from '../../utils';
 import { openNewPage } from '@/utils/env';
-import { useInfiniteScroll, useRequest } from 'ahooks';
+import {
+  buildFieldCommentMap,
+  formatFieldDisplayLabel
+} from '@/pages/exploreAnalysis/objectBrowse/utils/fieldDisplayLabel';
+import { useInfiniteScroll } from 'ahooks';
 
 const TabPane = Tabs.TabPane;
 
@@ -112,6 +116,8 @@ export interface LinkItem {
 interface ObjectTypeDetailDrawerProps {
   visible: boolean;
   onClose: () => void;
+  /** 本体场景库 ID（跨场景查询等无路由参数时传入） */
+  ontologyModelId?: number;
   /** 对象类型 id（推荐使用该字段驱动抽屉数据请求） */
   objectTypeId?: string;
   data?: ObjectTypeDetailData;
@@ -189,6 +195,7 @@ const DEFAULT_PAGE_SIZE = 10;
 export default function ObjectTypeDetailDrawer({
   visible,
   onClose,
+  ontologyModelId,
   objectTypeId,
   data,
   defaultActiveTab = 'instances',
@@ -199,7 +206,8 @@ export default function ObjectTypeDetailDrawer({
   defaultAttributesPageSize = DEFAULT_PAGE_SIZE
 }: ObjectTypeDetailDrawerProps) {
   const history = useHistory();
-  const { id: ontologyModelID } = useParams<{ id: string }>();
+  const { id: routeOntologyModelId } = useParams<{ id: string }>();
+  const ontologyModelID = ontologyModelId ?? routeOntologyModelId;
   const [activeTab, setActiveTab] = useState<string>(defaultActiveTab);
 
   useEffect(() => {
@@ -412,81 +420,84 @@ export default function ObjectTypeDetailDrawer({
     };
   }, []);
 
-  // 使用 useRequest 加载链接数据（用于滚动加载）
-  const { loading: linksScrollLoading, run: loadLinksForScroll } = useRequest(
-    async () => {
+  const loadLinks = useCallback(
+    async (page = 1, append = false) => {
       if (!resolvedObjectTypeIdNum) {
-        throw new Error('对象类型ID不能为空');
+        return;
       }
 
-      const params = {
-        sourceObjectTypeIDList: [resolvedObjectTypeIdNum],
-        targetObjectTypeIDList: [resolvedObjectTypeIdNum],
-        ontologyModelID: Number(ontologyModelID),
-        pageNo: linksPageNoRef.current,
-        pageSize: linksPageSize
-      };
+      setLinksLoading(true);
+      try {
+        const res = await listOntologyLinkType({
+          sourceObjectTypeIDList: [resolvedObjectTypeIdNum],
+          targetObjectTypeIDList: [resolvedObjectTypeIdNum],
+          ontologyModelID: Number(ontologyModelID),
+          pageNo: page,
+          pageSize: linksPageSize
+        });
 
-      const res = await listOntologyLinkType(params);
-
-      if (res.code !== '' || res.status !== 200 || !res.data) {
-        throw new Error(res.message || '获取链接数据失败');
-      }
-
-      return res.data;
-    },
-    {
-      manual: true,
-      onSuccess: (data) => {
-        const newData = data.result || [];
-        if (newData.length > 0) {
-          const convertedLinks: LinkItem[] = newData.map(
-            convertLinkInfoToLinkItem
+        if (res.code === '' && res.status === 200 && res.data) {
+          const newData = res.data.result || [];
+          const convertedLinks = newData.map(convertLinkInfoToLinkItem);
+          setLinksData((prevData) =>
+            append ? [...prevData, ...convertedLinks] : convertedLinks
           );
-          setLinksData((prevData) => [...prevData, ...convertedLinks]);
-          setLinksTotal(data.totalCount || 0);
+          setLinksTotal(res.data.totalCount ?? convertedLinks.length);
+          setLinksIsNoMore(newData.length < linksPageSize);
+          linksPageNoRef.current = page;
+          return;
         }
 
-        // 判断是否是最后一页
-        if (newData.length < linksPageSize) {
-          setLinksIsNoMore(true);
-        } else {
-          linksPageNoRef.current += 1;
+        if (!append) {
+          setLinksData([]);
+          setLinksTotal(0);
         }
-      },
-      onError: (error) => {
-        console.error('获取链接数据失败:', error);
-        Message.error(error.message || '获取链接数据失败');
         setLinksIsNoMore(true);
+      } catch (error) {
+        console.error('获取链接数据失败:', error);
+        Message.error('加载链接失败');
+        if (!append) {
+          setLinksData([]);
+          setLinksTotal(0);
+        }
+        setLinksIsNoMore(true);
+      } finally {
+        setLinksLoading(false);
       }
-    }
+    },
+    [
+      convertLinkInfoToLinkItem,
+      linksPageSize,
+      ontologyModelID,
+      resolvedObjectTypeIdNum
+    ]
   );
 
-  // 包装 loadLinksForScroll 以添加条件检查
-  const handleLoadLinksForScroll = useCallback(async () => {
+  const handleLoadMoreLinks = useCallback(async () => {
     if (
       linksIsNoMore ||
       !resolvedObjectTypeIdNum ||
-      linksScrollLoading ||
+      linksLoading ||
       activeTab !== 'links' ||
       !visible
     ) {
       return Promise.resolve();
     }
-    return loadLinksForScroll();
+
+    return loadLinks(linksPageNoRef.current + 1, true);
   }, [
-    linksIsNoMore,
-    resolvedObjectTypeIdNum,
-    linksScrollLoading,
     activeTab,
-    visible,
-    loadLinksForScroll
+    linksIsNoMore,
+    linksLoading,
+    loadLinks,
+    resolvedObjectTypeIdNum,
+    visible
   ]);
 
   // 无限滚动加载（仅当 activeTab === 'links' 时生效）
   useInfiniteScroll(
     async () => {
-      await handleLoadLinksForScroll();
+      await handleLoadMoreLinks();
       return { list: [] };
     },
     {
@@ -599,7 +610,8 @@ export default function ObjectTypeDetailDrawer({
     // 属性（默认拉第一页）
     loadAttributes(1, attributesPagination.pageSize);
 
-    loadLinksForScroll();
+    resetLinksState();
+    void loadLinks(1);
 
     // 实例（默认拉第一页）
     loadInstances(1, instancesPagination.pageSize);
@@ -612,25 +624,9 @@ export default function ObjectTypeDetailDrawer({
     loadAttributes,
     loadInstances,
     loadBehaviors,
-    loadLinksForScroll
+    loadLinks,
+    resetLinksState
   ]);
-
-  // 当切换到 links tab 时，如果还没有数据，触发加载
-  useEffect(() => {
-    if (
-      activeTab === 'links' &&
-      visible &&
-      resolvedObjectTypeIdNum &&
-      linksData.length === 0 &&
-      !linksScrollLoading &&
-      !linksIsNoMore
-    ) {
-      resetLinksState();
-      setTimeout(() => {
-        handleLoadLinksForScroll();
-      }, 0);
-    }
-  }, [activeTab, visible, resolvedObjectTypeIdNum]);
 
   // 处理编辑按钮点击
   const handleEdit = () => {
@@ -648,6 +644,11 @@ export default function ObjectTypeDetailDrawer({
     }
     Message.error(result.message || '复制失败');
   };
+
+  const fieldCommentMap = useMemo(
+    () => buildFieldCommentMap(attributesData),
+    [attributesData]
+  );
 
   // 实例表格列定义（动态生成，基于数据）
   const getInstanceColumns = (
@@ -679,7 +680,10 @@ export default function ObjectTypeDetailDrawer({
     // 生成列配置
     return keys.map((key) => ({
       title: (
-        <GlobalTooltip.Ellipsis text={key} className="pointer-events-auto" />
+        <GlobalTooltip.Ellipsis
+          text={formatFieldDisplayLabel(key, fieldCommentMap)}
+          className="pointer-events-auto"
+        />
       ),
       dataIndex: key,
       width: columnWidth,
@@ -1117,12 +1121,9 @@ export default function ObjectTypeDetailDrawer({
               )}
             </div>
           </TabPane>
-          <TabPane
-            key="links"
-            title={`链接(${linksTotal || linksData.length})`}
-          >
+          <TabPane key="links" title={`链接(${linksTotal})`}>
             <div className="mt-[16px] flex flex-col gap-[16px]">
-              {linksTotal === 0 && !linksScrollLoading && !linksLoading ? (
+              {linksData.length === 0 && !linksLoading ? (
                 <div className="flex justify-center py-[100px]">
                   <NoDataCard title="暂无数据" />
                 </div>
@@ -1182,7 +1183,7 @@ export default function ObjectTypeDetailDrawer({
                       </div>
                     );
                   })}
-                  {linksScrollLoading && (
+                  {linksLoading && (
                     <div className="flex items-center justify-center p-4">
                       <Spin />
                     </div>

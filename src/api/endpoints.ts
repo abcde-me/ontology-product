@@ -128,6 +128,9 @@ export const PrefixOntology = API_PREFIX + '/ontology-action/api/v1';
 export const ModaForgeResourceEndpoints = {
   // 登录
   Login: PrefixUserSpace + '/Login',
+  GetLoginCaptcha: PrefixUserSpace + '/GetLoginCaptcha',
+  GetScanLoginQrCode: PrefixUserSpace + '/GetScanLoginQrCode',
+  CheckScanLoginStatus: PrefixUserSpace + '/CheckScanLoginStatus',
   Logout: PrefixUserSpace + '/Logout',
   GetUser: PrefixUserSpace + '/GetUser',
   GetProjOrg: PrefixUserSpace + '/GetProjOrg',
@@ -769,6 +772,12 @@ export const ModaForgeResourceEndpoints = {
   GetOntologyTopologyApi: PrefixAimdp + '/GetOntologyTopology',
   // 分页查询对象类型实例数据
   ListOntologyObjectTypeDataApi: PrefixAimdp + '/ListOntologyObjectTypeData',
+  // 向量检索对象类型实例数据
+  VectorSearchOntologyObjectTypeDataApi:
+    PrefixAimdp + '/VectorSearchOntologyObjectTypeData',
+  // 语义检索对象类型实例数据
+  SemanticSearchOntologyObjectTypeDataApi:
+    PrefixAimdp + '/SemanticSearchOntologyObjectTypeData',
   // 获取物理属性列表
   ListOntologyPhysicalPropertiesApi:
     PrefixAimdp + '/ListOntologyPhysicalProperties',
@@ -795,12 +804,20 @@ export const ModaForgeResourceEndpoints = {
   ListOntologyObjectTypeApi: PrefixAimdp + '/ListOntologyObjectType',
   // 创建对象类型
   CreateOntologyObjectTypeApi: PrefixAimdp + '/CreateOntologyObjectType',
+  // 绑定已有对象类型到本体场景库
+  BindOntologyObjectTypeApi: PrefixAimdp + '/BindOntologyObjectType',
   // 更新对象类型
   UpdateOntologyObjectTypeApi: PrefixAimdp + '/UpdateOntologyObjectType',
   // 删除对象类型
   DeleteOntologyObjectTypeApi: PrefixAimdp + '/DeleteOntologyObjectType',
   // 获取对象类型详情
   GetOntologyObjectTypeApi: PrefixAimdp + '/GetOntologyObjectType',
+  // 探测运行时元数据服务是否已注册对象类型
+  GetRuntimeOntologyObjectTypeMetadataApi:
+    PrefixAimdp + '/GetRuntimeOntologyObjectTypeMetadata',
+  // 将场景库对象类型补注册到运行时元数据服务
+  RegisterOntologyObjectTypeMetadataApi:
+    PrefixAimdp + '/RegisterOntologyObjectTypeMetadata',
   // 上传CSV文件并解析
   UploadOntologyEntityDataFileApi:
     PrefixAimdp + '/UploadOntologyEntityDataFile',

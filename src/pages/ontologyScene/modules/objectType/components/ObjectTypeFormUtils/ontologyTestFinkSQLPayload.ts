@@ -37,6 +37,9 @@ export function syncFormStateToOntologyTestSyncStrategy(
     jdbcPollingIntervalSeconds: state.jdbcPollingIntervalSeconds,
     jdbcSyncSqlFull: state.jdbcSyncSqlFull,
     jdbcSyncSqlIncrement: state.jdbcSyncSqlIncrement,
+    apiIncrementalTimeParam: state.apiIncrementalTimeParam,
+    apiCheckpointParam: state.apiCheckpointParam,
+    apiIncrementalMarkerField: state.apiIncrementalMarkerField,
     fullSyncBatchSize: state.fullSyncBatchSize ?? pollFetchSize,
     ...(sourceDataInfo ? { sourceDataInfo } : {})
   };

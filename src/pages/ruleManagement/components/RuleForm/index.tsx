@@ -28,6 +28,8 @@ import { getParamsFromData, isNumericType } from '../../utils';
 import {
   ChangeType,
   ConditionType,
+  EXECUTION_MODE_OPTIONS,
+  ExecutionMode,
   GateConfigRes,
   MonthDayMode,
   NUM_CONDITION_OPERATOR_OPTIONS,
@@ -303,6 +305,14 @@ export const RuleForm = forwardRef<
           });
           return;
         }
+        if (changedKeys.includes('executionMode')) {
+          syncValidatedValues({
+            actionConfig: {
+              executionMode: changedValues.executionMode
+            }
+          });
+          return;
+        }
         if (changedKeys.some((key) => key.includes('functionParams'))) {
           syncValidatedValues({
             gateConfig: {
@@ -350,7 +360,8 @@ export const RuleForm = forwardRef<
       labelAlign={'left'}
       scrollToFirstError
       initialValues={{
-        triggerType: 1
+        triggerType: 1,
+        executionMode: ExecutionMode.Auto
       }}
       onValuesChange={handleManagedValuesChange}
     >
@@ -915,7 +926,10 @@ export const RuleForm = forwardRef<
                             actionInfo: action,
                             actionCode: action?.code,
                             actionId: v as any,
-                            parameters: actionParams as any
+                            parameters: actionParams as any,
+                            executionMode:
+                              form.getFieldValue('executionMode') ||
+                              ExecutionMode.Auto
                           }
                         : undefined
                     });
@@ -924,6 +938,14 @@ export const RuleForm = forwardRef<
                     ruleDetail.actionConfig?.actionInfo as BehaviorActionItem
                   }
                 />
+              </FormItem>
+              <FormItem
+                field={'executionMode'}
+                label={'执行模式'}
+                required
+                rules={[{ required: true, message: '请选择执行模式' }]}
+              >
+                <Radio.Group options={EXECUTION_MODE_OPTIONS} />
               </FormItem>
               <Form.Item
                 shouldUpdate={(p, c) => {

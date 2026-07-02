@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 import { Button, Space } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
-import { DotStatus } from '@ceai-front/arco-material';
 import { ContentWithCopy } from '@/components/ContentWithCopy';
 import { PermissionWrapper } from '@/components/PermissionGuard/PermissionWrapper';
 import { DATA_SOURCE_PERMISSIONS } from '@/config/permissions';
 import dayjs from 'dayjs';
 import type { DataSourceItem } from '../types';
-import { DataSourceType, ConnectionStatus } from '../types';
+import { getDataSourceTypeLabel } from '../constants';
+import { DataSourceType } from '../types';
 
 interface UseColumnsProps {
   onDelete: (id: string) => void;
@@ -15,7 +15,6 @@ interface UseColumnsProps {
   onTestConnection: (id: string) => void;
   onViewDetail?: (record: DataSourceItem) => void;
   dataSourceTypeFilters?: Array<{ text: string; value: string }>;
-  connectionStatusFilters?: Array<{ text: string; value: string }>;
   testingIds?: Set<string>;
 }
 
@@ -25,7 +24,6 @@ export const useColumns = ({
   onTestConnection,
   onViewDetail,
   dataSourceTypeFilters,
-  connectionStatusFilters,
   testingIds = new Set()
 }: UseColumnsProps) => {
   const columns: ColumnProps<DataSourceItem>[] = useMemo(
@@ -48,36 +46,15 @@ export const useColumns = ({
         width: 150,
         filters: dataSourceTypeFilters || [],
         filterMultiple: true,
-        render: (type: DataSourceType) => {
-          const typeMap = {
-            [DataSourceType.MYSQL]: { text: 'MySQL', color: 'blue' },
-            [DataSourceType.DAMENG]: { text: '达梦数据库', color: 'green' },
-            [DataSourceType.POSTGRESQL]: { text: 'PostgreSQL', color: 'purple' }
-          };
-          const config = typeMap[type];
-          return <div>{config.text}</div>;
-        }
+        render: (type: DataSourceType) => (
+          <div>{getDataSourceTypeLabel(type)}</div>
+        )
       },
       {
         title: '连接信息',
         dataIndex: 'connectionInfo',
         width: 300,
         render: (text) => <ContentWithCopy value={text} />
-      },
-      {
-        title: '连接状态',
-        dataIndex: 'connectionStatus',
-        width: 120,
-        filters: connectionStatusFilters || [],
-        filterMultiple: true,
-        render: (status: ConnectionStatus) => {
-          const statusMap = {
-            [ConnectionStatus.SUCCESS]: { text: '成功', color: '#00b42a' },
-            [ConnectionStatus.FAILED]: { text: '失败', color: '#f53f3f' }
-          };
-          const config = statusMap[status];
-          return <DotStatus text={config.text} color={config.color} />;
-        }
       },
       {
         title: '创建时间',
@@ -135,7 +112,6 @@ export const useColumns = ({
       onTestConnection,
       onViewDetail,
       dataSourceTypeFilters,
-      connectionStatusFilters,
       testingIds
     ]
   );

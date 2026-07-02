@@ -1,4 +1,5 @@
 import { SyncStatus } from './graphApi';
+import type { EmbeddingModelConfig } from '@/config/embeddingDefaults';
 
 export interface ListOntologyObjectTypeReq {
   /**
@@ -188,6 +189,8 @@ export interface CreateOntologyPhysicalProperty {
   sourceTableName?: string;
 }
 
+export type { EmbeddingModelConfig };
+
 export enum SourceType {
   ICEBERG = 1,
   FILE_UPLOAD = 2
@@ -316,7 +319,20 @@ export interface SyncStrategy {
    */
   jdbcSyncSqlIncrement?: string;
   /**
-   * 同步模式，CDC-"BINLOG_CDC"; 轮询-"JDBC_POLLING"
+   * API 定时拉取 - 增量时间参数名（写入请求 query/body，值为上次同步时间）
+   */
+  apiIncrementalTimeParam?: string;
+  /**
+   * API 定时拉取 - 游标/断点参数名（写入请求 query/body，值为上次断点）
+   */
+  apiCheckpointParam?: string;
+  /**
+   * API 定时拉取 - 响应体增量判定字段（从单条记录取值以更新断点）
+   */
+  apiIncrementalMarkerField?: string;
+  /**
+   * 同步模式，CDC-"BINLOG_CDC"; 轮询-"JDBC_POLLING";
+   * 消息队列-"KAFKA_CDC"（仅实时消费）; API-"API_PUSH"（实时接收）/"API_POLLING"（定时拉取）; CSV-"CSV_IMPORT"
    */
   mode: string;
   /**
@@ -373,6 +389,17 @@ export interface OntologyObjectTypeDetailSyncSourceDataStrategy
   sourceDataInfo?: OntologyObjectTypeDetailSourceDataInfo;
 }
 
+export interface BindOntologyObjectTypeReq {
+  /**
+   * 目标本体场景库 ID
+   */
+  ontologyModelID: number;
+  /**
+   * 待绑定的已有对象类型 ID
+   */
+  objectTypeID: number;
+}
+
 export interface CreateOntologyObjectTypeReq {
   /**
    * 对象类型id
@@ -403,6 +430,10 @@ export interface CreateOntologyObjectTypeReq {
    */
   ontologyModelID: number;
   /**
+   * 复用已有对象类型时传入，绑定到目标场景库
+   */
+  reuseObjectTypeID?: number;
+  /**
    * 物理属性列表
    */
   ontologyPhysicalPropertiesList?:
@@ -428,6 +459,10 @@ export interface CreateOntologyObjectTypeReq {
    * 同步策略信息
    */
   syncSourceDataStrategy?: SyncSourceDataStrategy;
+  /**
+   * 向量化字段使用的 Embedding 模型配置（存在 isVector=1 字段时附带）
+   */
+  embeddingModel?: EmbeddingModelConfig;
 }
 
 export interface UpdateOntologyObjectTypeReq
@@ -490,6 +525,9 @@ export interface GetOntologyObjectTypeDetailRes
     jdbcPollingIntervalSeconds?: number;
     jdbcSyncSqlFull?: string;
     jdbcSyncSqlIncrement?: string;
+    apiIncrementalTimeParam?: string;
+    apiCheckpointParam?: string;
+    apiIncrementalMarkerField?: string;
     syncStrategy?: Partial<SyncStrategy>;
   };
 }

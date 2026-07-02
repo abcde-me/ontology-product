@@ -1,0 +1,98 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.listPage {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.header {
+  flex-shrink: 0;
+  padding: 16px 16px 0;
+}
+
+.body {
+  min-height: 0;
+  flex: 1;
+  padding: 12px 16px 16px;
+}
+
+.detailPage {
+  display: flex;
+  height: calc(100vh - 56px);
+  max-height: calc(100vh - 56px);
+  box-sizing: border-box;
+  flex-direction: column;
+  overflow: hidden;
+  background: #f7f8fa;
+}
+
+.detailHeaderWrap {
+  margin-bottom: 8px;
+  flex-shrink: 0;
+  padding: 8px 12px 0;
+}
+
+.detailHeaderCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  background: #eff6ff;
+}
+
+.detailHeaderMain {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.detailBackBtn {
+  flex-shrink: 0;
+  padding: 0 4px;
+}
+
+.detailHeaderActions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.detailTitle {
+  color: #1d2129;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.detailMeta {
+  overflow: hidden;
+  color: #86909c;
+  font-size: 12px;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detailBody {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-border-2);
+  margin: 0 12px 10px;
+  border-radius: 8px;
+  background: #fff;
+}

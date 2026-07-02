@@ -10,7 +10,7 @@ import {
 import { useTable } from './hooks/useTable';
 import { useColumns } from './hooks/useColumns';
 import type { DataSourceItem } from './types';
-import { DataSourceType, ConnectionStatus } from './types';
+import { DATA_SOURCE_TYPE_META } from './constants';
 import {
   fetchDataSourceList,
   deleteDataSource,
@@ -33,22 +33,13 @@ export default function DataSourceManagement() {
   const [dataSourceTypeFilter, setDataSourceTypeFilter] = useState<string[]>(
     []
   );
-  const [connectionStatusFilter, setConnectionStatusFilter] = useState<
-    string[]
-  >([]);
 
-  // 数据源类型筛选选项
-  const dataSourceTypeFilters = [
-    { text: 'MySQL', value: DataSourceType.MYSQL },
-    { text: '达梦数据库', value: DataSourceType.DAMENG },
-    { text: 'PostgreSQL', value: DataSourceType.POSTGRESQL }
-  ];
-
-  // 连接状态筛选选项
-  const connectionStatusFilters = [
-    { text: '成功', value: ConnectionStatus.SUCCESS },
-    { text: '失败', value: ConnectionStatus.FAILED }
-  ];
+  const dataSourceTypeFilters = Object.entries(DATA_SOURCE_TYPE_META).map(
+    ([value, meta]) => ({
+      text: meta.label,
+      value
+    })
+  );
 
   // 使用 useTable hook
   const { data, loading, pagination, submit, onChange, refresh } = useTable<
@@ -61,9 +52,7 @@ export default function DataSourceManagement() {
         pageSize: params.pageSize || 10,
         filter: params.keyword || '',
         dataSourceTypes:
-          dataSourceTypeFilter.length > 0 ? dataSourceTypeFilter : undefined,
-        connectionStatuses:
-          connectionStatusFilter.length > 0 ? connectionStatusFilter : undefined
+          dataSourceTypeFilter.length > 0 ? dataSourceTypeFilter : undefined
       });
       console.log('result', result);
 
@@ -78,7 +67,7 @@ export default function DataSourceManagement() {
     },
     form,
     defaultPageSize: 10,
-    deps: [dataSourceTypeFilter, connectionStatusFilter]
+    deps: [dataSourceTypeFilter]
   });
 
   // 处理删除
@@ -110,7 +99,6 @@ export default function DataSourceManagement() {
       const result = await testConnection(id);
       if (result.success) {
         Message.success('连接成功');
-        // 连接测试成功后刷新列表，更新连接状态
         refresh();
       } else {
         Message.error(result.message);
@@ -174,13 +162,6 @@ export default function DataSourceManagement() {
       } else {
         setDataSourceTypeFilter([]);
       }
-
-      // 处理连接状态筛选
-      if (filters.connectionStatus) {
-        setConnectionStatusFilter(filters.connectionStatus);
-      } else {
-        setConnectionStatusFilter([]);
-      }
     }
 
     // 调用 useTable 的 onChange
@@ -194,7 +175,6 @@ export default function DataSourceManagement() {
     onEdit: handleEdit,
     onViewDetail: handleViewDetail,
     dataSourceTypeFilters,
-    connectionStatusFilters,
     testingIds
   });
 

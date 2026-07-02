@@ -26,6 +26,7 @@ import {
 } from '@ceai-front/arco-material';
 import { useHistory } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { scheduleOverlayCleanup } from '@/utils/removeStaleArcoOverlays';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
 import enUS from '@arco-design/web-react/es/locale/en-US';
 import PageLayout from './pages/admin/layout';
@@ -66,6 +67,10 @@ import { ProjectIdKey } from './utils/const';
 import { isSameArray } from './utils/array';
 import { logout, openNewPage } from '@/utils/env';
 import { handlePathName } from '@/hooks/use-path-change';
+import {
+  AI_ONTOLOGY_WORKBENCH_PATH,
+  ONTO_DEFAULT_HOME_PATH
+} from '@/common/constants';
 
 initI18n();
 patchHistoryForLocationChange();
@@ -174,6 +179,7 @@ function App() {
   const permissionInitializedRef = useRef(false);
   // 用于追踪项目是否刚刚切换过
   const projectSwitchedRef = useRef(false);
+  const defaultLandingAppliedRef = useRef(false);
 
   // 获取用户信息 - 在 App 初始化时调用
   useEffect(() => {
@@ -214,17 +220,38 @@ function App() {
       // console.log('finalMenus', finalMenus);
       setUserMenus(finalMenus);
 
-      // 只有当项目刚刚切换过时，才跳转到第一个有权限的路由
+      // 切换项目后固定回到首页，避免落到 AI 本体工作台
       if (projectSwitchedRef.current) {
-        const firstValidPath = finalMenus.find((item) => item.children)
-          ?.children?.[0]?.path;
-        if (firstValidPath) {
-          history.push(firstValidPath);
-        }
+        history.push(ONTO_DEFAULT_HOME_PATH);
         projectSwitchedRef.current = false;
       }
     }
-  }, [projectId, userActions.actions, userActions.isAdmin]);
+  }, [projectId, userActions.actions, userActions.isAdmin, history]);
+
+  // 系统刷新时，若落在 AI 本体工作台则回到首页（仅评估一次，避免 SPA 跳转误判）
+  useEffect(() => {
+    if (!isInitialized || location.pathname.includes('/login')) {
+      return;
+    }
+
+    if (defaultLandingAppliedRef.current) {
+      return;
+    }
+
+    defaultLandingAppliedRef.current = true;
+
+    const navEntry = performance.getEntriesByType('navigation')[0] as
+      | PerformanceNavigationTiming
+      | undefined;
+    const isPageReload = navEntry?.type === 'reload';
+    const isWorkbenchPath =
+      location.pathname === AI_ONTOLOGY_WORKBENCH_PATH ||
+      location.pathname.endsWith('/aiOntologyWorkbench');
+
+    if (isPageReload && isWorkbenchPath) {
+      history.replace(ONTO_DEFAULT_HOME_PATH);
+    }
+  }, [isInitialized, history]);
 
   useEffect(() => {
     // 在主应用中加载子应用时，初始化权限
@@ -241,16 +268,6 @@ function App() {
       permissionInitializedRef.current = true;
     }
   }, [projectId, userActions.actions, setUserPermissions]);
-
-  useEffect(() => {
-    if (userInfo?.id) {
-      const fullProjectIdKey = `${ProjectIdKey}${userInfo?.id}`;
-      const pId = getLocalStorage<string[]>(fullProjectIdKey);
-      if (Array.isArray(pId) && pId.length > 1) {
-        setProjectId(pId);
-      }
-    }
-  }, [userInfo?.id]);
 
   const refreshPage = useCallback(
     (url: string, from: string) => {
@@ -282,8 +299,8 @@ function App() {
         projectSwitchedRef.current = true;
       }
 
-      // 重置初始化标记
-      permissionInitializedRef.current = true;
+      // 重置初始化标记，允许 wujie 环境重新加载权限
+      permissionInitializedRef.current = false;
     },
     [projectId, setUserActions, setProjectId]
   );
@@ -349,8 +366,13 @@ function App() {
             );
           })}*/}
           <Redirect from="/login" to="/tenant/compute/onto/login" exact />
-          <Redirect from="/onto" to="/tenant/compute/onto/home" exact />
-          <Redirect from="/" to="/tenant/compute/onto/home" exact />
+          <Redirect from="/onto" to={ONTO_DEFAULT_HOME_PATH} exact />
+          <Redirect from="/" to={ONTO_DEFAULT_HOME_PATH} exact />
+          <Redirect
+            from="/tenant/compute/onto"
+            to={ONTO_DEFAULT_HOME_PATH}
+            exact
+          />
           <Route
             path={'/'}
             render={({ history }) => <PageLayout history={history} />}
@@ -418,6 +440,7 @@ const render = (Component) => {
 
 // 初始渲染
 render(Index);
+scheduleOverlayCleanup();
 
 // 只在开发环境下启用 HMR
 // @ts-expect-error

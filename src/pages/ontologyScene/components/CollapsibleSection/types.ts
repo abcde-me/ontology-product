@@ -18,8 +18,12 @@ export enum QueryMode {
  * 同步模式枚举
  */
 export enum SyncMode {
-  BINLOG_CDC = 'BINLOG_CDC', // CDC
-  JDBC_POLLING = 'JDBC_POLLING' // 轮询
+  BINLOG_CDC = 'BINLOG_CDC', // 数据库 CDC
+  JDBC_POLLING = 'JDBC_POLLING', // 数据库轮询
+  KAFKA_CDC = 'KAFKA_CDC', // 消息队列实时消费
+  API_PUSH = 'API_PUSH', // API 实时接收
+  API_POLLING = 'API_POLLING', // API 定时拉取
+  CSV_IMPORT = 'CSV_IMPORT' // CSV 文件导入
 }
 
 /**
@@ -77,6 +81,9 @@ export interface SyncSourceDataStrategy {
   jdbcPollingIntervalSeconds?: number;
   jdbcSyncSqlFull?: string;
   jdbcSyncSqlIncrement?: string;
+  apiIncrementalTimeParam?: string;
+  apiCheckpointParam?: string;
+  apiIncrementalMarkerField?: string;
 }
 
 /**

@@ -1,6 +1,8 @@
 import { DATA_SOURCE_TYPE } from '@/pages/ontologyScene/common/constants';
 import { ObjectTypeFormData } from './components/ObjectTypeFormUtils/types';
 import { GetOntologyObjectTypeDetailRes, SourceType } from '@/types/objectType';
+import { findDataResourceTableBySource } from './services/dataResourceMapping';
+import { normalizeSqlConnectorId } from './components/ObjectTypeFormUtils/normalizeSqlConnectorId';
 
 const DEFAULT_SYNC_SOURCE_DATA_STRATEGY_EDIT = {
   mode: 'BINLOG_CDC',
@@ -19,10 +21,21 @@ const DEFAULT_SYNC_SOURCE_DATA_STRATEGY_EDIT = {
 export function mapObjectTypeDetailToFormData(
   objectType: GetOntologyObjectTypeDetailRes
 ): Partial<ObjectTypeFormData> {
+  const matchedDataResource = findDataResourceTableBySource(
+    objectType.originalDbName,
+    objectType.originalTableName
+  );
+  const isDataResource =
+    objectType.sourceType === SourceType.ICEBERG &&
+    !normalizeSqlConnectorId(objectType.sourceDataInfo?.connectorId) &&
+    !!matchedDataResource;
+
   const dataSourceType =
     objectType.sourceType === SourceType.FILE_UPLOAD
       ? DATA_SOURCE_TYPE.LOCAL_CSV
-      : DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC;
+      : isDataResource
+        ? DATA_SOURCE_TYPE.DATA_RESOURCE
+        : DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC;
 
   const syncFromApi = objectType.syncSourceDataStrategy;
   const nestedStrategy = syncFromApi?.syncStrategy;
@@ -41,7 +54,9 @@ export function mapObjectTypeDetailToFormData(
       objectType.ontologyPhysicalPropertiesList || [],
     sourceDataInfo: objectType.sourceDataInfo
       ? {
-          connectorId: objectType.sourceDataInfo.connectorId,
+          connectorId: normalizeSqlConnectorId(
+            objectType.sourceDataInfo.connectorId
+          ),
           databaseName: objectType.sourceDataInfo.databaseName,
           tableName: objectType.sourceDataInfo.tableName,
           queryMode:
@@ -53,7 +68,9 @@ export function mapObjectTypeDetailToFormData(
     syncSourceDataStrategy: syncFromApi
       ? {
           sourceDataInfo: {
-            connectorId: syncFromApi.sourceDataInfo?.connectorId,
+            connectorId: normalizeSqlConnectorId(
+              syncFromApi.sourceDataInfo?.connectorId
+            ),
             databaseName: syncFromApi.sourceDataInfo?.databaseName,
             tableName: syncFromApi.sourceDataInfo?.tableName,
             queryMode:
@@ -112,20 +129,41 @@ export function mapObjectTypeDetailToFormData(
             syncFromApi.jdbcSyncSqlFull ?? nestedStrategy?.jdbcSyncSqlFull,
           jdbcSyncSqlIncrement:
             syncFromApi.jdbcSyncSqlIncrement ??
-            nestedStrategy?.jdbcSyncSqlIncrement
+            nestedStrategy?.jdbcSyncSqlIncrement,
+          apiIncrementalTimeParam:
+            syncFromApi.apiIncrementalTimeParam ??
+            nestedStrategy?.apiIncrementalTimeParam,
+          apiCheckpointParam:
+            syncFromApi.apiCheckpointParam ??
+            nestedStrategy?.apiCheckpointParam,
+          apiIncrementalMarkerField:
+            syncFromApi.apiIncrementalMarkerField ??
+            nestedStrategy?.apiIncrementalMarkerField
         }
       : undefined,
     _dataSource: {
       type: dataSourceType,
-      connectorId: objectType.sourceDataInfo?.connectorId,
+      connectorId: normalizeSqlConnectorId(
+        objectType.sourceDataInfo?.connectorId
+      ),
       database:
-        dataSourceType === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC
-          ? objectType.sourceDataInfo?.databaseName || objectType.originalDbName
+        dataSourceType === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC ||
+        dataSourceType === DATA_SOURCE_TYPE.DATA_RESOURCE
+          ? objectType.sourceDataInfo?.databaseName ||
+            objectType.originalDbName ||
+            matchedDataResource?.databaseType
           : undefined,
       table:
-        dataSourceType === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC
-          ? objectType.sourceDataInfo?.tableName || objectType.originalTableName
+        dataSourceType === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC ||
+        dataSourceType === DATA_SOURCE_TYPE.DATA_RESOURCE
+          ? objectType.sourceDataInfo?.tableName ||
+            objectType.originalTableName ||
+            matchedDataResource?.tableName
           : undefined,
+      dataResourceId: matchedDataResource?.id,
+      dataResourceIds: matchedDataResource
+        ? [matchedDataResource.id]
+        : undefined,
       queryMode:
         objectType.sourceDataInfo?.queryMode === 'sql' ? 'sql' : 'selected',
       sql: objectType.sourceDataInfo?.sql

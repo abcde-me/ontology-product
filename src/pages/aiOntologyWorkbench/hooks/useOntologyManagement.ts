@@ -6,6 +6,13 @@ import {
   createOntologyModel
 } from '@/api/ontologySceneLibrary/ontologyScene';
 import { createOntologyAgent } from '@/api/aiOntologyWorkbench/chat';
+import { isOntologyApiSuccess } from '@/utils/apiResponse';
+import { isDevAppId } from '@/utils/devChatStore';
+import { DIRECT_LLM_APP_ID } from '../services/directLlmChat';
+import {
+  devClearOntologyAgentId,
+  isLocalLlmAppId
+} from '@/utils/devOntologyStore';
 import type { SceneFormData } from '@/pages/ontologyScene/modules/list/components/SceneModal';
 import type { OntologScene } from '@/types/ontologySceneApi';
 
@@ -19,11 +26,15 @@ export const useOntologyManagement = () => {
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
 
-  // 正在创建 Agent 的本体 ID 集合（防止重复调用）
-  const creatingAgentIds = useState(new Set<number>())[0];
-
-  // 使用 ref 存储 loading 状态，避免异步竞态问题
   const loadingRef = useRef(false);
+  const pendingReloadRef = useRef<{
+    pageNo: number;
+    pageSize: number;
+    autoSelectFirst: boolean;
+  } | null>(null);
+  const creatingAgentPromisesRef = useRef(
+    new Map<number, Promise<string | undefined>>()
+  );
 
   /**
    * 加载本体列表
@@ -33,15 +44,18 @@ export const useOntologyManagement = () => {
    */
   const loadOntologyList = useCallback(
     async (pageNo = 1, pageSize = 20, autoSelectFirst = true) => {
-      // 使用 ref 检查 loading 状态，避免竞态条件
       if (loadingRef.current) {
-        console.log('[useOntologyManagement] 正在加载中，跳过重复调用');
+        console.log('[useOntologyManagement] 正在加载中，排队等待下一次刷新');
+        pendingReloadRef.current = { pageNo, pageSize, autoSelectFirst };
         return { list: [], total: 0, hasMore: false };
       }
 
-      // 立即设置 loading 状态
       loadingRef.current = true;
-      setOntologyListLoading(true);
+      const hasCachedList =
+        pageNo === 1 && useAIWorkbenchStore.getState().ontologyList.length > 0;
+      if (!hasCachedList) {
+        setOntologyListLoading(true);
+      }
 
       try {
         const res = await listOntologyModel({
@@ -50,13 +64,11 @@ export const useOntologyManagement = () => {
           order: 'desc',
           orderBy: 'create_time'
         });
-        if (res.status === 200 && res.code === '' && res.data) {
+        if (isOntologyApiSuccess(res) && res.data) {
           const list = res.data.result || [];
 
-          // 如果是第一页，直接设置列表
           if (pageNo === 1) {
             setOntologyList(list);
-            // 只在没有当前本体且 autoSelectFirst 为 true 时，才设置默认选中第一个
             const currentOntology =
               useAIWorkbenchStore.getState().currentOntology;
             if (list.length > 0 && !currentOntology && autoSelectFirst) {
@@ -64,7 +76,6 @@ export const useOntologyManagement = () => {
               setCurrentOntology(list[0]);
             }
           } else {
-            // 如果是后续页，追加到列表
             useAIWorkbenchStore.setState((state) => ({
               ontologyList: [...state.ontologyList, ...list]
             }));
@@ -82,61 +93,95 @@ export const useOntologyManagement = () => {
         Message.error('加载本体列表失败');
         return { list: [], total: 0, hasMore: false };
       } finally {
-        // 确保 loading 状态被重置
         loadingRef.current = false;
         setOntologyListLoading(false);
+
+        const pending = pendingReloadRef.current;
+        if (pending) {
+          pendingReloadRef.current = null;
+          await loadOntologyList(
+            pending.pageNo,
+            pending.pageSize,
+            pending.autoSelectFirst
+          );
+        }
       }
     },
     [setOntologyList, setOntologyListLoading, setCurrentOntology]
   );
 
+  const isPlaceholderAppId = (appID?: string) =>
+    !appID ||
+    isDevAppId(appID) ||
+    isLocalLlmAppId(appID) ||
+    appID === DIRECT_LLM_APP_ID;
+
   /**
    * 检查并创建本体 Agent（如果需要）
    */
   const ensureOntologyAgent = useCallback(
-    async (ontology: OntologScene): Promise<string | undefined> => {
-      // 如果已经有 appID，直接返回
-      if (ontology.appID) {
+    async (
+      ontology: OntologScene,
+      options?: { requireRealBackend?: boolean }
+    ): Promise<string | undefined> => {
+      const requireRealBackend = options?.requireRealBackend ?? false;
+
+      if (ontology.appID && !isPlaceholderAppId(ontology.appID)) {
         console.log('[useOntologyManagement] 本体已有 appID:', ontology.appID);
         return ontology.appID;
       }
 
-      // 如果正在创建中，跳过
-      if (creatingAgentIds.has(ontology.id!)) {
+      const ontologyId = ontology.id!;
+      const inFlight = creatingAgentPromisesRef.current.get(ontologyId);
+      if (inFlight) {
         console.log(
-          '[useOntologyManagement] 本体 Agent 正在创建中，跳过重复调用:',
-          ontology.id
+          '[useOntologyManagement] 等待进行中的 Agent 创建:',
+          ontologyId
         );
-        return undefined;
+        return inFlight;
       }
 
-      // 如果没有 appID，调用接口创建
-      console.log('[useOntologyManagement] 本体没有 appID，开始创建 Agent...', {
-        ontologyId: ontology.id,
-        ontologyName: ontology.name
-      });
+      const createTask = (async (): Promise<string | undefined> => {
+        if (
+          ontology.appID &&
+          (isDevAppId(ontology.appID) ||
+            (requireRealBackend && isLocalLlmAppId(ontology.appID)))
+        ) {
+          console.log(
+            '[useOntologyManagement] 检测到占位 appID，重新创建真实 Agent...',
+            ontology.appID
+          );
+          devClearOntologyAgentId(ontologyId);
+        }
 
-      // 标记为正在创建
-      creatingAgentIds.add(ontology.id!);
+        console.log(
+          '[useOntologyManagement] 本体没有 appID，开始创建 Agent...',
+          {
+            ontologyId,
+            ontologyName: ontology.name,
+            requireRealBackend
+          }
+        );
 
-      try {
-        const res = await createOntologyAgent({
-          ontologyModelId: ontology.id!
-        });
+        try {
+          const res = await createOntologyAgent({
+            ontologyModelId: ontologyId,
+            skipDevFallback: requireRealBackend
+          });
 
-        console.log('[useOntologyManagement] createOntologyAgent 响应:', res);
+          console.log('[useOntologyManagement] createOntologyAgent 响应:', res);
 
-        if (res.status === 200 && res.code === '' && res.data?.appID) {
-          const appID = res.data.appID;
-          console.log('[useOntologyManagement] Agent 创建成功，appID:', appID);
+          if (isOntologyApiSuccess(res) && res.data?.appID) {
+            const appID = res.data.appID;
+            console.log(
+              '[useOntologyManagement] Agent 创建成功，appID:',
+              appID
+            );
 
-          // 刷新本体列表以获取最新的 appID（不自动选择第一个）
-          console.log('[useOntologyManagement] 开始刷新本体列表...');
-          await loadOntologyList(1, 20, false);
-          console.log('[useOntologyManagement] 本体列表刷新完成');
+            await loadOntologyList(1, 20, false);
+            return appID;
+          }
 
-          return appID;
-        } else {
           console.error('[useOntologyManagement] 创建 Agent 失败:', {
             status: res.status,
             code: res.code,
@@ -145,17 +190,22 @@ export const useOntologyManagement = () => {
           });
           Message.error(res.message || '创建 Agent 失败');
           return undefined;
+        } catch (error) {
+          console.error('[useOntologyManagement] 创建 Agent 异常:', error);
+          Message.error('创建 Agent 失败');
+          return undefined;
         }
-      } catch (error) {
-        console.error('[useOntologyManagement] 创建 Agent 异常:', error);
-        Message.error('创建 Agent 失败');
-        return undefined;
+      })();
+
+      creatingAgentPromisesRef.current.set(ontologyId, createTask);
+
+      try {
+        return await createTask;
       } finally {
-        // 移除创建标记
-        creatingAgentIds.delete(ontology.id!);
+        creatingAgentPromisesRef.current.delete(ontologyId);
       }
     },
-    [loadOntologyList, creatingAgentIds]
+    [loadOntologyList]
   );
 
   /**
@@ -171,7 +221,7 @@ export const useOntologyManagement = () => {
           icon: data.icon || '',
           tagIdList: [] // 默认空数组
         });
-        if (res.status === 200 && res.code === '') {
+        if (isOntologyApiSuccess(res)) {
           Message.success('创建成功');
           setCreateModalVisible(false);
 

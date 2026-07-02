@@ -1,0 +1,97 @@
+.templateLinks {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.uploadRoot {
+  width: 100%;
+
+  :global {
+    .arco-upload,
+    .arco-upload-drag,
+    .upload-file {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .arco-upload-drag {
+      margin-bottom: 0;
+    }
+
+    .arco-upload-list {
+      margin-top: 4px;
+    }
+
+    .arco-upload-list-type-text .arco-upload-list-item {
+      margin-top: 0;
+      padding: 0;
+      background: transparent;
+      border: none;
+    }
+
+    .arco-upload-list-item-content {
+      padding: 0;
+    }
+  }
+}
+
+.uploadListItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 28px;
+  padding: 2px 0;
+}
+
+.uploadListItemMain {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-2);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.uploadListItemName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uploadListItemActions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+}
+
+.uploadListItemAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-3);
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover {
+    color: rgb(var(--primary-6));
+  }
+}
+
+.uploadListItemActionSuccess {
+  color: #00b42a;
+  cursor: default;
+
+  &:hover {
+    color: #00b42a;
+  }
+}

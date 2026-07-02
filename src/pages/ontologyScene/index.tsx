@@ -10,8 +10,8 @@ export default function DataAsset() {
       <Switch>
         <Redirect
           exact
-          from="/tenant/compute/modaforge/ontologyScene"
-          to="/tenant/compute/modaforge/ontologyScene/list"
+          from="/tenant/compute/onto/ontologyScene"
+          to="/tenant/compute/onto/ontologyScene/list"
         />
         {routes
           .find((route) => route.name === 'ontologyScene')

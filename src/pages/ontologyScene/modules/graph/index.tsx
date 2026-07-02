@@ -1,4 +1,10 @@
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, {
+  useCallback,
+  useState,
+  useEffect,
+  useMemo,
+  useRef
+} from 'react';
 import {
   AIWorflow,
   AIWorkflowProvider,
@@ -12,23 +18,35 @@ import {
   getWorkflow,
   createWorkflow,
   updateWorkflow,
-  setDraft
+  setDraft,
+  setActiveWorkflowSceneId
 } from './common/api';
 import { getOntologyTopology } from '@/api/ontologySceneLibrary/graph';
-import dagre from '@dagrejs/dagre';
 import type { GetOntologyTopologyResponse } from '@/types/graphApi';
 import styles from './index.module.scss';
 import { CustomLabel, EdgePanel } from './edges';
 import { Button, Spin } from '@arco-design/web-react';
 import SubHeader from './subHeader';
 import classNames from 'classnames';
-import { MarkerType } from 'reactflow';
+import { WORKFLOW_EDGE_MARKER_END } from './utils/topologyEdgeIdentity';
+import type { Node } from 'reactflow';
 import { useDemoStore } from './common/store';
 import { useHistory, useParams } from 'react-router-dom';
 import { OBJECT_TYPE_ICON_OPTIONS } from '../../common/constants';
-import EmptyStateGraph from './EmptyStateGraph';
+import { GraphCreateProvider } from './context/GraphCreateContext';
+import GraphContextMenuHandler from './components/GraphContextMenuHandler';
+import GraphEmptyCanvas from './components/GraphEmptyCanvas';
+import GraphNodeSelectionSync from './components/GraphNodeSelectionSync';
+import GraphEdgeSelectionSync from './components/GraphEdgeSelectionSync';
+import GraphClickSelectionHandler from './components/GraphClickSelectionHandler';
+import GraphDeleteKeyHandler from './components/GraphDeleteKeyHandler';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
+import { usePermission } from '@/hooks/usePermission';
+import { isDevBypassEnabled } from '@/utils/devFallback';
+import { isOntologyApiSuccess } from '@/utils/apiResponse';
+import { layoutOntologyGraphWithDagre } from './utils/layoutOntologyGraph';
+import { scheduleOverlayCleanup } from '@/utils/removeStaleArcoOverlays';
 
 const createNodesConfig = (
   OSId: string,
@@ -87,162 +105,7 @@ const createNodesConfig = (
   }
 ];
 
-const NODE_WIDTH = 244;
-const NODE_HEIGHT = 112;
 const MENU_WIDTH = 200;
-
-// 使用 dagre 进行布局计算
-function layoutNodesWithDagre(
-  topologyData: GetOntologyTopologyResponse,
-  newNode: GenerateNewNode,
-  selectedObjectTypeCode?: string
-) {
-  const topologyNodes = topologyData.nodes ?? [];
-  const topologyEdges = topologyData.edges ?? [];
-
-  if (topologyNodes.length === 0) {
-    return { nodes: [], edges: [], draft: true };
-  }
-
-  // 创建 dagre 图
-  const g = new dagre.graphlib.Graph();
-  g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: 'LR', nodesep: 60, ranksep: 280 });
-
-  // 创建节点映射，用于后续查找
-  const nodeIdMap = new Map<number, string>();
-  const workflowNodes: any[] = [];
-
-  // 先创建所有节点（不设置位置）
-  topologyNodes.forEach((topologyNode) => {
-    const nodeId = String(
-      topologyNode.id ?? topologyNode.code ?? topologyNode.name ?? Date.now()
-    );
-    if (topologyNode.id !== undefined) {
-      nodeIdMap.set(topologyNode.id, nodeId);
-    }
-
-    const { newNode: workflowNode } = newNode({
-      id: nodeId,
-      data: {
-        ...MyNodeDefault.defaultValue,
-        // @ts-expect-error
-        type: 'default',
-        desc: topologyNode.description ?? '',
-        title: topologyNode.name || '未命名节点',
-        // 用于控制节点面板的显隐：当节点被选中时面板会自动打开
-        selected: Boolean(
-          selectedObjectTypeCode &&
-            String(topologyNode.code ?? '') === String(selectedObjectTypeCode)
-        ),
-        attributes: topologyNode.ontologyPhysicalPropertiesList || [],
-        syncStatus: topologyNode.syncStatus,
-        code: topologyNode.code ?? '',
-        icon: topologyNode.icon ?? ''
-      },
-      position: { x: 0, y: 0 } // 临时位置，稍后由 dagre 计算
-    });
-
-    workflowNodes.push(workflowNode);
-    // 添加到 dagre 图
-    g.setNode(nodeId, { width: NODE_WIDTH, height: NODE_HEIGHT });
-  });
-
-  // 创建边并添加到 dagre 图
-  const workflowEdges = topologyEdges
-    .filter(
-      (topologyEdge) =>
-        topologyEdge.sourceId !== undefined &&
-        topologyEdge.targetId !== undefined
-    )
-    .map((topologyEdge) => {
-      const sourceId = nodeIdMap.get(topologyEdge.sourceId!);
-      const targetId = nodeIdMap.get(topologyEdge.targetId!);
-
-      if (sourceId && targetId) {
-        // 添加到 dagre 图
-        g.setEdge(sourceId, targetId);
-      }
-
-      return {
-        id: String(
-          topologyEdge.id ?? `${topologyEdge.sourceId}-${topologyEdge.targetId}`
-        ),
-        source: sourceId ?? String(topologyEdge.sourceId),
-        sourceHandle: 'source',
-        target: targetId ?? String(topologyEdge.targetId),
-        targetHandle: 'target',
-        type: 'custom-edge',
-        data: {
-          id: topologyEdge.id, // 保存原始的数字ID
-          name: topologyEdge.name || '',
-          syncStatus: topologyEdge.syncStatus
-        }
-      };
-    });
-
-  // 执行 dagre 布局
-  dagre.layout(g);
-
-  // 更新节点位置
-  const layoutedNodes = workflowNodes.map((node) => {
-    const nodeWithPos = g.node(node.id);
-    if (nodeWithPos) {
-      return {
-        ...node,
-        position: {
-          x: nodeWithPos.x - NODE_WIDTH / 2,
-          y: nodeWithPos.y - NODE_HEIGHT / 2
-        }
-      };
-    }
-    return node;
-  });
-
-  // 计算所有节点的边界框，用于X轴方向居中显示
-  if (layoutedNodes.length > 0) {
-    const minX = Math.min(...layoutedNodes.map((node) => node.position.x));
-    const maxX = Math.max(
-      ...layoutedNodes.map((node) => node.position.x + NODE_WIDTH)
-    );
-
-    // 计算图谱在X轴方向的中心点
-    const graphCenterX = (minX + maxX) / 2;
-
-    // 获取画布宽度（如果可用，否则使用默认值）
-    const canvasWidth =
-      typeof window !== 'undefined'
-        ? window.innerWidth - MENU_WIDTH
-        : 1920 - MENU_WIDTH;
-    // 计算画布中心点
-    const canvasCenterX = canvasWidth / 2;
-
-    // 计算X轴偏移量，使图谱中心移动到画布中心
-    // 如果图谱中心在X=graphCenterX，要移动到X=canvasCenterX，偏移量 = canvasCenterX - graphCenterX
-    const centerOffsetX = canvasCenterX - graphCenterX;
-
-    // 调整所有节点位置，使图谱在X轴方向居中
-    const centeredNodes = layoutedNodes.map((node) => ({
-      ...node,
-      position: {
-        x: node.position.x + centerOffsetX,
-        y: node.position.y // Y轴位置保持不变
-      }
-    }));
-
-    return {
-      nodes: centeredNodes,
-      edges: workflowEdges,
-      draft: true
-    };
-  }
-
-  return {
-    nodes: layoutedNodes,
-    edges: workflowEdges,
-    draft: true
-  };
-}
 
 // 创建基于接口数据的 initWorkflow
 const createInitWorkflow = (
@@ -259,7 +122,29 @@ const createInitWorkflow = (
       };
     }
 
-    return layoutNodesWithDagre(topologyData, newNode, selectedObjectTypeCode);
+    return layoutOntologyGraphWithDagre({
+      topologyData,
+      newNode,
+      selectedObjectType: selectedObjectTypeCode
+        ? { code: selectedObjectTypeCode }
+        : undefined,
+      sidebarOffset: MENU_WIDTH,
+      buildNodeData: (topologyNode, selectedObjectType) => ({
+        ...MyNodeDefault.defaultValue,
+        // @ts-expect-error
+        type: 'default',
+        desc: topologyNode.description ?? '',
+        title: topologyNode.name || '未命名节点',
+        selected: Boolean(
+          selectedObjectType?.code &&
+            String(topologyNode.code ?? '') === String(selectedObjectType.code)
+        ),
+        attributes: topologyNode.ontologyPhysicalPropertiesList || [],
+        syncStatus: topologyNode.syncStatus,
+        code: topologyNode.code ?? '',
+        icon: topologyNode.icon ?? ''
+      })
+    });
   };
 };
 
@@ -268,6 +153,8 @@ export default function OntologySceneGraph() {
   const [topologyData, setTopologyData] =
     useState<GetOntologyTopologyResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [topologyRevision, setTopologyRevision] = useState(0);
+  const loadGenerationRef = useRef(0);
   const [urlState, setUrlState] = useUrlState<{ objectTypeCode: string }>(
     { objectTypeCode: '' },
     { navigateMode: 'replace' }
@@ -279,48 +166,169 @@ export default function OntologySceneGraph() {
   const initialObjectTypeCodeFromUrl = useMemo(() => objectTypeCodeFromUrl, []);
   const showCustomEdgePanel = useDemoStore((s) => s.showCustomEdgePanel);
   const setShowCustomEdgePanel = useDemoStore((s) => s.setShowCustomEdgePanel);
+  const setSelectedEdgeId = useDemoStore((s) => s.setSelectedEdgeId);
   const history = useHistory();
   const { id: OSId } = useParams<{ id: string }>();
+  const sceneId = Number(OSId);
+  const { hasPermission } = usePermission();
+  const canCreate =
+    hasPermission(ONTOLOGY_PERMISSIONS.CREATE) || isDevBypassEnabled();
+  const canDeleteNode =
+    hasPermission(ONTOLOGY_PERMISSIONS.DELETE) || isDevBypassEnabled();
   const nodesConfig = useMemo(
     () => createNodesConfig(OSId, history),
     [OSId, history]
   );
 
-  // 计算是否为空：当 nodes 和 edges 都是空数组时，isEmpty 为 true
   const isEmpty =
     !loading &&
     topologyData !== null &&
     (!topologyData.nodes || topologyData.nodes.length === 0) &&
     (!topologyData.edges || topologyData.edges.length === 0);
 
-  useEffect(() => {
-    // 重置 loading 状态和拓扑数据
+  const reloadTopology = useCallback(async () => {
+    if (!Number.isFinite(sceneId) || sceneId <= 0) {
+      setTopologyData({ nodes: [], edges: [] });
+      setLoading(false);
+      return;
+    }
+
     setShowCustomEdgePanel(false);
     setLoading(true);
-    setTopologyData(null);
-    // 清除之前的 draft 缓存，避免显示旧数据
-    setDraft(null);
+    setActiveWorkflowSceneId(sceneId);
+    setDraft(null, sceneId);
+    const loadGeneration = loadGenerationRef.current + 1;
+    loadGenerationRef.current = loadGeneration;
 
-    // 获取本体拓扑数据
-    getOntologyTopology({
-      id: Number(OSId)
-    })
-      .then((res) => {
-        if (res.status === 200 && res.code === '' && res.data) {
-          setTopologyData(res.data);
-        }
-      })
-      .catch((err) => {
-        console.error('获取本体拓扑数据失败:', err);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [OSId]);
+    try {
+      const res = await getOntologyTopology({ id: sceneId });
+      if (loadGenerationRef.current !== loadGeneration) {
+        return;
+      }
+
+      if (isOntologyApiSuccess(res) && res.data) {
+        setTopologyData(res.data);
+      } else {
+        setTopologyData({ nodes: [], edges: [] });
+      }
+    } catch (err) {
+      if (loadGenerationRef.current !== loadGeneration) {
+        return;
+      }
+      console.error('获取本体拓扑数据失败:', err);
+      setTopologyData({ nodes: [], edges: [] });
+    } finally {
+      if (loadGenerationRef.current !== loadGeneration) {
+        return;
+      }
+      setTopologyRevision((revision) => revision + 1);
+      setLoading(false);
+    }
+  }, [sceneId, setShowCustomEdgePanel]);
+
+  useEffect(() => {
+    setActiveWorkflowSceneId(sceneId);
+
+    const panelState = useDemoStore.getState().showCustomEdgePanel;
+    if (typeof panelState !== 'boolean') {
+      setShowCustomEdgePanel(false);
+    }
+    reloadTopology();
+    // 仅在场景切换时重新拉取拓扑，避免其它页面操作触发图谱重载
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sceneId]);
+
+  useEffect(() => {
+    return () => {
+      setActiveWorkflowSceneId(null);
+      scheduleOverlayCleanup();
+    };
+  }, []);
 
   const nodesReadonlyChecker = useCallback(() => {
     return true;
   }, []);
+
+  const workflowApi = useMemo(
+    () => ({
+      workflowNotExistedMarks: ['ResourceNotFound', '资源不存在'],
+      getWorkflow,
+      createWorkflow,
+      updateWorkflow
+    }),
+    []
+  );
+
+  const workflowEdge = useMemo(
+    () => ({
+      markerEnd: WORKFLOW_EDGE_MARKER_END,
+      targetXOffset: -8,
+      labelRenderer: CustomLabel
+    }),
+    []
+  );
+
+  const handleWorkflowNodeClick = useCallback(
+    (node: Node) => {
+      setShowCustomEdgePanel(false);
+      setSelectedEdgeId(null);
+      const nodeData = node?.data as { code?: string } | undefined;
+      const clickedObjectTypeCode = nodeData?.code ? String(nodeData.code) : '';
+      setUrlState({ objectTypeCode: clickedObjectTypeCode });
+    },
+    [setSelectedEdgeId, setShowCustomEdgePanel, setUrlState]
+  );
+
+  const workflowEvents = useMemo(
+    () => ({
+      onNodeClick: handleWorkflowNodeClick
+    }),
+    [handleWorkflowNodeClick]
+  );
+
+  const workflowSubHeader = useMemo(
+    () => ({ fullyCustomSubheader: <SubHeader /> }),
+    []
+  );
+
+  const showEdgePanel =
+    typeof showCustomEdgePanel === 'boolean' && showCustomEdgePanel;
+
+  const workflowRightPanels = useMemo(
+    () => [
+      {
+        id: 'custom-edge-panel',
+        isShow: showEdgePanel,
+        panel: EdgePanel
+      }
+    ],
+    [showEdgePanel]
+  );
+
+  const graphOtherComponents = useMemo(
+    () => [
+      <GraphNodeSelectionSync key="graph-node-selection-sync" />,
+      <GraphEdgeSelectionSync key="graph-edge-selection-sync" />,
+      <GraphClickSelectionHandler key="graph-click-selection" />,
+      <GraphContextMenuHandler key="graph-context-menu" />,
+      <GraphDeleteKeyHandler key="graph-delete-key" />
+    ],
+    []
+  );
+
+  useEffect(() => {
+    if (!objectTypeCodeFromUrl || !topologyData?.nodes?.length) {
+      return;
+    }
+
+    const exists = topologyData.nodes.some(
+      (node) => String(node.code ?? '') === objectTypeCodeFromUrl
+    );
+
+    if (!exists) {
+      setUrlState({ objectTypeCode: '' });
+    }
+  }, [objectTypeCodeFromUrl, setUrlState, topologyData]);
 
   // 基于获取的数据创建 initWorkflow
   const initWorkflow = useCallback(
@@ -337,58 +345,41 @@ export default function OntologySceneGraph() {
   }
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden bg-white">
-      {isEmpty ? (
-        <EmptyStateGraph />
-      ) : (
-        <AIWorkflowProvider
-          nodes={nodesConfig}
-          initWorkflow={initWorkflow}
-          nodesDraggableWhenReadonly
-          autoRefreshWhenTabVisible={false}
-          api={{
-            workflowNotExistedMarks: ['ResourceNotFound', '资源不存在'],
-            getWorkflow,
-            createWorkflow,
-            updateWorkflow
-          }}
-          nodesReadonlyChecker={nodesReadonlyChecker}
-          headerHeight={0}
-          edge={{
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              width: 14,
-              height: 14,
-              color: '#C3C7D4'
-            },
-            targetXOffset: -8,
-            labelRenderer: CustomLabel
-          }}
-          events={{
-            onNodeClick: (node) => {
-              setShowCustomEdgePanel(false);
-              // 把当前点击的对象类型 code 写入 URL，便于分享/刷新后自动打开面板
-              const nodeData = node?.data as { code?: string } | undefined;
-              const clickedObjectTypeCode = nodeData?.code
-                ? String(nodeData.code)
-                : '';
-              setUrlState({ objectTypeCode: clickedObjectTypeCode });
-            }
-          }}
-          subHeader={{ fullyCustomSubheader: <SubHeader /> }}
-          rightPanels={[
-            {
-              id: 'custom-edge-panel',
-              isShow: showCustomEdgePanel,
-              panel: EdgePanel
-            }
-          ]}
-        >
-          <AIWorflow
-            className={classNames(styles['ai-workflow'], styles['edge-style'])}
-          />
-        </AIWorkflowProvider>
-      )}
-    </div>
+    <GraphCreateProvider
+      sceneId={sceneId}
+      canCreate={canCreate}
+      canDeleteNode={canDeleteNode}
+      topologyData={topologyData}
+      onCreated={reloadTopology}
+    >
+      <div className="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-white">
+        {isEmpty ? (
+          <GraphEmptyCanvas />
+        ) : (
+          <AIWorkflowProvider
+            key={`ontology-graph-${sceneId}-${topologyRevision}`}
+            nodes={nodesConfig}
+            initWorkflow={initWorkflow}
+            nodesDraggableWhenReadonly
+            autoRefreshWhenTabVisible={false}
+            api={workflowApi}
+            nodesReadonlyChecker={nodesReadonlyChecker}
+            headerHeight={0}
+            edge={workflowEdge}
+            events={workflowEvents}
+            subHeader={workflowSubHeader}
+            rightPanels={workflowRightPanels}
+            otherComponents={graphOtherComponents}
+          >
+            <AIWorflow
+              className={classNames(
+                styles['ai-workflow'],
+                styles['edge-style']
+              )}
+            />
+          </AIWorkflowProvider>
+        )}
+      </div>
+    </GraphCreateProvider>
   );
 }

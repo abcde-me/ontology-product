@@ -9,6 +9,8 @@ import SceneModal, {
 } from '@/pages/ontologyScene/modules/list/components/SceneModal';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
+import { isOntologyApiSuccess } from '@/utils/apiResponse';
+import { useUserInfoStore } from '@/store/userInfoStore';
 import homeBgVideo from './assets/home-bac.mp4';
 
 export default function Home() {
@@ -19,6 +21,10 @@ export default function Home() {
   const handleModalSubmit = async (data: SceneFormData) => {
     setSubmitLoading(true);
     try {
+      const projectReady = await useUserInfoStore
+        .getState()
+        .ensureProjectReady();
+
       const response = await createOntologyModel({
         name: data.name,
         description: data.description || '',
@@ -26,20 +32,31 @@ export default function Home() {
         tagIdList: []
       });
 
-      if (response.status === 200 && response.code === '') {
-        Message.success('创建成功');
-        history.push(
-          `/tenant/compute/onto/ontologyScene/detail/${response.data.id}`
+      if (isOntologyApiSuccess(response) && response.data?.id) {
+        Message.success(
+          projectReady ? '创建成功' : '创建成功（开发环境本地缓存）'
         );
-      } else {
-        Message.error(response.message || '创建失败');
+        setModalVisible(false);
+        history.push(
+          projectReady
+            ? `/tenant/compute/onto/ontologyScene/detail/${response.data.id}`
+            : '/tenant/compute/onto/ontologyScene/list'
+        );
+        return;
       }
+
+      Message.error(response?.message || '创建失败');
     } catch (error) {
-      Message.error('创建失败');
+      const errorMessage =
+        typeof error === 'string'
+          ? error
+          : error instanceof Error
+            ? error.message
+            : '';
+      Message.error(errorMessage || '创建失败');
       console.error('提交失败:', error);
     } finally {
       setSubmitLoading(false);
-      setModalVisible(false);
     }
   };
 
@@ -68,7 +85,7 @@ export default function Home() {
             aria-hidden
           />
         </div>
-        <div className="mt-[8vh] w-full text-center">
+        <div className="relative z-[1] mt-[8vh] w-full text-center">
           {/* 大标题 - 入场动效 */}
           <h1
             className={classNames(
