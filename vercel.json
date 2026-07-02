@@ -2,6 +2,9 @@
   "installCommand": "echo skip",
   "buildCommand": "echo skip",
   "outputDirectory": "dist",
+  "git": {
+    "deploymentEnabled": false
+  },
   "rewrites": [
     {
       "source": "/deepseek-api/(.*)",
