@@ -9,7 +9,6 @@ import {
 import {
   isOntologyApiSuccess,
   isResourceNotFoundResponse,
-  isTransientApiError,
   isTransientApiResponse
 } from '@/utils/apiResponse';
 import { isDevBypassEnabled } from '@/utils/devFallback';
@@ -85,6 +84,8 @@ const shouldUseDevDetailFallback = (
 };
 
 const shouldUseDevListFallback = (_error?: unknown) => isDevBypassEnabled();
+
+const shouldUseDevSceneWriteFallback = () => isDevBypassEnabled();
 
 const buildDevListFallbackResponse = async (filter = '') => {
   const fallback = buildDevListResponse(filter);
@@ -190,17 +191,15 @@ export const createOntologyModel = async (
       return response;
     }
 
-    if (isDevBypassEnabled() && isPermissionRelatedError(response?.message)) {
-      console.warn('[dev] 创建场景权限失败，写入本地开发缓存');
+    if (shouldUseDevSceneWriteFallback()) {
+      console.warn('[dev] 创建场景接口失败，写入本地开发缓存');
       return devCreateOntologyModel(params);
     }
 
     return response;
   } catch (error) {
-    const message = typeof error === 'string' ? error : '';
-
-    if (isDevBypassEnabled() && isPermissionRelatedError(message)) {
-      console.warn('[dev] 创建场景权限失败，写入本地开发缓存');
+    if (shouldUseDevSceneWriteFallback()) {
+      console.warn('[dev] 创建场景接口异常，写入本地开发缓存');
       return devCreateOntologyModel(params);
     }
 
@@ -226,17 +225,15 @@ export const updateOntologyModel = async (
       return response;
     }
 
-    if (isDevBypassEnabled() && isPermissionRelatedError(response?.message)) {
-      console.warn('[dev] 更新场景权限失败，写入本地开发缓存');
+    if (shouldUseDevSceneWriteFallback()) {
+      console.warn('[dev] 更新场景接口失败，写入本地开发缓存');
       return devUpdateOntologyModel(params);
     }
 
     return response;
   } catch (error) {
-    const message = typeof error === 'string' ? error : '';
-
-    if (isDevBypassEnabled() && isPermissionRelatedError(message)) {
-      console.warn('[dev] 更新场景权限失败，写入本地开发缓存');
+    if (shouldUseDevSceneWriteFallback()) {
+      console.warn('[dev] 更新场景接口异常，写入本地开发缓存');
       return devUpdateOntologyModel(params);
     }
 
