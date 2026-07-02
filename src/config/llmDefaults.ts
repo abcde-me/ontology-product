@@ -10,7 +10,5 @@ export const LLM_ENV_DEFAULTS = {
   model: process.env.REACT_APP_AI_WORKBENCH_LLM_MODEL || 'deepseek-v4-pro',
   baseUrl:
     process.env.REACT_APP_AI_WORKBENCH_LLM_BASE_URL ||
-    (process.env.NODE_ENV === 'development'
-      ? '/deepseek-api'
-      : 'https://api.deepseek.com')
+    (process.env.NODE_ENV === 'development' ? '/deepseek-api' : '/deepseek-api')
 };

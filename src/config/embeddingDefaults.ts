@@ -12,7 +12,7 @@ export const EMBEDDING_ENV_DEFAULTS = {
     process.env.REACT_APP_EMBEDDING_BASE_URL ||
     (process.env.NODE_ENV === 'development'
       ? '/deepseek-api'
-      : 'https://api.deepseek.com'),
+      : '/deepseek-api'),
   /** 向量维度（DeepSeek embedding 响应为准，此处为默认值） */
   dimension: Number(process.env.REACT_APP_EMBEDDING_DIMENSION) || 1536
 };
