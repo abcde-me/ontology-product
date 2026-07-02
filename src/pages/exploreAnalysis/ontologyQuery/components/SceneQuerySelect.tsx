@@ -4,6 +4,8 @@ import type { SelectProps } from '@arco-design/web-react';
 import { SCENE_QUERY_ALL_VALUE } from '../constants';
 import { fetchSceneQueryOptions } from '../services/sceneOptions';
 import type { SceneQueryOption } from '../services/sceneOptions';
+import { isDevBypassEnabled } from '@/utils/devFallback';
+import { notifyNoOntologyScene } from '@/utils/ontologySceneEmptyHint';
 import styles from './SceneQuerySelect.module.scss';
 
 const Option = Select.Option;
@@ -30,10 +32,15 @@ export const SceneQuerySelect: React.FC<SceneQuerySelectProps> = ({
     fetchSceneQueryOptions()
       .then((options) => {
         setSceneOptions([...DEFAULT_SCENE_OPTIONS, ...options]);
+        if (options.length === 0 && isDevBypassEnabled()) {
+          notifyNoOntologyScene();
+        }
       })
       .catch((error) => {
         console.error('加载本体场景库失败:', error);
-        Message.error('加载本体场景库失败');
+        if (!isDevBypassEnabled()) {
+          Message.error('加载本体场景库失败');
+        }
       })
       .finally(() => {
         setOptionsLoading(false);

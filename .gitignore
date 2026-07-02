@@ -57,3 +57,4 @@ gui_test_screenshots
 # Kiro IDE
 .kiro
 
+.env*

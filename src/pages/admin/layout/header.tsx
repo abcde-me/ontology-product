@@ -15,7 +15,6 @@ import React, {
 } from 'react';
 import { useHistory } from 'react-router-dom';
 import { menus, filterMenusByPermissions, type MenuModel } from './menus';
-import HeaderLogo from '@/assets/header-logo.png';
 import cls from 'classnames';
 import { ProjectIdKey } from '@/utils/const';
 import { setLocalStorage } from '@/utils/storage';
@@ -39,10 +38,6 @@ export default function Header({
   className?: string;
   style?: CSSProperties;
 }) {
-  // const { data } = useLogoInfo();
-  const data = {
-    logoPic: HeaderLogo
-  };
   const { pushPath } = usePathChange();
   const isMountedRef = useRef(true);
 
@@ -130,7 +125,10 @@ export default function Header({
     >
       <div className="flex h-full items-center">
         <a href="/" className="flex items-center">
-          <img className="h-[18px]" src={data?.logoPic || HeaderLogo} />
+          <div
+            className="h-[18px] w-[72px] shrink-0 rounded-[2px] bg-[rgb(var(--primary-4))]"
+            aria-hidden
+          />
           <div className="mx-[6px] h-[18px] w-[1px] bg-white"></div>
           <div className="text-[16px] leading-[22px] text-white">
             本体构建与运营平台

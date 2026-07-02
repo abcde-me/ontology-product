@@ -366,6 +366,12 @@ function App() {
             );
           })}*/}
           <Redirect from="/login" to="/tenant/compute/onto/login" exact />
+          <Redirect
+            from="/aiOntologyWorkbench"
+            to="/tenant/compute/onto/aiOntologyWorkbench"
+            exact
+          />
+          <Redirect from="/home" to="/tenant/compute/onto/home" exact />
           <Redirect from="/onto" to={ONTO_DEFAULT_HOME_PATH} exact />
           <Redirect from="/" to={ONTO_DEFAULT_HOME_PATH} exact />
           <Redirect

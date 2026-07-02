@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Message, Modal, Select } from '@arco-design/web-react';
+import { Alert, Form, Message, Modal, Select } from '@arco-design/web-react';
 import { fetchSceneSelectOptions } from '../services/sceneSelectOptions';
 import type { SceneSelectOption } from '../types';
+import { isDevBypassEnabled } from '@/utils/devFallback';
+import { NO_ONTOLOGY_SCENE_TIP } from '@/utils/ontologySceneEmptyHint';
 
 const Option = Select.Option;
 
@@ -34,10 +36,15 @@ export const SceneSelectModal: React.FC<SceneSelectModalProps> = ({
     fetchSceneSelectOptions()
       .then((options) => {
         setSceneOptions(options);
+        if (options.length === 0 && isDevBypassEnabled()) {
+          Message.warning(NO_ONTOLOGY_SCENE_TIP);
+        }
       })
       .catch((error) => {
         console.error('加载本体场景库失败:', error);
-        Message.error('加载本体场景库失败');
+        if (!isDevBypassEnabled()) {
+          Message.error('加载本体场景库失败');
+        }
       })
       .finally(() => {
         setOptionsLoading(false);
@@ -66,6 +73,9 @@ export const SceneSelectModal: React.FC<SceneSelectModalProps> = ({
       onOk={handleOk}
       unmountOnExit
     >
+      {!optionsLoading && sceneOptions.length === 0 ? (
+        <Alert type="warning" content={NO_ONTOLOGY_SCENE_TIP} />
+      ) : null}
       <Form form={form} layout="vertical">
         <Form.Item
           field="sceneId"

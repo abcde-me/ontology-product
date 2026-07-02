@@ -43,7 +43,16 @@ export const isDevBypassEnabled = () => {
   }
 
   const hostname = window.location.hostname;
-  return hostname === 'localhost' || hostname === '127.0.0.1';
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return true;
+  }
+
+  // Vercel 独立部署：无后端登录/项目接口时启用本地兜底
+  if (hostname.endsWith('.vercel.app')) {
+    return true;
+  }
+
+  return false;
 };
 
 export const getDevUserInfo = () => ({

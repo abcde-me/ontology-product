@@ -84,8 +84,7 @@ const shouldUseDevDetailFallback = (
   return isPermissionRelatedError(message);
 };
 
-const shouldUseDevListFallback = (error?: unknown) =>
-  isDevBypassEnabled() && (error === undefined || isTransientApiError(error));
+const shouldUseDevListFallback = (_error?: unknown) => isDevBypassEnabled();
 
 const buildDevListFallbackResponse = async (filter = '') => {
   const fallback = buildDevListResponse(filter);

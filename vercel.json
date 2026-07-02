@@ -1,6 +1,6 @@
 {
-  "installCommand": "yarn install --frozen-lockfile",
-  "buildCommand": "cross-env NODE_OPTIONS=--max-old-space-size=4096 yarn build",
+  "installCommand": "echo skip",
+  "buildCommand": "echo skip",
   "outputDirectory": "dist",
   "rewrites": [
     {
@@ -28,6 +28,16 @@
     {
       "source": "/",
       "destination": "/onto/",
+      "permanent": false
+    },
+    {
+      "source": "/onto/aiOntologyWorkbench",
+      "destination": "/onto/tenant/compute/onto/aiOntologyWorkbench",
+      "permanent": false
+    },
+    {
+      "source": "/onto/home",
+      "destination": "/onto/tenant/compute/onto/home",
       "permanent": false
     }
   ]

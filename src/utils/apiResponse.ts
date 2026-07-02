@@ -111,7 +111,7 @@ export const isTransientApiError = (error: unknown): boolean => {
   }
 
   const message = getApiErrorMessage(error, '');
-  return /502|503|504|Gateway Timeout|timeout|ETIMEDOUT|ECONNABORTED|Network Error/i.test(
+  return /502|503|504|Gateway Timeout|timeout|ETIMEDOUT|ECONNABORTED|Network Error|Failed to fetch|fetch failed/i.test(
     message
   );
 };
