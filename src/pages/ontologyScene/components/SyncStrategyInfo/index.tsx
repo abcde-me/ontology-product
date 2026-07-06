@@ -17,7 +17,6 @@ import {
   isApiSyncMode,
   isCsvIncrementalImportScope,
   isCsvSyncMode,
-  isApiPollingIncrementalScope,
   isKafkaSyncMode,
   resolveCsvImportScopeDisplayLabel,
   resolveSyncModeLabel
@@ -377,39 +376,22 @@ export const SyncStrategyInfo: React.FC<SyncStrategyInfoProps> = ({
         <>
           <div className="mb-[12px] flex gap-[16px]">
             {renderField(
-              '冲突策略',
-              getConflictStrategyText(syncSourceDataStrategy.conflictStrategy)
+              '每页大小参数名',
+              syncSourceDataStrategy.apiPageSizeParam
+            )}
+            {renderField('页号参数名', syncSourceDataStrategy.apiPageNumParam)}
+          </div>
+          <div className="mb-[12px] flex gap-[16px]">
+            {renderField(
+              '总数参数名',
+              syncSourceDataStrategy.apiTotalCountParam
             )}
             {renderField(
-              '同步范围',
-              getSyncScopeText(syncSourceDataStrategy.syncScope)
+              '起始页号',
+              syncSourceDataStrategy.apiStartPageNum?.toString()
             )}
           </div>
-          {isApiPollingIncrementalScope(syncSourceDataStrategy.syncScope) && (
-            <>
-              <div className="mb-[12px] flex gap-[16px]">
-                {renderField(
-                  '增量时间参数',
-                  syncSourceDataStrategy.apiIncrementalTimeParam
-                )}
-                {renderField(
-                  '游标参数',
-                  syncSourceDataStrategy.apiCheckpointParam
-                )}
-              </div>
-              <div className="mb-[12px] flex gap-[16px]">
-                {renderField(
-                  '增量判定字段',
-                  syncSourceDataStrategy.apiIncrementalMarkerField
-                )}
-              </div>
-            </>
-          )}
           <div className="flex gap-[16px]">
-            {renderField(
-              '请求并行数',
-              syncSourceDataStrategy.parallelism?.toString()
-            )}
             {renderField(
               '异常策略',
               getExceptionStrategyText(

@@ -6,6 +6,7 @@ import type {
   SqlSourceDataInfo,
   SyncSourceDataStrategyFormState
 } from './types';
+import { isIcebergConnectorSubtype } from '../ObjectTypeFormSteps/common/instanceSyncStrategyConfig';
 
 export function sqlSourceDataInfoToSourceDataInfoForTest(
   source?: SqlSourceDataInfo
@@ -25,8 +26,11 @@ export function syncFormStateToOntologyTestSyncStrategy(
   sourceDataInfo?: SourceDataInfo
 ): OntologyTestFinkSQLSyncStrategyPayload {
   const pollFetchSize = state.pollFetchSize || 500;
+  const isIcebergSource = isIcebergConnectorSubtype(
+    state.sourceDataInfo?.connectorSubtype
+  );
   return {
-    mode: state.mode || 'BINLOG_CDC',
+    mode: state.mode || (isIcebergSource ? 'JDBC_POLLING' : 'BINLOG_CDC'),
     conflictStrategy: state.conflictStrategy || 'KEEP_SOURCE',
     syncScope: state.syncScope || 'FULL_THEN_INCREMENTAL',
     pollFetchSize,
@@ -40,6 +44,10 @@ export function syncFormStateToOntologyTestSyncStrategy(
     apiIncrementalTimeParam: state.apiIncrementalTimeParam,
     apiCheckpointParam: state.apiCheckpointParam,
     apiIncrementalMarkerField: state.apiIncrementalMarkerField,
+    apiPageSizeParam: state.apiPageSizeParam,
+    apiPageNumParam: state.apiPageNumParam,
+    apiTotalCountParam: state.apiTotalCountParam,
+    apiStartPageNum: state.apiStartPageNum,
     fullSyncBatchSize: state.fullSyncBatchSize ?? pollFetchSize,
     ...(sourceDataInfo ? { sourceDataInfo } : {})
   };

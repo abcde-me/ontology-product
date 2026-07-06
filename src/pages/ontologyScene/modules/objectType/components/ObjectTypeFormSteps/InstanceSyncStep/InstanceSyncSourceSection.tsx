@@ -258,6 +258,10 @@ export default function InstanceSyncSourceSection({
       apiIncrementalTimeParam: undefined,
       apiCheckpointParam: undefined,
       apiIncrementalMarkerField: undefined,
+      apiPageSizeParam: undefined,
+      apiPageNumParam: undefined,
+      apiTotalCountParam: undefined,
+      apiStartPageNum: undefined,
       fileResourceId: undefined,
       fileParseRequirement:
         nextType === INSTANCE_SYNC_SOURCE_TYPE.FILE_PARSE

@@ -9,6 +9,7 @@ import {
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import { SyncSourceDataStrategyFormState } from '../../ObjectTypeFormUtils/types';
 import ApiSyncStrategyCommonFields from './ApiSyncStrategyCommonFields';
+import ApiPollingPaginationFields from './ApiPollingPaginationFields';
 import {
   API_SYNC_MODE,
   API_SYNC_MODE_LABEL,
@@ -58,11 +59,16 @@ export default function ApiSyncStrategyFormSection({
       exceptionStrategy: defaults.exceptionStrategy,
       pollFetchSize: defaults.pollFetchSize,
       jdbcPollingIntervalSeconds: defaults.jdbcPollingIntervalSeconds,
+      apiStartPageNum: defaults.apiStartPageNum,
       ...(mode === API_SYNC_MODE.API_PUSH
         ? {
             apiIncrementalTimeParam: undefined,
             apiCheckpointParam: undefined,
-            apiIncrementalMarkerField: undefined
+            apiIncrementalMarkerField: undefined,
+            apiPageSizeParam: undefined,
+            apiPageNumParam: undefined,
+            apiTotalCountParam: undefined,
+            apiStartPageNum: undefined
           }
         : {})
     });
@@ -136,6 +142,12 @@ export default function ApiSyncStrategyFormSection({
               }
             />
           </FormItem>
+
+          <ApiPollingPaginationFields
+            syncSourceDataStrategy={syncSourceDataStrategy}
+            onStrategyUpdate={onStrategyUpdate}
+            readOnly={readOnly}
+          />
         </>
       )}
 

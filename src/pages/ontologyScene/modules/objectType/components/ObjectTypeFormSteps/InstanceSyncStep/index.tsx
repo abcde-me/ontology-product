@@ -218,11 +218,14 @@ export default function InstanceSyncStep({
   };
 
   const handleSourceChange = (sourceDataInfo: SqlSourceDataInfo) => {
-    const next = {
+    const next = applyInstanceSyncStrategyDefaults({
       ...syncSourceDataStrategy,
       sourceDataInfo
-    };
+    });
     setSyncSourceDataStrategy(next);
+    if (next.mode !== syncSourceDataStrategy.mode) {
+      form.setFieldValue('syncMode', next.mode);
+    }
     const configured = isInstanceSyncSourceConfigured(next, { isDataResource });
     if (!configured || sourceDataInfo.queryMode === 'sql') {
       clearSyncMappingSourceFields();

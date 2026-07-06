@@ -27,6 +27,7 @@ export default function DataSourceManagement() {
   );
   const [testingIds, setTestingIds] = useState<Set<string>>(new Set());
   const [detailVisible, setDetailVisible] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [detailRecord, setDetailRecord] = useState<DataSourceItem | null>(null);
 
   // 筛选器状态
@@ -140,16 +141,20 @@ export default function DataSourceManagement() {
 
   // 处理查看详情
   const handleViewDetail = async (record: DataSourceItem) => {
+    setDetailVisible(true);
+    setDetailLoading(true);
+    setDetailRecord(null);
+
     try {
-      // 调用接口获取详细信息
       const detail = await getDataSourceDetail(record.id);
       setDetailRecord(detail);
-      setDetailVisible(true);
     } catch (error: any) {
-      // 显示后端返回的错误消息
       const errorMessage = error?.message || '获取详情失败';
       Message.error(errorMessage);
+      setDetailVisible(false);
       console.error(error);
+    } finally {
+      setDetailLoading(false);
     }
   };
 
@@ -243,8 +248,12 @@ export default function DataSourceManagement() {
       {/* 详情抽屉 */}
       <DataSourceDetailDrawer
         visible={detailVisible}
+        loading={detailLoading}
         dataSource={detailRecord}
-        onClose={() => setDetailVisible(false)}
+        onClose={() => {
+          setDetailVisible(false);
+          setDetailRecord(null);
+        }}
       />
     </div>
   );

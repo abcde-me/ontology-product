@@ -340,6 +340,38 @@ export default function SqlSourceSelector({
   }, [fetchDatabaseTables]);
 
   useEffect(() => {
+    const connectorId = normalizeSqlConnectorId(value.connectorId);
+    if (
+      connectorId === undefined ||
+      value.connectorSubtype ||
+      !connectors.length
+    ) {
+      return;
+    }
+    const connector = connectors.find(
+      (item) => Number(item.id) === connectorId
+    );
+    if (!connector?.subtype) {
+      return;
+    }
+    onChange({
+      ...value,
+      connectorName: connector.name,
+      connectorSubtype: connector.subtype
+    });
+  }, [
+    connectors,
+    onChange,
+    value.connectorId,
+    value.connectorSubtype,
+    value.databaseName,
+    value.tableName,
+    value.projectID,
+    value.queryMode,
+    value.sql
+  ]);
+
+  useEffect(() => {
     const normalized = normalizeSqlConnectorId(value.connectorId);
     if (normalized === value.connectorId) {
       return;

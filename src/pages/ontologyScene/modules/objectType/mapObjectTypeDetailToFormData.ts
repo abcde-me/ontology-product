@@ -57,6 +57,8 @@ export function mapObjectTypeDetailToFormData(
           connectorId: normalizeSqlConnectorId(
             objectType.sourceDataInfo.connectorId
           ),
+          connectorName: objectType.sourceDataInfo.connectorName,
+          connectorSubtype: objectType.sourceDataInfo.connectorSubtype,
           databaseName: objectType.sourceDataInfo.databaseName,
           tableName: objectType.sourceDataInfo.tableName,
           queryMode:
@@ -71,6 +73,8 @@ export function mapObjectTypeDetailToFormData(
             connectorId: normalizeSqlConnectorId(
               syncFromApi.sourceDataInfo?.connectorId
             ),
+            connectorName: syncFromApi.sourceDataInfo?.connectorName,
+            connectorSubtype: syncFromApi.sourceDataInfo?.connectorSubtype,
             databaseName: syncFromApi.sourceDataInfo?.databaseName,
             tableName: syncFromApi.sourceDataInfo?.tableName,
             queryMode:
@@ -138,7 +142,16 @@ export function mapObjectTypeDetailToFormData(
             nestedStrategy?.apiCheckpointParam,
           apiIncrementalMarkerField:
             syncFromApi.apiIncrementalMarkerField ??
-            nestedStrategy?.apiIncrementalMarkerField
+            nestedStrategy?.apiIncrementalMarkerField,
+          apiPageSizeParam:
+            syncFromApi.apiPageSizeParam ?? nestedStrategy?.apiPageSizeParam,
+          apiPageNumParam:
+            syncFromApi.apiPageNumParam ?? nestedStrategy?.apiPageNumParam,
+          apiTotalCountParam:
+            syncFromApi.apiTotalCountParam ??
+            nestedStrategy?.apiTotalCountParam,
+          apiStartPageNum:
+            syncFromApi.apiStartPageNum ?? nestedStrategy?.apiStartPageNum
         }
       : undefined,
     _dataSource: {

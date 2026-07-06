@@ -101,11 +101,13 @@ export const DEFAULT_API_POLLING_SYNC_STRATEGY: Pick<
   | 'parallelism'
   | 'exceptionStrategy'
   | 'jdbcPollingIntervalSeconds'
+  | 'apiStartPageNum'
 > = {
   ...API_SHARED_DEFAULTS,
   mode: API_SYNC_MODE.API_POLLING,
   syncScope: 'INCREMENTAL',
-  jdbcPollingIntervalSeconds: 60
+  jdbcPollingIntervalSeconds: 60,
+  apiStartPageNum: 1
 };
 
 export const DEFAULT_API_SYNC_STRATEGY = DEFAULT_API_PUSH_SYNC_STRATEGY;
@@ -409,12 +411,59 @@ export function applyApiSyncStrategyDefaults(
   };
 }
 
+/** Iceberg 连接器 subtype（与数据源连接配置一致） */
+export const ICEBERG_CONNECTOR_SUBTYPE = 'iceberg';
+
+export function isIcebergConnectorSubtype(subtype?: string): boolean {
+  return subtype?.toLowerCase() === ICEBERG_CONNECTOR_SUBTYPE;
+}
+
+/** Iceberg 数据源不支持 CDC，仅允许 JDBC 轮询 */
+export function normalizeDatabaseSyncStrategyFields(
+  strategy: Pick<SyncSourceDataStrategyFormState, 'mode'>,
+  connectorSubtype?: string
+): Partial<SyncSourceDataStrategyFormState> {
+  const patches: Partial<SyncSourceDataStrategyFormState> = {};
+  if (
+    isIcebergConnectorSubtype(connectorSubtype) &&
+    strategy.mode === 'BINLOG_CDC'
+  ) {
+    patches.mode = 'JDBC_POLLING';
+  }
+  return patches;
+}
+
+export function applyDatabaseSyncStrategyDefaults(
+  strategy: SyncSourceDataStrategyFormState
+): SyncSourceDataStrategyFormState {
+  const sourceType =
+    strategy.instanceSyncSourceType ?? INSTANCE_SYNC_SOURCE_TYPE.DATABASE;
+  if (sourceType !== INSTANCE_SYNC_SOURCE_TYPE.DATABASE) {
+    return strategy;
+  }
+
+  const patches = normalizeDatabaseSyncStrategyFields(
+    strategy,
+    strategy.sourceDataInfo?.connectorSubtype
+  );
+  if (!Object.keys(patches).length) {
+    return strategy;
+  }
+
+  return {
+    ...strategy,
+    ...patches
+  };
+}
+
 export function applyInstanceSyncStrategyDefaults(
   strategy: SyncSourceDataStrategyFormState
 ): SyncSourceDataStrategyFormState {
-  return applyCsvSyncStrategyDefaults(
-    applyApiSyncStrategyDefaults(
-      applyMessageQueueSyncStrategyDefaults(strategy)
+  return applyDatabaseSyncStrategyDefaults(
+    applyCsvSyncStrategyDefaults(
+      applyApiSyncStrategyDefaults(
+        applyMessageQueueSyncStrategyDefaults(strategy)
+      )
     )
   );
 }

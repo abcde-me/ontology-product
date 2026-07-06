@@ -13,7 +13,6 @@ import ModelingStep from './ObjectTypeFormSteps/ModelingStep';
 import InstanceSyncStep from './ObjectTypeFormSteps/InstanceSyncStep';
 import { syncStrategyStateToFormValues } from './ObjectTypeFormSteps/common/SyncSourceDataStrategyFormSection';
 import {
-  isApiPollingIncrementalScope,
   isApiPollingMode,
   applyInstanceSyncStrategyDefaults
 } from './ObjectTypeFormSteps/common/instanceSyncStrategyConfig';
@@ -206,10 +205,16 @@ function applySyncSourceFromModelingInfo(
     queryMode,
     sql: info.sql
   };
-  setSyncSourceDataStrategy((prev) => ({
-    ...prev,
-    sourceDataInfo
-  }));
+  setSyncSourceDataStrategy((prev) => {
+    const next = applyInstanceSyncStrategyDefaults({
+      ...prev,
+      sourceDataInfo
+    });
+    if (next.mode !== prev.mode) {
+      form.setFieldValue('syncMode', next.mode);
+    }
+    return next;
+  });
   form.setFieldsValue(buildSqlSourceSelectorFormFields('sync', sourceDataInfo));
 }
 
@@ -956,23 +961,6 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             : '请完整填写轮询参数'
         );
         return false;
-      }
-
-      const isApiPollingIncremental =
-        syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE &&
-        isApiPollingMode(s.mode) &&
-        isApiPollingIncrementalScope(s.syncScope);
-      if (isApiPollingIncremental) {
-        const hasIncrementalParam =
-          !!s.apiIncrementalTimeParam?.trim() || !!s.apiCheckpointParam?.trim();
-        if (!hasIncrementalParam) {
-          Message.warning('请至少填写增量时间参数或游标参数之一');
-          return false;
-        }
-        if (!s.apiIncrementalMarkerField?.trim()) {
-          Message.warning('请填写增量判定字段');
-          return false;
-        }
       }
 
       if (

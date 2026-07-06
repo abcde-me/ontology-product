@@ -144,12 +144,21 @@ export const mockDataSource: DataSourceItem[] = [
     dataSourceType: DataSourceType.ICEBERG,
     connectorType: 'sql',
     connectionInfo:
-      'iceberg://catalog.hive.example.com:9083/lakehouse_warehouse',
+      'iceberg://thrift://hms.example.com:9083 | s3a://lakehouse/warehouse',
     connectionStatus: ConnectionStatus.SUCCESS,
     creator: '孙十一',
     creatorOrg: '数据供方机构A03',
     createTime: '2026-06-07 11:40:00',
-    updateTime: '2026-06-09 16:50:00'
+    updateTime: '2026-06-09 16:50:00',
+    config: {
+      metastoreUri: 'thrift://hms.example.com:9083',
+      warehouseType: 'MINIO',
+      warehouseUri: 's3a://lakehouse/warehouse',
+      s3Region: 'cn-north-1',
+      s3Endpoint: 'http://minio.example.com:9000',
+      s3AccessKey: 'bWluaW8=',
+      s3SecretKey: 'c2VjcmV0'
+    }
   },
   {
     id: '12',

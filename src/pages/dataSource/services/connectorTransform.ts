@@ -12,21 +12,30 @@ import {
   DataSourceFormData,
   DataSourceItem,
   DataSourceType,
+  IcebergWarehouseType,
+  OAuth2GrantType,
   type ApiConnectorConfig,
   type ConnectorConfig,
+  type IcebergConnectorConfig,
   type KafkaConnectorConfig,
   type SqlConnectorConfig
 } from '../types';
 import { ConnectionStatusMap } from '@/api/dataSource/connector';
+import type { IcebergConnectorConfigPayload } from '@/api/dataSource/connector';
 import {
   isApiDataSourceType,
+  isIcebergDataSourceType,
   isKafkaDataSourceType,
-  isSqlDataSourceType,
+  isRelationalSqlDataSourceType,
   resolveDataSourceType
 } from '../constants';
 
 const isSqlConfig = (config: ConnectorConfig): config is SqlConnectorConfig =>
   'host' in config && 'port' in config && 'user' in config;
+
+const isIcebergConfig = (
+  config: ConnectorConfig
+): config is IcebergConnectorConfig => 'metastoreUri' in config;
 
 const isApiConfig = (config: ConnectorConfig): config is ApiConnectorConfig =>
   'url' in config && 'method' in config;
@@ -35,11 +44,30 @@ const isKafkaConfig = (
   config: ConnectorConfig
 ): config is KafkaConnectorConfig => 'brokers' in config;
 
+export const parseSqlConnectionInfo = (
+  connectionInfo: string
+): Pick<SqlConnectorConfig, 'host' | 'port' | 'database'> | null => {
+  const match = connectionInfo.match(/^[\w-]+:\/\/([^:/]+):(\d+)(?:\/(.+))?$/);
+  if (!match) {
+    return null;
+  }
+
+  return {
+    host: match[1],
+    port: match[2],
+    database: match[3] || ''
+  };
+};
+
 export const buildConnectionInfo = (
   dataSourceType: DataSourceType,
   config: ConnectorConfig
 ): string => {
-  if (isSqlDataSourceType(dataSourceType) && isSqlConfig(config)) {
+  if (isIcebergDataSourceType(dataSourceType) && isIcebergConfig(config)) {
+    return `iceberg://${config.metastoreUri} | ${config.warehouseUri}`;
+  }
+
+  if (isRelationalSqlDataSourceType(dataSourceType) && isSqlConfig(config)) {
     const subtype = getConnectorMeta(dataSourceType).subtype;
     return `${subtype}://${config.host}:${config.port}${config.database ? '/' + config.database : ''}`;
   }
@@ -58,7 +86,33 @@ export const buildConnectionInfo = (
 export const formDataToConnectorConfig = (
   data: DataSourceFormData
 ): ConnectorConfigPayload => {
-  if (isSqlDataSourceType(data.dataSourceType)) {
+  if (isIcebergDataSourceType(data.dataSourceType)) {
+    const payload: IcebergConnectorConfigPayload = {
+      metastoreUri: data.metastoreUri || '',
+      warehouseType: data.warehouseType || IcebergWarehouseType.HDFS,
+      warehouseUri: data.warehouseUri || ''
+    };
+
+    if (payload.warehouseType === IcebergWarehouseType.MINIO) {
+      if (data.s3Region?.trim()) {
+        payload.s3Region = data.s3Region.trim();
+      }
+      payload.s3Endpoint = data.s3Endpoint?.trim() || '';
+      payload.s3AccessKey = data.s3AccessKey?.trim() || '';
+      payload.s3SecretKey = data.s3SecretKey?.trim() || '';
+    }
+
+    if (
+      payload.warehouseType === IcebergWarehouseType.HDFS &&
+      data.hdfsNameNode?.trim()
+    ) {
+      payload.hdfsNameNode = data.hdfsNameNode.trim();
+    }
+
+    return payload;
+  }
+
+  if (isRelationalSqlDataSourceType(data.dataSourceType)) {
     return {
       host: data.host || '',
       port: String(data.port ?? ''),
@@ -79,6 +133,12 @@ export const formDataToConnectorConfig = (
       bearer_token: data.bearerToken,
       username: data.username,
       password: data.password,
+      oauth2_token_url: data.oauth2TokenUrl,
+      oauth2_client_id: data.oauth2ClientId,
+      oauth2_client_secret: data.oauth2ClientSecret,
+      oauth2_scope: data.oauth2Scope,
+      oauth2_grant_type:
+        data.oauth2GrantType || OAuth2GrantType.CLIENT_CREDENTIALS,
       request_body: data.requestBody,
       timeout: data.timeout ? String(data.timeout) : undefined,
       data_path: data.dataPath
@@ -109,7 +169,26 @@ export const connectorConfigToFormData = (
     return base;
   }
 
-  if (isSqlDataSourceType(item.dataSourceType) && isSqlConfig(config)) {
+  if (isIcebergDataSourceType(item.dataSourceType) && isIcebergConfig(config)) {
+    return {
+      ...base,
+      metastoreUri: config.metastoreUri,
+      warehouseType:
+        (config.warehouseType as IcebergWarehouseType) ||
+        IcebergWarehouseType.HDFS,
+      warehouseUri: config.warehouseUri,
+      s3Region: config.s3Region,
+      s3Endpoint: config.s3Endpoint,
+      s3AccessKey: config.s3AccessKey ? '******' : '',
+      s3SecretKey: config.s3SecretKey ? '******' : '',
+      hdfsNameNode: config.hdfsNameNode
+    };
+  }
+
+  if (
+    isRelationalSqlDataSourceType(item.dataSourceType) &&
+    isSqlConfig(config)
+  ) {
     return {
       ...base,
       host: config.host,
@@ -132,6 +211,13 @@ export const connectorConfigToFormData = (
       bearerToken: config.bearer_token,
       username: config.username,
       password: config.password ? '******' : '',
+      oauth2TokenUrl: config.oauth2_token_url,
+      oauth2ClientId: config.oauth2_client_id,
+      oauth2ClientSecret: config.oauth2_client_secret ? '******' : '',
+      oauth2Scope: config.oauth2_scope,
+      oauth2GrantType:
+        (config.oauth2_grant_type as OAuth2GrantType) ||
+        OAuth2GrantType.CLIENT_CREDENTIALS,
       requestBody: config.request_body,
       dataPath: config.data_path,
       timeout: config.timeout ? Number(config.timeout) : undefined

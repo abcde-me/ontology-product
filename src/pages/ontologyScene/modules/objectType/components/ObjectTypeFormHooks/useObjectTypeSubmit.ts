@@ -18,7 +18,8 @@ import {
   CSV_SYNC_MODE,
   applyInstanceSyncStrategyDefaults,
   isApiPollingMode,
-  isCsvIncrementalImportScope
+  isCsvIncrementalImportScope,
+  isIcebergConnectorSubtype
 } from '../ObjectTypeFormSteps/common/instanceSyncStrategyConfig';
 import { resolveEmbeddingModelConfig } from '@/services/llmScenarioStorage';
 import { hasVectorizedPhysicalProperties } from '@/services/ontologyVectorization';
@@ -264,6 +265,10 @@ function buildSyncSourceDataStrategy(
   const isCsvSource =
     normalizedState.instanceSyncSourceType ===
     INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD;
+  const isIcebergDatabaseSource =
+    normalizedState.instanceSyncSourceType ===
+      INSTANCE_SYNC_SOURCE_TYPE.DATABASE &&
+    isIcebergConnectorSubtype(normalizedState.sourceDataInfo?.connectorSubtype);
   const jdbcCheckpointField = isApiSource
     ? ''
     : (normalizedState.jdbcCheckpointField ?? '');
@@ -277,7 +282,9 @@ function buildSyncSourceDataStrategy(
         ? normalizedState.mode || API_SYNC_MODE.API_PUSH
         : isCsvSource
           ? normalizedState.mode || CSV_SYNC_MODE.CSV_IMPORT
-          : normalizedState.mode || 'BINLOG_CDC',
+          : isIcebergDatabaseSource
+            ? normalizedState.mode || 'JDBC_POLLING'
+            : normalizedState.mode || 'BINLOG_CDC',
     conflictStrategy:
       isCsvSource && !isCsvIncrementalImportScope(normalizedState.syncScope)
         ? ''
@@ -316,7 +323,17 @@ function buildSyncSourceDataStrategy(
       : undefined,
     apiIncrementalMarkerField: isApiSource
       ? normalizedState.apiIncrementalMarkerField?.trim() || undefined
-      : undefined
+      : undefined,
+    apiPageSizeParam: isApiSource
+      ? normalizedState.apiPageSizeParam?.trim() || undefined
+      : undefined,
+    apiPageNumParam: isApiSource
+      ? normalizedState.apiPageNumParam?.trim() || undefined
+      : undefined,
+    apiTotalCountParam: isApiSource
+      ? normalizedState.apiTotalCountParam?.trim() || undefined
+      : undefined,
+    apiStartPageNum: isApiSource ? normalizedState.apiStartPageNum : undefined
   };
   return {
     ...syncStrategyPayload,

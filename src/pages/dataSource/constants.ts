@@ -52,6 +52,13 @@ export const DATA_SOURCE_TYPE_META: Record<DataSourceType, DataSourceTypeMeta> =
 export const isSqlDataSourceType = (type: DataSourceType): boolean =>
   DATA_SOURCE_TYPE_META[type].connectorType === 'sql';
 
+export const isIcebergDataSourceType = (type: DataSourceType): boolean =>
+  type === DataSourceType.ICEBERG;
+
+/** 传统关系型 SQL（不含 Iceberg） */
+export const isRelationalSqlDataSourceType = (type: DataSourceType): boolean =>
+  isSqlDataSourceType(type) && !isIcebergDataSourceType(type);
+
 export const isApiDataSourceType = (type: DataSourceType): boolean =>
   type === DataSourceType.API;
 

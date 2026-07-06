@@ -117,6 +117,11 @@ export const getDataSourceList = async (
     );
   }
 
+  filteredData.sort(
+    (a, b) =>
+      new Date(b.createTime).getTime() - new Date(a.createTime).getTime()
+  );
+
   const pageNo = params.pageNo || 1;
   const pageSize = params.pageSize || 10;
   const start = (pageNo - 1) * pageSize;
@@ -186,21 +191,13 @@ export const updateDataSource = async (
   return updatedItem;
 };
 
-export const testConnection = async (
-  id: string
-): Promise<{ success: boolean; message: string }> => {
+const mockTestConnectionResult = async (): Promise<{
+  success: boolean;
+  message: string;
+}> => {
   await new Promise((resolve) => setTimeout(resolve, 1200));
 
-  const item = dataStore.find((d) => d.id === id);
-  if (!item) {
-    return {
-      success: false,
-      message: '数据源不存在'
-    };
-  }
-
-  const random = Math.random();
-  if (random > 0.2) {
+  if (Math.random() > 0.2) {
     return {
       success: true,
       message: '连接成功'
@@ -211,4 +208,24 @@ export const testConnection = async (
     success: false,
     message: '连接失败: 连接超时，请检查网络配置'
   };
+};
+
+export const testConnection = async (
+  id: string
+): Promise<{ success: boolean; message: string }> => {
+  const item = dataStore.find((d) => d.id === id);
+  if (!item) {
+    return {
+      success: false,
+      message: '数据源不存在'
+    };
+  }
+
+  return mockTestConnectionResult();
+};
+
+export const testConnectionByForm = async (
+  _data: DataSourceFormData
+): Promise<{ success: boolean; message: string }> => {
+  return mockTestConnectionResult();
 };

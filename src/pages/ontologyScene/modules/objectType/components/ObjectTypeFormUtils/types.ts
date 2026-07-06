@@ -159,6 +159,14 @@ export interface SyncSourceDataStrategyFormState {
   apiCheckpointParam?: string;
   /** API 定时拉取：响应体增量判定字段 */
   apiIncrementalMarkerField?: string;
+  /** API 定时拉取：每页大小参数名 */
+  apiPageSizeParam?: string;
+  /** API 定时拉取：页号参数名 */
+  apiPageNumParam?: string;
+  /** API 定时拉取：总数参数名 */
+  apiTotalCountParam?: string;
+  /** API 定时拉取：起始页号 */
+  apiStartPageNum?: number;
 }
 
 export interface ObjectTypeFormData {

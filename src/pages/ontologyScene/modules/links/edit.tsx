@@ -19,6 +19,7 @@ import { LinkType as FormLinkType } from '../../types/link';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
 import { ProButton } from '@ceai-front/arco-material';
 import { IconLeft } from '@arco-design/web-react/icon';
+import { isIcebergConnectorSubtype } from '@/pages/ontologyScene/modules/objectType/components/ObjectTypeFormSteps/common/instanceSyncStrategyConfig';
 
 export default function OntologySceneLinksEdit() {
   const history = useHistory();
@@ -72,8 +73,15 @@ export default function OntologySceneLinksEdit() {
     if (!strategy) return undefined;
     const sourceDataInfo = buildSourceDataInfo(strategy.sourceDataInfo);
     if (!sourceDataInfo) return undefined;
+    const isIcebergSource = isIcebergConnectorSubtype(
+      strategy.sourceDataInfo?.connectorSubtype
+    );
+    const mode =
+      isIcebergSource && strategy.mode === 'BINLOG_CDC'
+        ? 'JDBC_POLLING'
+        : strategy.mode;
     return {
-      mode: strategy.mode,
+      mode,
       conflictStrategy: strategy.conflictStrategy,
       syncScope: strategy.syncScope,
       pollFetchSize: strategy.pollFetchSize,

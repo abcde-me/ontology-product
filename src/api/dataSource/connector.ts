@@ -21,6 +21,17 @@ export interface SqlConnectorConfigPayload {
   database?: string;
 }
 
+export interface IcebergConnectorConfigPayload {
+  metastoreUri: string;
+  warehouseType: string;
+  warehouseUri: string;
+  s3Region?: string;
+  s3Endpoint?: string;
+  s3AccessKey?: string;
+  s3SecretKey?: string;
+  hdfsNameNode?: string;
+}
+
 export interface ApiConnectorConfigPayload {
   url: string;
   method: string;
@@ -31,6 +42,11 @@ export interface ApiConnectorConfigPayload {
   bearer_token?: string;
   username?: string;
   password?: string;
+  oauth2_token_url?: string;
+  oauth2_client_id?: string;
+  oauth2_client_secret?: string;
+  oauth2_scope?: string;
+  oauth2_grant_type?: string;
   request_body?: string;
   timeout?: string;
   data_path?: string;
@@ -50,6 +66,7 @@ export interface KafkaConnectorConfigPayload {
 
 export type ConnectorConfigPayload =
   | SqlConnectorConfigPayload
+  | IcebergConnectorConfigPayload
   | ApiConnectorConfigPayload
   | KafkaConnectorConfigPayload;
 
@@ -189,9 +206,9 @@ export async function deleteConnector(id: number) {
 }
 
 /**
- * 测试数据源连接
+ * 测试数据源连接（支持按 id 或表单 config 测试）
  */
-export async function testConnector(id: number) {
-  const res = await UAPI.RES.TestConnectorApi({}).post({ id }).inRegion().do();
+export async function testConnector(params: TestConnectorParams) {
+  const res = await UAPI.RES.TestConnectorApi({}).post(params).inRegion().do();
   return res;
 }

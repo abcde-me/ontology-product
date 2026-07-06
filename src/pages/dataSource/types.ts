@@ -19,7 +19,14 @@ export enum ApiAuthType {
   NONE = 'none',
   API_KEY = 'api_key',
   BEARER = 'bearer',
-  BASIC = 'basic'
+  BASIC = 'basic',
+  OAUTH2 = 'oauth2'
+}
+
+// OAuth2 授权类型
+export enum OAuth2GrantType {
+  CLIENT_CREDENTIALS = 'client_credentials',
+  PASSWORD = 'password'
 }
 
 // API 请求方法
@@ -34,6 +41,12 @@ export enum ApiHttpMethod {
 export enum KafkaFieldParseMode {
   PARSE = 'parse',
   RAW = 'raw'
+}
+
+// Iceberg 仓库存储类型
+export enum IcebergWarehouseType {
+  MINIO = 'MINIO',
+  HDFS = 'HDFS'
 }
 
 // SQL 连接器配置
@@ -56,9 +69,26 @@ export interface ApiConnectorConfig {
   bearer_token?: string;
   username?: string;
   password?: string;
+  oauth2_token_url?: string;
+  oauth2_client_id?: string;
+  oauth2_client_secret?: string;
+  oauth2_scope?: string;
+  oauth2_grant_type?: OAuth2GrantType | string;
   request_body?: string;
   timeout?: string;
   data_path?: string;
+}
+
+// Iceberg 连接器配置（Hive Catalog + iceberg-flink-runtime 原生读取）
+export interface IcebergConnectorConfig {
+  metastoreUri: string;
+  warehouseType: IcebergWarehouseType | string;
+  warehouseUri: string;
+  s3Region?: string;
+  s3Endpoint?: string;
+  s3AccessKey?: string;
+  s3SecretKey?: string;
+  hdfsNameNode?: string;
 }
 
 // Kafka 连接器配置（Topic、字段解析等在接入时配置）
@@ -76,6 +106,7 @@ export interface KafkaConnectorConfig {
 
 export type ConnectorConfig =
   | SqlConnectorConfig
+  | IcebergConnectorConfig
   | ApiConnectorConfig
   | KafkaConnectorConfig;
 
@@ -131,9 +162,23 @@ export interface DataSourceFormData {
   apiKey?: string;
   apiKeyHeader?: string;
   bearerToken?: string;
+  oauth2TokenUrl?: string;
+  oauth2ClientId?: string;
+  oauth2ClientSecret?: string;
+  oauth2Scope?: string;
+  oauth2GrantType?: OAuth2GrantType;
   requestBody?: string;
   dataPath?: string;
   timeout?: number;
+  // Iceberg 字段
+  metastoreUri?: string;
+  warehouseType?: IcebergWarehouseType;
+  warehouseUri?: string;
+  s3Region?: string;
+  s3Endpoint?: string;
+  s3AccessKey?: string;
+  s3SecretKey?: string;
+  hdfsNameNode?: string;
   // Kafka 字段
   brokers?: string;
   topic?: string;

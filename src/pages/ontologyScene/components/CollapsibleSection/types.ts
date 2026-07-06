@@ -84,6 +84,10 @@ export interface SyncSourceDataStrategy {
   apiIncrementalTimeParam?: string;
   apiCheckpointParam?: string;
   apiIncrementalMarkerField?: string;
+  apiPageSizeParam?: string;
+  apiPageNumParam?: string;
+  apiTotalCountParam?: string;
+  apiStartPageNum?: number;
 }
 
 /**

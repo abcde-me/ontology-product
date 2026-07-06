@@ -19,6 +19,10 @@ import {
   syncFormStateToOntologyTestSyncStrategy
 } from '../../ObjectTypeFormUtils/ontologyTestFinkSQLPayload';
 import { syncScopeRequiresIncrementalPollingFields } from '../../ObjectTypeFormUtils/syncScopeRequiresIncrementalPollingFields';
+import {
+  isIcebergConnectorSubtype,
+  normalizeDatabaseSyncStrategyFields
+} from './instanceSyncStrategyConfig';
 
 const FormItem = Form.Item;
 
@@ -145,6 +149,21 @@ export default function SyncSourceDataStrategyFormSection({
       setSqlTestOverlayExpanded((prev) => ({ ...prev, increment: true }));
     }
   }, [sqlTestResult.increment]);
+
+  const connectorSubtype =
+    syncSourceDataStrategy.sourceDataInfo?.connectorSubtype;
+  const isIcebergConnector = isIcebergConnectorSubtype(connectorSubtype);
+
+  useEffect(() => {
+    const patches = normalizeDatabaseSyncStrategyFields(
+      { mode: syncSourceDataStrategy.mode },
+      connectorSubtype
+    );
+    if (!Object.keys(patches).length) {
+      return;
+    }
+    onStrategyUpdate(patches);
+  }, [connectorSubtype, syncSourceDataStrategy.mode, onStrategyUpdate]);
 
   const currentQueryMode =
     syncSourceDataStrategy.sourceDataInfo.queryMode || 'selected';
@@ -361,7 +380,9 @@ export default function SyncSourceDataStrategyFormSection({
           onChange={(mode) => onStrategyUpdate({ mode })}
           disabled={readOnly}
         >
-          <Radio value="BINLOG_CDC">CDC</Radio>
+          <Radio value="BINLOG_CDC" disabled={readOnly || isIcebergConnector}>
+            CDC
+          </Radio>
           <Radio value="JDBC_POLLING">轮询</Radio>
         </Radio.Group>
       </FormItem>

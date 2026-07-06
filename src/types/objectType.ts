@@ -331,6 +331,22 @@ export interface SyncStrategy {
    */
   apiIncrementalMarkerField?: string;
   /**
+   * API 定时拉取 - 每页大小参数名（写入请求 query/body）
+   */
+  apiPageSizeParam?: string;
+  /**
+   * API 定时拉取 - 页号参数名（写入请求 query/body）
+   */
+  apiPageNumParam?: string;
+  /**
+   * API 定时拉取 - 总数参数名（从响应体读取总记录数）
+   */
+  apiTotalCountParam?: string;
+  /**
+   * API 定时拉取 - 起始页号
+   */
+  apiStartPageNum?: number;
+  /**
    * 同步模式，CDC-"BINLOG_CDC"; 轮询-"JDBC_POLLING";
    * 消息队列-"KAFKA_CDC"（仅实时消费）; API-"API_PUSH"（实时接收）/"API_POLLING"（定时拉取）; CSV-"CSV_IMPORT"
    */
@@ -528,6 +544,10 @@ export interface GetOntologyObjectTypeDetailRes
     apiIncrementalTimeParam?: string;
     apiCheckpointParam?: string;
     apiIncrementalMarkerField?: string;
+    apiPageSizeParam?: string;
+    apiPageNumParam?: string;
+    apiTotalCountParam?: string;
+    apiStartPageNum?: number;
     syncStrategy?: Partial<SyncStrategy>;
   };
 }

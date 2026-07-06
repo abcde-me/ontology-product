@@ -3,4 +3,23 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+
+  :global {
+    .link-text {
+      color: #23293b;
+      font-family: 'PingFang SC', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 22px;
+      cursor: pointer;
+    }
+
+    .arco-table-tr {
+      &:hover {
+        .link-text {
+          color: rgb(var(--primary-6)) !important;
+        }
+      }
+    }
+  }
 }

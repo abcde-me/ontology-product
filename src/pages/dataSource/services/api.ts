@@ -186,6 +186,25 @@ export const updateDataSource = async (
   }
 };
 
+const parseTestConnectionResult = (result: {
+  code?: number;
+  message?: string;
+  data?: { status?: string };
+}): { success: boolean; message: string } => {
+  if (result.code) {
+    return {
+      success: false,
+      message: result.message || '连接测试失败'
+    };
+  }
+
+  const isSuccess = result.data?.status === 'succeed';
+  return {
+    success: isSuccess,
+    message: result.message || (isSuccess ? '连接成功' : '连接失败')
+  };
+};
+
 /**
  * 测试数据源连接
  */
@@ -197,20 +216,38 @@ export const testConnection = async (
   }
 
   try {
-    const result = await connectorApi.testConnector(Number(id));
-
-    if (result.code) {
-      return {
-        success: false,
-        message: result.message || '连接测试失败'
-      };
-    }
-
-    const isSuccess = result.data?.status === 'succeed';
+    const result = await connectorApi.testConnector({ id });
+    return parseTestConnectionResult(result);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message || error?.message || '连接测试失败';
     return {
-      success: isSuccess,
-      message: result.message || (isSuccess ? '连接成功' : '连接失败')
+      success: false,
+      message
     };
+  }
+};
+
+/**
+ * 按表单配置测试数据源连接（新增/编辑时使用）
+ */
+export const testConnectionByForm = async (
+  data: DataSourceFormData
+): Promise<{ success: boolean; message: string }> => {
+  if (USE_MOCK) {
+    return mockApi.testConnectionByForm(data);
+  }
+
+  try {
+    const meta = getConnectorMeta(data.dataSourceType);
+    const result = await connectorApi.testConnector({
+      config: {
+        ...formDataToConnectorConfig(data),
+        type: meta.connectorType,
+        subtype: meta.subtype as connectorApi.ConnectorSubtype
+      }
+    });
+    return parseTestConnectionResult(result);
   } catch (error: any) {
     const message =
       error?.response?.data?.message || error?.message || '连接测试失败';
