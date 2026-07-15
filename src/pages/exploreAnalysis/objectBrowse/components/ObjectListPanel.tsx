@@ -557,6 +557,8 @@ export const ObjectListPanel: React.FC<ObjectListPanelProps> = ({
       <InstanceDetailDrawer
         visible={detailVisible}
         record={selectedRecord}
+        sceneId={selectionContext?.sceneId}
+        objectTypeId={selectionContext?.objectTypeId}
         fieldCommentMap={fieldCommentMap}
         vectorFieldNames={vectorFieldNames}
         onClose={() => {

@@ -1,0 +1,58 @@
+.scopeFields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  color: #1d2129;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.required {
+  color: #f53f3f;
+  margin-left: 2px;
+}
+
+.hint {
+  margin-left: 6px;
+  color: #86909c;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.instanceBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--color-border-2);
+  border-radius: 8px;
+  background: #fafbfc;
+}
+
+.instanceGroups {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.instanceGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.instanceGroupTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}

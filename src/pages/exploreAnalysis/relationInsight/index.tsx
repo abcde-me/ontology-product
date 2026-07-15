@@ -8,12 +8,17 @@ import React, {
 import { Message } from '@arco-design/web-react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
+  AlgorithmParamsDrawer,
   ObjectSelectDrawer,
   OperationGuideModal,
   RelationInsightCanvas,
   RelationInsightToolbar
 } from './components';
-import { DEFAULT_CANVAS_MODE } from './constants';
+import {
+  DEFAULT_CANVAS_MODE,
+  DEFAULT_GRAPH_ALGORITHM,
+  getDefaultAlgorithmParams
+} from './constants';
 import {
   buildRelationGraph,
   enrichSelectedObjectContexts,
@@ -22,6 +27,7 @@ import {
 import type {
   CanvasModeKey,
   GraphAlgorithmKey,
+  GraphAlgorithmParams,
   GraphLayoutKey,
   QueryResultItem,
   RelationGraphEdge,
@@ -50,7 +56,15 @@ export default function RelationInsight() {
   const [loadedInstanceKeys, setLoadedInstanceKeys] = useState<Set<string>>(
     () => new Set()
   );
-  const [algorithm, setAlgorithm] = useState<GraphAlgorithmKey>('neighbor-2');
+  const [algorithm, setAlgorithm] = useState<GraphAlgorithmKey>(
+    DEFAULT_GRAPH_ALGORITHM
+  );
+  const [algorithmParams, setAlgorithmParams] = useState<GraphAlgorithmParams>(
+    () => getDefaultAlgorithmParams(DEFAULT_GRAPH_ALGORITHM)
+  );
+  const [algoParamsVisible, setAlgoParamsVisible] = useState(false);
+  const [pendingAlgorithm, setPendingAlgorithm] =
+    useState<GraphAlgorithmKey | null>(null);
   const [canvasMode, setCanvasMode] =
     useState<CanvasModeKey>(DEFAULT_CANVAS_MODE);
   const [layout, setLayout] = useState<GraphLayoutKey>('force');
@@ -65,8 +79,10 @@ export default function RelationInsight() {
   const [graphRevision, setGraphRevision] = useState(0);
   const hasGraphRef = useRef(false);
   const selectedObjectsRef = useRef(selectedObjects);
+  const algorithmParamsRef = useRef(algorithmParams);
 
   selectedObjectsRef.current = selectedObjects;
+  algorithmParamsRef.current = algorithmParams;
 
   const urlParams = useMemo(
     () => parseRelationInsightUrlParams(location.search),
@@ -138,10 +154,16 @@ export default function RelationInsight() {
       try {
         const existingGraph =
           cleared || nodes.length === 0 ? undefined : { nodes, edges };
-        const graphAlgorithm = mode === 'graph' ? 'neighbor-2' : algorithm;
+        const graphAlgorithm =
+          mode === 'graph' ? DEFAULT_GRAPH_ALGORITHM : algorithm;
+        const graphParams =
+          mode === 'graph'
+            ? getDefaultAlgorithmParams(DEFAULT_GRAPH_ALGORITHM)
+            : algorithmParams;
         const graph = await buildRelationGraph({
           selectedObjects: contexts,
           algorithm: graphAlgorithm,
+          algorithmParams: graphParams,
           layout,
           loadMode: mode,
           existingGraph
@@ -167,6 +189,7 @@ export default function RelationInsight() {
     },
     [
       algorithm,
+      algorithmParams,
       cleared,
       edges,
       layout,
@@ -198,6 +221,7 @@ export default function RelationInsight() {
       const graph = await rebuildRelationGraph({
         selectedObjects: objects,
         algorithm,
+        algorithmParams: algorithmParamsRef.current,
         layout
       });
       setNodes(graph.nodes);
@@ -210,6 +234,23 @@ export default function RelationInsight() {
       setLoading(false);
     }
   }, [algorithm, cleared, layout]);
+
+  const handleAlgorithmSelect = (value: GraphAlgorithmKey) => {
+    setPendingAlgorithm(value);
+    setAlgoParamsVisible(true);
+  };
+
+  const handleAlgorithmParamsConfirm = (params: GraphAlgorithmParams) => {
+    if (!pendingAlgorithm) {
+      return;
+    }
+
+    setAlgorithm(pendingAlgorithm);
+    setAlgorithmParams(params);
+    setAlgoParamsVisible(false);
+    setPendingAlgorithm(null);
+    Message.success('图算法参数已应用');
+  };
 
   const handleCanvasModeChange = (value: CanvasModeKey) => {
     if (value === 'detail') {
@@ -247,7 +288,8 @@ export default function RelationInsight() {
             ...context,
             loadedAsGraph: true
           })),
-          algorithm: 'neighbor-2',
+          algorithm: DEFAULT_GRAPH_ALGORITHM,
+          algorithmParams: getDefaultAlgorithmParams(DEFAULT_GRAPH_ALGORITHM),
           layout,
           loadMode: 'graph'
         });
@@ -290,7 +332,7 @@ export default function RelationInsight() {
     }
 
     rebuildCanvas();
-  }, [algorithm, cleared, layout, rebuildCanvas]);
+  }, [algorithm, algorithmParams, cleared, layout, rebuildCanvas]);
 
   const resetCanvasState = useCallback(() => {
     setNodes([]);
@@ -327,7 +369,7 @@ export default function RelationInsight() {
           layout={layout}
           favorited={favorited}
           onOpenSelect={() => setSelectVisible(true)}
-          onAlgorithmChange={setAlgorithm}
+          onAlgorithmSelect={handleAlgorithmSelect}
           onCanvasModeChange={handleCanvasModeChange}
           onLayoutChange={setLayout}
           onClearCanvas={handleClearCanvas}
@@ -365,6 +407,21 @@ export default function RelationInsight() {
       <OperationGuideModal
         visible={guideVisible}
         onClose={() => setGuideVisible(false)}
+      />
+
+      <AlgorithmParamsDrawer
+        visible={algoParamsVisible}
+        algorithm={pendingAlgorithm ?? algorithm}
+        params={
+          pendingAlgorithm === algorithm
+            ? algorithmParams
+            : getDefaultAlgorithmParams(pendingAlgorithm ?? algorithm)
+        }
+        onCancel={() => {
+          setAlgoParamsVisible(false);
+          setPendingAlgorithm(null);
+        }}
+        onConfirm={handleAlgorithmParamsConfirm}
       />
     </div>
   );

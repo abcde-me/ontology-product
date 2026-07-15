@@ -12,6 +12,7 @@ import type { FieldCommentMap } from '@/pages/exploreAnalysis/objectBrowse/utils
 import type { InstanceQueryRow } from '@/pages/exploreAnalysis/objectBrowse/types';
 import type {
   GraphAlgorithmKey,
+  GraphAlgorithmParams,
   GraphLayoutKey,
   RelationGraphData,
   RelationGraphEdge,
@@ -26,6 +27,8 @@ import {
   applyEdgePairNodeColors,
   DEFAULT_EDGE_COLOR
 } from '../utils/nodeColors';
+import { analyzeTopologyByAlgorithm } from './graphAlgorithms';
+import { getDefaultAlgorithmParams } from '../constants';
 
 const MAX_LINK_ROWS = 100;
 const MAX_NEIGHBOR_NODES = 40;
@@ -50,93 +53,43 @@ const getFieldCommentMap = async (
 const filterTopologyByDepth = (
   topology: GetOntologyTopologyResponse,
   focusNodeId: number,
-  algorithm: GraphAlgorithmKey
+  algorithm: GraphAlgorithmKey,
+  params?: GraphAlgorithmParams,
+  fallbackTargetId?: number
 ): GetOntologyTopologyResponse => {
-  const nodes = topology.nodes ?? [];
-  const edges = topology.edges ?? [];
+  const result = analyzeTopologyByAlgorithm(
+    topology,
+    focusNodeId,
+    algorithm,
+    params ?? getDefaultAlgorithmParams(algorithm),
+    fallbackTargetId
+  );
 
-  if (algorithm === 'connected') {
-    const visibleNodeIds = new Set<number>([focusNodeId]);
-    let changed = true;
-
-    while (changed) {
-      changed = false;
-      edges.forEach((edge) => {
-        const sourceId = edge.sourceId;
-        const targetId = edge.targetId;
-        if (sourceId == null || targetId == null) {
-          return;
-        }
-
-        const sourceVisible = visibleNodeIds.has(sourceId);
-        const targetVisible = visibleNodeIds.has(targetId);
-
-        if (sourceVisible && !targetVisible) {
-          visibleNodeIds.add(targetId);
-          changed = true;
-        }
-        if (targetVisible && !sourceVisible) {
-          visibleNodeIds.add(sourceId);
-          changed = true;
-        }
-      });
+  // 将分析分值挂到拓扑节点备注，后续建图时读取
+  const annotatedNodes = (result.topology.nodes ?? []).map((node) => {
+    if (node.id == null) {
+      return node;
     }
-
+    const score = result.scores.get(node.id);
+    const community = result.communities.get(node.id);
+    const extras: string[] = [];
+    if (score != null) {
+      extras.push(`score=${Number(score.toFixed(4))}`);
+    }
+    if (community != null) {
+      extras.push(`community=${community}`);
+    }
     return {
-      nodes: nodes.filter(
-        (node) => node.id != null && visibleNodeIds.has(node.id)
-      ),
-      edges: edges.filter(
-        (edge) =>
-          edge.sourceId != null &&
-          edge.targetId != null &&
-          visibleNodeIds.has(edge.sourceId) &&
-          visibleNodeIds.has(edge.targetId)
-      )
+      ...node,
+      description: extras.length
+        ? `${node.description || ''}${node.description ? ' | ' : ''}${extras.join(' ')}`.trim()
+        : node.description
     };
-  }
-
-  const maxDepth = algorithm === 'neighbor-2' ? 2 : 1;
-  const visibleNodeIds = new Set<number>([focusNodeId]);
-  let frontier = new Set<number>([focusNodeId]);
-
-  for (let depth = 0; depth < maxDepth; depth += 1) {
-    const nextFrontier = new Set<number>();
-
-    edges.forEach((edge) => {
-      const sourceId = edge.sourceId;
-      const targetId = edge.targetId;
-      if (sourceId == null || targetId == null) {
-        return;
-      }
-
-      if (frontier.has(sourceId) && !visibleNodeIds.has(targetId)) {
-        visibleNodeIds.add(targetId);
-        nextFrontier.add(targetId);
-      }
-      if (frontier.has(targetId) && !visibleNodeIds.has(sourceId)) {
-        visibleNodeIds.add(sourceId);
-        nextFrontier.add(sourceId);
-      }
-    });
-
-    frontier = nextFrontier;
-    if (frontier.size === 0) {
-      break;
-    }
-  }
+  });
 
   return {
-    nodes: nodes.filter(
-      (node) => node.id != null && visibleNodeIds.has(node.id)
-    ),
-    edges: edges.filter(
-      (edge) =>
-        edge.sourceId != null &&
-        edge.targetId != null &&
-        visibleNodeIds.has(edge.sourceId) &&
-        visibleNodeIds.has(edge.targetId)
-    )
+    nodes: annotatedNodes,
+    edges: result.topology.edges
   };
 };
 
@@ -180,24 +133,60 @@ const createGraphNode = (
     instanceId?: string;
     sceneId?: number;
     detailFields?: Array<{ label: string; value: string }>;
+    algoScore?: number;
+    algoCommunity?: number;
   }
-): RelationGraphNode => ({
-  id,
-  type: 'knowledgeNode',
-  data: {
-    label: params.label,
-    subLabel: params.subLabel,
-    isFocus: params.isFocus,
-    objectTypeId: params.objectTypeId,
-    objectTypeName: params.objectTypeName ?? params.subLabel,
-    instanceId: params.instanceId,
-    sceneId: params.sceneId,
-    detailFields: params.detailFields,
-    color: getCategoryColor(params.objectTypeId, params.isFocus),
-    size: getNodeSize(params.isFocus)
-  },
-  position: { x: 0, y: 0 }
-});
+): RelationGraphNode => {
+  const score = params.algoScore;
+  const baseSize = getNodeSize(params.isFocus);
+  const size =
+    score != null && !params.isFocus
+      ? Math.min(56, Math.max(baseSize, baseSize + Math.log10(score + 1) * 10))
+      : baseSize;
+
+  const detailFields = [...(params.detailFields ?? [])];
+  if (score != null) {
+    detailFields.push({ label: '算法得分', value: score.toFixed(4) });
+  }
+  if (params.algoCommunity != null) {
+    detailFields.push({
+      label: '社区编号',
+      value: String(params.algoCommunity)
+    });
+  }
+
+  return {
+    id,
+    type: 'knowledgeNode',
+    data: {
+      label: params.label,
+      subLabel: params.subLabel,
+      isFocus: params.isFocus,
+      objectTypeId: params.objectTypeId,
+      objectTypeName: params.objectTypeName ?? params.subLabel,
+      instanceId: params.instanceId,
+      sceneId: params.sceneId,
+      detailFields,
+      algoScore: score,
+      algoCommunity: params.algoCommunity,
+      color: getCategoryColor(params.objectTypeId, params.isFocus),
+      size
+    },
+    position: { x: 0, y: 0 }
+  };
+};
+
+const parseAlgoMeta = (description?: string) => {
+  if (!description) {
+    return {};
+  }
+  const scoreMatch = description.match(/score=([0-9.]+)/);
+  const communityMatch = description.match(/community=([0-9]+)/);
+  return {
+    algoScore: scoreMatch ? Number(scoreMatch[1]) : undefined,
+    algoCommunity: communityMatch ? Number(communityMatch[1]) : undefined
+  };
+};
 
 const buildDetailFieldsFromRow = async (
   row: Record<string, unknown>,
@@ -314,6 +303,7 @@ const appendFocusObjectRelations = async (
     }
 
     const neighborType = typeNodeMap.get(neighborTypeId);
+    const algoMeta = parseAlgoMeta(neighborType?.description);
     let linkDetail;
 
     try {
@@ -371,7 +361,9 @@ const appendFocusObjectRelations = async (
             subLabel: neighborType?.name,
             isFocus: false,
             objectTypeId: neighborTypeId,
-            objectTypeName: neighborType?.name
+            objectTypeName: neighborType?.name,
+            algoScore: algoMeta.algoScore,
+            algoCommunity: algoMeta.algoCommunity
           })
         );
         accumulator.nodeIdSet.add(placeholderId);
@@ -420,6 +412,8 @@ const appendFocusObjectRelations = async (
             objectTypeName: neighborType?.name,
             instanceId: neighborInstanceId,
             sceneId: selectedObject.sceneId,
+            algoScore: algoMeta.algoScore,
+            algoCommunity: algoMeta.algoCommunity,
             detailFields: await buildDetailFieldsFromRow(
               row,
               selectedObject.sceneId,
@@ -524,13 +518,25 @@ const appendObjectsToGraph = async (params: {
   selectedObjects: SelectedObjectContext[];
   loadMode: RelationLoadMode;
   algorithm: GraphAlgorithmKey;
+  algorithmParams?: GraphAlgorithmParams;
   topologyRes: { data?: GetOntologyTopologyResponse };
   accumulator: GraphAccumulator;
 }) => {
-  const { selectedObjects, loadMode, algorithm, topologyRes, accumulator } =
-    params;
+  const {
+    selectedObjects,
+    loadMode,
+    algorithm,
+    algorithmParams,
+    topologyRes,
+    accumulator
+  } = params;
   const edgeColor = DEFAULT_EDGE_COLOR;
   const topologyCache = new Map<number, GetOntologyTopologyResponse>();
+  const fallbackTargetId = selectedObjects.find(
+    (item, index) =>
+      index > 0 && item.objectTypeId !== selectedObjects[0]?.objectTypeId
+  )?.objectTypeId;
+
   const getFilteredTopology = (objectTypeId: number) => {
     if (!topologyCache.has(objectTypeId)) {
       topologyCache.set(
@@ -538,7 +544,9 @@ const appendObjectsToGraph = async (params: {
         filterTopologyByDepth(
           topologyRes.data ?? { nodes: [], edges: [] },
           objectTypeId,
-          algorithm
+          algorithm,
+          algorithmParams,
+          fallbackTargetId
         )
       );
     }
@@ -562,6 +570,7 @@ const appendObjectsToGraph = async (params: {
 export const buildRelationGraph = async (params: {
   selectedObjects: SelectedObjectContext[];
   algorithm: GraphAlgorithmKey;
+  algorithmParams?: GraphAlgorithmParams;
   layout: GraphLayoutKey;
   loadMode?: RelationLoadMode;
   existingGraph?: RelationGraphData;
@@ -569,6 +578,7 @@ export const buildRelationGraph = async (params: {
   const {
     selectedObjects,
     algorithm,
+    algorithmParams,
     layout,
     loadMode = 'graph',
     existingGraph
@@ -615,6 +625,7 @@ export const buildRelationGraph = async (params: {
     selectedObjects,
     loadMode,
     algorithm,
+    algorithmParams,
     topologyRes,
     accumulator
   });
@@ -632,9 +643,10 @@ export const buildRelationGraph = async (params: {
 export const rebuildRelationGraph = async (params: {
   selectedObjects: SelectedObjectContext[];
   algorithm: GraphAlgorithmKey;
+  algorithmParams?: GraphAlgorithmParams;
   layout: GraphLayoutKey;
 }): Promise<RelationGraphData> => {
-  const { selectedObjects, algorithm, layout } = params;
+  const { selectedObjects, algorithm, algorithmParams, layout } = params;
 
   if (selectedObjects.length === 0) {
     return { nodes: [], edges: [] };
@@ -662,11 +674,22 @@ export const rebuildRelationGraph = async (params: {
   const accumulator = createAccumulatorFromGraph();
   const edgeColor = DEFAULT_EDGE_COLOR;
   const topologyCache = new Map<number, GetOntologyTopologyResponse>();
+  const fallbackTargetId = selectedObjects.find(
+    (item, index) =>
+      index > 0 && item.objectTypeId !== selectedObjects[0]?.objectTypeId
+  )?.objectTypeId;
+
   const getFilteredTopology = (objectTypeId: number) => {
     if (!topologyCache.has(objectTypeId)) {
       topologyCache.set(
         objectTypeId,
-        filterTopologyByDepth(topologyRes.data, objectTypeId, algorithm)
+        filterTopologyByDepth(
+          topologyRes.data,
+          objectTypeId,
+          algorithm,
+          algorithmParams,
+          fallbackTargetId
+        )
       );
     }
     return topologyCache.get(objectTypeId)!;

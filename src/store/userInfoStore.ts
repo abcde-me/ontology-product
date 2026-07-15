@@ -12,7 +12,8 @@ import {
   getDevRealProjectIdFromEnv,
   getDevRealFsIdFromEnv,
   isDevBypassEnabled,
-  isDevFallbackProjectId
+  isDevFallbackProjectId,
+  withDevInitTimeout
 } from '@/utils/devFallback';
 import {
   extractAndNormalizeProjOrgList,
@@ -153,6 +154,40 @@ export const useUserInfoStore = create<UserInfoStore>()(
           try {
             set({ isLoading: true, error: null });
 
+            if (isDevBypassEnabled()) {
+              const syncRealUserInfo = async () => {
+                try {
+                  const response = await withDevInitTimeout(
+                    GetUser(),
+                    'GetUser'
+                  );
+
+                  if (!isRequestSuccess(response) || !response.data?.id) {
+                    return;
+                  }
+
+                  set({
+                    userInfo: response.data,
+                    error: null
+                  });
+                  await get().initializeProjects();
+                } catch (error) {
+                  console.warn('[dev] 后台同步用户信息失败', error);
+                }
+              };
+
+              set({
+                userInfo: applyDevAuthBootstrap().userInfo,
+                userActions: getDevAdminActions(),
+                isLoading: false,
+                error: null
+              });
+              await get().initializeProjects();
+              finishInit();
+              void syncRealUserInfo();
+              return;
+            }
+
             let userInfo: UserInfo | null = null;
 
             try {
@@ -279,26 +314,10 @@ export const useUserInfoStore = create<UserInfoStore>()(
           });
         };
 
-        if (!userInfo?.id) {
-          applyFallbackIfNeeded();
-          return;
-        }
-
-        const fullProjectIdKey = `${ProjectIdKey}${userInfo.id}`;
-        const cachedProjectId = getLocalStorage<string[]>(fullProjectIdKey);
-        if (isDevFallbackProjectId(cachedProjectId)) {
-          localStorage.removeItem(fullProjectIdKey);
-        }
-
-        try {
-          const response = await GetProjOrg({});
-          const result = extractAndNormalizeProjOrgList(response);
-
-          if (!result.length) {
-            applyFallbackIfNeeded();
-            return;
-          }
-
+        const applyProjectList = (
+          result: NormalizedOrgNode[],
+          fullProjectIdKey: string
+        ) => {
           set({ projectList: result });
 
           if (
@@ -332,6 +351,65 @@ export const useUserInfoStore = create<UserInfoStore>()(
           }
 
           applyFallbackIfNeeded();
+        };
+
+        const syncRealProjects = async () => {
+          if (!userInfo?.id) {
+            return;
+          }
+
+          const fullProjectIdKey = `${ProjectIdKey}${userInfo.id}`;
+          const cachedProjectId = getLocalStorage<string[]>(fullProjectIdKey);
+          if (isDevFallbackProjectId(cachedProjectId)) {
+            localStorage.removeItem(fullProjectIdKey);
+          }
+
+          try {
+            const response = await withDevInitTimeout(
+              GetProjOrg({}),
+              'GetProjOrg'
+            );
+            const result = extractAndNormalizeProjOrgList(response);
+
+            if (!result.length) {
+              return;
+            }
+
+            applyProjectList(result, fullProjectIdKey);
+          } catch (error) {
+            console.warn('[dev] 后台同步项目列表失败', error);
+          }
+        };
+
+        if (isDevBypassEnabled()) {
+          if (!get().projectList?.length) {
+            applyFallbackIfNeeded();
+          }
+          void syncRealProjects();
+          return;
+        }
+
+        if (!userInfo?.id) {
+          applyFallbackIfNeeded();
+          return;
+        }
+
+        const fullProjectIdKey = `${ProjectIdKey}${userInfo.id}`;
+        const cachedProjectId = getLocalStorage<string[]>(fullProjectIdKey);
+        if (isDevFallbackProjectId(cachedProjectId)) {
+          localStorage.removeItem(fullProjectIdKey);
+        }
+
+        try {
+          const response = await GetProjOrg({});
+          const result = extractAndNormalizeProjOrgList(response);
+
+          if (!result.length) {
+            applyFallbackIfNeeded();
+            return;
+          }
+
+          applyProjectList(result, fullProjectIdKey);
         } catch (error) {
           console.error('Failed to initialize projects:', error);
           applyFallbackIfNeeded();

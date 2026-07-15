@@ -68,7 +68,7 @@ export default function Home() {
     <div
       className={classNames(
         styles['home-page'],
-        'flex h-full w-full overflow-hidden bg-white'
+        'flex h-full min-h-[calc(100vh-56px)] w-full overflow-hidden bg-white'
       )}
     >
       {/* 内容区域 */}

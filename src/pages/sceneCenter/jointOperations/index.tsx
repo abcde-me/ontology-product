@@ -61,7 +61,7 @@ export default function JointOperations() {
     <div className="flex h-full min-h-0 flex-col overflow-hidden">
       <div className="flex-shrink-0 px-4 pt-4">
         <PageHeader
-          title="跨域火力协同"
+          title="跨域协同"
           subTitle="基于图谱、公理与场景规则，实现跨领域数据查询与应用"
         />
       </div>

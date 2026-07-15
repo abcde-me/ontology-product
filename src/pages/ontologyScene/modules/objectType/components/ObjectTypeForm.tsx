@@ -52,6 +52,7 @@ import {
   resolveGeneratedObjectTypeParsedSchema
 } from '../services/generateObjectTypeCsvTemplate';
 import { applyObjectTypeParsedSchema } from './ObjectTypeFormUtils/applyObjectTypeParsedSchema';
+import GenerateCsvSchemaRequirementModal from './GenerateCsvSchemaRequirementModal';
 import type { DataResourceTable } from '@/pages/dataResource/types';
 import { buildDataResourceObjectTypeDescriptionFromTables } from '../services/dataResourceMapping';
 import { fetchSceneObjectTypeCodes } from '@/pages/ontologyScene/modules/graph/services/graphCreateServices';
@@ -285,6 +286,15 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       InstanceSyncMappingField[]
     >([]);
     const [generatingSchema, setGeneratingSchema] = useState(false);
+    const [
+      generateRequirementModalVisible,
+      setGenerateRequirementModalVisible
+    ] = useState(false);
+    const [pendingGenerateBasicInfo, setPendingGenerateBasicInfo] = useState<{
+      name: string;
+      description?: string;
+      code?: string;
+    }>();
     const [fieldsLoading, setFieldsLoading] = useState(false);
     const [, setFileUploaded] = useState(false);
     const [isReUpload, setIsReUpload] = useState(false);
@@ -1050,7 +1060,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       );
     };
 
-    const handleGenerateSchemaFromBasicInfo = async () => {
+    const handleGenerateSchemaFromBasicInfo = () => {
       if (dataSource.type !== DATA_SOURCE_TYPE.LOCAL_CSV || modelingReadOnly) {
         return;
       }
@@ -1067,12 +1077,26 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         return;
       }
 
+      setPendingGenerateBasicInfo({
+        name: objectTypeName,
+        description: values.description,
+        code: values.code
+      });
+      setGenerateRequirementModalVisible(true);
+    };
+
+    const handleConfirmGenerateSchema = async (requirements: string) => {
+      if (!pendingGenerateBasicInfo) {
+        return;
+      }
+
       setGeneratingSchema(true);
       try {
-        const displayFileName = `${values.code || 'object_type'}_schema.csv`;
+        const displayFileName = `${pendingGenerateBasicInfo.code || 'object_type'}_schema.csv`;
         const { definition, source } = await generateObjectTypeCsvTemplate({
-          name: objectTypeName,
-          description: values.description
+          name: pendingGenerateBasicInfo.name,
+          description: pendingGenerateBasicInfo.description,
+          requirements
         });
         const parsed = await resolveGeneratedObjectTypeParsedSchema(
           definition,
@@ -1090,14 +1114,20 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         });
 
         setIsReUpload(true);
+        setGenerateRequirementModalVisible(false);
+        setPendingGenerateBasicInfo(undefined);
 
         if (source === 'llm') {
-          Message.success('已根据名称与描述生成建模模板，可继续编辑');
+          Message.success('已根据名称、描述与生成要求生成建模模板，可继续编辑');
         } else {
           Message.info('已填充标准模板数据，可继续编辑或重新上传 CSV');
         }
-      } catch {
-        Message.warning('生成建模模板失败，请手动上传 Schema 文件');
+      } catch (error) {
+        Message.warning(
+          error instanceof Error
+            ? error.message
+            : '生成建模模板失败，请手动上传 Schema 文件'
+        );
       } finally {
         setGeneratingSchema(false);
       }
@@ -1578,6 +1608,16 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         </div>
 
         {showFooter && renderFooter()}
+
+        <GenerateCsvSchemaRequirementModal
+          visible={generateRequirementModalVisible}
+          confirmLoading={generatingSchema}
+          onCancel={() => {
+            setGenerateRequirementModalVisible(false);
+            setPendingGenerateBasicInfo(undefined);
+          }}
+          onConfirm={handleConfirmGenerateSchema}
+        />
       </div>
     );
   }

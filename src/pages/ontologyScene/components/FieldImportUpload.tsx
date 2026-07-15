@@ -123,7 +123,7 @@ export const CsvSchemaTemplateLinks: React.FC<CsvSchemaTemplateLinksProps> = ({
         标准模板(.csv)
       </a>
       {showGenerateSchemaButton && onGenerateSchema && (
-        <Tooltip content="根据基本信息生成数据">
+        <Tooltip content="可填写生成要求，根据基本信息智能生成模板数据">
           <a
             href="#"
             onClick={handleGenerateClick}

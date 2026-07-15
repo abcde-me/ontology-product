@@ -29,7 +29,11 @@ import ObjectTypeCreateIcon from '../../assets/object-type-create.png';
 import LinkCreateIcon from '../../assets/link-create.png';
 import BehaviorCreateIcon from '../../assets/behavior-create.png';
 import TestCreateIcon from '../../assets/test-create.png';
-import { ONTOLOGY_SCENE_MENU_ITEM_KEYS } from '@/common/constants';
+import {
+  AI_ONTOLOGY_WORKBENCH_PATH,
+  ONTOLOGY_SCENE_MENU_ITEM_KEYS
+} from '@/common/constants';
+import { SECONDARY_MENU_ITEMS } from '@/config/secondaryMenuItems';
 import SceneModal, { SceneFormData } from './components/SceneModal';
 import styles from './index.module.scss';
 import classNames from 'classnames';
@@ -57,6 +61,7 @@ import { enrichOntologySceneCounts } from '@/utils/enrichOntologySceneCounts';
 import { exportOntologyScene } from '@/pages/ontologyScene/services/exportOntologyScene';
 import { importOntologyScenePackage } from '@/pages/ontologyScene/services/importOntologyScene';
 import { sortOntologyScenesByCreateTimeDesc } from '@/utils/sortOntologyScenes';
+import { purgeEmptyOntologyScenes } from '@/pages/ontologyScene/services/purgeEmptyOntologyScenes';
 
 // 扩展 ProcessStep 类型，使 description 支持 ReactNode
 interface SceneProcessStep extends Omit<ProcessStep, 'description'> {
@@ -321,11 +326,26 @@ export default function OntologySceneList() {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [exportingSceneId, setExportingSceneId] = useState<number>();
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const emptyScenesPurgedRef = useRef(false);
 
   // 加载场景列表
   const loadSceneList = useCallback(async () => {
     setLoading(true);
     try {
+      if (!emptyScenesPurgedRef.current) {
+        emptyScenesPurgedRef.current = true;
+        try {
+          const purgeResult = await purgeEmptyOntologyScenes();
+          if (purgeResult.deleted > 0) {
+            Message.success(
+              `已清理 ${purgeResult.deleted} 个无对象类型/无实例的空场景库`
+            );
+          }
+        } catch (error) {
+          console.warn('[purge] 空场景清理失败，继续加载列表', error);
+        }
+      }
+
       const response = await listOntologyModel({
         pageNo: currentPage,
         pageSize: pageSize,
@@ -649,7 +669,7 @@ export default function OntologySceneList() {
         title=""
         description=""
         toggleText="操作引导"
-        defaultExpanded={true}
+        defaultExpanded={false}
         steps={processSteps as any}
       />
 
@@ -664,16 +684,26 @@ export default function OntologySceneList() {
             width: 200
           }}
         />
-        <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.CREATE}>
-          <Button
-            type="primary"
-            icon={<IconPlus />}
-            onClick={handleCreate}
-            className="rounded"
-          >
-            创建本体场景
-          </Button>
-        </PermissionWrapper>
+        <div className="flex items-center gap-3">
+          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.LIST}>
+            <Button
+              type="outline"
+              onClick={() => history.push(AI_ONTOLOGY_WORKBENCH_PATH)}
+            >
+              {SECONDARY_MENU_ITEMS.AIOntoWorkbench}
+            </Button>
+          </PermissionWrapper>
+          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.CREATE}>
+            <Button
+              type="primary"
+              icon={<IconPlus />}
+              onClick={handleCreate}
+              className="rounded"
+            >
+              创建本体场景
+            </Button>
+          </PermissionWrapper>
+        </div>
       </div>
 
       {loading ? (

@@ -1,17 +1,23 @@
 import React, { useMemo } from 'react';
-import { Button, Popconfirm, Space } from '@arco-design/web-react';
+import { Button, Popconfirm, Space, Tag } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
 import dayjs from 'dayjs';
-import type { ImplicitRelationTaskListItem } from '../types';
+import { DISCOVERY_ALGORITHM_LABEL } from '../constants';
+import type {
+  ImplicitDiscoveryAlgorithm,
+  ImplicitRelationTaskListItem
+} from '../types';
 
 interface UseColumnsProps {
   onViewDetail: (record: ImplicitRelationTaskListItem) => void;
+  onAsk: (record: ImplicitRelationTaskListItem) => void;
   onDelete: (record: ImplicitRelationTaskListItem) => void;
   deletingId?: string;
 }
 
 export const useColumns = ({
   onViewDetail,
+  onAsk,
   onDelete,
   deletingId
 }: UseColumnsProps) => {
@@ -20,12 +26,12 @@ export const useColumns = ({
       {
         title: '任务名称',
         dataIndex: 'name',
-        width: 200
+        width: 180
       },
       {
-        title: '关联图谱',
+        title: '本体图谱',
         dataIndex: 'ontologySceneName',
-        width: 180,
+        width: 150,
         render: (value?: string, record?: ImplicitRelationTaskListItem) =>
           value ||
           (record?.ontologySceneId
@@ -33,25 +39,42 @@ export const useColumns = ({
             : '未配置')
       },
       {
-        title: '补充链接/关系',
-        dataIndex: 'richRelationCount',
-        width: 100
+        title: '对象类型',
+        dataIndex: 'objectTypeSummary',
+        width: 160,
+        render: (value?: string) => value || '-'
       },
       {
-        title: '推理规则',
-        dataIndex: 'ruleCount',
+        title: '实例范围',
+        dataIndex: 'instanceSummary',
+        width: 140,
+        render: (value?: string) => value || '-'
+      },
+      {
+        title: '发现算法',
+        dataIndex: 'algorithm',
+        width: 110,
+        render: (algorithm: ImplicitDiscoveryAlgorithm) => (
+          <Tag size="small">
+            {DISCOVERY_ALGORITHM_LABEL[algorithm] || algorithm}
+          </Tag>
+        )
+      },
+      {
+        title: '发现关系数',
+        dataIndex: 'discoveryCount',
         width: 100
       },
       {
         title: '更新时间',
         dataIndex: 'updatedAt',
-        width: 180,
+        width: 170,
         render: (time: string) => dayjs(time).format('YYYY-MM-DD HH:mm:ss')
       },
       {
         title: '操作',
         dataIndex: 'operations',
-        width: 160,
+        width: 210,
         fixed: 'right' as const,
         render: (_, record) => (
           <Space size={12}>
@@ -63,8 +86,17 @@ export const useColumns = ({
             >
               查看详情
             </Button>
+            <Button
+              type="text"
+              size="small"
+              className="p-0"
+              disabled={!record.discoveryCount}
+              onClick={() => onAsk(record)}
+            >
+              问答
+            </Button>
             <Popconfirm
-              title="确认删除该隐性关系任务？删除后不可恢复。"
+              title="确认删除该关系挖掘任务？删除后不可恢复。"
               onOk={() => onDelete(record)}
             >
               <Button
@@ -81,7 +113,7 @@ export const useColumns = ({
         )
       }
     ],
-    [deletingId, onDelete, onViewDetail]
+    [deletingId, onAsk, onDelete, onViewDetail]
   );
 
   return columns;

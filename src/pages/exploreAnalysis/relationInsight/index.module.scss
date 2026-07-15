@@ -76,8 +76,70 @@
   }
 }
 
+.toolbar-algo-dropdown {
+  max-height: 360px;
+
+  :global {
+    .arco-select-group-title {
+      padding: 8px 12px 4px;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 20px;
+      background: transparent;
+    }
+
+    .arco-select-group-title [data-algo-category='path'] {
+      color: #0f766e !important;
+    }
+
+    .arco-select-group-title [data-algo-category='centrality'] {
+      color: #c2410c !important;
+    }
+
+    .arco-select-group-title [data-algo-category='community'] {
+      color: #7c3aed !important;
+    }
+
+    .arco-select-group-title [data-algo-category='structure'] {
+      color: #0369a1 !important;
+    }
+
+    .arco-select-group-title [data-algo-category='similarity'] {
+      color: #be185d !important;
+    }
+  }
+}
+
+.algo-category-label {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
 .toolbar-select-trigger {
   min-width: 96px;
+}
+
+.algo-params-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.algo-params-desc {
+  display: block;
+  line-height: 22px;
+}
+
+.algo-params-scenarios {
+  margin-top: 4px;
+}
+
+.algo-params-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .toolbar-select-arrow {

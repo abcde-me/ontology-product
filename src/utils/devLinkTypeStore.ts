@@ -196,6 +196,26 @@ export const devListOntologyLinkTypeColumn = () => ({
   }
 });
 
+/** 按场景库 ID 清理本地链接类型 */
+export const devDeleteOntologyLinkTypesByModelId = (
+  ontologyModelID: number
+) => {
+  const modelId = Number(ontologyModelID);
+  if (!Number.isFinite(modelId)) {
+    return 0;
+  }
+
+  const records = readLinks();
+  const nextRecords = records.filter(
+    (item) => Number(item.ontologyModelID) !== modelId
+  );
+  const removed = records.length - nextRecords.length;
+  if (removed > 0) {
+    writeLinks(nextRecords);
+  }
+  return removed;
+};
+
 /** 删除与对象类型相关的全部本地链接（源或目标命中） */
 export const devDeleteOntologyLinkTypesByObjectTypeIds = (
   objectTypeIds: number[]

@@ -20,7 +20,10 @@ import {
   SCENE_QUERY_ALL_VALUE
 } from '@/pages/exploreAnalysis/ontologyQuery/constants';
 import { SceneQuerySelect } from '@/pages/exploreAnalysis/ontologyQuery/components/SceneQuerySelect';
-import { queryObjectTypes } from '@/pages/exploreAnalysis/ontologyQuery/services/objectTypeQuery';
+import {
+  loadObjectTypeQueryCache,
+  queryObjectTypes
+} from '@/pages/exploreAnalysis/ontologyQuery/services/objectTypeQuery';
 import type {
   ObjectTypeQueryFormValues,
   ObjectTypeQueryRow
@@ -58,8 +61,6 @@ export const ObjectTypeListTab: React.FC = () => {
   const [detailVisible, setDetailVisible] = useState(false);
   const [selectedObjectType, setSelectedObjectType] =
     useState<ObjectTypeQueryRow | null>(null);
-  const [hasQueried, setHasQueried] = useState(false);
-
   const fetchList = useCallback(
     async (page = pageNo, size = pageSize, forceRefresh = false) => {
       setLoading(true);
@@ -88,7 +89,29 @@ export const ObjectTypeListTab: React.FC = () => {
   );
 
   useEffect(() => {
-    form.setFieldsValue(defaultFormValues);
+    const init = async () => {
+      setLoading(true);
+      try {
+        await loadObjectTypeQueryCache(true);
+        form.setFieldsValue(defaultFormValues);
+        const result = await queryObjectTypes({
+          ...defaultFormValues,
+          pageNo: 1,
+          pageSize: 10
+        });
+        setData(result.items);
+        setTotal(result.total);
+        setPageNo(1);
+        setPageSize(10);
+      } catch (error) {
+        console.error('加载对象类型列表失败:', error);
+        Message.error('加载对象类型列表失败');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    init();
 
     return () => {
       removeStaleArcoOverlays();
@@ -97,17 +120,14 @@ export const ObjectTypeListTab: React.FC = () => {
   }, []);
 
   const handleSearch = () => {
-    setHasQueried(true);
     setPageNo(1);
     fetchList(1, pageSize, true);
   };
 
   const handleReset = () => {
     form.setFieldsValue(defaultFormValues);
-    setHasQueried(false);
     setPageNo(1);
-    setData([]);
-    setTotal(0);
+    fetchList(1, pageSize, true);
   };
 
   const handleCreate = () => {
@@ -345,7 +365,7 @@ export const ObjectTypeListTab: React.FC = () => {
         }}
       />
 
-      {hasQueried && total > 0 && (
+      {total > 0 && (
         <div
           className={`${styles['query-pagination']} ${pageStyles['elements-pagination']}`}
         >

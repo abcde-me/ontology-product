@@ -6,14 +6,19 @@ import { listOntologyModel } from '@/api/ontologySceneLibrary/ontologyScene';
 import { isOntologyApiSuccess } from '@/utils/apiResponse';
 import PageHeader from '@/components/PageHeader';
 import CreateTaskModal from './components/CreateTaskModal';
+import ImplicitRelationChatModal from './components/ImplicitRelationChatModal';
 import { useColumns } from './hooks/useColumns';
 import type {
   CreateImplicitRelationTaskInput,
+  ImplicitDiscoveryResult,
+  ImplicitRelationTask,
   ImplicitRelationTaskListItem
 } from './types';
+import { getImplicitRelationKnowledge } from './services/implicitRelationStore';
 import {
   createImplicitRelationTask,
   deleteImplicitRelationTask,
+  getImplicitRelationTask,
   listImplicitRelationTasks
 } from './services/taskStorage';
 import styles from './index.module.scss';
@@ -30,9 +35,17 @@ export default function ImplicitRelationList() {
   const [keyword, setKeyword] = useState('');
   const [data, setData] = useState<ImplicitRelationTaskListItem[]>([]);
   const [deletingId, setDeletingId] = useState<string>();
+  const [scenesLoading, setScenesLoading] = useState(false);
+  const [scenes, setScenes] = useState<Array<{ id: number; name: string }>>([]);
   const [sceneNameMap, setSceneNameMap] = useState<Record<number, string>>({});
+  const [chatVisible, setChatVisible] = useState(false);
+  const [chatTask, setChatTask] = useState<ImplicitRelationTask | null>(null);
+  const [chatResult, setChatResult] = useState<ImplicitDiscoveryResult | null>(
+    null
+  );
 
-  const loadSceneNames = useCallback(async () => {
+  const loadScenes = useCallback(async () => {
+    setScenesLoading(true);
     try {
       const res = await listOntologyModel({
         pageNo: 1,
@@ -42,16 +55,23 @@ export default function ImplicitRelationList() {
       });
 
       if (isOntologyApiSuccess(res) && res.data?.result) {
+        const nextScenes: Array<{ id: number; name: string }> = [];
         const map: Record<number, string> = {};
         res.data.result.forEach((scene) => {
-          if (scene.id != null) {
-            map[scene.id] = scene.name || `场景 #${scene.id}`;
+          if (scene.id == null) {
+            return;
           }
+          const name = scene.name || `场景 #${scene.id}`;
+          nextScenes.push({ id: scene.id, name });
+          map[scene.id] = name;
         });
+        setScenes(nextScenes);
         setSceneNameMap(map);
       }
     } catch {
-      // ignore scene name loading errors
+      // ignore
+    } finally {
+      setScenesLoading(false);
     }
   }, []);
 
@@ -71,8 +91,8 @@ export default function ImplicitRelationList() {
   }, [sceneNameMap]);
 
   useEffect(() => {
-    void loadSceneNames();
-  }, [loadSceneNames]);
+    void loadScenes();
+  }, [loadScenes]);
 
   useEffect(() => {
     loadData();
@@ -119,8 +139,21 @@ export default function ImplicitRelationList() {
     }
   };
 
+  const handleAsk = (record: ImplicitRelationTaskListItem) => {
+    const task = getImplicitRelationTask(record.id);
+    const knowledge = getImplicitRelationKnowledge(record.id);
+    if (!task || !knowledge.result) {
+      Message.warning('该任务暂无挖掘结果，请先进入详情执行发现');
+      return;
+    }
+    setChatTask(task);
+    setChatResult(knowledge.result);
+    setChatVisible(true);
+  };
+
   const columns = useColumns({
     onViewDetail: (record) => history.push(`${DETAIL_PATH}/${record.id}`),
+    onAsk: handleAsk,
     onDelete: handleDelete,
     deletingId
   });
@@ -128,8 +161,8 @@ export default function ImplicitRelationList() {
   return (
     <div className={styles.listPage}>
       <PageHeader
-        title="隐性关系"
-        subTitle="创建隐性关系分析任务，基于图谱拓扑与推理规则发现潜在关联"
+        title="关系挖掘"
+        subTitle="选择本体图谱、对象类型与实例范围，基于社区分析与路径预测发现潜在关联"
       />
 
       <div className="mb-4 flex items-center justify-between gap-3">
@@ -155,14 +188,27 @@ export default function ImplicitRelationList() {
         columns={columns}
         data={filteredData}
         pagination={{ pageSize: 10, showTotal: true }}
-        noDataElement="暂无隐性关系任务，点击右上角新建"
+        noDataElement="暂无关系挖掘任务，点击右上角新建"
       />
 
       <CreateTaskModal
         visible={createVisible}
         saving={creating}
+        scenesLoading={scenesLoading}
+        scenes={scenes}
         onCancel={() => setCreateVisible(false)}
         onSubmit={handleCreate}
+      />
+
+      <ImplicitRelationChatModal
+        visible={chatVisible}
+        task={chatTask}
+        result={chatResult}
+        onClose={() => {
+          setChatVisible(false);
+          setChatTask(null);
+          setChatResult(null);
+        }}
       />
     </div>
   );

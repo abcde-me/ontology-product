@@ -1,0 +1,3 @@
+import { IMPLICIT_RELATION_EVIDENCE_SUMMARY_SCENARIO } from '@/services/llmScenarioDefinitions';
+
+export { IMPLICIT_RELATION_EVIDENCE_SUMMARY_SCENARIO };

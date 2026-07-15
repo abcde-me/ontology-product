@@ -141,7 +141,8 @@ export const KnowledgeGraphEdge: React.FC<EdgeProps> = ({
         markerEnd={activeMarkerEnd}
         style={{
           stroke: edgeColor,
-          strokeWidth: isConnectedToSelected ? 2 : 1.5
+          strokeWidth: isConnectedToSelected ? 2.5 : data?.isImplicit ? 2 : 1.5,
+          strokeDasharray: data?.isImplicit ? '6 4' : undefined
         }}
       />
       {showLabel ? (

@@ -43,6 +43,7 @@ import { removeStaleArcoOverlays } from '@/utils/removeStaleArcoOverlays';
 
 import {
   invalidatePublicAttributeQueryCache,
+  loadPublicAttributeQueryCache,
   queryPublicAttributes
 } from '../services/publicAttributeQuery';
 
@@ -91,8 +92,6 @@ export const AttributeListTab: React.FC = () => {
 
   const [submitLoading, setSubmitLoading] = useState(false);
 
-  const [hasQueried, setHasQueried] = useState(false);
-
   const fetchList = useCallback(
     async (page = pageNo, size = pageSize, forceRefresh = false) => {
       setLoading(true);
@@ -134,7 +133,30 @@ export const AttributeListTab: React.FC = () => {
   );
 
   useEffect(() => {
-    form.setFieldsValue(defaultFormValues);
+    const init = async () => {
+      setLoading(true);
+
+      try {
+        await loadPublicAttributeQueryCache(true);
+        form.setFieldsValue(defaultFormValues);
+        const result = await queryPublicAttributes({
+          ...defaultFormValues,
+          pageNo: 1,
+          pageSize: 10
+        });
+        setData(result.items);
+        setTotal(result.total);
+        setPageNo(1);
+        setPageSize(10);
+      } catch (error) {
+        console.error('加载属性列表失败:', error);
+        Message.error('加载属性列表失败');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    init();
 
     return () => {
       removeStaleArcoOverlays();
@@ -144,8 +166,6 @@ export const AttributeListTab: React.FC = () => {
   }, []);
 
   const handleSearch = () => {
-    setHasQueried(true);
-
     setPageNo(1);
 
     fetchList(1, pageSize, true);
@@ -154,13 +174,9 @@ export const AttributeListTab: React.FC = () => {
   const handleReset = () => {
     form.setFieldsValue(defaultFormValues);
 
-    setHasQueried(false);
-
     setPageNo(1);
 
-    setData([]);
-
-    setTotal(0);
+    fetchList(1, pageSize, true);
   };
 
   const handleCreate = () => {
@@ -249,9 +265,7 @@ export const AttributeListTab: React.FC = () => {
 
           invalidatePublicAttributeQueryCache();
 
-          if (hasQueried) {
-            fetchList(pageNo, pageSize, true);
-          }
+          fetchList(pageNo, pageSize, true);
 
           return;
         }
@@ -519,7 +533,7 @@ export const AttributeListTab: React.FC = () => {
         }}
       />
 
-      {hasQueried && total > 0 && (
+      {total > 0 && (
         <div
           className={`${styles['query-pagination']} ${pageStyles['elements-pagination']}`}
         >

@@ -66,6 +66,22 @@ export const routes: IRoute[] = [
     exact: false,
     children: []
   },
+  // 本体权限
+  {
+    name: 'ontologyPermission',
+    key: '/tenant/compute/onto/ontologyPermission',
+    component: React.lazy(async () => import('../../ontologyPermission')),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
+  // 本体监控
+  {
+    name: 'ontologyMonitor',
+    key: '/tenant/compute/onto/ontologyMonitor',
+    component: React.lazy(async () => import('../../ontologyMonitor')),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
   // 本体场景库
   {
     name: 'ontologyScene',
@@ -174,6 +190,56 @@ export const routes: IRoute[] = [
     key: '/tenant/compute/onto/businessAutomation/runLog',
     component: React.lazy(async () => import('../../ruleRunLog')),
     children: []
+  },
+  // 知识管理 - 知识库
+  {
+    name: 'knowledgeBase',
+    key: '/tenant/compute/onto/knowledgeManagement/knowledgeBase',
+    component: React.lazy(
+      async () => import('../../knowledgeManagement/knowledgeBase')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
+  // 知识管理 - 语义映射
+  {
+    name: 'semanticMapping',
+    key: '/tenant/compute/onto/knowledgeManagement/semanticMapping',
+    component: React.lazy(
+      async () => import('../../knowledgeManagement/semanticMapping')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: [
+      {
+        name: 'semanticMappingDetail',
+        key: '/tenant/compute/onto/knowledgeManagement/semanticMapping/detail/:id',
+        component: React.lazy(
+          async () => import('../../knowledgeManagement/semanticMapping/detail')
+        ),
+        permission: ONTOLOGY_PERMISSIONS.LIST,
+        ignore: true
+      }
+    ]
+  },
+  // 知识管理 - 领域公理
+  {
+    name: 'domainAxiom',
+    key: '/tenant/compute/onto/knowledgeManagement/domainAxiom',
+    component: React.lazy(
+      async () => import('../../knowledgeManagement/domainAxiom')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: [
+      {
+        name: 'domainAxiomDetail',
+        key: '/tenant/compute/onto/knowledgeManagement/domainAxiom/detail/:id',
+        component: React.lazy(
+          async () => import('../../knowledgeManagement/domainAxiom/detail')
+        ),
+        permission: ONTOLOGY_PERMISSIONS.LIST,
+        ignore: true
+      }
+    ]
   },
   // 数据源管理
   {
@@ -298,6 +364,26 @@ export const routes: IRoute[] = [
       }
     ]
   },
+  // 探索分析 - 推理分析
+  {
+    name: 'inferenceAnalysis',
+    key: '/tenant/compute/onto/exploreAnalysis/inferenceAnalysis',
+    component: React.lazy(
+      async () => import('../../exploreAnalysis/inferenceAnalysis')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: [
+      {
+        name: 'inferenceAnalysisDetail',
+        key: '/tenant/compute/onto/exploreAnalysis/inferenceAnalysis/detail/:id',
+        component: React.lazy(
+          async () => import('../../exploreAnalysis/inferenceAnalysis/detail')
+        ),
+        permission: ONTOLOGY_PERMISSIONS.LIST,
+        ignore: true
+      }
+    ]
+  },
   // 应用中心 - 应用场景
   {
     name: 'applicationScene',
@@ -316,6 +402,16 @@ export const routes: IRoute[] = [
       }
     ]
   },
+  // 应用中心 - 组件管理
+  {
+    name: 'componentManagement',
+    key: '/tenant/compute/onto/sceneCenter/componentManagement',
+    component: React.lazy(
+      async () => import('../../sceneCenter/componentManagement')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
   // 场景中心 - 情报分析
   {
     name: 'intelligenceAnalysis',
@@ -326,12 +422,72 @@ export const routes: IRoute[] = [
     permission: ONTOLOGY_PERMISSIONS.LIST,
     children: []
   },
-  // 场景中心 - 跨域火力协同
+  // 场景中心 - 跨域协同
   {
     name: 'jointOperations',
     key: '/tenant/compute/onto/sceneCenter/jointOperations',
     component: React.lazy(
       async () => import('../../sceneCenter/jointOperations')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
+  // 军事主题 - 态势感知
+  {
+    name: 'situationalAwareness',
+    key: '/tenant/compute/onto/militaryTheme/situationalAwareness',
+    component: React.lazy(
+      async () => import('../../militaryTheme/situationalAwareness')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
+  // 军事主题 - 后勤保障
+  {
+    name: 'logisticsSupport',
+    key: '/tenant/compute/onto/militaryTheme/logisticsSupport',
+    component: React.lazy(
+      async () => import('../../militaryTheme/logisticsSupport')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
+  // 军事主题 - 反间谍
+  {
+    name: 'counterEspionage',
+    key: '/tenant/compute/onto/militaryTheme/counterEspionage',
+    component: React.lazy(
+      async () => import('../../militaryTheme/counterEspionage')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
+  // 科研主题 - 型号研究
+  {
+    name: 'modelResearch',
+    key: '/tenant/compute/onto/researchTheme/modelResearch',
+    component: React.lazy(
+      async () => import('../../researchTheme/modelResearch')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
+  // 模拟仿真 - 仿真对比
+  {
+    name: 'simulationComparison',
+    key: '/tenant/compute/onto/simulation/simulationComparison',
+    component: React.lazy(
+      async () => import('../../simulation/simulationComparison')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
+  // 模拟仿真 - 仿真推演
+  {
+    name: 'simulationDeduction',
+    key: '/tenant/compute/onto/simulation/simulationDeduction',
+    component: React.lazy(
+      async () => import('../../simulation/simulationDeduction')
     ),
     permission: ONTOLOGY_PERMISSIONS.LIST,
     children: []
@@ -359,6 +515,16 @@ export const routes: IRoute[] = [
         ignore: true
       }
     ]
+  },
+  // SDK 管理
+  {
+    name: 'sdkManagement',
+    key: '/tenant/compute/onto/platformResource/sdkManagement',
+    component: React.lazy(
+      async () => import('../../ontologyService/sdkManagement')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
   },
   // 运营中心页面
   {

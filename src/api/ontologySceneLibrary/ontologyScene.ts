@@ -29,6 +29,7 @@ import {
   isPermissionRelatedError
 } from '@/utils/devOntologyStore';
 import { enrichOntologySceneCounts } from '@/utils/enrichOntologySceneCounts';
+import { purgeOntologySceneLocalResources } from '@/utils/purgeOntologySceneLocalResources';
 import { sortOntologyScenesByCreateTimeDesc } from '@/utils/sortOntologyScenes';
 
 const normalizeSceneId = (id: unknown): number | null => {
@@ -253,6 +254,7 @@ export const deleteOntologyModel = async (params: {
     if (isOntologyApiSuccess(response)) {
       if (isDevBypassEnabled()) {
         purgeOntologySceneCache(params.id);
+        purgeOntologySceneLocalResources(params.id);
       }
       return response;
     }
@@ -264,7 +266,9 @@ export const deleteOntologyModel = async (params: {
       isDevOntologyScene(params.id)
     ) {
       console.warn('[dev] 后端删除失败，从本地开发缓存删除');
-      return devDeleteOntologyModel(params.id);
+      const result = devDeleteOntologyModel(params.id);
+      purgeOntologySceneLocalResources(params.id);
+      return result;
     }
 
     return response;
@@ -277,7 +281,9 @@ export const deleteOntologyModel = async (params: {
       isDevOntologyScene(params.id)
     ) {
       console.warn('[dev] 删除场景权限失败，从本地开发缓存删除');
-      return devDeleteOntologyModel(params.id);
+      const result = devDeleteOntologyModel(params.id);
+      purgeOntologySceneLocalResources(params.id);
+      return result;
     }
 
     throw error;

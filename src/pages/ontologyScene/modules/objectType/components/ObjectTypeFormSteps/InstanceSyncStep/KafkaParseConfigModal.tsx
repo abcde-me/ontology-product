@@ -616,7 +616,7 @@ export default function KafkaParseConfigModal({
                     )
                   }
                 >
-                  {isPathManual ? '保存' : '确认入库'}
+                  保存
                 </Button>
               )}
             </Space>

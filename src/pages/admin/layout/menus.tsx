@@ -9,6 +9,7 @@ import {
   DATA_SOURCE_PERMISSIONS
 } from '@/config/permissions';
 import { SECONDARY_MENU_ITEMS } from '@/config/secondaryMenuItems';
+import { RESEARCH_THEME_ITEMS } from '@/config/researchThemeItems';
 import OntologyLibrary from '@/assets/sider/ontology-library.svg';
 import AIOntoWorkbench from '@/assets/sider/ai-onto-workbench.svg';
 import OrganMenu from '@/assets/sider/organmenu.svg';
@@ -88,6 +89,15 @@ export const filterMenusByPermissions = (
 
 const iconClass = 'appforge-sider-icon flex-none text-[20px]';
 
+const researchThemeIcons = [
+  <OntologyLibrary key="research-icon-0" className={iconClass} />,
+  <AIOntoWorkbench key="research-icon-1" className={iconClass} />,
+  <RuleRunLogIcon key="research-icon-2" className={iconClass} />,
+  <BaseMenu key="research-icon-3" className={iconClass} />,
+  <OrganMenu key="research-icon-4" className={iconClass} />,
+  <IconMdpDatasetMgmt key="research-icon-5" className={iconClass} />
+];
+
 export const menus: MenuModel[] = [
   {
     type: 'itemGroup',
@@ -129,10 +139,17 @@ export const menus: MenuModel[] = [
         permission: ONTOLOGY_PERMISSIONS.LIST
       },
       {
-        title: SECONDARY_MENU_ITEMS.AIOntoWorkbench,
-        icon: <AIOntoWorkbench className={iconClass} />,
-        key: 'AIOntoWorkbench',
-        path: '/tenant/compute/onto/aiOntologyWorkbench',
+        title: SECONDARY_MENU_ITEMS.ontologyPermission,
+        icon: <OrganMenu className={iconClass} />,
+        key: 'ontologyPermission',
+        path: '/tenant/compute/onto/ontologyPermission',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.ontologyMonitor,
+        icon: <RuleRunLogIcon className={iconClass} />,
+        key: 'ontologyMonitor',
+        path: '/tenant/compute/onto/ontologyMonitor',
         permission: ONTOLOGY_PERMISSIONS.LIST
       }
     ]
@@ -169,6 +186,55 @@ export const menus: MenuModel[] = [
         key: 'ImplicitRelation',
         path: '/tenant/compute/onto/exploreAnalysis/implicitRelation',
         permission: ONTOLOGY_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.InferenceAnalysis,
+        icon: <BaseMenu className={iconClass} />,
+        key: 'InferenceAnalysis',
+        path: '/tenant/compute/onto/exploreAnalysis/inferenceAnalysis',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
+    title: '业务自动化',
+    key: 'BusinessAutomation',
+    children: [
+      {
+        title: SECONDARY_MENU_ITEMS.AutomationRuleManagement,
+        icon: <IconMdpDatasetMgmt className={iconClass} />,
+        key: 'AutomationRuleManagement',
+        path: '/tenant/compute/onto/businessAutomation/management',
+        permission: AUTOMATION_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.AutomationRuleRunLog,
+        icon: <RuleRunLogIcon className={iconClass} />,
+        key: 'AutomationRuleRunLog',
+        path: '/tenant/compute/onto/businessAutomation/runLog',
+        permission: AUTOMATION_PERMISSIONS.LIST
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
+    title: '模拟仿真',
+    key: 'Simulation',
+    children: [
+      {
+        title: SECONDARY_MENU_ITEMS.SimulationComparison,
+        icon: <OntologyLibrary className={iconClass} />,
+        key: 'SimulationComparison',
+        path: '/tenant/compute/onto/simulation/simulationComparison',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.SimulationDeduction,
+        icon: <AIOntoWorkbench className={iconClass} />,
+        key: 'SimulationDeduction',
+        path: '/tenant/compute/onto/simulation/simulationDeduction',
+        permission: ONTOLOGY_PERMISSIONS.LIST
       }
     ]
   },
@@ -186,17 +252,39 @@ export const menus: MenuModel[] = [
         permission: ONTOLOGY_PERMISSIONS.LIST
       },
       {
-        title: SECONDARY_MENU_ITEMS.IntelligenceAnalysis,
+        title: SECONDARY_MENU_ITEMS.ComponentManagement,
+        icon: <BaseMenu className={iconClass} />,
+        key: 'ComponentManagement',
+        path: '/tenant/compute/onto/sceneCenter/componentManagement',
+        activePaths: ['/tenant/compute/onto/sceneCenter/componentManagement'],
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
+    title: '知识管理',
+    key: 'KnowledgeManagement',
+    children: [
+      {
+        title: SECONDARY_MENU_ITEMS.KnowledgeBase,
         icon: <OntologyLibrary className={iconClass} />,
-        key: 'IntelligenceAnalysis',
-        path: '/tenant/compute/onto/sceneCenter/intelligenceAnalysis',
+        key: 'KnowledgeBase',
+        path: '/tenant/compute/onto/knowledgeManagement/knowledgeBase',
         permission: ONTOLOGY_PERMISSIONS.LIST
       },
       {
-        title: SECONDARY_MENU_ITEMS.JointOperations,
-        icon: <AIOntoWorkbench className={iconClass} />,
-        key: 'JointOperations',
-        path: '/tenant/compute/onto/sceneCenter/jointOperations',
+        title: SECONDARY_MENU_ITEMS.SemanticMapping,
+        icon: <BaseMenu className={iconClass} />,
+        key: 'SemanticMapping',
+        path: '/tenant/compute/onto/knowledgeManagement/semanticMapping',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.DomainAxiom,
+        icon: <OrganMenu className={iconClass} />,
+        key: 'DomainAxiom',
+        path: '/tenant/compute/onto/knowledgeManagement/domainAxiom',
         permission: ONTOLOGY_PERMISSIONS.LIST
       }
     ]
@@ -238,8 +326,8 @@ export const menus: MenuModel[] = [
   },
   {
     type: 'itemGroup',
-    title: '平台资源',
-    key: 'platformResource',
+    title: '本体服务',
+    key: 'OntologyService',
     children: [
       {
         title: SECONDARY_MENU_ITEMS.apiManagement,
@@ -250,32 +338,79 @@ export const menus: MenuModel[] = [
         anyPermission: [API_KEY_PERMISSIONS.MENU, TAG_PERMISSIONS.LIST]
       },
       {
-        key: 'modelManagement',
-        title: SECONDARY_MENU_ITEMS.modelManagement,
-        icon: <BaseMenu className={iconClass} />,
-        path: '/tenant/compute/onto/platformResource/modelManagement',
-        permission: MODEL_MANAGEMENT_PERMISSIONS.LIST
+        title: SECONDARY_MENU_ITEMS.sdkManagement,
+        icon: <OntologyLibrary className={iconClass} />,
+        key: 'sdkManagement',
+        path: '/tenant/compute/onto/platformResource/sdkManagement',
+        permission: ONTOLOGY_PERMISSIONS.LIST
       }
     ]
   },
   {
     type: 'itemGroup',
-    title: '业务自动化',
-    key: 'BusinessAutomation',
+    title: '军事主题',
+    key: 'MilitaryTheme',
     children: [
       {
-        title: SECONDARY_MENU_ITEMS.AutomationRuleManagement,
-        icon: <IconMdpDatasetMgmt className={iconClass} />,
-        key: 'AutomationRuleManagement',
-        path: '/tenant/compute/onto/businessAutomation/management',
-        permission: AUTOMATION_PERMISSIONS.LIST
+        title: SECONDARY_MENU_ITEMS.IntelligenceAnalysis,
+        icon: <OntologyLibrary className={iconClass} />,
+        key: 'IntelligenceAnalysis',
+        path: '/tenant/compute/onto/sceneCenter/intelligenceAnalysis',
+        permission: ONTOLOGY_PERMISSIONS.LIST
       },
       {
-        title: SECONDARY_MENU_ITEMS.AutomationRuleRunLog,
-        icon: <RuleRunLogIcon className={iconClass} />,
-        key: 'AutomationRuleRunLog',
-        path: '/tenant/compute/onto/businessAutomation/runLog',
-        permission: AUTOMATION_PERMISSIONS.LIST
+        title: SECONDARY_MENU_ITEMS.CounterEspionage,
+        icon: <OrganMenu className={iconClass} />,
+        key: 'CounterEspionage',
+        path: '/tenant/compute/onto/militaryTheme/counterEspionage',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.SituationalAwareness,
+        icon: <AIOntoWorkbench className={iconClass} />,
+        key: 'SituationalAwareness',
+        path: '/tenant/compute/onto/militaryTheme/situationalAwareness',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.JointOperations,
+        icon: <AIOntoWorkbench className={iconClass} />,
+        key: 'JointOperations',
+        path: '/tenant/compute/onto/sceneCenter/jointOperations',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.LogisticsSupport,
+        icon: <IconMdpDatasetMgmt className={iconClass} />,
+        key: 'LogisticsSupport',
+        path: '/tenant/compute/onto/militaryTheme/logisticsSupport',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
+    title: '科研主题',
+    key: 'ResearchTheme',
+    children: RESEARCH_THEME_ITEMS.map((item, index) => ({
+      title: item.title,
+      icon: researchThemeIcons[index % researchThemeIcons.length],
+      key: item.key,
+      path: `/tenant/compute/onto/researchTheme/${item.pathSegment}`,
+      permission: ONTOLOGY_PERMISSIONS.LIST
+    }))
+  },
+  {
+    type: 'itemGroup',
+    title: '平台管理',
+    key: 'PlatformManagement',
+    children: [
+      {
+        key: 'modelManagement',
+        title: SECONDARY_MENU_ITEMS.modelManagement,
+        icon: <BaseMenu className={iconClass} />,
+        path: '/tenant/compute/onto/platformResource/modelManagement',
+        permission: MODEL_MANAGEMENT_PERMISSIONS.LIST
       }
     ]
   }

@@ -54,13 +54,18 @@ export const fetchDataResourceList = (
   }
 
   if (keyword) {
-    items = items.filter(
-      (item) =>
+    items = items.filter((item) => {
+      if (params.filterByTableCommentOnly) {
+        return item.tableComment.toLowerCase().includes(keyword);
+      }
+
+      return (
         item.tableName.toLowerCase().includes(keyword) ||
         item.tableComment.toLowerCase().includes(keyword) ||
         item.databaseType.toLowerCase().includes(keyword) ||
         item.sourceSystem.toLowerCase().includes(keyword)
-    );
+      );
+    });
   }
 
   const total = items.length;

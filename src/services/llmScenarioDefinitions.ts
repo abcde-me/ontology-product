@@ -117,11 +117,48 @@ export const BUILTIN_LLM_SCENARIOS: readonly LlmScenarioDefinition[] = [
     order: 59
   },
   {
-    code: 'implicit_relation_rule_gen',
-    name: '隐性关系推理规则生成',
+    code: 'implicit_relation_discovery_summary',
+    name: '关系挖掘发现结果总结',
     menuKey: 'ImplicitRelation',
-    description: '将自然语言描述智能转换为隐性关系推理规则、图算法或常识提示词',
+    description: '对社区分析、路径预测或时空分析的挖掘结果进行业务化总结说明',
     order: 60
+  },
+  {
+    code: 'implicit_relation_result_qa',
+    name: '关系挖掘结果问答',
+    menuKey: 'ImplicitRelation',
+    description: '基于挖掘结果的图谱结构与发现结论，支持对话式问答解读',
+    order: 61
+  },
+  {
+    code: 'implicit_relation_evidence_summary',
+    name: '关系证据通俗解读',
+    menuKey: 'ImplicitRelation',
+    description:
+      '结合关系图谱与发现算法，将单条隐性关系证据转成业务可理解的专业通俗说明',
+    order: 62
+  },
+  {
+    code: 'semantic_mapping_synonym_gen',
+    name: '语义映射同义词生成',
+    menuKey: 'SemanticMapping',
+    description: '根据标准术语与映射描述智能生成同义词与别名',
+    order: 65
+  },
+  {
+    code: 'semantic_mapping_batch_gen',
+    name: '语义映射批量生成',
+    menuKey: 'SemanticMapping',
+    description: '根据所选本体场景库与生成要求，自动批量生成标准术语及语义映射',
+    order: 66
+  },
+  {
+    code: 'inference_analysis_run',
+    name: '推理分析任务推理',
+    menuKey: 'InferenceAnalysis',
+    description:
+      '创建推理任务后，根据任务描述、推理类型、本体场景、语义映射与领域公理自动生成推理结果、推理路径与关联节点结论',
+    order: 70
   }
 ];
 
@@ -139,7 +176,17 @@ export const ONTOLOGY_BEHAVIOR_FUNCTION_RECOMMEND_SCENARIO =
   BUILTIN_LLM_SCENARIOS[10];
 export const INSTANCE_SYNC_COLUMN_MAPPING_SCENARIO = BUILTIN_LLM_SCENARIOS[11];
 export const KAFKA_JSONPATH_RULE_GEN_SCENARIO = BUILTIN_LLM_SCENARIOS[12];
-export const IMPLICIT_RELATION_RULE_GEN_SCENARIO = BUILTIN_LLM_SCENARIOS[13];
+export const IMPLICIT_RELATION_DISCOVERY_SUMMARY_SCENARIO =
+  BUILTIN_LLM_SCENARIOS[13];
+/** @deprecated 使用 IMPLICIT_RELATION_DISCOVERY_SUMMARY_SCENARIO */
+export const IMPLICIT_RELATION_RULE_GEN_SCENARIO =
+  IMPLICIT_RELATION_DISCOVERY_SUMMARY_SCENARIO;
+export const IMPLICIT_RELATION_RESULT_QA_SCENARIO = BUILTIN_LLM_SCENARIOS[14];
+export const IMPLICIT_RELATION_EVIDENCE_SUMMARY_SCENARIO =
+  BUILTIN_LLM_SCENARIOS[15];
+export const SEMANTIC_MAPPING_SYNONYM_GEN_SCENARIO = BUILTIN_LLM_SCENARIOS[16];
+export const SEMANTIC_MAPPING_BATCH_GEN_SCENARIO = BUILTIN_LLM_SCENARIOS[17];
+export const INFERENCE_ANALYSIS_RUN_SCENARIO = BUILTIN_LLM_SCENARIOS[18];
 
 const scenarioMap = new Map(
   BUILTIN_LLM_SCENARIOS.map((item) => [item.code, item])

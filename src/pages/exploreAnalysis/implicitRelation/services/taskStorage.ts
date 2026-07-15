@@ -1,9 +1,14 @@
 import type {
   CreateImplicitRelationTaskInput,
+  ImplicitAnalysisScope,
   ImplicitRelationTask,
   ImplicitRelationTaskListItem
 } from '../types';
 import { getImplicitRelationKnowledge } from './implicitRelationStore';
+import {
+  formatInstanceScopeSummary,
+  formatObjectTypeSummary
+} from './scopeInstances';
 
 const STORAGE_KEY = 'onto_implicit_relation_tasks_v1';
 
@@ -31,9 +36,58 @@ const writeStorage = (payload: StoragePayload) => {
 const generateId = () =>
   `implicit-relation-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
+const normalizeScope = (
+  scope: ImplicitAnalysisScope | undefined,
+  task: ImplicitRelationTask
+): ImplicitAnalysisScope | undefined => {
+  if (scope?.ontologySceneId && scope.objectTypes) {
+    return {
+      ontologySceneId: scope.ontologySceneId,
+      ontologySceneName: scope.ontologySceneName,
+      objectTypes: scope.objectTypes,
+      instanceMode: scope.instanceMode === 'selected' ? 'selected' : 'all',
+      instances: Array.isArray(scope.instances) ? scope.instances : []
+    };
+  }
+  if (task.ontologySceneId) {
+    return {
+      ontologySceneId: task.ontologySceneId,
+      ontologySceneName: task.ontologySceneName,
+      objectTypes: [],
+      instanceMode: 'all',
+      instances: []
+    };
+  }
+  return undefined;
+};
+
+const normalizeAlgorithm = (
+  algorithm?: string
+): ImplicitRelationTask['algorithm'] => {
+  if (algorithm === 'path-prediction') {
+    return 'path-prediction';
+  }
+  if (algorithm === 'spatiotemporal') {
+    return 'spatiotemporal';
+  }
+  return 'community';
+};
+
+const normalizeTask = (task: ImplicitRelationTask): ImplicitRelationTask => {
+  const scope = normalizeScope(task.scope, task);
+  return {
+    ...task,
+    algorithm: normalizeAlgorithm(task.algorithm),
+    ontologySceneId: scope?.ontologySceneId ?? task.ontologySceneId,
+    ontologySceneName: scope?.ontologySceneName ?? task.ontologySceneName,
+    scope
+  };
+};
+
 export const listImplicitRelationTasks = (): ImplicitRelationTaskListItem[] => {
   const { tasks } = readStorage();
   return Object.values(tasks)
+    .map(normalizeTask)
     .sort(
       (left, right) =>
         new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime()
@@ -42,15 +96,26 @@ export const listImplicitRelationTasks = (): ImplicitRelationTaskListItem[] => {
       const knowledge = getImplicitRelationKnowledge(task.id);
       return {
         ...task,
-        ruleCount: knowledge.inferenceRules.length,
-        richRelationCount: knowledge.richRelations.length
+        discoveryCount: knowledge.result?.discoveries.length ?? 0,
+        lastRanAt: knowledge.result?.ranAt,
+        objectTypeSummary: formatObjectTypeSummary(
+          task.scope?.objectTypes || []
+        ),
+        instanceSummary: formatInstanceScopeSummary(
+          task.scope?.instanceMode || 'all',
+          task.scope?.instances.length || 0,
+          task.scope?.objectTypes.length || 0
+        )
       };
     });
 };
 
 export const getImplicitRelationTask = (
   id: string
-): ImplicitRelationTask | null => readStorage().tasks[id] || null;
+): ImplicitRelationTask | null => {
+  const task = readStorage().tasks[id];
+  return task ? normalizeTask(task) : null;
+};
 
 export const createImplicitRelationTask = (
   input: CreateImplicitRelationTaskInput
@@ -59,12 +124,36 @@ export const createImplicitRelationTask = (
   if (!name) {
     throw new Error('任务名称不能为空');
   }
+  if (!input.scope?.ontologySceneId) {
+    throw new Error('请选择本体图谱');
+  }
+  if (!input.scope.objectTypes?.length) {
+    throw new Error('请选择对象类型');
+  }
+  if (
+    input.scope.instanceMode === 'selected' &&
+    !input.scope.instances?.length
+  ) {
+    throw new Error('请选择至少一个实例');
+  }
 
   const now = new Date().toISOString();
+  const scope: ImplicitAnalysisScope = {
+    ontologySceneId: input.scope.ontologySceneId,
+    ontologySceneName: input.scope.ontologySceneName,
+    objectTypes: input.scope.objectTypes,
+    instanceMode: input.scope.instanceMode,
+    instances: input.scope.instances || []
+  };
+
   const task: ImplicitRelationTask = {
     id: generateId(),
     name,
     description: input.description?.trim() || undefined,
+    ontologySceneId: scope.ontologySceneId,
+    ontologySceneName: scope.ontologySceneName,
+    algorithm: input.algorithm,
+    scope,
     createdAt: now,
     updatedAt: now
   };
@@ -78,23 +167,44 @@ export const createImplicitRelationTask = (
 export const updateImplicitRelationTask = (
   id: string,
   patch: Partial<
-    Pick<ImplicitRelationTask, 'name' | 'description' | 'ontologySceneId'>
+    Pick<
+      ImplicitRelationTask,
+      | 'name'
+      | 'description'
+      | 'ontologySceneId'
+      | 'ontologySceneName'
+      | 'algorithm'
+      | 'scope'
+    >
   >
 ): ImplicitRelationTask => {
   const payload = readStorage();
   const existing = payload.tasks[id];
   if (!existing) {
-    throw new Error('隐性关系任务不存在');
+    throw new Error('关系挖掘任务不存在');
   }
 
+  const nextScope = patch.scope
+    ? normalizeScope(patch.scope, { ...existing, ...patch })
+    : existing.scope;
+
   const next: ImplicitRelationTask = {
-    ...existing,
+    ...normalizeTask(existing),
     ...patch,
     name: patch.name?.trim() || existing.name,
     description:
       patch.description !== undefined
         ? patch.description?.trim() || undefined
         : existing.description,
+    scope: nextScope,
+    ontologySceneId:
+      nextScope?.ontologySceneId ??
+      patch.ontologySceneId ??
+      existing.ontologySceneId,
+    ontologySceneName:
+      nextScope?.ontologySceneName ??
+      patch.ontologySceneName ??
+      existing.ontologySceneName,
     updatedAt: new Date().toISOString()
   };
 
@@ -106,7 +216,7 @@ export const updateImplicitRelationTask = (
 export const deleteImplicitRelationTask = (id: string) => {
   const payload = readStorage();
   if (!payload.tasks[id]) {
-    throw new Error('隐性关系任务不存在');
+    throw new Error('关系挖掘任务不存在');
   }
 
   delete payload.tasks[id];

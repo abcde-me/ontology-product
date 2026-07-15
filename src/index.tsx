@@ -52,7 +52,6 @@ import {
 import Login from './pages/login';
 import { Page404 } from './pages/errorPages';
 // import Header from './pages/admin/layout/header';
-import { Header } from '@ceai-front/arco-material';
 import {
   isInFrame,
   isWujie,
@@ -71,6 +70,7 @@ import {
   AI_ONTOLOGY_WORKBENCH_PATH,
   ONTO_DEFAULT_HOME_PATH
 } from '@/common/constants';
+import PlatformHeader from '@/components/PlatformHeader';
 
 initI18n();
 patchHistoryForLocationChange();
@@ -334,7 +334,7 @@ function App() {
     <Layout className="flex h-full flex-col">
       <Layout.Header className={cls({ hidden })}>
         {!hidden && (
-          <Header
+          <PlatformHeader
             title="本体构建与运营平台"
             openHelpLink={(linkInfo) => {
               openNewPage('/onto/assets/多模态数据治理平台 - 用户手册.pdf');

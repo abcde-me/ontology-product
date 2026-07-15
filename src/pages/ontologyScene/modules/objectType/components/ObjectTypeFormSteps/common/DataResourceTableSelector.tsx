@@ -31,6 +31,10 @@ interface DataResourceTableSelectorProps {
   variant?: 'select' | 'list';
   /** 是否允许多选，默认 true */
   multiple?: boolean;
+  /** 检索时仅匹配中文名称（tableComment），默认同时匹配表注释等字段 */
+  filterByTableCommentOnly?: boolean;
+  /** list 模式下展示「全部」快捷选项，支持一键全选/取消 */
+  showSelectAll?: boolean;
 }
 
 function normalizeValue(value?: string | string[]): string[] {
@@ -76,7 +80,9 @@ export default function DataResourceTableSelector({
   disabled = false,
   disabledTableIds = [],
   variant = 'select',
-  multiple = true
+  multiple = true,
+  filterByTableCommentOnly = false,
+  showSelectAll = false
 }: DataResourceTableSelectorProps) {
   const [options, setOptions] = useState<DataResourceListItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<DataResourceListItem[]>(
@@ -93,19 +99,23 @@ export default function DataResourceTableSelector({
     new Map()
   );
 
-  const loadOptions = useCallback(async (filter?: string) => {
-    setLoading(true);
-    try {
-      const result = await fetchDataResourceList({
-        pageNo: 1,
-        pageSize: 1000,
-        filter: filter?.trim() || undefined
-      });
-      setOptions(result.items);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const loadOptions = useCallback(
+    async (filter?: string) => {
+      setLoading(true);
+      try {
+        const result = await fetchDataResourceList({
+          pageNo: 1,
+          pageSize: 1000,
+          filter: filter?.trim() || undefined,
+          filterByTableCommentOnly: filterByTableCommentOnly || undefined
+        });
+        setOptions(result.items);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [filterByTableCommentOnly]
+  );
 
   const debouncedSearch = useMemo(
     () =>
@@ -229,6 +239,32 @@ export default function DataResourceTableSelector({
     setListSelection(id, !selectedIds.includes(id));
   };
 
+  const selectableOptions = useMemo(
+    () => options.filter((item) => !disabledTableIdSet.has(item.id)),
+    [disabledTableIdSet, options]
+  );
+
+  const allSelectableSelected = useMemo(
+    () =>
+      selectableOptions.length > 0 &&
+      selectableOptions.every((item) => selectedIds.includes(item.id)),
+    [selectableOptions, selectedIds]
+  );
+
+  const someSelectableSelected = useMemo(
+    () => selectableOptions.some((item) => selectedIds.includes(item.id)),
+    [selectableOptions, selectedIds]
+  );
+
+  const handleSelectAll = () => {
+    if (allSelectableSelected) {
+      emitSelection([]);
+      return;
+    }
+
+    emitSelection(selectableOptions.map((item) => item.id));
+  };
+
   if (variant === 'list') {
     return (
       <div className={styles.listPanel}>
@@ -236,7 +272,7 @@ export default function DataResourceTableSelector({
           <Input
             allowClear
             prefix={<IconSearch />}
-            placeholder="搜索表名、表注释"
+            placeholder="搜索中文名称"
             value={searchKeyword}
             disabled={readOnly || disabled}
             onChange={handleListSearchChange}
@@ -244,6 +280,30 @@ export default function DataResourceTableSelector({
         </div>
         <Spin loading={loading} style={{ width: '100%' }}>
           <div className={styles.list}>
+            {showSelectAll && multiple && selectableOptions.length ? (
+              <div
+                className={`${styles.row} ${styles.selectAll}${
+                  allSelectableSelected ? ` ${styles.selected}` : ''
+                }`}
+                onClick={() => {
+                  if (readOnly || disabled) {
+                    return;
+                  }
+                  handleSelectAll();
+                }}
+              >
+                <Checkbox
+                  checked={allSelectableSelected}
+                  indeterminate={
+                    someSelectableSelected && !allSelectableSelected
+                  }
+                  disabled={readOnly || disabled}
+                  onChange={handleSelectAll}
+                  onClick={(event) => event.stopPropagation()}
+                />
+                <span className={styles.label}>全部</span>
+              </div>
+            ) : null}
             {options.length ? (
               options.map((item) => {
                 const checked = selectedIds.includes(item.id);

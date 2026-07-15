@@ -123,3 +123,18 @@ ul li {
     }
   }
 }
+
+.platform-header-brand .aa-header .platform-info > img,
+.platform-header-brand .aa-header .platform-info > svg {
+  display: none !important;
+}
+
+.platform-header-brand .aa-header .platform-info::before {
+  content: var(--platform-brand-name);
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--color-text-1);
+  white-space: nowrap;
+}

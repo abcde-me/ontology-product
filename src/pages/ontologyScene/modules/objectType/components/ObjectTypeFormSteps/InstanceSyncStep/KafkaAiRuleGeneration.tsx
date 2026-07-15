@@ -264,7 +264,7 @@ export default function KafkaAiRuleGeneration({
         visible={saveModalVisible}
         onCancel={() => setSaveModalVisible(false)}
         onOk={() => void handleConfirmRuleSave()}
-        okText="确认入库"
+        okText="保存"
         cancelText="取消"
         confirmLoading={saveLoading}
         style={{ width: 'min(1000px, 96vw)' }}

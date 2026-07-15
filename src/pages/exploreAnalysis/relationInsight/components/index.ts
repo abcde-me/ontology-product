@@ -1,5 +1,6 @@
 export { KnowledgeGraphEdge } from './KnowledgeGraphEdge';
 export { KnowledgeGraphNode } from './KnowledgeGraphNode';
+export { AlgorithmParamsDrawer } from './AlgorithmParamsDrawer';
 export { ObjectSelectDrawer } from './ObjectSelectDrawer';
 export { OperationGuideModal } from './OperationGuideModal';
 export { RelationInsightCanvas } from './RelationInsightCanvas';

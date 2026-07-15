@@ -26,6 +26,7 @@ import {
   useUserProjectList
 } from '@/store/userInfoStore';
 import { handlePathName } from '@/hooks/use-path-change';
+import { PLATFORM_BRAND_NAME } from '@/common/constants';
 import { logout, openNewPage } from '@/utils/env';
 import { isSameArray } from '@/utils/array';
 import { normalizeProjOrgList } from '@/utils/projOrg';
@@ -125,10 +126,9 @@ export default function Header({
     >
       <div className="flex h-full items-center">
         <a href="/" className="flex items-center">
-          <div
-            className="h-[18px] w-[72px] shrink-0 rounded-[2px] bg-[rgb(var(--primary-4))]"
-            aria-hidden
-          />
+          <div className="shrink-0 whitespace-nowrap text-[16px] font-semibold leading-[22px] text-white">
+            {PLATFORM_BRAND_NAME}
+          </div>
           <div className="mx-[6px] h-[18px] w-[1px] bg-white"></div>
           <div className="text-[16px] leading-[22px] text-white">
             本体构建与运营平台

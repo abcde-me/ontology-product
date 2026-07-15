@@ -1,0 +1,63 @@
+.relationSection {
+  margin-top: 20px;
+}
+
+.relationTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #1d2129;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.relationList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.relationCard {
+  padding: 12px;
+  border: 1px dashed #fdba74;
+  border-radius: 8px;
+  background: #fff7ed;
+}
+
+.relationPair {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d2129;
+}
+
+.arrow {
+  color: #e85d04;
+}
+
+.peerLabel {
+  color: #c2410c;
+}
+
+.relationMeta {
+  margin-bottom: 6px;
+}
+
+.evidenceText {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.relationActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}

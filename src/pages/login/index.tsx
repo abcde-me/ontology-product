@@ -1,4 +1,5 @@
 import LoginBgPng from '@/assets/LOGINbg.png';
+import { PLATFORM_BRAND_NAME } from '@/common/constants';
 import { Card, Tabs } from '@arco-design/web-react';
 import React, { useState } from 'react';
 import { PasswordLoginForm } from './components/PasswordLoginForm';
@@ -59,10 +60,9 @@ function Header() {
   return (
     <div className="mb-8 flex items-center justify-center">
       <div className="flex flex-nowrap items-center gap-3">
-        <div
-          className="h-8 w-24 shrink-0 rounded-[2px] bg-[rgb(var(--primary-6))]"
-          aria-hidden
-        />
+        <div className="shrink-0 whitespace-nowrap text-[17px] font-bold text-[rgb(var(--primary-6))]">
+          {PLATFORM_BRAND_NAME}
+        </div>
         <div className="h-6 w-px shrink-0 bg-gray-400" />
         <div className="shrink-0 whitespace-nowrap text-[17px] font-bold text-gray-800">
           本体构建与运营平台

@@ -333,6 +333,8 @@ export default function CreateObjectTypeOnGraphModal({
             >
               <DataResourceTableSelector
                 variant="list"
+                filterByTableCommentOnly
+                showSelectAll
                 disabledTableIds={existingTableIds}
                 value={selectedTables.map((table) => table.id)}
                 onChange={handleDataResourceTablesChange}

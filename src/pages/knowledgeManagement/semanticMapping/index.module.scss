@@ -1,0 +1,253 @@
+.listPage {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.createForm {
+  :global {
+    .arco-form-label-item > label,
+    .arco-form-item-label,
+    .arco-form-label-item label {
+      font-weight: 600;
+      color: var(--color-text-1);
+    }
+  }
+}
+
+.modeSwitch {
+  margin-bottom: 16px;
+}
+
+.candidateSection {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-2);
+}
+
+.candidateTitle {
+  margin-bottom: 12px;
+  color: #1d2129;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 22px;
+}
+
+.candidateList {
+  width: 100%;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.candidateCard {
+  padding: 12px;
+  border: 1px solid var(--color-border-2);
+  border-radius: 6px;
+  background: #f7f8fa;
+}
+
+.candidateCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: #4e5969;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.candidateMeta {
+  margin-top: 8px;
+  color: #86909c;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.synonymCell {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 24px;
+  vertical-align: middle;
+}
+
+.synonymTag {
+  display: inline-flex !important;
+  margin-right: 4px;
+  max-width: 120px;
+  overflow: hidden;
+  vertical-align: middle;
+
+  :global(.arco-tag-content) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &:last-child {
+    margin-right: 0;
+  }
+}
+
+.detailPage {
+  display: flex;
+  height: calc(100vh - 56px);
+  max-height: calc(100vh - 56px);
+  box-sizing: border-box;
+  flex-direction: column;
+  overflow: hidden;
+  background: #f7f8fa;
+}
+
+.detailHeaderWrap {
+  margin-bottom: 8px;
+  flex-shrink: 0;
+  padding: 8px 12px 0;
+}
+
+.detailHeaderCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  background: #eff6ff;
+}
+
+.detailHeaderMain {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.detailBackBtn {
+  flex-shrink: 0;
+  padding: 0 4px;
+}
+
+.detailHeaderActions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.detailTitle {
+  color: #1d2129;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.detailMeta {
+  overflow: hidden;
+  color: #86909c;
+  font-size: 12px;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detailBody {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: auto;
+  border: 1px solid var(--color-border-2);
+  margin: 0 12px 10px;
+  border-radius: 8px;
+  background: #fff;
+  padding: 20px;
+}
+
+.detailInfoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+}
+
+.detailInfoItem {
+  min-width: 0;
+}
+
+.detailInfoLabel {
+  margin-bottom: 4px;
+  color: #86909c;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.detailInfoValue {
+  color: #1d2129;
+  font-size: 14px;
+  line-height: 22px;
+  word-break: break-all;
+}
+
+.detailSection {
+  margin-top: 20px;
+}
+
+.detailBlockValue {
+  margin-top: 4px;
+  padding: 12px;
+  border: 1px solid var(--color-border-2);
+  border-radius: 6px;
+  background: #f7f8fa;
+  color: #1d2129;
+  font-size: 14px;
+  line-height: 22px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.detailTagWrap {
+  margin-top: 4px;
+}
+
+.detailObjectList {
+  margin-top: 4px;
+  padding: 12px;
+  border: 1px solid var(--color-border-2);
+  border-radius: 6px;
+  background: #f7f8fa;
+}
+
+.detailObjectItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border-2);
+  color: #1d2129;
+  font-size: 14px;
+  line-height: 22px;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &:first-child {
+    padding-top: 0;
+  }
+}
+
+.detailObjectMeta {
+  color: #86909c;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.detailEmpty {
+  margin-top: 4px;
+  color: #86909c;
+  font-size: 14px;
+  line-height: 22px;
+}

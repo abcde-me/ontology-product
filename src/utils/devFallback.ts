@@ -175,8 +175,29 @@ export const applyDevAuthBootstrap = (userId = DEV_USER_ID) => {
 
 export const ONTOLOGY_MANAGER_API_PREFIX = '/ontology-manager/api/v1';
 
+/** 开发环境登录/项目初始化超时（避免后端不可达时长时间白屏） */
+export const DEV_AUTH_INIT_TIMEOUT_MS = 3000;
+
 /** 开发环境 ontology-manager 接口超时上限（仅用于明确离线场景，勿用于正常联调） */
 export const DEV_ONTOLOGY_API_TIMEOUT_MS = 25000;
+
+export const withDevInitTimeout = <T>(
+  promise: Promise<T>,
+  label: string
+): Promise<T> => {
+  if (!isDevBypassEnabled()) {
+    return promise;
+  }
+
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      window.setTimeout(() => {
+        reject(new Error(`${label} timeout`));
+      }, DEV_AUTH_INIT_TIMEOUT_MS);
+    })
+  ]);
+};
 
 export const isOntologyManagerApiUrl = (requestUrl?: string) =>
   !!requestUrl?.includes(ONTOLOGY_MANAGER_API_PREFIX);

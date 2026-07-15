@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useEffect, useMemo } from 'react';
-import { Spin, Tabs } from '@arco-design/web-react';
+import { Button, Spin, Tabs } from '@arco-design/web-react';
 import {
   Redirect,
   Route,
@@ -8,6 +8,10 @@ import {
   useLocation
 } from 'react-router-dom';
 import PageHeader from '@/components/PageHeader';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { AI_ONTOLOGY_WORKBENCH_PATH } from '@/common/constants';
+import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
+import { SECONDARY_MENU_ITEMS } from '@/config/secondaryMenuItems';
 import { removeStaleArcoOverlays } from '@/utils/removeStaleArcoOverlays';
 import { AttributeListTab, LinkListTab, ObjectTypeListTab } from './components';
 import {
@@ -95,6 +99,17 @@ export default function OntologyElements() {
     );
   }
 
+  const aiWorkbenchButton = (
+    <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.LIST}>
+      <Button
+        type="outline"
+        onClick={() => history.push(AI_ONTOLOGY_WORKBENCH_PATH)}
+      >
+        {SECONDARY_MENU_ITEMS.AIOntoWorkbench}
+      </Button>
+    </PermissionWrapper>
+  );
+
   return (
     <div className={styles['query-page']}>
       {!isCompact ? (
@@ -102,8 +117,13 @@ export default function OntologyElements() {
           className={styles['query-page-header']}
           title="本体要素"
           subTitle={PAGE_SUBTITLE}
+          extra={aiWorkbenchButton}
         />
-      ) : null}
+      ) : (
+        <div className={styles['query-page-compact-actions']}>
+          {aiWorkbenchButton}
+        </div>
+      )}
 
       <div
         className={`${styles['query-page-content']} ${

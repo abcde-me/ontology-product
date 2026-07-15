@@ -1,47 +1,365 @@
 .workspace {
   display: flex;
-  height: 100%;
-  min-height: 0;
+  flex: none;
   flex-direction: column;
-  overflow: hidden;
   gap: 12px;
-}
-
-.introBlock {
-  display: flex;
-  height: 180px;
-  flex-shrink: 0;
-  flex-direction: column;
-  min-height: 0;
   overflow: hidden;
 }
 
-.sectionTabs {
-  flex-shrink: 0;
-}
-
-.sectionTabs :global(.arco-tabs-content) {
-  display: none;
-}
-
-.sectionTabs :global(.arco-tabs-header-nav) {
-  margin-bottom: 0;
-}
-
-.sectionTabs :global(.arco-tabs-header-extra) {
+.toolbar {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
-  padding-bottom: 2px;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.tabBody {
+.sectionTitle {
+  color: #1d2129;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #86909c;
+  font-size: 12px;
+}
+
+.legendSolid,
+.legendDash {
+  display: inline-block;
+  width: 22px;
+  height: 0;
+  border-top: 2px solid #94a3b8;
+}
+
+.legendDash {
+  border-top-style: dashed;
+  border-top-color: #e85d04;
+}
+
+.main {
+  display: flex;
+  /* 约容纳：发现总结 + 6 条发现的关系 */
+  height: 520px;
+  min-height: 520px;
+  flex: none;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.canvasPane {
+  display: flex;
+  min-width: 0;
   min-height: 0;
   flex: 1;
+  flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--color-border-2);
   border-radius: 8px;
+  background: #fff;
 }
 
-.tabBody :global(> div) {
-  height: 100%;
+.canvasPaneFullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  flex: none;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+
+.fullscreenBtn {
+  flex-shrink: 0;
+  color: var(--color-text-2);
+}
+
+.canvasHeader {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border-2);
+}
+
+.canvasHeaderRight {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px 14px;
+}
+
+.canvasTitleRow {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+}
+
+.canvasTitle {
+  color: #1d2129;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.canvasMeta {
+  color: #86909c;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.canvasBody {
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.sidePane {
+  display: flex;
+  width: 340px;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.summaryCard,
+.listCard {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid var(--color-border-2);
+  border-radius: 8px;
+  background: #fff;
+  padding: 12px;
+}
+
+.summaryCard {
+  flex: 0 1 auto;
+  max-height: 96px;
+  overflow: hidden;
+}
+
+.summaryBody {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.listCard {
+  flex: 1;
+  overflow: hidden;
+}
+
+.sideTitle {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #1d2129;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.summaryText {
+  margin-bottom: 0 !important;
+  color: #4e5969;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.summaryList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.summaryItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.summaryIndex {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: #e8f3ff;
+  color: #165dff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.summaryItemText {
+  flex: 1;
+  min-width: 0;
+  color: #1d2129;
+  font-size: 13px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.statRow {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  color: #86909c;
+  font-size: 12px;
+}
+
+.discoveryList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* 约 6 条发现关系的可视高度 */
+  min-height: 0;
+  max-height: 420px;
+  overflow: auto;
+}
+
+.emptyList {
+  padding: 24px 0;
+  color: var(--color-text-3);
+  font-size: 13px;
+  text-align: center;
+}
+
+.discoveryItem {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-2);
+  border-radius: 8px;
+  background: #fafbfc;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.discoveryItem:hover {
+  border-color: #fdba74;
+  background: #fff7ed;
+}
+
+.discoveryItemActive {
+  border-color: #e85d04;
+  background: #fff7ed;
+}
+
+.discoveryItemChecked {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.discoveryItemHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.discoveryPair {
+  flex: 1;
+  min-width: 0;
+  color: #1d2129;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.discoveryArrow {
+  margin: 0 6px;
+  color: #e85d04;
+}
+
+.discoveryMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+  color: #86909c;
+  font-size: 12px;
+}
+
+@media (max-width: 1100px) {
+  .workspace {
+    height: auto;
+    overflow: visible;
+  }
+
+  .main {
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .canvasPane {
+    width: 100%;
+    height: 420px;
+    min-height: 420px;
+    flex: none;
+  }
+
+  .sidePane {
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .summaryCard {
+    max-height: 160px;
+    flex: none;
+  }
+
+  .listCard {
+    max-height: none;
+    flex: none;
+  }
+
+  .discoveryList {
+    max-height: 420px;
+  }
+}
+
+@media (max-height: 820px) {
+  .main {
+    height: 460px;
+    min-height: 460px;
+  }
+
+  .discoveryList {
+    max-height: 360px;
+  }
 }

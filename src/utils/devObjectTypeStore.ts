@@ -527,6 +527,26 @@ export const devDeleteOntologyObjectType = (id: number) => {
   };
 };
 
+/** 按场景库 ID 清理本地对象类型（含实例） */
+export const devDeleteOntologyObjectTypesByModelId = (
+  ontologyModelID: number
+) => {
+  const modelId = Number(ontologyModelID);
+  if (!Number.isFinite(modelId)) {
+    return 0;
+  }
+
+  const records = readObjectTypes();
+  const nextRecords = records.filter(
+    (item) => Number(item.ontologyModelID) !== modelId
+  );
+  const removed = records.length - nextRecords.length;
+  if (removed > 0) {
+    writeObjectTypes(nextRecords);
+  }
+  return removed;
+};
+
 /** pageNo/pageSize 为 -1 时表示不分页，返回全部结果 */
 const paginateDevList = <T>(
   items: T[],

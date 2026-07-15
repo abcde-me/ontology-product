@@ -1,3 +1,8 @@
 export { default as ImplicitRelationWorkspace } from './ImplicitRelationWorkspace';
-export { default as RichRelationPanel } from './RichRelationPanel';
-export { default as InferenceRulePanel } from './InferenceRulePanel';
+export { default as ImplicitRelationCanvas } from './ImplicitRelationCanvas';
+export { default as EvidenceDrawer } from './EvidenceDrawer';
+export { default as CreateTaskModal } from './CreateTaskModal';
+export { default as AnalysisScopeFields } from './AnalysisScopeFields';
+export { default as ImplicitRelationChatModal } from './ImplicitRelationChatModal';
+export { default as AddToInstanceModal } from './AddToInstanceModal';
+export { default as TaskConfigPanel } from './TaskConfigPanel';

@@ -2,7 +2,7 @@ import { GlobalState } from '@/store';
 import '@/style/tailwind.css';
 import '@/style/markdowm.less';
 import '@/style/scrollbar.css';
-import { Layout } from '@arco-design/web-react';
+import { Layout, Spin } from '@arco-design/web-react';
 import * as React from 'react';
 import 'github-markdown-css/github-markdown-light.css';
 import { useTranslation } from 'react-i18next';
@@ -110,12 +110,8 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
   // 如果用户信息还未初始化完成，显示全局loading
   if (!isInitialized) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center">
-        <div className="text-center">
-          <div className="mb-4">
-            <div className="inline-block h-3 w-3 animate-spin rounded-full  border-solid border-blue-600 border-r-transparent"></div>
-          </div>
-        </div>
+      <div className="flex h-screen w-screen items-center justify-center bg-[#F5F7FC]">
+        <Spin size={32} />
       </div>
     );
   }

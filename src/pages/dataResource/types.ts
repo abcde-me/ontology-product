@@ -52,6 +52,8 @@ export interface GetDataResourceListParams {
   pageNo: number;
   pageSize: number;
   filter?: string;
+  /** 仅按中文名称（tableComment）过滤关键字，默认同时匹配表名、表注释等字段 */
+  filterByTableCommentOnly?: boolean;
   databaseType?: string;
   sourceSystem?: string;
   queryPermission?: DataQueryPermission;

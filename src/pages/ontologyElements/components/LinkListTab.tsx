@@ -22,6 +22,7 @@ import {
 import { SceneQuerySelect } from '@/pages/exploreAnalysis/ontologyQuery/components/SceneQuerySelect';
 import {
   formatLinkEndpoint,
+  loadLinkQueryCache,
   queryLinks
 } from '@/pages/exploreAnalysis/ontologyQuery/services/linkQuery';
 import type {
@@ -56,8 +57,6 @@ export const LinkListTab: React.FC = () => {
   const [detailVisible, setDetailVisible] = useState(false);
   const [selectedLink, setSelectedLink] = useState<LinkQueryRow | null>(null);
   const [sceneSelectVisible, setSceneSelectVisible] = useState(false);
-  const [hasQueried, setHasQueried] = useState(false);
-
   const fetchList = useCallback(
     async (page = pageNo, size = pageSize) => {
       setLoading(true);
@@ -85,7 +84,29 @@ export const LinkListTab: React.FC = () => {
   );
 
   useEffect(() => {
-    form.setFieldsValue(defaultFormValues);
+    const init = async () => {
+      setLoading(true);
+      try {
+        await loadLinkQueryCache(true);
+        form.setFieldsValue(defaultFormValues);
+        const result = await queryLinks({
+          ...defaultFormValues,
+          pageNo: 1,
+          pageSize: 10
+        });
+        setData(result.items);
+        setTotal(result.total);
+        setPageNo(1);
+        setPageSize(10);
+      } catch (error) {
+        console.error('加载链接列表失败:', error);
+        Message.error('加载链接列表失败');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    init();
 
     return () => {
       removeStaleArcoOverlays();
@@ -94,17 +115,14 @@ export const LinkListTab: React.FC = () => {
   }, []);
 
   const handleSearch = () => {
-    setHasQueried(true);
     setPageNo(1);
     fetchList(1, pageSize);
   };
 
   const handleReset = () => {
     form.setFieldsValue(defaultFormValues);
-    setHasQueried(false);
     setPageNo(1);
-    setData([]);
-    setTotal(0);
+    fetchList(1, pageSize);
   };
 
   const handleViewLink = (record: LinkQueryRow) => {
@@ -321,7 +339,7 @@ export const LinkListTab: React.FC = () => {
         }}
       />
 
-      {hasQueried && total > 0 && (
+      {total > 0 && (
         <div
           className={`${styles['query-pagination']} ${pageStyles['elements-pagination']}`}
         >
