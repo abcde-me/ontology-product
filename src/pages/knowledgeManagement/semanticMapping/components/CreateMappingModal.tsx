@@ -569,17 +569,14 @@ export default function CreateMappingModal({
                 form.setFieldValue('attributeKeys', []);
               }}
             >
-              {uniqueObjectTypes
-                .filter(
-                  (item): item is typeof item & { id: number } =>
-                    item.id != null
-                )
-                .map((item) => (
+              {uniqueObjectTypes.map((item) =>
+                item.id == null ? null : (
                   <Option key={item.id} value={item.id}>
                     {item.name || item.code || `对象类型 #${item.id}`}
                     {item.sceneName ? `（${item.sceneName}）` : ''}
                   </Option>
-                ))}
+                )
+              )}
             </Select>
           </Form.Item>
 
