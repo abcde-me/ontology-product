@@ -133,6 +133,11 @@ const NODE_TYPES: InferenceRelatedNode['nodeType'][] = [
   'conclusion'
 ];
 
+const isRelatedNodeType = (
+  value: string
+): value is InferenceRelatedNode['nodeType'] =>
+  (NODE_TYPES as readonly string[]).includes(value);
+
 const normalizePathFromUnknown = (value: unknown): InferencePathStep[] => {
   if (!Array.isArray(value)) {
     return [];
@@ -156,10 +161,10 @@ const normalizePathFromUnknown = (value: unknown): InferencePathStep[] => {
         fromNode: String(row.fromNode ?? '').trim() || undefined,
         toNode: String(row.toNode ?? '').trim() || undefined,
         relation: String(row.relation ?? '').trim() || undefined
-      } as InferencePathStep;
+      } satisfies InferencePathStep;
     })
-    .filter(Boolean)
-    .sort((a, b) => a!.order - b!.order) as InferencePathStep[];
+    .filter((item): item is InferencePathStep => item != null)
+    .sort((a, b) => a.order - b.order);
 };
 
 const normalizeNodesFromUnknown = (value: unknown): InferenceRelatedNode[] => {
@@ -177,19 +182,17 @@ const normalizeNodesFromUnknown = (value: unknown): InferenceRelatedNode[] => {
       if (!name && !conclusion) {
         return null;
       }
-      const rawType = String(
-        row.nodeType ?? ''
-      ).trim() as InferenceRelatedNode['nodeType'];
+      const rawType = String(row.nodeType ?? '').trim();
       return {
         id: generateNodeId(index),
         name: name || `节点 ${index + 1}`,
-        nodeType: NODE_TYPES.includes(rawType) ? rawType : 'concept',
+        nodeType: isRelatedNodeType(rawType) ? rawType : 'concept',
         role: String(row.role ?? '').trim() || '中间节点',
         conclusion: conclusion || '-',
         evidence: String(row.evidence ?? '').trim() || undefined
-      } as InferenceRelatedNode;
+      } satisfies InferenceRelatedNode;
     })
-    .filter(Boolean) as InferenceRelatedNode[];
+    .filter((item): item is InferenceRelatedNode => item != null);
 };
 
 const buildUserPrompt = (input: RunInferenceInput): string => {

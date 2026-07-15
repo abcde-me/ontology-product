@@ -26,7 +26,10 @@ import AnalysisScopeFields, {
 } from './components/AnalysisScopeFields';
 import TaskConfigPanel from './components/TaskConfigPanel';
 import { getImplicitRelationKnowledge } from './services/implicitRelationStore';
-import { validateAnalysisScope } from './services/scopeInstances';
+import {
+  toAnalysisScope,
+  validateAnalysisScope
+} from './services/scopeInstances';
 import {
   getImplicitRelationTask,
   updateImplicitRelationTask
@@ -148,11 +151,16 @@ export default function ImplicitRelationDetail() {
       if (!task) {
         return;
       }
+      const fullScope = toAnalysisScope(draftScope);
+      if (!fullScope) {
+        setScopeError('请选择本体图谱');
+        return;
+      }
 
       const next = updateImplicitRelationTask(task.id, {
-        scope: draftScope as ImplicitAnalysisScope,
-        ontologySceneId: draftScope.ontologySceneId,
-        ontologySceneName: draftScope.ontologySceneName,
+        scope: fullScope,
+        ontologySceneId: fullScope.ontologySceneId,
+        ontologySceneName: fullScope.ontologySceneName,
         algorithm: values.algorithm,
         description: values.description
       });

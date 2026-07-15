@@ -65,22 +65,22 @@ const buildInferenceKnowledge = (
 
   const semanticMappings = (task.semanticMappingIds || [])
     .map((id) => mappingMap.get(id))
-    .filter(Boolean)
+    .filter((item): item is NonNullable<typeof item> => Boolean(item))
     .map((item) => ({
-      standardTerm: item!.standardTerm,
-      synonyms: item!.synonyms,
-      description: item!.description,
-      objectTypeNames: (item!.objectTypes || []).map((ot) => ot.name)
+      standardTerm: item.standardTerm,
+      synonyms: item.synonyms,
+      description: item.description,
+      objectTypeNames: (item.objectTypes || []).map((ot) => ot.name)
     }));
 
   const domainAxioms = (task.domainAxiomIds || [])
     .map((id) => axiomMap.get(id))
-    .filter(Boolean)
+    .filter((item): item is NonNullable<typeof item> => Boolean(item))
     .map((item) => ({
-      name: item!.name,
-      expression: item!.expression,
-      description: item!.description,
-      domain: item!.domain
+      name: item.name,
+      expression: item.expression,
+      description: item.description,
+      domain: item.domain
     }));
 
   return {

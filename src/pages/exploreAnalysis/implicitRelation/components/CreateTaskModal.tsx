@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Modal, Radio, Spin } from '@arco-design/web-react';
 import { DISCOVERY_ALGORITHM_OPTIONS } from '../constants';
+import {
+  toAnalysisScope,
+  validateAnalysisScope
+} from '../services/scopeInstances';
+import AnalysisScopeFields, { type SceneOption } from './AnalysisScopeFields';
 import type {
   CreateImplicitRelationTaskInput,
   ImplicitAnalysisScope,
   ImplicitDiscoveryAlgorithm
 } from '../types';
-import { validateAnalysisScope } from '../services/scopeInstances';
-import AnalysisScopeFields, { type SceneOption } from './AnalysisScopeFields';
 
 const { TextArea } = Input;
 
@@ -63,12 +66,17 @@ export default function CreateTaskModal({
         setScopeError(error);
         return;
       }
+      const fullScope = toAnalysisScope(scope);
+      if (!fullScope) {
+        setScopeError('请选择本体图谱');
+        return;
+      }
       setScopeError(undefined);
       onSubmit({
         name: values.name,
         description: values.description,
         algorithm: values.algorithm,
-        scope: scope as ImplicitAnalysisScope
+        scope: fullScope
       });
     } catch {
       // form validation failed

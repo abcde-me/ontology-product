@@ -140,3 +140,19 @@ export const validateAnalysisScope = (
   }
   return null;
 };
+
+/** 将已通过校验的范围转为完整类型（需先调用 validateAnalysisScope） */
+export const toAnalysisScope = (
+  scope: Partial<ImplicitAnalysisScope>
+): ImplicitAnalysisScope | null => {
+  if (scope.ontologySceneId == null) {
+    return null;
+  }
+  return {
+    ontologySceneId: scope.ontologySceneId,
+    ontologySceneName: scope.ontologySceneName,
+    objectTypes: scope.objectTypes || [],
+    instanceMode: scope.instanceMode || 'all',
+    instances: scope.instances || []
+  };
+};
