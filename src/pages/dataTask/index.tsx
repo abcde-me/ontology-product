@@ -1,23 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Pagination, Message, Modal } from '@arco-design/web-react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { SearchTable } from '@ceai-front/arco-material';
-import { PageHeader, SearchForm } from './components';
+import { CreateDataTaskModal, PageHeader, SearchForm } from './components';
 import { useTable } from '@/pages/dataSource/hooks/useTable';
 import { useColumns } from './hooks/useColumns';
 import type { DataTaskItem } from './types';
 import { TaskType, ScheduleType, TaskStatus, ExecutionStatus } from './types';
 import {
+  createDataTask,
   fetchDataTaskList,
   deleteDataTask,
   copyDataTask,
   toggleDataTaskStatus
 } from './services/api';
+import { createEmptyWorkflowDraft } from './mocks/workflowDraftApi';
+import { setWorkflowDraft } from './editor/services/draftApi';
 import styles from './index.module.scss';
 
 export default function DataTaskManagement() {
   const history = useHistory();
+  const location = useLocation();
   const [form] = Form.useForm();
+  const [createVisible, setCreateVisible] = useState(false);
+  const [createInitialName, setCreateInitialName] = useState('');
+  const [creating, setCreating] = useState(false);
   const [taskTypeFilter, setTaskTypeFilter] = useState<string[]>([]);
   const [scheduleTypeFilter, setScheduleTypeFilter] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
@@ -25,7 +32,27 @@ export default function DataTaskManagement() {
     []
   );
 
-  const taskTypeFilters = [{ text: '表-表同步', value: TaskType.TABLE_SYNC }];
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('create') !== '1') {
+      return;
+    }
+    const presetName = params.get('name')?.trim() || '';
+    setCreateInitialName(presetName);
+    setCreateVisible(true);
+    params.delete('create');
+    params.delete('name');
+    const search = params.toString();
+    history.replace({
+      pathname: location.pathname,
+      search: search ? `?${search}` : ''
+    });
+  }, [history, location.pathname, location.search]);
+
+  const taskTypeFilters = [
+    { text: '表-表同步', value: TaskType.TABLE_SYNC },
+    { text: 'DAG工作流', value: TaskType.WORKFLOW_DAG }
+  ];
 
   const scheduleTypeFilters = [
     { text: '周期调度', value: ScheduleType.PERIODIC },
@@ -111,7 +138,9 @@ export default function DataTaskManagement() {
   };
 
   const handleViewDetail = (record: DataTaskItem) => {
-    Message.info(`查看任务详情：${record.name}`);
+    history.push(
+      `/tenant/compute/onto/dataConnection/dataTask2/edit/${record.id}`
+    );
   };
 
   const handleViewExecutionLog = (record: DataTaskItem) => {
@@ -131,7 +160,33 @@ export default function DataTaskManagement() {
   };
 
   const handleAdd = () => {
-    Message.info('新增数据任务功能开发中');
+    setCreateInitialName('');
+    setCreateVisible(true);
+  };
+
+  const handleCreateSubmit = async (values: {
+    name: string;
+    description?: string;
+  }) => {
+    setCreating(true);
+    try {
+      const created = await createDataTask({
+        name: values.name,
+        description: values.description
+      });
+      const emptyDraft = createEmptyWorkflowDraft(created.id);
+      setWorkflowDraft(emptyDraft, created.id);
+      setCreateVisible(false);
+      Message.success('创建成功');
+      history.push(
+        `/tenant/compute/onto/dataConnection/dataTask2/edit/${created.id}`
+      );
+    } catch (error: any) {
+      Message.error(error?.message || '创建失败');
+      throw error;
+    } finally {
+      setCreating(false);
+    }
   };
 
   const handleTableChange = (_pag: any, _sorter: any, filters: any) => {
@@ -196,6 +251,17 @@ export default function DataTaskManagement() {
           />
         </div>
       )}
+
+      <CreateDataTaskModal
+        visible={createVisible}
+        loading={creating}
+        initialName={createInitialName}
+        onCancel={() => {
+          setCreateVisible(false);
+          setCreateInitialName('');
+        }}
+        onSubmit={handleCreateSubmit}
+      />
     </div>
   );
 }

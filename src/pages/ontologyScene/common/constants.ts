@@ -129,11 +129,33 @@ export const INSTANCE_SYNC_SOURCE_TYPE = {
   DATABASE: 'database',
   MESSAGE_QUEUE: 'message_queue',
   API_INTERFACE: 'api_interface',
-  FILE_PARSE: 'file_parse'
+  FILE_PARSE: 'file_parse',
+  WORKFLOW: 'workflow'
 } as const;
 
 export type InstanceSyncSourceType =
   (typeof INSTANCE_SYNC_SOURCE_TYPE)[keyof typeof INSTANCE_SYNC_SOURCE_TYPE];
+
+/** 实例同步数据源类型展示文案 */
+export const INSTANCE_SYNC_SOURCE_TYPE_LABEL: Record<
+  InstanceSyncSourceType,
+  string
+> = {
+  [INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD]: 'CSV上传',
+  [INSTANCE_SYNC_SOURCE_TYPE.DATABASE]: '数据库',
+  [INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE]: '消息队列',
+  [INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE]: 'API接口',
+  [INSTANCE_SYNC_SOURCE_TYPE.FILE_PARSE]: '文件解析',
+  [INSTANCE_SYNC_SOURCE_TYPE.WORKFLOW]: '工作流'
+};
+
+export const INSTANCE_SYNC_SOURCE_TYPE_OPTIONS: Array<{
+  value: InstanceSyncSourceType;
+  label: string;
+}> = Object.entries(INSTANCE_SYNC_SOURCE_TYPE_LABEL).map(([value, label]) => ({
+  value: value as InstanceSyncSourceType,
+  label
+}));
 
 /** Kafka 消息解析模式 */
 export const KAFKA_MESSAGE_PARSE_MODE = {

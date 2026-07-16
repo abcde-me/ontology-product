@@ -1,3 +1,4 @@
+export { LoadGraphSettingsModal } from './LoadGraphSettingsModal';
 export { KnowledgeGraphEdge } from './KnowledgeGraphEdge';
 export { KnowledgeGraphNode } from './KnowledgeGraphNode';
 export { AlgorithmParamsDrawer } from './AlgorithmParamsDrawer';

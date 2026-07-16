@@ -10,7 +10,8 @@ import {
   Select,
   Switch,
   Table,
-  TableColumnProps
+  TableColumnProps,
+  Tooltip
 } from '@arco-design/web-react';
 import { IconDelete, IconQuestionCircle } from '@arco-design/web-react/icon';
 import {
@@ -106,6 +107,7 @@ function createEmptyAttribute(): ObjectTypeAttributeField {
     propertyType: '',
     isPrimary: 0,
     isStoreAsPublic: 0,
+    isInstanceName: 0,
     publicPropertyID: 0,
     isVector: 0,
     sourceColumnName: '',
@@ -186,6 +188,7 @@ export default function ObjectTypeAttributeTable({
         return {
           ...field,
           isPrimary: nextIsPrimary,
+          ...(isPrimary ? { isInstanceName: 1 as const } : {}),
           propertyType: normalizeColumnTypeForPrimary(
             field.propertyType,
             isPrimary
@@ -200,6 +203,7 @@ export default function ObjectTypeAttributeTable({
     const nextFields = [...attributeFields, createEmptyAttribute()];
     if (nextFields.length === 1) {
       nextFields[0].isPrimary = 1;
+      nextFields[0].isInstanceName = 1;
     }
     syncFields(nextFields);
   };
@@ -213,7 +217,8 @@ export default function ObjectTypeAttributeTable({
     if (current.isPrimary === 1 && nextFields.length > 0) {
       nextFields = nextFields.map((field, currentIndex) => ({
         ...field,
-        isPrimary: currentIndex === 0 ? 1 : 0
+        isPrimary: currentIndex === 0 ? 1 : 0,
+        ...(currentIndex === 0 ? { isInstanceName: 1 as const } : {})
       }));
     }
     syncFields(nextFields);
@@ -425,6 +430,35 @@ export default function ObjectTypeAttributeTable({
             </div>
           );
         }
+      },
+      {
+        title: (
+          <span className="inline-flex items-center gap-[4px]">
+            实例名称
+            <Tooltip
+              content="实例/知识图谱中展示的名称，支持多个字段拼接显示"
+              position="top"
+            >
+              <span className="inline-flex items-center">
+                <IconQuestionCircle className="cursor-pointer text-[#86909C]" />
+              </span>
+            </Tooltip>
+          </span>
+        ),
+        dataIndex: 'isInstanceName',
+        width: 120,
+        render: (_, record, index) => (
+          <Switch
+            size="small"
+            checked={record.isInstanceName === 1}
+            disabled={readOnly}
+            onChange={(checked) =>
+              handleFieldChange(index, {
+                isInstanceName: checked ? 1 : 0
+              })
+            }
+          />
+        )
       },
       {
         title: '操作',

@@ -14,6 +14,13 @@ export interface SelectedObjectContext {
 
 export type RelationLoadMode = 'nodes-only' | 'graph';
 
+/** 载入图谱时的关系跳数，'all' 表示全部关联 */
+export type GraphLoadHopCount = number | 'all';
+
+export interface GraphLoadSettings {
+  hopCount: GraphLoadHopCount;
+}
+
 export type QueryResultLoadStatus = 'pending' | 'loaded';
 
 export interface QueryResultItem {
@@ -131,7 +138,7 @@ export interface KnowledgeGraphNodeData {
 
 export interface RelationGraphNode {
   id: string;
-  type: 'knowledgeNode';
+  type: 'knowledgeNode' | 'instanceCardNode';
   data: KnowledgeGraphNodeData;
   position: { x: number; y: number };
 }
@@ -141,7 +148,7 @@ export interface RelationGraphEdge {
   source: string;
   target: string;
   label?: string;
-  type: 'knowledgeEdge';
+  type: 'knowledgeEdge' | 'instanceOntologyEdge';
   data?: {
     linkName?: string;
     edgeColor?: string;

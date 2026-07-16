@@ -158,6 +158,8 @@ interface FieldImportUploadProps {
   /** 为 false 时不在上传区内渲染模板链接（由外部 FormItem label 等位置展示） */
   showTemplateLinks?: boolean;
   hasUploadedFile?: boolean;
+  /** CSV 上传区格式说明，不传则使用默认文案 */
+  csvFormatHint?: string;
 }
 
 const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
@@ -174,7 +176,8 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
   generatingSchema = false,
   showGenerateSchemaButton = false,
   showTemplateLinks = true,
-  hasUploadedFile = false
+  hasUploadedFile = false,
+  csvFormatHint
 }) => {
   const [fileList, setFileList] = useState<any>(initialFileList);
   const getEffectiveProjectId = useUserInfoStore(
@@ -537,14 +540,14 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
               点击或拖拽文件到此处上传
             </span>
             <span className="text-center text-[11px] leading-[18px] text-[var(--color-text-4)]">
-              {fileType === 'csv' ? (
-                <>
-                  UTF-8 编码，不超过 {maxSize}MB；第 1 行英文名、第 2 行类型、第
-                  3 行注释，第 4 行起为数据
-                </>
-              ) : (
-                '支持 CSV 格式文件'
-              )}
+              {fileType === 'csv'
+                ? (csvFormatHint ?? (
+                    <>
+                      UTF-8 编码，不超过 {maxSize}MB；第 1 行英文名、第 2
+                      行类型、第 3 行注释，第 4 行起为数据
+                    </>
+                  ))
+                : '支持 CSV 格式文件'}
             </span>
             {fileType === 'excel' && (
               <span className="text-[11px] text-[var(--color-text-4)]">

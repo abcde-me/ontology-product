@@ -19,3 +19,6 @@ export const SCAN_LOGIN_POLL_INTERVAL = 2000;
 export const DEFAULT_LOGIN_CAPTCHA_CODE = '1111';
 
 export const DEV_LOGIN_CAPTCHA_ID = 'dev-local-captcha';
+
+/** 后端登录不可用时写入的本地开发 token */
+export const DEV_LOGIN_TOKEN = 'dev-local-token';

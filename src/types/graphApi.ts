@@ -213,6 +213,10 @@ export interface PhysicalProperties {
    */
   isPrimary?: 1 | 0;
   /**
+   * 是否作为实例名称（1：是，0：否）
+   */
+  isInstanceName?: 1 | 0;
+  /**
    * 是否向量化源字段（1：是，0：否）
    */
   isVectorSourceField?: 1 | 0;

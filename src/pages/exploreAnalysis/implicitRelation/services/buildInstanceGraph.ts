@@ -13,6 +13,10 @@ import {
   resolveInstanceId,
   getInstanceDisplayFields
 } from '@/pages/exploreAnalysis/objectBrowse/utils/instanceRow';
+import {
+  getInstanceNameFieldNames,
+  resolveInstanceDisplayName
+} from '@/pages/exploreAnalysis/objectBrowse/utils/instanceDisplayName';
 import type { InstanceQueryRow } from '@/pages/exploreAnalysis/objectBrowse/types';
 import type { ImplicitScopeInstance } from '../types';
 import { buildInstanceNodeKey } from './scopeInstances';
@@ -61,17 +65,14 @@ export interface InstanceRelationGraph {
   edges: InstanceGraphEdge[];
 }
 
-const resolveLabel = (
+const resolveLabel = async (
+  sceneId: number,
+  objectTypeId: number,
   row: Record<string, unknown>,
   fallback: string
-): string => {
-  const preferred = ['name', 'title', 'label', 'Name', 'code', 'Code'];
-  for (const key of preferred) {
-    if (row[key] != null && String(row[key]).trim()) {
-      return String(row[key]);
-    }
-  }
-  return fallback;
+): Promise<string> => {
+  const fieldNames = await getInstanceNameFieldNames(sceneId, objectTypeId);
+  return resolveInstanceDisplayName(row, fieldNames, fallback);
 };
 
 const normalizeJoinKey = (value: string) =>
@@ -292,7 +293,10 @@ export const buildInstanceRelationGraph = async (params: {
     }
 
     const label =
-      options?.label || (row ? resolveLabel(row, instanceId) : instanceId);
+      options?.label ||
+      (row
+        ? await resolveLabel(sceneId, objectTypeId, row, instanceId)
+        : instanceId);
 
     const node: InstanceGraphNode = {
       key,
@@ -710,7 +714,12 @@ export const buildInstanceRelationGraph = async (params: {
       rowByNodeKey.set(node.key, row);
       node.attributes = getInstanceDisplayFields(row as InstanceQueryRow);
       if (!node.label || node.label === node.instanceId) {
-        node.label = resolveLabel(row, node.instanceId);
+        node.label = await resolveLabel(
+          sceneId,
+          node.objectTypeId,
+          row,
+          node.instanceId
+        );
       }
     }
   }
@@ -723,6 +732,7 @@ export const buildInstanceRelationGraph = async (params: {
 
 /** 预加载某对象类型实例选项（用于选择器） */
 export const loadInstanceSelectOptions = async (
+  sceneId: number,
   objectTypeId: number,
   objectTypeName?: string
 ): Promise<ImplicitScopeInstance[]> => {
@@ -734,8 +744,10 @@ export const loadInstanceSelectOptions = async (
   if (!isOntologyApiSuccess(res)) {
     return [];
   }
-  return (res.data?.result || [])
-    .map((row) => {
+
+  const rows = res.data?.result || [];
+  const items = await Promise.all(
+    rows.map(async (row) => {
       const id = resolveInstanceId(row);
       if (id == null || id === '') {
         return null;
@@ -745,8 +757,15 @@ export const loadInstanceSelectOptions = async (
         objectTypeId,
         objectTypeName,
         instanceId,
-        instanceLabel: resolveLabel(row, instanceId)
+        instanceLabel: await resolveLabel(
+          sceneId,
+          objectTypeId,
+          row,
+          instanceId
+        )
       } as ImplicitScopeInstance;
     })
-    .filter((item): item is ImplicitScopeInstance => Boolean(item));
+  );
+
+  return items.filter((item): item is ImplicitScopeInstance => Boolean(item));
 };

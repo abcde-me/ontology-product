@@ -1,0 +1,25 @@
+.empty-hint {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  pointer-events: none;
+  user-select: none;
+}
+
+.empty-hint-title {
+  font-size: 14px;
+  line-height: 22px;
+  color: #64748b;
+}
+
+.empty-hint-desc {
+  font-size: 12px;
+  line-height: 20px;
+  color: #94a3b8;
+}

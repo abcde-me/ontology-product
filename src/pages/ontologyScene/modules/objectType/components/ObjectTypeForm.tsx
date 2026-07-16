@@ -31,12 +31,20 @@ import {
 } from './ObjectTypeFormUtils/types';
 import { normalizeSqlConnectorId } from './ObjectTypeFormUtils/normalizeSqlConnectorId';
 import {
+  hasAnySourceMapping,
   INSTANCE_SYNC_SOURCE_UNCONFIGURED_MESSAGE,
   isInstanceSyncSourceConfigured,
+  isInstanceSyncSourceTypeConfigured,
   legacyFieldToObjectTypeAttribute,
   mergeOntologyPhysicalPropertiesForForm,
-  mergeOntologyPhysicalPropertiesListForForm
+  mergeOntologyPhysicalPropertiesListForForm,
+  resolvePrimaryMappingSourceTypes
 } from './ObjectTypeFormUtils/attributeFields';
+import {
+  buildMappingSourceLabels,
+  resolveMappingSourceTabs,
+  resolveTabConfigForValidation
+} from './ObjectTypeFormSteps/InstanceSyncStep/instanceSyncSourceTabModel';
 import { buildStreamParseFormValidateFields } from './ObjectTypeFormUtils/instanceSyncStreamParse';
 import { buildObjectTypeFormData } from './ObjectTypeFormHooks/useObjectTypeSubmit';
 import { resolveManualObjectTypeSchemaFilePath } from '../services/resolveManualObjectTypeSchemaFilePath';
@@ -97,7 +105,7 @@ const DEFAULT_INSTANCE_SYNC_VALUES = {
 };
 
 const DEFAULT_SYNC_SOURCE_DATA_STRATEGY: SyncSourceDataStrategyFormState = {
-  instanceSyncSourceType: INSTANCE_SYNC_SOURCE_TYPE.DATABASE,
+  mappingSourceTypes: [],
   sourceDataInfo: {
     queryMode: 'selected'
   },
@@ -445,9 +453,9 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           ? syncStrategyStateToFormValues(mergedSyncStrategyForForm)
           : {};
         const syncSourceTypeFormPatch = {
-          syncSourceType:
-            mergedSyncStrategyForForm?.instanceSyncSourceType ||
-            INSTANCE_SYNC_SOURCE_TYPE.DATABASE,
+          syncSourceType: resolvePrimaryMappingSourceTypes(
+            mergedSyncStrategyForForm
+          ),
           syncInstanceCsvFile: mergedSyncStrategyForForm?.instanceCsvFilePath,
           syncMessageQueueConnector:
             mergedSyncStrategyForForm?.messageQueueConnectorId,
@@ -470,7 +478,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           syncFileResourceId: mergedSyncStrategyForForm?.fileResourceId,
           syncFileParseRequirement:
             mergedSyncStrategyForForm?.fileParseRequirement ||
-            DEFAULT_OBJECT_TYPE_FILE_PARSE_REQUIREMENT
+            DEFAULT_OBJECT_TYPE_FILE_PARSE_REQUIREMENT,
+          syncWorkflowDataTaskId: mergedSyncStrategyForForm?.workflowDataTaskId
         };
 
         if (isEdit) {
@@ -550,6 +559,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                 isPrimary: field.isPrimary,
                 isUse: 1,
                 isStoreAsPublic: field.isStoreAsPublic,
+                isInstanceName: field.isInstanceName,
                 publicPropertyID: field.publicPropertyID || 0,
                 sourceColumnName: field.sourceColumnName,
                 sourceColumnComment: field.sourceColumnComment,
@@ -875,20 +885,65 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
 
     const validateInstanceSync = async () => {
       const syncSource = syncSourceDataStrategy.sourceDataInfo;
-      const syncSourceType =
-        syncSourceDataStrategy.instanceSyncSourceType ||
-        INSTANCE_SYNC_SOURCE_TYPE.DATABASE;
-      const isDatabaseSyncSource =
-        syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.DATABASE;
+      const selectedSourceTypes = resolvePrimaryMappingSourceTypes(
+        syncSourceDataStrategy
+      );
+
+      if (!selectedSourceTypes.length) {
+        Message.warning('请至少添加一个数据源');
+        return false;
+      }
+
+      const primarySourceType =
+        selectedSourceTypes[0] || INSTANCE_SYNC_SOURCE_TYPE.DATABASE;
+      const includesDatabase = selectedSourceTypes.includes(
+        INSTANCE_SYNC_SOURCE_TYPE.DATABASE
+      );
+      const includesCsv = selectedSourceTypes.includes(
+        INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD
+      );
+      const includesKafka = selectedSourceTypes.includes(
+        INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE
+      );
+      const includesApi = selectedSourceTypes.includes(
+        INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE
+      );
+      const includesFileParse = selectedSourceTypes.includes(
+        INSTANCE_SYNC_SOURCE_TYPE.FILE_PARSE
+      );
+      const includesWorkflow = selectedSourceTypes.includes(
+        INSTANCE_SYNC_SOURCE_TYPE.WORKFLOW
+      );
+      const isWorkflowOnly =
+        selectedSourceTypes.length === 1 &&
+        selectedSourceTypes[0] === INSTANCE_SYNC_SOURCE_TYPE.WORKFLOW;
       const isDatabasePollingMode =
-        isDatabaseSyncSource && syncSourceDataStrategy.mode === 'JDBC_POLLING';
+        includesDatabase && syncSourceDataStrategy.mode === 'JDBC_POLLING';
       const isSqlPolling =
         isDatabasePollingMode && syncSource.queryMode === 'sql';
       const requiresPollingParams =
         isDatabasePollingMode ||
-        (syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE &&
-          isApiPollingMode(syncSourceDataStrategy.mode));
+        (includesApi && isApiPollingMode(syncSourceDataStrategy.mode));
       const s = syncSourceDataStrategy;
+
+      if (isWorkflowOnly) {
+        try {
+          await form.validate(['syncSourceType', 'syncWorkflowDataTaskId']);
+        } catch (error) {
+          return false;
+        }
+
+        if (
+          !isInstanceSyncSourceConfigured(syncSourceDataStrategy, {
+            isDataResource: dataSource.type === DATA_SOURCE_TYPE.DATA_RESOURCE
+          })
+        ) {
+          Message.warning('请选择数据任务');
+          return false;
+        }
+
+        return true;
+      }
 
       if (!s.mode) {
         Message.warning('请选择同步模式');
@@ -896,22 +951,14 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       }
       if (!s.conflictStrategy) {
         const csvRequiresConflict =
-          syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD &&
-          s.syncScope === 'INCREMENTAL';
-        if (
-          syncSourceType !== INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD ||
-          csvRequiresConflict
-        ) {
+          includesCsv && s.syncScope === 'INCREMENTAL';
+        if (!includesCsv || csvRequiresConflict) {
           Message.warning('请选择冲突策略');
           return false;
         }
       }
       if (!s.syncScope) {
-        Message.warning(
-          syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD
-            ? '请选择导入范围'
-            : '请选择同步范围'
-        );
+        Message.warning(includesCsv ? '请选择导入范围' : '请选择同步范围');
         return false;
       }
       if (!s.exceptionStrategy) {
@@ -922,26 +969,25 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       const validateFields = [
         'syncSourceType',
         'syncMappingFields',
-        ...(syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD
-          ? ['syncInstanceCsvFile']
-          : []),
-        ...(syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE
+        ...(includesCsv ? ['syncInstanceCsvFile'] : []),
+        ...(includesKafka
           ? [
               'syncMessageQueueConnector',
               'syncMessageQueueTopic',
               ...buildStreamParseFormValidateFields(syncSourceDataStrategy)
             ]
           : []),
-        ...(syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE
+        ...(includesApi
           ? [
               'syncApiConnector',
               ...buildStreamParseFormValidateFields(syncSourceDataStrategy)
             ]
           : []),
-        ...(syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.FILE_PARSE
+        ...(includesFileParse
           ? ['syncFileResourceId', 'syncFileParseRequirement']
           : []),
-        ...(isDatabaseSyncSource ? ['syncConnector', 'syncDatabaseTable'] : [])
+        ...(includesWorkflow ? ['syncWorkflowDataTaskId'] : []),
+        ...(includesDatabase ? ['syncConnector', 'syncDatabaseTable'] : [])
       ];
 
       try {
@@ -966,9 +1012,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           !syncSourceDataStrategy.pollFetchSize)
       ) {
         Message.warning(
-          syncSourceType === INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE
-            ? '请完整填写定时拉取参数'
-            : '请完整填写轮询参数'
+          includesApi ? '请完整填写定时拉取参数' : '请完整填写轮询参数'
         );
         return false;
       }
@@ -1005,21 +1049,56 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         }
       }
 
-      const hasMappedField = syncMappingFields.some(
-        (field) => field.sourceColumnName
+      const mappingSourceTabs = resolveMappingSourceTabs(
+        syncSourceDataStrategy
       );
-      const hasPrimaryMapping = syncMappingFields.some(
-        (field) => field.isPrimary === 1 && field.sourceColumnName
-      );
+      const mappingSourceLabels = buildMappingSourceLabels(mappingSourceTabs);
 
-      if (!hasMappedField) {
-        Message.warning('实例同步映射至少需要一个有效映射');
+      if (!mappingSourceTabs.length) {
+        Message.warning('请至少添加一个数据源');
         return false;
       }
 
-      if (!hasPrimaryMapping) {
-        Message.warning('对象类型主键需要映射到源表字段');
-        return false;
+      for (const tab of mappingSourceTabs) {
+        const tabConfig = resolveTabConfigForValidation(
+          syncSourceDataStrategy,
+          tab
+        );
+        if (
+          !isInstanceSyncSourceTypeConfigured(tabConfig, tab.sourceType, {
+            isDataResource: dataSource.type === DATA_SOURCE_TYPE.DATA_RESOURCE
+          })
+        ) {
+          Message.warning(
+            `请完成「${mappingSourceLabels[tab.id]}」的数据源配置`
+          );
+          return false;
+        }
+      }
+
+      const mappingRequiredTabs = mappingSourceTabs.filter(
+        (tab) => tab.sourceType !== INSTANCE_SYNC_SOURCE_TYPE.WORKFLOW
+      );
+
+      for (const tab of mappingRequiredTabs) {
+        const hasPrimaryMappingForSource = syncMappingFields.some(
+          (field) =>
+            field.isPrimary === 1 && hasAnySourceMapping(field, [tab.id])
+        );
+        if (!hasPrimaryMappingForSource) {
+          Message.warning(`请为「${mappingSourceLabels[tab.id]}」配置主键映射`);
+          return false;
+        }
+
+        const hasMappedFieldForSource = syncMappingFields.some((field) =>
+          hasAnySourceMapping(field, [tab.id])
+        );
+        if (!hasMappedFieldForSource) {
+          Message.warning(
+            `请为「${mappingSourceLabels[tab.id]}」配置至少一个字段映射`
+          );
+          return false;
+        }
       }
 
       return true;

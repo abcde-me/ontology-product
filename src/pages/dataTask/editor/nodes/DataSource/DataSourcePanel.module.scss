@@ -1,0 +1,38 @@
+.data-source-panel {
+  padding: 8px 16px 12px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.panel-header-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+  color: var(--color-text-1);
+}
+
+.ai-assist-placeholder {
+  margin-top: 10px;
+  border: 1px dashed var(--color-border-2);
+  border-radius: 6px;
+  background: var(--color-fill-1);
+  padding: 10px 12px;
+}
+
+.ai-assist-title {
+  margin-bottom: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-2);
+}
+
+.ai-assist-desc {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--color-text-3);
+}

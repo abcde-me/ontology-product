@@ -103,9 +103,10 @@ export default function CreateMappingModal({
     []
   );
   const [attributesLoading, setAttributesLoading] = useState(false);
-  const selectedObjectTypeIds = Form.useWatch('objectTypeIds', form) as
-    | number[]
-    | undefined;
+  const selectedObjectTypeIds: number[] | undefined = Form.useWatch(
+    'objectTypeIds',
+    form
+  );
 
   const [scenesLoading, setScenesLoading] = useState(false);
   const [sceneOptions, setSceneOptions] = useState<SceneOption[]>([]);
@@ -192,7 +193,7 @@ export default function CreateMappingModal({
             res.data.result
               .filter((scene) => scene.id != null)
               .map((scene) => ({
-                id: scene.id as number,
+                id: Number(scene.id),
                 name: scene.name || `场景 #${scene.id}`
               }))
           );
@@ -228,7 +229,8 @@ export default function CreateMappingModal({
       ids.map(async (objectTypeId) => {
         const objectType = objectTypeMap.get(objectTypeId);
         if (!objectType || objectType.sceneId == null) {
-          return [] as AttributeOption[];
+          const emptyOptions: AttributeOption[] = [];
+          return emptyOptions;
         }
         const properties = await fetchQueryableProperties(
           objectType.sceneId,
@@ -252,8 +254,7 @@ export default function CreateMappingModal({
         const nextOptions = groups.flat();
         setAttributeOptions(nextOptions);
         const validKeys = new Set(nextOptions.map((item) => item.key));
-        const currentKeys =
-          (form.getFieldValue('attributeKeys') as string[] | undefined) || [];
+        const currentKeys: string[] = form.getFieldValue('attributeKeys') ?? [];
         const nextKeys = currentKeys.filter((key) => validKeys.has(key));
         if (nextKeys.length !== currentKeys.length) {
           form.setFieldValue('attributeKeys', nextKeys);
@@ -317,7 +318,7 @@ export default function CreateMappingModal({
           attributes: attributes?.length ? attributes : undefined
         };
       })
-      .filter(Boolean) as SemanticMappingObjectTypeRef[];
+      .filter((item): item is SemanticMappingObjectTypeRef => item !== null);
   };
 
   const handleGenerateSynonyms = async () => {
@@ -482,8 +483,8 @@ export default function CreateMappingModal({
         <RadioGroup
           type="button"
           value={mode}
-          onChange={(value) => {
-            setMode(value as CreateMode);
+          onChange={(value: CreateMode) => {
+            setMode(value);
             if (value === 'manual') {
               setCandidates([]);
             }
@@ -633,8 +634,8 @@ export default function CreateMappingModal({
                 showSearch
                 loading={scenesLoading}
                 value={selectedSceneIds}
-                onChange={(value) => {
-                  setSelectedSceneIds(value as number[]);
+                onChange={(value: number[]) => {
+                  setSelectedSceneIds(value);
                   setCandidates([]);
                 }}
                 filterOption={(inputValue, option) =>
@@ -732,9 +733,9 @@ export default function CreateMappingModal({
                       placeholder="同义词 / 别名"
                       value={item.synonyms}
                       tokenSeparators={[',', '，', ';', '；']}
-                      onChange={(value) =>
+                      onChange={(value: string[]) =>
                         updateCandidate(item.key, {
-                          synonyms: (value as string[]) || []
+                          synonyms: value ?? []
                         })
                       }
                     />

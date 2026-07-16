@@ -1,0 +1,25 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.desc,
+.all-hint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.hop-mode {
+  margin: 0;
+}
+
+.hop-input {
+  width: 100%;
+}
+
+.alert {
+  margin: 0;
+  padding: 8px 12px;
+}

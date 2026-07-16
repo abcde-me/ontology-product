@@ -16,6 +16,7 @@ import {
   IconShrink
 } from '@arco-design/web-react/icon';
 import dayjs from 'dayjs';
+import { useLocation } from 'react-router-dom';
 import { DISCOVERY_ALGORITHM_LABEL } from '../constants';
 import type {
   DiscoveredImplicitRelation,
@@ -42,6 +43,7 @@ export default function ImplicitRelationWorkspace({
   knowledge,
   onKnowledgeChange
 }: ImplicitRelationWorkspaceProps) {
+  const location = useLocation();
   const [running, setRunning] = useState(false);
   const [selectedDiscoveryId, setSelectedDiscoveryId] = useState<string>();
   const [checkedDiscoveryIds, setCheckedDiscoveryIds] = useState<string[]>([]);
@@ -83,6 +85,23 @@ export default function ImplicitRelationWorkspace({
       setGraphRevision((revision) => revision + 1);
     }
   }, [knowledge.result?.ranAt]);
+
+  useEffect(() => {
+    const discoveryId = new URLSearchParams(location.search).get('discoveryId');
+    if (!discoveryId) {
+      return;
+    }
+
+    const matched = knowledge.result?.discoveries.find(
+      (item) => item.id === discoveryId
+    );
+    if (!matched) {
+      return;
+    }
+
+    setSelectedDiscoveryId(discoveryId);
+    setEvidenceVisible(true);
+  }, [knowledge.result?.discoveries, location.search]);
 
   const selectedDiscovery = useMemo(
     () =>

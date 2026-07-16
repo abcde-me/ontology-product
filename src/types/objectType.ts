@@ -180,6 +180,10 @@ export interface CreateOntologyPhysicalProperty {
    */
   isVector?: 1 | 0;
   /**
+   * 是否作为实例名称（实例/知识图谱中展示的名称）
+   */
+  isInstanceName?: 1 | 0;
+  /**
    * 向量源字段
    */
   vectorSourceFieldName?: string;
@@ -239,6 +243,10 @@ export interface OntologyPhysicalPropertiesList {
    * 是否向量化，1：是，0：否
    */
   isVector: number;
+  /**
+   * 是否作为实例名称，1：是，0：否
+   */
+  isInstanceName?: number;
   /**
    * 属性名称（注释）
    */

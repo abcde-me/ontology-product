@@ -1,8 +1,14 @@
 import {
+  CreateDataTaskParams,
+  DataTaskDetail,
   DataTaskItem,
   DataTaskListResponse,
+  ExecutionStatus,
   GetDataTaskListParams,
-  TaskStatus
+  ScheduleType,
+  TaskStatus,
+  TaskType,
+  UpdateDataTaskParams
 } from '../types';
 import { mockDataTasks } from './mockData';
 
@@ -78,7 +84,20 @@ export const copyDataTask = async (id: string): Promise<DataTaskItem> => {
     throw new Error('数据任务不存在');
   }
 
-  const now = new Date()
+  const newItem: DataTaskItem = {
+    ...item,
+    id: String(Date.now()),
+    name: `${item.name}_copy`,
+    status: TaskStatus.DEVELOPING,
+    updateTime: formatNow()
+  };
+
+  dataStore.unshift(newItem);
+  return newItem;
+};
+
+const formatNow = () =>
+  new Date()
     .toLocaleString('zh-CN', {
       year: 'numeric',
       month: '2-digit',
@@ -90,16 +109,67 @@ export const copyDataTask = async (id: string): Promise<DataTaskItem> => {
     })
     .replace(/\//g, '-');
 
-  const newItem: DataTaskItem = {
-    ...item,
+export const getDataTaskDetail = async (
+  id: string
+): Promise<DataTaskDetail> => {
+  await new Promise((resolve) => setTimeout(resolve, 200));
+
+  const item = dataStore.find((task) => task.id === id);
+  if (!item) {
+    throw new Error('数据任务不存在');
+  }
+
+  return { ...item };
+};
+
+export const createDataTask = async (
+  params: CreateDataTaskParams
+): Promise<DataTaskDetail> => {
+  await new Promise((resolve) => setTimeout(resolve, 300));
+
+  const newItem: DataTaskDetail = {
     id: String(Date.now()),
-    name: `${item.name}_copy`,
+    taskType: params.taskType ?? TaskType.WORKFLOW_DAG,
+    name: params.name,
+    scheduleType: params.scheduleType ?? ScheduleType.IMMEDIATE,
     status: TaskStatus.DEVELOPING,
-    updateTime: now
+    latestExecutionStatus: ExecutionStatus.SUCCESS,
+    updater: 'current_user',
+    updaterName: '当前用户',
+    updateTime: formatNow(),
+    description: params.description,
+    processId: `process_${Date.now()}`
   };
 
   dataStore.unshift(newItem);
   return newItem;
+};
+
+export const updateDataTask = async (
+  params: UpdateDataTaskParams
+): Promise<DataTaskDetail> => {
+  await new Promise((resolve) => setTimeout(resolve, 200));
+
+  const item = dataStore.find((task) => task.id === params.id);
+  if (!item) {
+    throw new Error('数据任务不存在');
+  }
+
+  if (params.name !== undefined) {
+    item.name = params.name;
+  }
+  if (params.scheduleType !== undefined) {
+    item.scheduleType = params.scheduleType;
+  }
+  if (params.description !== undefined) {
+    item.description = params.description;
+  }
+  if (params.cron !== undefined) {
+    item.cron = params.cron;
+  }
+
+  item.updateTime = formatNow();
+  return { ...item };
 };
 
 export const toggleDataTaskStatus = async (
@@ -114,15 +184,5 @@ export const toggleDataTaskStatus = async (
   }
 
   item.status = online ? TaskStatus.ONLINE : TaskStatus.OFFLINE;
-  item.updateTime = new Date()
-    .toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    })
-    .replace(/\//g, '-');
+  item.updateTime = formatNow();
 };

@@ -1,0 +1,45 @@
+.inference-agent-panel {
+  padding: 8px 16px 12px;
+}
+
+.panel-header {
+  margin-bottom: 8px;
+}
+
+.panel-header-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+  color: var(--color-text-1);
+}
+
+.trigger-hint {
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(var(--primary-1), 0.45);
+  border: 1px solid rgba(var(--primary-6), 0.2);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.ai-assist-placeholder {
+  margin-top: 10px;
+  border: 1px dashed var(--color-border-2);
+  border-radius: 6px;
+  background: var(--color-fill-1);
+  padding: 10px 12px;
+}
+
+.ai-assist-title {
+  margin-bottom: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-2);
+}
+
+.ai-assist-desc {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--color-text-3);
+}

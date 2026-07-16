@@ -52,11 +52,15 @@ export default function ObjectBrowse() {
   const [vectorFieldNames, setVectorFieldNames] = useState<Set<string>>(
     () => new Set()
   );
+  const [instanceNameFieldNames, setInstanceNameFieldNames] = useState<
+    string[]
+  >([]);
 
   useEffect(() => {
     if (!selectionContext) {
       setFieldCommentMap({});
       setVectorFieldNames(new Set());
+      setInstanceNameFieldNames([]);
       return;
     }
 
@@ -64,13 +68,21 @@ export default function ObjectBrowse() {
       selectionContext.sceneId,
       selectionContext.objectTypeId
     )
-      .then(({ commentMap, vectorFieldNames: vectorFields }) => {
-        setFieldCommentMap(commentMap);
-        setVectorFieldNames(vectorFields);
-      })
+      .then(
+        ({
+          commentMap,
+          vectorFieldNames: vectorFields,
+          instanceNameFieldNames: nameFields
+        }) => {
+          setFieldCommentMap(commentMap);
+          setVectorFieldNames(vectorFields);
+          setInstanceNameFieldNames(nameFields);
+        }
+      )
       .catch(() => {
         setFieldCommentMap({});
         setVectorFieldNames(new Set());
+        setInstanceNameFieldNames([]);
       });
   }, [selectionContext]);
 
@@ -279,6 +291,7 @@ export default function ObjectBrowse() {
           selectionContext={selectionContext}
           fieldCommentMap={fieldCommentMap}
           vectorFieldNames={vectorFieldNames}
+          instanceNameFieldNames={instanceNameFieldNames}
           total={total}
           page={page}
           pageSize={pageSize}

@@ -2,7 +2,7 @@
 export const ONTO_DEFAULT_HOME_PATH = '/tenant/compute/onto/home';
 
 /** 平台品牌名称（顶栏、登录页） */
-export const PLATFORM_BRAND_NAME = '如花管理中心';
+export const PLATFORM_BRAND_NAME = 'XXX管理中心';
 
 export const AI_ONTOLOGY_WORKBENCH_PATH =
   '/tenant/compute/onto/aiOntologyWorkbench';

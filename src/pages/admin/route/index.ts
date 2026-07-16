@@ -306,6 +306,22 @@ export const routes: IRoute[] = [
     permission: DATA_SOURCE_PERMISSIONS.LIST,
     children: []
   },
+  // 数据任务2 - 新建
+  {
+    name: 'dataTaskCreate',
+    key: '/tenant/compute/onto/dataConnection/dataTask2/create',
+    component: React.lazy(async () => import('../../dataTask/editor')),
+    permission: DATA_SOURCE_PERMISSIONS.LIST,
+    children: []
+  },
+  // 数据任务2 - 编辑
+  {
+    name: 'dataTaskEdit',
+    key: '/tenant/compute/onto/dataConnection/dataTask2/edit/:taskId',
+    component: React.lazy(async () => import('../../dataTask/editor')),
+    permission: DATA_SOURCE_PERMISSIONS.LIST,
+    children: []
+  },
   // 数据任务2 - 执行记录
   {
     name: 'dataTask2ExecutionLog',

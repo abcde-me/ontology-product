@@ -586,6 +586,8 @@ export const coerceOntologyPhysicalProperty = (
     propertyComment,
     propertyType,
     isPrimary: Number(property.isPrimary ?? 0) === 1 ? 1 : 0,
+    isInstanceName:
+      Number(property.isInstanceName ?? property.isPrimary ?? 0) === 1 ? 1 : 0,
     isVector: Number(property.isVector ?? 0) === 1 ? 1 : 0,
     publicPropertyID: Number(property.publicPropertyID ?? 0),
     sourceColumnName: String(property.sourceColumnName ?? propertyName),
@@ -732,6 +734,7 @@ const toPhysicalProperty = (
   comment: property.propertyComment,
   columnType: property.propertyType,
   isPrimary: property.isPrimary === 1 ? 1 : 0,
+  isInstanceName: property.isInstanceName === 1 ? 1 : 0,
   isVectorSourceField: property.isVector === 1 ? 1 : 0,
   objectTypeID: record.id,
   ontologyObjectTypeId: record.id,

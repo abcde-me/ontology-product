@@ -13,7 +13,10 @@ import {
 } from '@arco-design/web-react';
 import { IconRobot } from '@arco-design/web-react/icon';
 import {
+  hasAnySourceMapping,
   INSTANCE_SYNC_SOURCE_UNCONFIGURED_MESSAGE,
+  syncLegacySourceFieldsFromPrimaryKey,
+  updateMappingEntryForKey,
   VECTOR_FIELD_SUFFIX
 } from '../../ObjectTypeFormUtils/attributeFields';
 import {
@@ -38,7 +41,10 @@ interface InstanceSyncMappingTableProps {
   setMappingFields: React.Dispatch<
     React.SetStateAction<InstanceSyncMappingField[]>
   >;
-  sourceFields: SourceTableField[];
+  mappingSourceKeys: string[];
+  activeMappingKey?: string;
+  mappingSourceLabel?: string;
+  sourceFieldsByKey: Record<string, SourceTableField[]>;
   sourceConfigured: boolean;
   loading: boolean;
   onSmartMatch?: () => void;
@@ -46,33 +52,55 @@ interface InstanceSyncMappingTableProps {
   smartMatchTooltip?: string;
   styles: Record<string, string>;
   readOnly?: boolean;
+  sourceUnconfiguredMessage?: string;
 }
 
 export default function InstanceSyncMappingTable({
   form,
   mappingFields,
   setMappingFields,
-  sourceFields,
+  mappingSourceKeys,
+  activeMappingKey,
+  mappingSourceLabel,
+  sourceFieldsByKey,
   sourceConfigured,
   loading,
   onSmartMatch,
   smartMatchLoading = false,
   smartMatchTooltip = '根据表字段与属性id，字段注释与属性名称的语义进行匹配',
   styles,
-  readOnly = false
+  readOnly = false,
+  sourceUnconfiguredMessage = INSTANCE_SYNC_SOURCE_UNCONFIGURED_MESSAGE
 }: InstanceSyncMappingTableProps) {
   const syncFields = (nextFields: InstanceSyncMappingField[]) => {
-    setMappingFields(nextFields);
-    form.setFieldValue('syncMappingFields', nextFields);
+    const normalized = activeMappingKey
+      ? nextFields.map((field) =>
+          syncLegacySourceFieldsFromPrimaryKey(field, activeMappingKey)
+        )
+      : nextFields;
+    setMappingFields(normalized);
+    form.setFieldValue('syncMappingFields', normalized);
   };
 
-  const handleFieldChange = (
+  const handleSourceMappingChange = (
     index: number,
-    updates: Partial<InstanceSyncMappingField>
+    mappingKey: string,
+    updates: {
+      fieldName?: string;
+      fieldComment?: string;
+      fieldType?: string;
+      fieldOriginName?: string;
+    }
   ) => {
-    const nextFields = mappingFields.map((field, currentIndex) =>
-      currentIndex === index ? { ...field, ...updates } : field
-    );
+    const nextFields = mappingFields.map((field, currentIndex) => {
+      if (currentIndex !== index) {
+        return field;
+      }
+      const updated = updateMappingEntryForKey(field, mappingKey, updates);
+      return activeMappingKey === mappingKey
+        ? syncLegacySourceFieldsFromPrimaryKey(updated, mappingKey)
+        : updated;
+    });
     syncFields(nextFields);
   };
 
@@ -116,98 +144,145 @@ export default function InstanceSyncMappingTable({
     [form, setMappingFields]
   );
 
-  const sourceFieldOptions = useMemo(
-    () =>
-      sourceConfigured
-        ? sourceFields.map((field) => ({
-            label: field.fieldComment
-              ? `${field.fieldId} (${field.fieldComment})`
-              : field.fieldId,
-            value: field.fieldId
-          }))
-        : [],
-    [sourceConfigured, sourceFields]
+  const buildSourceFieldOptions = useCallback(
+    (mappingKey: string) => {
+      const fields = sourceFieldsByKey[mappingKey] || [];
+      return fields.map((field) => ({
+        label: field.fieldComment
+          ? `${field.fieldId} (${field.fieldComment})`
+          : field.fieldId,
+        value: field.fieldId
+      }));
+    },
+    [sourceFieldsByKey]
   );
+
+  const sourceLabel = mappingSourceLabel || '数据源';
+
+  const sourceFieldColumns = useMemo<
+    TableColumnProps<InstanceSyncMappingField>[]
+  >(() => {
+    const mappingKey = activeMappingKey;
+    if (!mappingKey) {
+      return [
+        {
+          title: '字段名',
+          width: 220,
+          render: () => <EllipsisText value="-" />
+        },
+        {
+          title: '字段注释',
+          width: 160,
+          render: () => <EllipsisText value="-" />
+        },
+        {
+          title: '字段类型',
+          width: 120,
+          render: () => <EllipsisText value="-" />
+        }
+      ];
+    }
+
+    const sourceFieldOptions = buildSourceFieldOptions(mappingKey);
+    const typeFields = sourceFieldsByKey[mappingKey] || [];
+
+    return [
+      {
+        title: '字段名',
+        dataIndex: `sourceMappings.${mappingKey}.fieldName`,
+        width: 220,
+        onHeaderCell: () => groupDividerHeaderCell,
+        onCell: () => groupDividerBodyCell,
+        render: (_value, record, index) => {
+          const entry = record.sourceMappings?.[mappingKey];
+          return (
+            <Select
+              showSearch
+              allowCreate
+              value={entry?.fieldName}
+              placeholder="选择或输入字段名"
+              options={sourceFieldOptions}
+              filterOption={(inputValue, option) =>
+                String(option.props?.value ?? '')
+                  .toLowerCase()
+                  .includes(
+                    String(inputValue ?? '')
+                      .trim()
+                      .toLowerCase()
+                  ) ||
+                String(option.props?.children ?? '')
+                  .toLowerCase()
+                  .includes(
+                    String(inputValue ?? '')
+                      .trim()
+                      .toLowerCase()
+                  )
+              }
+              onChange={(next) => {
+                if (readOnly) return;
+                if (next === undefined || next === null || next === '') {
+                  handleSourceMappingChange(index, mappingKey, {
+                    fieldName: undefined,
+                    fieldOriginName: undefined,
+                    fieldComment: undefined,
+                    fieldType: undefined
+                  });
+                  return;
+                }
+                const str = String(next);
+                const sourceField = typeFields.find(
+                  (field) => field.fieldId === str
+                );
+                if (sourceField) {
+                  handleSourceMappingChange(index, mappingKey, {
+                    fieldName: str,
+                    fieldOriginName: sourceField.fieldId,
+                    fieldComment: sourceField.fieldComment,
+                    fieldType: sourceField.fieldType
+                  });
+                } else {
+                  handleSourceMappingChange(index, mappingKey, {
+                    fieldName: str
+                  });
+                }
+              }}
+              allowClear
+              disabled={readOnly}
+            />
+          );
+        }
+      },
+      {
+        title: '字段注释',
+        dataIndex: `sourceMappings.${mappingKey}.fieldComment`,
+        width: 160,
+        render: (_value, record) => (
+          <EllipsisText
+            value={record.sourceMappings?.[mappingKey]?.fieldComment}
+          />
+        )
+      },
+      {
+        title: '字段类型',
+        dataIndex: `sourceMappings.${mappingKey}.fieldType`,
+        width: 120,
+        render: (_value, record) => (
+          <EllipsisText
+            value={record.sourceMappings?.[mappingKey]?.fieldType}
+          />
+        )
+      }
+    ];
+  }, [activeMappingKey, buildSourceFieldOptions, sourceFieldsByKey, readOnly]);
 
   const columns = useMemo<TableColumnProps<InstanceSyncMappingField>[]>(
     () => [
       {
-        title: '数据源表字段映射',
+        title: `数据来源（${sourceLabel}）`,
         onHeaderCell: () => ({
           className: 'sync-map-group-head sync-map-group-head--source'
         }),
-        children: [
-          {
-            title: '表字段',
-            dataIndex: 'sourceColumnName',
-            width: 240,
-            render: (value, _record, index) => (
-              <Select
-                showSearch
-                allowCreate
-                value={value}
-                placeholder="选择或输入表字段名"
-                options={sourceFieldOptions}
-                filterOption={(inputValue, option) =>
-                  String(option.props?.value ?? '')
-                    .toLowerCase()
-                    .includes(
-                      String(inputValue ?? '')
-                        .trim()
-                        .toLowerCase()
-                    ) ||
-                  String(option.props?.children ?? '')
-                    .toLowerCase()
-                    .includes(
-                      String(inputValue ?? '')
-                        .trim()
-                        .toLowerCase()
-                    )
-                }
-                onChange={(next) => {
-                  if (readOnly) return;
-                  if (next === undefined || next === null || next === '') {
-                    handleFieldChange(index, {
-                      sourceColumnName: undefined,
-                      sourceCoumnOriginName: undefined,
-                      sourceColumnComment: undefined,
-                      sourceColumnType: undefined
-                    });
-                    return;
-                  }
-                  const str = String(next);
-                  const sourceField = sourceFields.find(
-                    (field) => field.fieldId === str
-                  );
-                  if (sourceField) {
-                    handleFieldChange(index, {
-                      sourceColumnName: str,
-                      sourceCoumnOriginName: sourceField.fieldId,
-                      sourceColumnComment: sourceField.fieldComment,
-                      sourceColumnType: sourceField.fieldType
-                    });
-                  } else {
-                    handleFieldChange(index, { sourceColumnName: str });
-                  }
-                }}
-                allowClear
-                disabled={readOnly || !sourceConfigured}
-              />
-            )
-          },
-          {
-            title: '字段注释',
-            dataIndex: 'sourceColumnComment',
-            width: 160,
-            render: (value) => <EllipsisText value={value} />
-          },
-          {
-            title: '字段类型',
-            dataIndex: 'sourceColumnType',
-            width: 120,
-            render: (value) => <EllipsisText value={value} />
-          }
-        ]
+        children: sourceFieldColumns
       },
       {
         title: '对象属性',
@@ -310,9 +385,8 @@ export default function InstanceSyncMappingTable({
       }
     ],
     [
-      sourceConfigured,
-      sourceFieldOptions,
-      sourceFields,
+      sourceFieldColumns,
+      sourceLabel,
       readOnly,
       handleVectorizationChange,
       handleVectorCommentChange
@@ -320,6 +394,7 @@ export default function InstanceSyncMappingTable({
   );
 
   const objectTypeName = Form.useWatch('name', form);
+  const tableScrollX = 1600;
 
   return (
     <div className={styles['modeling-section']}>
@@ -338,7 +413,9 @@ export default function InstanceSyncMappingTable({
               size="small"
               icon={<IconRobot />}
               loading={smartMatchLoading}
-              disabled={!sourceConfigured || readOnly}
+              disabled={
+                !sourceConfigured || !mappingSourceKeys.length || readOnly
+              }
               onClick={onSmartMatch}
             >
               智能匹配
@@ -346,11 +423,19 @@ export default function InstanceSyncMappingTable({
           </Tooltip>
         ) : null}
       </div>
+
       <div className={styles['attribute-fields-form-item']}>
         {!sourceConfigured ? (
           <Alert
             type="warning"
-            content={INSTANCE_SYNC_SOURCE_UNCONFIGURED_MESSAGE}
+            content={sourceUnconfiguredMessage}
+            style={{ marginBottom: 12 }}
+          />
+        ) : null}
+        {!mappingSourceKeys.length ? (
+          <Alert
+            type="warning"
+            content="请先添加数据源"
             style={{ marginBottom: 12 }}
           />
         ) : null}
@@ -362,21 +447,30 @@ export default function InstanceSyncMappingTable({
               required: true,
               validator: (_value, callback) => {
                 if (!sourceConfigured) {
-                  callback(INSTANCE_SYNC_SOURCE_UNCONFIGURED_MESSAGE);
+                  callback(sourceUnconfiguredMessage);
                   return;
                 }
-                const hasMappedField = mappingFields.some(
-                  (field) => field.sourceColumnName
+                if (!mappingSourceKeys.length) {
+                  callback('请先添加数据源');
+                  return;
+                }
+                const activeKeys = activeMappingKey
+                  ? [activeMappingKey]
+                  : mappingSourceKeys;
+                const hasMappedField = mappingFields.some((field) =>
+                  hasAnySourceMapping(field, activeKeys)
                 );
                 const primaryMapped = mappingFields.some(
-                  (field) => field.isPrimary === 1 && field.sourceColumnName
+                  (field) =>
+                    field.isPrimary === 1 &&
+                    hasAnySourceMapping(field, activeKeys)
                 );
                 if (!hasMappedField) {
                   callback('实例同步映射至少需要一个有效映射');
                   return;
                 }
                 if (!primaryMapped) {
-                  callback('对象类型主键需要映射到源表字段');
+                  callback('对象类型主键需要映射到数据来源字段');
                   return;
                 }
                 callback();
@@ -389,7 +483,7 @@ export default function InstanceSyncMappingTable({
               className={`${styles['attribute-mapping-table']} ${styles['instance-sync-mapping-table']}`}
               loading={loading}
               tableLayoutFixed
-              scroll={{ x: 1600 }}
+              scroll={{ x: tableScrollX }}
               columns={columns}
               data={mappingFields}
               rowKey={(record) => record.key || record.propertyID}

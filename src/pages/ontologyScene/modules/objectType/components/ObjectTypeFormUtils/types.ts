@@ -3,6 +3,7 @@ import {
   OntologyPhysicalPropertiesList,
   SourceType
 } from '@/types/objectType';
+import type { DataTaskItem } from '@/pages/dataTask/types';
 import {
   DataSourceType,
   InstanceSyncSourceType,
@@ -57,6 +58,7 @@ export interface ObjectTypeAttributeField {
   propertyType: string;
   isPrimary: 1 | 0;
   isStoreAsPublic: 1 | 0;
+  isInstanceName?: 1 | 0;
   publicPropertyID?: number;
   isVector?: 1 | 0;
   sourceColumnName: string;
@@ -71,12 +73,23 @@ export interface ObjectTypeAttributeField {
   _vectorPropertyId?: string | number;
 }
 
+export interface InstanceSyncSourceMappingEntry {
+  fieldName?: string;
+  fieldComment?: string;
+  fieldType?: string;
+  fieldOriginName?: string;
+}
+
 export interface InstanceSyncMappingField {
   key: string;
   sourceColumnName?: string;
   sourceColumnComment?: string;
   sourceColumnType?: string;
   sourceCoumnOriginName?: string;
+  /** 按数据来源类型分组的字段映射（key 可为 sourceType 或 tabId） */
+  sourceMappings?: Partial<
+    Record<InstanceSyncSourceType | string, InstanceSyncSourceMappingEntry>
+  >;
   propertyID: string;
   propertyComment: string;
   propertyType: string;
@@ -103,6 +116,11 @@ export interface ObjectTypeDataSourceState {
   filePath?: string;
   queryMode?: 'selected' | 'sql';
   sql?: string;
+}
+
+export interface InstanceSyncSourceTabItem {
+  id: string;
+  sourceType: InstanceSyncSourceType;
 }
 
 export interface SyncSourceDataStrategyFormState {
@@ -140,6 +158,36 @@ export interface SyncSourceDataStrategyFormState {
   fileParseResultRows?: Record<string, string>[];
   /** 文件解析：与 rows 对应的解析上下文标识 */
   fileParseResultRunKey?: string;
+  /** 工作流：数据任务 id */
+  workflowDataTaskId?: string;
+  /** 工作流：数据任务名称（回显用） */
+  workflowDataTaskName?: string;
+  /** 工作流：关联 processId */
+  workflowProcessId?: string;
+  /** 工作流：已选数据任务快照（用于展示列表信息） */
+  workflowDataTaskSnapshot?: Pick<
+    DataTaskItem,
+    | 'taskType'
+    | 'name'
+    | 'scheduleType'
+    | 'status'
+    | 'latestExecutionStatus'
+    | 'updater'
+    | 'updaterName'
+    | 'updateTime'
+    | 'description'
+  >;
+  /** 工作流：输出字段（用于实例同步映射） */
+  workflowOutputFields?: SourceTableField[];
+  /** 实例映射中勾选展示的数据来源类型（兼容旧数据） */
+  mappingSourceTypes?: InstanceSyncSourceType[];
+  /** 实例同步数据源 Tab（支持同类型多实例） */
+  mappingSourceTabs?: InstanceSyncSourceTabItem[];
+  /** 各 Tab 独立配置快照 */
+  sourceTabConfigSnapshots?: Record<
+    string,
+    Partial<SyncSourceDataStrategyFormState>
+  >;
   sourceDataInfo: SqlSourceDataInfo;
   mode: string;
   conflictStrategy: string;

@@ -21,6 +21,7 @@ import {
 import type { OntologScene } from '@/types/ontologySceneApi';
 import type { InstanceQueryRow } from '@/pages/exploreAnalysis/objectBrowse/types';
 import type {
+  GraphLoadSettings,
   QueryResultItem,
   RelationLoadMode,
   SelectedObjectContext
@@ -39,7 +40,11 @@ interface ObjectSelectDrawerProps {
   loadedInstanceKeys: Set<string>;
   loading?: boolean;
   onClose: () => void;
-  onLoad: (rows: QueryResultItem[], mode: RelationLoadMode) => void;
+  onLoad: (
+    rows: QueryResultItem[],
+    mode: RelationLoadMode,
+    graphSettings?: GraphLoadSettings
+  ) => void;
 }
 
 interface FormValues {
@@ -252,8 +257,12 @@ export const ObjectSelectDrawer: React.FC<ObjectSelectDrawerProps> = ({
     [loadedInstanceKeys, queryResults]
   );
 
-  const handleLoad = (rows: QueryResultItem[], mode: RelationLoadMode) => {
-    onLoad(rows, mode);
+  const handleLoad = (
+    rows: QueryResultItem[],
+    mode: RelationLoadMode,
+    graphSettings?: GraphLoadSettings
+  ) => {
+    onLoad(rows, mode, graphSettings);
     setQueryResults((prev) =>
       prev.map((item) =>
         rows.some((row) => row.key === item.key)

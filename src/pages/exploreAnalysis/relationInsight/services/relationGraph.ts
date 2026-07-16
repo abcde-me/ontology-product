@@ -28,10 +28,14 @@ import {
   DEFAULT_EDGE_COLOR
 } from '../utils/nodeColors';
 import { analyzeTopologyByAlgorithm } from './graphAlgorithms';
-import { getDefaultAlgorithmParams } from '../constants';
+import {
+  CANVAS_MAX_INSTANCES,
+  CANVAS_MAX_RELATIONS,
+  getDefaultAlgorithmParams
+} from '../constants';
 
-const MAX_LINK_ROWS = 100;
-const MAX_NEIGHBOR_NODES = 40;
+const MAX_LINK_ROWS = CANVAS_MAX_RELATIONS;
+const MAX_NEIGHBOR_NODES = CANVAS_MAX_INSTANCES;
 
 const fieldCommentMapCache = new Map<string, FieldCommentMap>();
 

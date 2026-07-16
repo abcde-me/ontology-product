@@ -81,7 +81,11 @@ export default function AnalysisScopeFields({
     setInstanceOptionsLoading(true);
     Promise.all(
       objectTypes.map(async (ot) => {
-        const options = await loadInstanceSelectOptions(ot.id, ot.name);
+        const options = await loadInstanceSelectOptions(
+          sceneId!,
+          ot.id,
+          ot.name
+        );
         return [ot.id, options] as const;
       })
     )

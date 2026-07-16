@@ -1,0 +1,55 @@
+.tableEmbedded,
+.tableFullscreen {
+  :global(.arco-table-th) {
+    background: #fff7ed;
+  }
+}
+
+.tableEmbedded {
+  border: 1px solid #fed7aa;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.tableFullscreen {
+  height: 100%;
+}
+
+.clickableRow {
+  cursor: pointer;
+
+  &:hover {
+    :global(.arco-table-td) {
+      background: #fff7ed !important;
+    }
+  }
+}
+
+.relationName {
+  color: #c2410c;
+  font-weight: 600;
+}
+
+.detailCell {
+  min-width: 0;
+}
+
+.detailPair {
+  color: #1d2129;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detailMeta {
+  margin-top: 4px;
+  color: #86909c;
+  font-size: 12px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

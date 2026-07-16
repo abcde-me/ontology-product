@@ -1,0 +1,55 @@
+.object-type-panel {
+  padding: 8px 16px 12px;
+}
+
+.panel-header {
+  margin-bottom: 8px;
+}
+
+.panel-header-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+  color: var(--color-text-1);
+}
+
+.strategy-section-title {
+  margin: 10px 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+  color: var(--color-text-1);
+}
+
+.ai-assist-placeholder {
+  margin-top: 10px;
+  border: 1px dashed var(--color-border-2);
+  border-radius: 6px;
+  background: var(--color-fill-1);
+  padding: 10px 12px;
+}
+
+.ai-assist-title {
+  margin-bottom: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-2);
+}
+
+.ai-assist-desc {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--color-text-3);
+}
+
+.mapping-section {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.mapping-hint {
+  margin-bottom: 8px;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--color-text-3);
+}

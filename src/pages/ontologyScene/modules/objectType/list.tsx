@@ -39,7 +39,6 @@ import {
   pauseSyncObjectTypeTask
 } from '@/api/ontologySceneLibrary/objectType';
 import {
-  canAutoConfigureDataResourceInstanceSync,
   configureDataResourceInstanceSync,
   isDataResourceBackedObjectTypeFromRecord
 } from '@/pages/ontologyScene/modules/objectType/services/configureDataResourceInstanceSync';
@@ -84,9 +83,6 @@ export default function OntologySceneObjectTypeList() {
   const [switchLoadingIds, setSwitchLoadingIds] = useState<Set<number>>(
     new Set()
   );
-  const [configureSyncLoadingIds, setConfigureSyncLoadingIds] = useState<
-    Set<number>
-  >(new Set());
   const [selectExistingVisible, setSelectExistingVisible] = useState(false);
   const [selectExistingLoading, setSelectExistingLoading] = useState(false);
 
@@ -268,32 +264,9 @@ export default function OntologySceneObjectTypeList() {
     );
   };
 
-  // 处理配置实例同步
-  const handleConfigureSync = async (record: ObjectType) => {
+  const handleInstanceSync = (record: ObjectType) => {
     if (!record.id) {
       Message.error('对象类型ID无效');
-      return;
-    }
-
-    if (canAutoConfigureDataResourceInstanceSync(record)) {
-      setConfigureSyncLoadingIds((prev) => new Set(prev).add(record.id));
-      try {
-        const result = await configureDataResourceInstanceSync(record.id);
-        if (result.ok) {
-          Message.success(result.message);
-          refresh();
-        } else {
-          Message.error(result.message);
-        }
-      } catch {
-        Message.error('配置实例同步失败');
-      } finally {
-        setConfigureSyncLoadingIds((prev) => {
-          const next = new Set(prev);
-          next.delete(record.id);
-          return next;
-        });
-      }
       return;
     }
 
@@ -532,27 +505,8 @@ export default function OntologySceneObjectTypeList() {
           return <span>-</span>;
         }
 
-        // 如果 enableSyncSourceData 为 false，显示"未配置 配置"
         if (!record.enableSyncSourceData) {
-          return (
-            <div className="flex items-center gap-[4px]">
-              <span className="text-[#334155]">未配置</span>
-              <span
-                className={`text-[#184FF2] ${
-                  configureSyncLoadingIds.has(record.id)
-                    ? 'cursor-wait opacity-60'
-                    : 'cursor-pointer hover:underline'
-                }`}
-                onClick={() => {
-                  if (!configureSyncLoadingIds.has(record.id)) {
-                    void handleConfigureSync(record);
-                  }
-                }}
-              >
-                {configureSyncLoadingIds.has(record.id) ? '配置中...' : '配置'}
-              </span>
-            </div>
-          );
+          return <span className="text-[#334155]">未配置</span>;
         }
 
         // 如果 enableSyncSourceData 为 true，根据 syncEnabled 显示 Switch
@@ -640,7 +594,7 @@ export default function OntologySceneObjectTypeList() {
     {
       title: '操作',
       dataIndex: 'actions',
-      width: 120,
+      width: 160,
       fixed: 'right',
       render: (_, record) => {
         // 当 enableSyncSourceData 和 syncEnabled 都为 true 时，禁用编辑按钮
@@ -668,6 +622,17 @@ export default function OntologySceneObjectTypeList() {
                     编辑
                   </Button>
                 </span>
+              </Tooltip>
+            </PermissionWrapper>
+            <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.MODIFY}>
+              <Tooltip content="同步实例">
+                <Button
+                  type="text"
+                  className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
+                  onClick={() => handleInstanceSync(record)}
+                >
+                  实例
+                </Button>
               </Tooltip>
             </PermissionWrapper>
             <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.DELETE}>

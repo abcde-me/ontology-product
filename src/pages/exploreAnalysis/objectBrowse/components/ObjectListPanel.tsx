@@ -64,6 +64,8 @@ interface ObjectListPanelProps {
   fieldCommentMap?: FieldCommentMap;
 
   vectorFieldNames?: Set<string>;
+
+  instanceNameFieldNames?: string[];
 }
 
 const SCORE_KEY = 'score';
@@ -229,7 +231,9 @@ export const ObjectListPanel: React.FC<ObjectListPanelProps> = ({
 
   fieldCommentMap,
 
-  vectorFieldNames
+  vectorFieldNames,
+
+  instanceNameFieldNames
 }) => {
   const history = useHistory();
 
@@ -561,6 +565,7 @@ export const ObjectListPanel: React.FC<ObjectListPanelProps> = ({
         objectTypeId={selectionContext?.objectTypeId}
         fieldCommentMap={fieldCommentMap}
         vectorFieldNames={vectorFieldNames}
+        instanceNameFieldNames={instanceNameFieldNames}
         onClose={() => {
           setDetailVisible(false);
 

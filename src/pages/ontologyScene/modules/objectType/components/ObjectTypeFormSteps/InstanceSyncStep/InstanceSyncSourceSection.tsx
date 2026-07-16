@@ -4,10 +4,10 @@ import {
   Form,
   Input,
   Message,
-  Radio,
   Select,
   Space
 } from '@arco-design/web-react';
+import { IconDownload } from '@arco-design/web-react/icon';
 import FieldImportUpload from '@/pages/ontologyScene/components/FieldImportUpload';
 import { PrefixAimdp } from '@/api/endpoints';
 import {
@@ -42,22 +42,20 @@ import {
   SqlSourceDataInfo,
   SyncSourceDataStrategyFormState
 } from '../../ObjectTypeFormUtils/types';
-import {
-  getDefaultSyncStrategyPatchForSourceType,
-  normalizeApiSyncStrategyFields,
-  normalizeCsvSyncStrategyFields,
-  normalizeMessageQueueSyncStrategyFields
-} from '../common/instanceSyncStrategyConfig';
 import SqlSourceSelector from '../common/SqlSourceSelector';
 import KafkaMessageParseSettings from './KafkaMessageParseSettings';
 import FileParseResultModal from './FileParseResultModal';
+import WorkflowSourceSelector from './WorkflowSourceSelector';
 import { DEFAULT_OBJECT_TYPE_FILE_PARSE_REQUIREMENT } from '../../../services/extractObjectTypeFileParse';
+import { downloadInstanceSyncCsvTemplate } from '../../../services/buildInstanceSyncCsvTemplate';
 
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
 
 interface InstanceSyncSourceSectionProps {
   form: any;
+  /** 当前 Tab 固定的数据源类型 */
+  sourceType: InstanceSyncSourceType;
   syncSourceDataStrategy: SyncSourceDataStrategyFormState;
   syncMappingFields?: InstanceSyncMappingField[];
   objectTypeAttributes?: ObjectTypeAttributeField[];
@@ -76,7 +74,7 @@ interface InstanceSyncSourceSectionProps {
   onSqlColumnsParsed?: (columns: ConnectorAnalyseFinkSqlColumnItem[]) => void;
   onCsvColumnsParsed?: (fields: SourceTableField[]) => void;
   onKafkaParseFieldsReady?: (fields: SourceTableField[]) => void;
-  onSourceTypeChange?: () => void;
+  onWorkflowOutputFieldsReady?: (fields: SourceTableField[]) => void;
   objectTypeName?: string;
   styles: Record<string, string>;
   readOnly?: boolean;
@@ -99,6 +97,7 @@ function csvUploadResponseToSourceFields(responseData: {
 
 export default function InstanceSyncSourceSection({
   form,
+  sourceType: selectedSourceType,
   syncSourceDataStrategy,
   syncMappingFields = [],
   objectTypeAttributes = [],
@@ -109,14 +108,11 @@ export default function InstanceSyncSourceSection({
   onSqlColumnsParsed,
   onCsvColumnsParsed,
   onKafkaParseFieldsReady,
-  onSourceTypeChange,
+  onWorkflowOutputFieldsReady,
   objectTypeName,
   styles,
   readOnly = false
 }: InstanceSyncSourceSectionProps) {
-  const sourceType =
-    syncSourceDataStrategy.instanceSyncSourceType ||
-    INSTANCE_SYNC_SOURCE_TYPE.DATABASE;
   const [fileResources, setFileResources] = useState<FileResourceListItem[]>(
     []
   );
@@ -134,7 +130,7 @@ export default function InstanceSyncSourceSection({
   const autoSelectKafkaTopicRef = useRef(false);
 
   useEffect(() => {
-    if (sourceType !== INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE) {
+    if (selectedSourceType !== INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE) {
       return;
     }
 
@@ -153,10 +149,10 @@ export default function InstanceSyncSourceSection({
     };
 
     void loadKafkaConnectors();
-  }, [sourceType]);
+  }, [selectedSourceType]);
 
   useEffect(() => {
-    if (sourceType !== INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE) {
+    if (selectedSourceType !== INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE) {
       return;
     }
 
@@ -175,10 +171,10 @@ export default function InstanceSyncSourceSection({
     };
 
     void loadApiConnectors();
-  }, [sourceType]);
+  }, [selectedSourceType]);
 
   useEffect(() => {
-    if (sourceType !== INSTANCE_SYNC_SOURCE_TYPE.FILE_PARSE) {
+    if (selectedSourceType !== INSTANCE_SYNC_SOURCE_TYPE.FILE_PARSE) {
       return;
     }
 
@@ -199,7 +195,7 @@ export default function InstanceSyncSourceSection({
     };
 
     void loadFileResources();
-  }, [sourceType]);
+  }, [selectedSourceType]);
 
   useEffect(() => {
     const filePath = syncSourceDataStrategy.instanceCsvFilePath?.trim();
@@ -215,103 +211,6 @@ export default function InstanceSyncSourceSection({
       }
     ]);
   }, [syncSourceDataStrategy.instanceCsvFilePath]);
-
-  const handleSourceTypeChange = (nextType: InstanceSyncSourceType) => {
-    const defaultStrategyPatch =
-      getDefaultSyncStrategyPatchForSourceType(nextType);
-    const sourceTypeStrategyPatch =
-      nextType === INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE
-        ? normalizeMessageQueueSyncStrategyFields({
-            mode: defaultStrategyPatch?.mode,
-            syncScope: defaultStrategyPatch?.syncScope,
-            exceptionStrategy: defaultStrategyPatch?.exceptionStrategy
-          })
-        : nextType === INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE
-          ? normalizeApiSyncStrategyFields({
-              mode: defaultStrategyPatch?.mode,
-              syncScope: defaultStrategyPatch?.syncScope,
-              exceptionStrategy: defaultStrategyPatch?.exceptionStrategy
-            })
-          : nextType === INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD
-            ? normalizeCsvSyncStrategyFields({
-                mode: defaultStrategyPatch?.mode,
-                syncScope: defaultStrategyPatch?.syncScope,
-                exceptionStrategy: defaultStrategyPatch?.exceptionStrategy
-              })
-            : {};
-    onStrategyUpdate({
-      ...(defaultStrategyPatch || {}),
-      ...sourceTypeStrategyPatch,
-      instanceSyncSourceType: nextType,
-      instanceCsvFilePath: undefined,
-      messageQueueConnectorId: undefined,
-      messageQueueTopic: undefined,
-      messageQueueParseMode: undefined,
-      messageQueueStructuredParseRule: undefined,
-      messageQueueMaxFlattenDepth: undefined,
-      messageQueueArrayHandleMode: undefined,
-      messageQueueAiRulePrompt: undefined,
-      messageQueueAiRuleContent: undefined,
-      messageQueueAiRuleSavedAt: undefined,
-      messageQueueParseResultFields: undefined,
-      apiConnectorId: undefined,
-      apiIncrementalTimeParam: undefined,
-      apiCheckpointParam: undefined,
-      apiIncrementalMarkerField: undefined,
-      apiPageSizeParam: undefined,
-      apiPageNumParam: undefined,
-      apiTotalCountParam: undefined,
-      apiStartPageNum: undefined,
-      fileResourceId: undefined,
-      fileParseRequirement:
-        nextType === INSTANCE_SYNC_SOURCE_TYPE.FILE_PARSE
-          ? DEFAULT_OBJECT_TYPE_FILE_PARSE_REQUIREMENT
-          : undefined,
-      fileParseResultRows: undefined,
-      fileParseResultRunKey: undefined,
-      sourceDataInfo: { queryMode: 'selected' }
-    });
-    form.setFieldsValue({
-      ...(defaultStrategyPatch
-        ? {
-            syncMode: sourceTypeStrategyPatch.mode ?? defaultStrategyPatch.mode,
-            conflictStrategy: defaultStrategyPatch.conflictStrategy,
-            syncScope:
-              sourceTypeStrategyPatch.syncScope ??
-              defaultStrategyPatch.syncScope,
-            pollFetchSize: defaultStrategyPatch.pollFetchSize,
-            parallelism: defaultStrategyPatch.parallelism,
-            exceptionStrategy:
-              sourceTypeStrategyPatch.exceptionStrategy ??
-              defaultStrategyPatch.exceptionStrategy,
-            jdbcPollingIntervalSeconds:
-              defaultStrategyPatch.jdbcPollingIntervalSeconds
-          }
-        : {}),
-      syncSourceType: nextType,
-      syncInstanceCsvFile: undefined,
-      syncMessageQueueConnector: undefined,
-      syncMessageQueueTopic: undefined,
-      syncMessageQueueParseMode: undefined,
-      syncMessageQueueStructuredParseRule: undefined,
-      syncMessageQueueMaxFlattenDepth: undefined,
-      syncMessageQueueArrayHandleMode: undefined,
-      syncMessageQueueAiRulePrompt: undefined,
-      syncMessageQueueAiRuleContent: undefined,
-      syncMessageQueueAiRuleSavedAt: undefined,
-      syncApiConnector: undefined,
-      syncFileResourceId: undefined,
-      syncFileParseRequirement:
-        nextType === INSTANCE_SYNC_SOURCE_TYPE.FILE_PARSE
-          ? DEFAULT_OBJECT_TYPE_FILE_PARSE_REQUIREMENT
-          : undefined,
-      syncConnector: undefined,
-      syncDatabaseTable: undefined,
-      syncSql: undefined,
-      syncQueryMode: 'selected'
-    });
-    onSourceTypeChange?.();
-  };
 
   const handleCsvFileChange = (fileData: any) => {
     if (!fileData || (Array.isArray(fileData) && fileData.length === 0)) {
@@ -385,7 +284,7 @@ export default function InstanceSyncSourceSection({
   useEffect(() => {
     const connectorId = syncSourceDataStrategy.messageQueueConnectorId;
     if (
-      sourceType !== INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE ||
+      selectedSourceType !== INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE ||
       !connectorId
     ) {
       setKafkaTopics([]);
@@ -395,7 +294,7 @@ export default function InstanceSyncSourceSection({
     const shouldAutoSelect = autoSelectKafkaTopicRef.current;
     autoSelectKafkaTopicRef.current = false;
     void applyKafkaConnectorTopics(connectorId, shouldAutoSelect);
-  }, [sourceType, syncSourceDataStrategy.messageQueueConnectorId]);
+  }, [selectedSourceType, syncSourceDataStrategy.messageQueueConnectorId]);
 
   const handleFileResourceChange = (fileResourceId?: string) => {
     onStrategyUpdate({
@@ -459,71 +358,87 @@ export default function InstanceSyncSourceSection({
     setFileParseModalVisible(true);
   };
 
+  const handleDownloadInstanceSyncTemplate = () => {
+    if (readOnly) {
+      return;
+    }
+    if (
+      Boolean(syncSourceDataStrategy.instanceCsvFilePath) ||
+      csvFileList.length > 0
+    ) {
+      Message.warning('请先删除已上传的文件后再下载模板');
+      return;
+    }
+    if (!objectTypeAttributes.length) {
+      Message.warning('请先在属性信息步骤配置对象类型属性');
+      return;
+    }
+    downloadInstanceSyncCsvTemplate(objectTypeAttributes, objectTypeName);
+    Message.success('开始下载导入模板');
+  };
+
   const selectedFileName = fileResources.find(
     (item) => item.id === syncSourceDataStrategy.fileResourceId
   )?.fileName;
 
   return (
     <>
-      <FormItem
-        label="数据源类型"
-        field="syncSourceType"
-        rules={[{ required: true, message: '请选择数据源类型' }]}
-        initialValue={INSTANCE_SYNC_SOURCE_TYPE.DATABASE}
-      >
-        <Radio.Group
-          value={sourceType}
-          disabled={readOnly}
-          onChange={handleSourceTypeChange}
-        >
-          <Radio value={INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD}>CSV上传</Radio>
-          <Radio value={INSTANCE_SYNC_SOURCE_TYPE.DATABASE}>数据库</Radio>
-          <Radio value={INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE}>
-            消息队列
-          </Radio>
-          <Radio value={INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE}>API接口</Radio>
-          <Radio value={INSTANCE_SYNC_SOURCE_TYPE.FILE_PARSE}>文件解析</Radio>
-        </Radio.Group>
-      </FormItem>
-
-      {sourceType === INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD ? (
-        <FormItem
-          label="实例数据文件"
-          field="syncInstanceCsvFile"
-          rules={[
-            {
-              required: true,
-              validator: (_value, callback) => {
-                if (!syncSourceDataStrategy.instanceCsvFilePath?.trim()) {
-                  callback('请上传CSV文件');
-                  return;
+      {selectedSourceType === INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD ? (
+        <>
+          <FormItem
+            label="实例数据文件"
+            field="syncInstanceCsvFile"
+            rules={[
+              {
+                required: true,
+                validator: (_value, callback) => {
+                  if (!syncSourceDataStrategy.instanceCsvFilePath?.trim()) {
+                    callback('请上传CSV文件');
+                    return;
+                  }
+                  callback();
                 }
-                callback();
               }
-            }
-          ]}
-        >
-          <FieldImportUpload
-            accept=".csv"
-            fileType="csv"
-            maxSize={100}
-            customAction={`${PrefixAimdp}/UploadOntologyEntityDataFile`}
-            fileList={csvFileList}
-            disabled={readOnly}
-            showTemplateLinks={false}
-            hasUploadedFile={
-              Boolean(syncSourceDataStrategy.instanceCsvFilePath) ||
-              csvFileList.length > 0
-            }
-            onFileChange={handleCsvFileChange}
-            onUploadingChange={() => {
-              // 保持 FieldImportUpload 调用签名稳定。
-            }}
-          />
-        </FormItem>
+            ]}
+          >
+            {!readOnly ? (
+              <div className={styles['instance-sync-csv-template-row']}>
+                <button
+                  type="button"
+                  className={styles['instance-sync-csv-template-link']}
+                  onClick={handleDownloadInstanceSyncTemplate}
+                >
+                  <IconDownload />
+                  下载导入模板(.csv)
+                </button>
+                <span className={styles['instance-sync-csv-template-tip']}>
+                  请先下载模板，填写实例数据后再上传
+                </span>
+              </div>
+            ) : null}
+            <FieldImportUpload
+              accept=".csv"
+              fileType="csv"
+              maxSize={100}
+              customAction={`${PrefixAimdp}/UploadOntologyEntityDataFile`}
+              fileList={csvFileList}
+              disabled={readOnly}
+              showTemplateLinks={false}
+              hasUploadedFile={
+                Boolean(syncSourceDataStrategy.instanceCsvFilePath) ||
+                csvFileList.length > 0
+              }
+              csvFormatHint={`UTF-8 编码，不超过 100MB；第 1 行属性 id、第 2 行属性字段类型、第 3 行属性字段信息，第 4 行起为实例数据`}
+              onFileChange={handleCsvFileChange}
+              onUploadingChange={() => {
+                // 保持 FieldImportUpload 调用签名稳定。
+              }}
+            />
+          </FormItem>
+        </>
       ) : null}
 
-      {sourceType === INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE ? (
+      {selectedSourceType === INSTANCE_SYNC_SOURCE_TYPE.MESSAGE_QUEUE ? (
         <>
           <FormItem
             label="数据源连接"
@@ -677,7 +592,7 @@ export default function InstanceSyncSourceSection({
         </>
       ) : null}
 
-      {sourceType === INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE ? (
+      {selectedSourceType === INSTANCE_SYNC_SOURCE_TYPE.API_INTERFACE ? (
         <>
           <FormItem
             label="数据源连接"
@@ -763,22 +678,24 @@ export default function InstanceSyncSourceSection({
         </>
       ) : null}
 
-      {sourceType === INSTANCE_SYNC_SOURCE_TYPE.DATABASE ? (
-        <SqlSourceSelector
-          form={form}
-          value={syncSourceDataStrategy.sourceDataInfo}
-          onChange={onSourceDataInfoChange}
-          onTableSelected={onTableSelected}
-          onSqlColumnsParsed={onSqlColumnsParsed}
-          fieldPrefix="sync"
-          styles={styles}
-          ontologySqlTestTaskType="TABLE_REALTIME_SYNC"
-          syncSourceDataStrategyForSqlTest={syncSourceDataStrategy}
-          readOnly={readOnly}
-        />
+      {selectedSourceType === INSTANCE_SYNC_SOURCE_TYPE.DATABASE ? (
+        <>
+          <SqlSourceSelector
+            form={form}
+            value={syncSourceDataStrategy.sourceDataInfo}
+            onChange={onSourceDataInfoChange}
+            onTableSelected={onTableSelected}
+            onSqlColumnsParsed={onSqlColumnsParsed}
+            fieldPrefix="sync"
+            styles={styles}
+            ontologySqlTestTaskType="TABLE_REALTIME_SYNC"
+            syncSourceDataStrategyForSqlTest={syncSourceDataStrategy}
+            readOnly={readOnly}
+          />
+        </>
       ) : null}
 
-      {sourceType === INSTANCE_SYNC_SOURCE_TYPE.FILE_PARSE ? (
+      {selectedSourceType === INSTANCE_SYNC_SOURCE_TYPE.FILE_PARSE ? (
         <>
           <FormItem
             label="解析文件"
@@ -853,6 +770,20 @@ export default function InstanceSyncSourceSection({
             readOnly={readOnly}
             onClose={() => setFileParseModalVisible(false)}
             onSave={handleSaveFileParseResult}
+          />
+        </>
+      ) : null}
+
+      {selectedSourceType === INSTANCE_SYNC_SOURCE_TYPE.WORKFLOW ? (
+        <>
+          <WorkflowSourceSelector
+            form={form}
+            syncSourceDataStrategy={syncSourceDataStrategy}
+            objectTypeAttributes={objectTypeAttributes}
+            onStrategyUpdate={onStrategyUpdate}
+            onWorkflowOutputFieldsReady={onWorkflowOutputFieldsReady}
+            styles={styles}
+            readOnly={readOnly}
           />
         </>
       ) : null}

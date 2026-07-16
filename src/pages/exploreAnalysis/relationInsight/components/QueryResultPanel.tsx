@@ -1,10 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Button, Space, Table, Tag, Tooltip } from '@arco-design/web-react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
 import type { FieldCommentMap } from '@/pages/exploreAnalysis/objectBrowse/utils/fieldDisplayLabel';
 import { formatFieldDisplayLabel } from '@/pages/exploreAnalysis/objectBrowse/utils/fieldDisplayLabel';
-import type { QueryResultItem, RelationLoadMode } from '../types';
+import type {
+  GraphLoadSettings,
+  QueryResultItem,
+  RelationLoadMode
+} from '../types';
+import { LoadGraphSettingsModal } from './LoadGraphSettingsModal';
 import styles from './QueryResultPanel.module.scss';
 
 interface QueryResultPanelProps {
@@ -13,7 +18,11 @@ interface QueryResultPanelProps {
   loading?: boolean;
   fieldCommentMap?: FieldCommentMap;
   onSelectionChange: (keys: string[]) => void;
-  onLoad: (rows: QueryResultItem[], mode: RelationLoadMode) => void;
+  onLoad: (
+    rows: QueryResultItem[],
+    mode: RelationLoadMode,
+    graphSettings?: GraphLoadSettings
+  ) => void;
 }
 
 const INTERNAL_FIELD_KEYS = new Set(['score', '_score', 'similarity']);
@@ -26,6 +35,8 @@ export const QueryResultPanel: React.FC<QueryResultPanelProps> = ({
   onSelectionChange,
   onLoad
 }) => {
+  const [graphSettingsVisible, setGraphSettingsVisible] = useState(false);
+
   const selectedRows = useMemo(
     () => data.filter((item) => selectedKeys.includes(item.key)),
     [data, selectedKeys]
@@ -129,7 +140,12 @@ export const QueryResultPanel: React.FC<QueryResultPanelProps> = ({
     if (pendingSelectedRows.length === 0) {
       return;
     }
-    onLoad(pendingSelectedRows, 'graph');
+    setGraphSettingsVisible(true);
+  };
+
+  const handleGraphSettingsConfirm = (settings: GraphLoadSettings) => {
+    setGraphSettingsVisible(false);
+    onLoad(pendingSelectedRows, 'graph', settings);
   };
 
   return (
@@ -137,7 +153,7 @@ export const QueryResultPanel: React.FC<QueryResultPanelProps> = ({
       <div className={styles.header}>
         <div className={styles['title-wrap']}>
           <span className={styles.title}>查询结果</span>
-          <Tooltip content="勾选实例后，可仅载入节点或载入两跳关联图谱">
+          <Tooltip content="勾选实例后，可仅载入节点或载入关联图谱">
             <IconQuestionCircle className={styles.help} />
           </Tooltip>
           <Space size={8} className={styles.stats}>
@@ -157,7 +173,7 @@ export const QueryResultPanel: React.FC<QueryResultPanelProps> = ({
           >
             载入节点
           </Button>
-          <Tooltip content="仅载入各节点两跳关联图谱">
+          <Tooltip content="载入各节点关联图谱，可设置关系跳数">
             <span className={styles['tooltip-btn-wrap']}>
               <Button
                 size="small"
@@ -171,6 +187,12 @@ export const QueryResultPanel: React.FC<QueryResultPanelProps> = ({
           </Tooltip>
         </Space>
       </div>
+
+      <LoadGraphSettingsModal
+        visible={graphSettingsVisible}
+        onCancel={() => setGraphSettingsVisible(false)}
+        onConfirm={handleGraphSettingsConfirm}
+      />
 
       <Table
         rowKey="key"

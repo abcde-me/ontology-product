@@ -17,7 +17,8 @@ import {
 import {
   DEFAULT_CANVAS_MODE,
   DEFAULT_GRAPH_ALGORITHM,
-  getDefaultAlgorithmParams
+  getDefaultAlgorithmParams,
+  resolveGraphLoadAlgorithm
 } from './constants';
 import {
   buildRelationGraph,
@@ -29,6 +30,7 @@ import type {
   GraphAlgorithmKey,
   GraphAlgorithmParams,
   GraphLayoutKey,
+  GraphLoadSettings,
   QueryResultItem,
   RelationGraphEdge,
   RelationGraphNode,
@@ -143,7 +145,11 @@ export default function RelationInsight() {
   }, []);
 
   const loadToCanvas = useCallback(
-    async (contexts: SelectedObjectContext[], mode: RelationLoadMode) => {
+    async (
+      contexts: SelectedObjectContext[],
+      mode: RelationLoadMode,
+      graphSettings?: GraphLoadSettings
+    ) => {
       if (contexts.length === 0) {
         return;
       }
@@ -154,12 +160,20 @@ export default function RelationInsight() {
       try {
         const existingGraph =
           cleared || nodes.length === 0 ? undefined : { nodes, edges };
+        const graphLoadConfig =
+          mode === 'graph' && graphSettings
+            ? resolveGraphLoadAlgorithm(graphSettings.hopCount)
+            : mode === 'graph'
+              ? resolveGraphLoadAlgorithm(1)
+              : null;
         const graphAlgorithm =
-          mode === 'graph' ? DEFAULT_GRAPH_ALGORITHM : algorithm;
+          graphLoadConfig?.algorithm ??
+          (mode === 'graph' ? DEFAULT_GRAPH_ALGORITHM : algorithm);
         const graphParams =
-          mode === 'graph'
+          graphLoadConfig?.algorithmParams ??
+          (mode === 'graph'
             ? getDefaultAlgorithmParams(DEFAULT_GRAPH_ALGORITHM)
-            : algorithmParams;
+            : algorithmParams);
         const graph = await buildRelationGraph({
           selectedObjects: contexts,
           algorithm: graphAlgorithm,
@@ -201,11 +215,15 @@ export default function RelationInsight() {
   );
 
   const handleLoadFromResults = useCallback(
-    (rows: QueryResultItem[], mode: RelationLoadMode) => {
+    (
+      rows: QueryResultItem[],
+      mode: RelationLoadMode,
+      graphSettings?: GraphLoadSettings
+    ) => {
       const contexts = rows.map((item) =>
         toSelectedObjectContext(item, mode === 'graph')
       );
-      loadToCanvas(contexts, mode);
+      loadToCanvas(contexts, mode, graphSettings);
     },
     [loadToCanvas]
   );

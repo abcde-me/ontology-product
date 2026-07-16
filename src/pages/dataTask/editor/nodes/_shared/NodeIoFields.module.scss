@@ -1,0 +1,72 @@
+.node-io-fields {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-2);
+}
+
+.section {
+  margin-bottom: 12px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-1);
+  line-height: 22px;
+}
+
+.section-desc {
+  margin-bottom: 6px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--color-text-3);
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.field-name {
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.field-type {
+  width: 130px;
+  flex-shrink: 0;
+}
+
+.field-des {
+  flex: 1;
+  min-width: 0;
+}
+
+.remove-btn {
+  flex-shrink: 0;
+  color: var(--color-text-3);
+  cursor: pointer;
+
+  &:hover {
+    color: rgb(var(--danger-6));
+  }
+}
+
+.empty-tip {
+  padding: 4px 0;
+  font-size: 12px;
+  color: var(--color-text-3);
+}

@@ -44,7 +44,7 @@ const fetchPropertiesFromClient = (
   return res.data?.result || [];
 };
 
-const fetchProperties = async (
+export const fetchProperties = async (
   sceneId: number,
   objectTypeId: number
 ): Promise<PhysicalProperties[]> => {
@@ -98,6 +98,24 @@ export const buildVectorFieldNameSet = (
       .map((item) => String(item.name).trim())
   );
 
+export const extractInstanceNameFieldNames = (
+  properties: PhysicalProperties[]
+): string[] => {
+  const instanceNameFields = properties
+    .filter((item) => item.name && item.isInstanceName === 1)
+    .map((item) => String(item.name).trim())
+    .filter(Boolean);
+
+  if (instanceNameFields.length) {
+    return instanceNameFields;
+  }
+
+  return properties
+    .filter((item) => item.name && item.isPrimary === 1)
+    .map((item) => String(item.name).trim())
+    .filter(Boolean);
+};
+
 export const fetchFieldCommentMap = async (
   sceneId: number,
   objectTypeId: number
@@ -114,7 +132,8 @@ export const fetchObjectBrowseFieldMeta = async (
 
   return {
     commentMap: buildFieldCommentMap(properties),
-    vectorFieldNames: buildVectorFieldNameSet(properties)
+    vectorFieldNames: buildVectorFieldNameSet(properties),
+    instanceNameFieldNames: extractInstanceNameFieldNames(properties)
   };
 };
 

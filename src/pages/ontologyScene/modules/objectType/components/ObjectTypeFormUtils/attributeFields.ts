@@ -4,10 +4,12 @@ import {
   OntologyPhysicalPropertiesList
 } from '@/types/objectType';
 import { INSTANCE_SYNC_SOURCE_TYPE } from '@/pages/ontologyScene/common/constants';
+import type { InstanceSyncSourceType } from '@/pages/ontologyScene/common/constants';
 import { isStreamParseSettingsConfigured } from './instanceSyncStreamParse';
 import {
   AttributeField,
   InstanceSyncMappingField,
+  InstanceSyncSourceMappingEntry,
   ObjectTypeAttributeField,
   SourceTableField,
   SqlSourceDataInfo,
@@ -36,10 +38,9 @@ export function isDatabaseSyncSourceConfigured(
   return options?.isDataResource ? true : !!sourceDataInfo.connectorId;
 }
 
-export function isInstanceSyncSourceConfigured(
+export function isInstanceSyncSourceTypeConfigured(
   strategy: Pick<
     SyncSourceDataStrategyFormState,
-    | 'instanceSyncSourceType'
     | 'instanceCsvFilePath'
     | 'messageQueueConnectorId'
     | 'messageQueueTopic'
@@ -50,13 +51,12 @@ export function isInstanceSyncSourceConfigured(
     | 'messageQueueAiRuleContent'
     | 'apiConnectorId'
     | 'fileResourceId'
+    | 'workflowDataTaskId'
     | 'sourceDataInfo'
   >,
+  sourceType: InstanceSyncSourceType,
   options?: { isDataResource?: boolean }
 ): boolean {
-  const sourceType =
-    strategy.instanceSyncSourceType || INSTANCE_SYNC_SOURCE_TYPE.DATABASE;
-
   if (sourceType === INSTANCE_SYNC_SOURCE_TYPE.CSV_UPLOAD) {
     return !!strategy.instanceCsvFilePath?.trim();
   }
@@ -82,7 +82,37 @@ export function isInstanceSyncSourceConfigured(
     return !!strategy.fileResourceId?.trim();
   }
 
+  if (sourceType === INSTANCE_SYNC_SOURCE_TYPE.WORKFLOW) {
+    return !!strategy.workflowDataTaskId?.trim();
+  }
+
   return isDatabaseSyncSourceConfigured(strategy.sourceDataInfo, options);
+}
+
+export function isInstanceSyncSourceConfigured(
+  strategy: Pick<
+    SyncSourceDataStrategyFormState,
+    | 'mappingSourceTypes'
+    | 'instanceSyncSourceType'
+    | 'instanceCsvFilePath'
+    | 'messageQueueConnectorId'
+    | 'messageQueueTopic'
+    | 'messageQueueParseMode'
+    | 'messageQueueStructuredParseRule'
+    | 'messageQueueMaxFlattenDepth'
+    | 'messageQueueArrayHandleMode'
+    | 'messageQueueAiRuleContent'
+    | 'apiConnectorId'
+    | 'fileResourceId'
+    | 'workflowDataTaskId'
+    | 'sourceDataInfo'
+  >,
+  options?: { isDataResource?: boolean }
+): boolean {
+  const sourceTypes = resolvePrimaryMappingSourceTypes(strategy);
+  return sourceTypes.every((sourceType) =>
+    isInstanceSyncSourceTypeConfigured(strategy, sourceType, options)
+  );
 }
 
 export function clearInstanceSyncMappingSourceFields(
@@ -93,8 +123,151 @@ export function clearInstanceSyncMappingSourceFields(
     sourceColumnName: undefined,
     sourceColumnComment: undefined,
     sourceColumnType: undefined,
-    sourceCoumnOriginName: undefined
+    sourceCoumnOriginName: undefined,
+    sourceMappings: undefined
   };
+}
+
+export function getMappingEntryForKey(
+  field: InstanceSyncMappingField,
+  key: string
+): InstanceSyncSourceMappingEntry | undefined {
+  return field.sourceMappings?.[key];
+}
+
+export function getMappingEntryForSourceType(
+  field: InstanceSyncMappingField,
+  sourceType: InstanceSyncSourceType
+): InstanceSyncSourceMappingEntry | undefined {
+  return getMappingEntryForKey(field, sourceType);
+}
+
+export function hasAnySourceMapping(
+  field: InstanceSyncMappingField,
+  keys?: string[]
+): boolean {
+  if (keys?.length) {
+    return keys.some((key) => {
+      const entry = getMappingEntryForKey(field, key);
+      return Boolean(entry?.fieldName?.trim());
+    });
+  }
+  return Boolean(field.sourceColumnName?.trim());
+}
+
+export function syncLegacySourceFieldsFromPrimaryKey(
+  field: InstanceSyncMappingField,
+  primaryKey?: string
+): InstanceSyncMappingField {
+  if (!primaryKey) {
+    return field;
+  }
+  const entry = getMappingEntryForKey(field, primaryKey);
+  if (!entry?.fieldName?.trim()) {
+    return {
+      ...field,
+      sourceColumnName: undefined,
+      sourceColumnComment: undefined,
+      sourceColumnType: undefined,
+      sourceCoumnOriginName: undefined
+    };
+  }
+  return {
+    ...field,
+    sourceColumnName: entry.fieldName,
+    sourceColumnComment: entry.fieldComment,
+    sourceColumnType: entry.fieldType,
+    sourceCoumnOriginName: entry.fieldOriginName || entry.fieldName
+  };
+}
+
+export function syncLegacySourceFieldsFromPrimaryType(
+  field: InstanceSyncMappingField,
+  primaryType?: InstanceSyncSourceType | string
+): InstanceSyncMappingField {
+  return syncLegacySourceFieldsFromPrimaryKey(field, primaryType);
+}
+
+export function applyMappingSourceTypesToFields(
+  fields: InstanceSyncMappingField[],
+  sourceTypes: InstanceSyncSourceType[],
+  removedTypes: InstanceSyncSourceType[] = []
+): InstanceSyncMappingField[] {
+  return applyMappingKeysToFields(fields, sourceTypes, removedTypes);
+}
+
+export function applyMappingKeysToFields(
+  fields: InstanceSyncMappingField[],
+  keys: string[],
+  removedKeys: string[] = []
+): InstanceSyncMappingField[] {
+  return fields.map((field) => {
+    const nextMappings = { ...(field.sourceMappings || {}) };
+    removedKeys.forEach((key) => {
+      delete nextMappings[key];
+    });
+    keys.forEach((key) => {
+      if (!nextMappings[key]) {
+        nextMappings[key] = {};
+      }
+    });
+    return {
+      ...field,
+      sourceMappings: Object.keys(nextMappings).length
+        ? nextMappings
+        : undefined
+    };
+  });
+}
+
+export function updateMappingEntryForKey(
+  field: InstanceSyncMappingField,
+  key: string,
+  updates: Partial<InstanceSyncSourceMappingEntry>
+): InstanceSyncMappingField {
+  const current = field.sourceMappings?.[key] || {};
+  const nextEntry = { ...current, ...updates };
+  const hasValue = Boolean(
+    nextEntry.fieldName?.trim() ||
+      nextEntry.fieldComment?.trim() ||
+      nextEntry.fieldType?.trim()
+  );
+  const nextMappings = { ...(field.sourceMappings || {}) };
+  if (hasValue) {
+    nextMappings[key] = nextEntry;
+  } else {
+    delete nextMappings[key];
+  }
+  return {
+    ...field,
+    sourceMappings: Object.keys(nextMappings).length ? nextMappings : undefined
+  };
+}
+
+export function updateMappingEntryForSourceType(
+  field: InstanceSyncMappingField,
+  sourceType: InstanceSyncSourceType,
+  updates: Partial<InstanceSyncSourceMappingEntry>
+): InstanceSyncMappingField {
+  return updateMappingEntryForKey(field, sourceType, updates);
+}
+
+export function resolvePrimaryMappingSourceTypes(
+  strategy?: Pick<
+    SyncSourceDataStrategyFormState,
+    'mappingSourceTabs' | 'mappingSourceTypes' | 'instanceSyncSourceType'
+  >
+): InstanceSyncSourceType[] {
+  if (strategy?.mappingSourceTabs?.length) {
+    return strategy.mappingSourceTabs.map((tab) => tab.sourceType);
+  }
+  const selected = strategy?.mappingSourceTypes || [];
+  if (selected.length) {
+    return selected;
+  }
+  const fallback =
+    strategy?.instanceSyncSourceType || INSTANCE_SYNC_SOURCE_TYPE.DATABASE;
+  return fallback ? [fallback] : [];
 }
 
 export function buildSyncMappingFieldsFromAttributes(
@@ -157,6 +330,7 @@ export function sourceFieldToObjectTypeAttribute(
     propertyType: normalizeColumnTypeForPrimary(field.fieldType, isPrimary),
     isPrimary: isPrimary ? 1 : 0,
     isStoreAsPublic: 0,
+    isInstanceName: isPrimary ? 1 : 0,
     publicPropertyID: 0,
     isVector: 0,
     sourceColumnName: field.fieldId,
@@ -228,6 +402,7 @@ export function finkSqlParsedColumnToObjectTypeAttribute(
     propertyType: normalizeColumnTypeForPrimary(fieldType, isPrimaryBool),
     isPrimary,
     isStoreAsPublic: 0,
+    isInstanceName: isPrimary,
     publicPropertyID: 0,
     isVector: 0,
     sourceColumnName: fieldId,
@@ -266,6 +441,7 @@ export function objectTypeAttributeToLegacyField(
     isPrimary: field.isPrimary,
     isUse: 1,
     isStoreAsPublic: field.isStoreAsPublic,
+    isInstanceName: field.isInstanceName,
     publicPropertyID: field.publicPropertyID || 0,
     isVector: field.isVector,
     vectorSourceFieldName: undefined,
@@ -291,6 +467,7 @@ interface LegacyAttributeLike {
   propertyType?: string;
   isPrimary?: number;
   isStoreAsPublic?: number;
+  isInstanceName?: number;
   publicPropertyID?: number;
   isVector?: number;
   sourceColumnName?: string;
@@ -323,6 +500,9 @@ export function legacyFieldToObjectTypeAttribute(
     raw.sourceColumnComment ?? raw.comment ?? propertyComment ?? '';
   const backendPropertyID = Number(raw.propertyID);
   const legacySourceTable = raw.sourceTableName?.trim();
+  const isPrimary = raw.isPrimary === 1 ? 1 : 0;
+  const isInstanceName =
+    raw.isInstanceName === 1 ? 1 : raw.isInstanceName === 0 ? 0 : isPrimary;
   return {
     key: createObjectTypeAttributeKey('legacy-field'),
     backendPropertyID: Number.isFinite(backendPropertyID)
@@ -331,8 +511,9 @@ export function legacyFieldToObjectTypeAttribute(
     propertyID,
     propertyComment,
     propertyType,
-    isPrimary: raw.isPrimary === 1 ? 1 : 0,
+    isPrimary,
     isStoreAsPublic: raw.isStoreAsPublic === 1 ? 1 : 0,
+    isInstanceName,
     publicPropertyID: raw.publicPropertyID || 0,
     isVector: raw.isVector === 1 ? 1 : 0,
     sourceColumnName,

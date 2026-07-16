@@ -11,6 +11,7 @@ import {
 import {
   DATA_SOURCE_TYPE,
   INSTANCE_SYNC_SOURCE_TYPE,
+  InstanceSyncSourceType,
   OBJECT_TYPE_ICON_OPTIONS
 } from '@/pages/ontologyScene/common/constants';
 import {
@@ -27,7 +28,9 @@ import { isGraphObjectTypePlaceholderFilePath } from '@/utils/ontologyCsvTemplat
 import {
   VECTOR_FIELD_SUFFIX,
   flattenOntologyPhysicalPropertiesForSubmit,
-  objectTypeAttributeToLegacyField
+  getMappingEntryForSourceType,
+  objectTypeAttributeToLegacyField,
+  resolvePrimaryMappingSourceTypes
 } from '../ObjectTypeFormUtils/attributeFields';
 import {
   AttributeField,
@@ -89,6 +92,27 @@ function toSubmitSourceDataInfoFromSyncState(
     };
   }
 
+  if (sourceType === INSTANCE_SYNC_SOURCE_TYPE.FILE_PARSE) {
+    if (!state.fileResourceId?.trim()) {
+      return undefined;
+    }
+    return {
+      tableName: state.fileResourceId.trim(),
+      queryMode: 'selected'
+    };
+  }
+
+  if (sourceType === INSTANCE_SYNC_SOURCE_TYPE.WORKFLOW) {
+    if (!state.workflowDataTaskId?.trim()) {
+      return undefined;
+    }
+    return {
+      databaseName: state.workflowProcessId?.trim() || undefined,
+      tableName: state.workflowDataTaskId.trim(),
+      queryMode: 'selected'
+    };
+  }
+
   return toSubmitSourceDataInfo(state.sourceDataInfo);
 }
 
@@ -138,11 +162,36 @@ function dataSourceStateToSqlSourceDataInfo(
   };
 }
 
+function resolveEffectiveMappingSource(
+  mapping: InstanceSyncMappingField | undefined,
+  primaryType?: InstanceSyncSourceType
+) {
+  const entry =
+    mapping && primaryType
+      ? getMappingEntryForSourceType(mapping, primaryType)
+      : undefined;
+  if (entry?.fieldName?.trim()) {
+    return {
+      sourceColumnName: entry.fieldName,
+      sourceColumnComment: entry.fieldComment,
+      sourceColumnType: entry.fieldType,
+      sourceCoumnOriginName: entry.fieldOriginName || entry.fieldName
+    };
+  }
+  return {
+    sourceColumnName: mapping?.sourceColumnName,
+    sourceColumnComment: mapping?.sourceColumnComment,
+    sourceColumnType: mapping?.sourceColumnType,
+    sourceCoumnOriginName: mapping?.sourceCoumnOriginName
+  };
+}
+
 function buildPhysicalProperties(
   objectTypeAttributes: ObjectTypeAttributeField[] | undefined,
   syncMappingFields: InstanceSyncMappingField[] | undefined,
   fallbackAttributeFields: AttributeField[],
-  dataSource?: ObjectTypeDataSourceState
+  dataSource?: ObjectTypeDataSourceState,
+  syncSourceDataStrategy?: SyncSourceDataStrategyFormState
 ): CreateOntologyPhysicalProperty[] | OntologyPhysicalPropertiesList[] {
   if (!objectTypeAttributes?.length) {
     return flattenOntologyPhysicalPropertiesForSubmit(fallbackAttributeFields);
@@ -151,11 +200,20 @@ function buildPhysicalProperties(
   const syncByPropertyID = new Map(
     (syncMappingFields || []).map((field) => [field.propertyID, field])
   );
+  const primaryMappingSourceType = resolvePrimaryMappingSourceTypes(
+    syncSourceDataStrategy
+  )[0];
   const sourcePrimaryKey = (
     syncMappingFields?.length
       ? syncMappingFields
           .filter((field) => field.isPrimary === 1)
-          .map((field) => field.sourceColumnName || field.propertyID)
+          .map((field) => {
+            const resolved = resolveEffectiveMappingSource(
+              field,
+              primaryMappingSourceType
+            );
+            return resolved.sourceColumnName || field.propertyID;
+          })
       : objectTypeAttributes
           .filter((field) => field.isPrimary === 1)
           .map((field) => field.sourceColumnName || field.propertyID)
@@ -180,15 +238,21 @@ function buildPhysicalProperties(
 
   for (const field of objectTypeAttributes) {
     const mapping = syncByPropertyID.get(field.propertyID);
+    const resolvedSource = resolveEffectiveMappingSource(
+      mapping,
+      primaryMappingSourceType
+    );
     const sourceColumnName =
-      mapping?.sourceColumnName || field.sourceColumnName || field.propertyID;
+      resolvedSource.sourceColumnName ||
+      field.sourceColumnName ||
+      field.propertyID;
     const sourceCoumnOriginName =
-      mapping?.sourceCoumnOriginName || sourceColumnName;
+      resolvedSource.sourceCoumnOriginName || sourceColumnName;
     const sourceColumnType =
-      mapping?.sourceColumnType || field.sourceColumnType;
+      resolvedSource.sourceColumnType || field.sourceColumnType;
     const sourceTableName = resolveSourceTableName(field);
     const sourceColumnComment =
-      mapping?.sourceColumnComment ||
+      resolvedSource.sourceColumnComment ||
       field.sourceColumnComment ||
       field.propertyComment;
     const vectorizationOn =
@@ -200,6 +264,7 @@ function buildPhysicalProperties(
       propertyComment: field.propertyComment,
       propertyType: field.propertyType,
       isPrimary: field.isPrimary,
+      isInstanceName: field.isInstanceName ?? (field.isPrimary === 1 ? 1 : 0),
       isVector: 0,
       publicPropertyID: field.publicPropertyID || 0,
       sourceColumnName,
@@ -230,6 +295,7 @@ function buildPhysicalProperties(
         propertyComment: vecComment,
         propertyType: 'vector',
         isPrimary: 0,
+        isInstanceName: 0,
         isVector: 1,
         publicPropertyID: 0,
         sourceColumnName,
@@ -457,7 +523,8 @@ export function buildCreateObjectTypeRequest(
     data.objectTypeAttributes,
     data.syncMappingFields,
     data.ontologyPhysicalPropertiesList as AttributeField[],
-    data._dataSource
+    data._dataSource,
+    data.syncSourceDataStrategy
   );
 
   return {

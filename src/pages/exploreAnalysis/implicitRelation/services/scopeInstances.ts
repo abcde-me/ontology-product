@@ -5,7 +5,10 @@ import type {
 } from '../types';
 import { listOntologyObjectTypeData } from '@/api/ontologySceneLibrary/graph';
 import { resolveInstanceId } from '@/pages/exploreAnalysis/objectBrowse/utils/instanceRow';
-import type { InstanceQueryRow } from '@/pages/exploreAnalysis/objectBrowse/types';
+import {
+  getInstanceNameFieldNames,
+  resolveInstanceDisplayName
+} from '@/pages/exploreAnalysis/objectBrowse/utils/instanceDisplayName';
 
 /** 每个对象类型最多载入的实例数（全部模式） */
 export const MAX_INSTANCES_PER_TYPE = 100;
@@ -30,21 +33,8 @@ export const parseInstanceNodeKey = (
   return { objectTypeId, instanceId };
 };
 
-const resolveInstanceLabel = (
-  row: InstanceQueryRow,
-  fallback: string
-): string => {
-  const preferred = ['name', 'title', 'label', 'Name', 'TITLE'];
-  for (const key of preferred) {
-    const value = row[key];
-    if (value != null && String(value).trim()) {
-      return String(value);
-    }
-  }
-  return fallback;
-};
-
 export const fetchObjectTypeInstances = async (
+  sceneId: number,
   objectTypeId: number,
   objectTypeName?: string,
   pageSize = MAX_INSTANCES_PER_TYPE
@@ -59,7 +49,10 @@ export const fetchObjectTypeInstances = async (
     throw new Error(`加载对象类型实例失败：${objectTypeName || objectTypeId}`);
   }
 
-  return (res.data?.result || [])
+  const fieldNames = await getInstanceNameFieldNames(sceneId, objectTypeId);
+  const rows = res.data?.result || [];
+
+  return rows
     .map((row) => {
       const id = resolveInstanceId(row);
       if (id == null || id === '') {
@@ -70,7 +63,7 @@ export const fetchObjectTypeInstances = async (
         objectTypeId,
         objectTypeName,
         instanceId,
-        instanceLabel: resolveInstanceLabel(row, instanceId)
+        instanceLabel: resolveInstanceDisplayName(row, fieldNames, instanceId)
       } as ImplicitScopeInstance;
     })
     .filter((item): item is ImplicitScopeInstance => Boolean(item));
@@ -94,7 +87,9 @@ export const resolveScopeInstances = async (
   }
 
   const batches = await Promise.all(
-    scope.objectTypes.map((ot) => fetchObjectTypeInstances(ot.id, ot.name))
+    scope.objectTypes.map((ot) =>
+      fetchObjectTypeInstances(scope.ontologySceneId, ot.id, ot.name)
+    )
   );
   const merged = batches.flat();
   if (!merged.length) {

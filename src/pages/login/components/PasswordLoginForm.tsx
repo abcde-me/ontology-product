@@ -1,18 +1,20 @@
 import { Login } from '@/api/modules/user';
 import { isRequestSuccess } from '@/api/utils';
-import { Button, Form, Input } from '@arco-design/web-react';
+import { isDevBypassEnabled, withDevInitTimeout } from '@/utils/devFallback';
+import { setLoginToken } from '@/utils/env';
+import { Button, Form, Input, Message } from '@arco-design/web-react';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { CaptchaImage } from './CaptchaImage';
-import { DEFAULT_LOGIN_CAPTCHA_CODE } from '../constants';
-import { useLoginCaptcha } from '../hooks/useLoginCaptcha';
-import styles from '../index.module.scss';
+import {
+  DEFAULT_LOGIN_CAPTCHA_CODE,
+  DEV_LOGIN_CAPTCHA_ID,
+  DEV_LOGIN_TOKEN
+} from '../constants';
 import { getLoginRedirectPath } from '../utils';
 
 interface LoginFormValues {
   account: string;
   password: string;
-  captchaCode: string;
 }
 
 export function PasswordLoginForm() {
@@ -20,42 +22,50 @@ export function PasswordLoginForm() {
   const [loading, setLoading] = useState(false);
   const history = useHistory();
   const location = useLocation();
-  const {
-    captchaId,
-    captchaImage,
-    loading: captchaLoading,
-    refresh
-  } = useLoginCaptcha();
+
+  const enterSystem = () => {
+    history.push(getLoginRedirectPath(location.search));
+  };
+
+  const enterWithDevBypass = () => {
+    setLoginToken(DEV_LOGIN_TOKEN);
+    Message.success('后端登录不可用，已使用本地开发账号进入');
+    enterSystem();
+  };
 
   const handleSubmit = async (values: LoginFormValues) => {
-    if (!captchaId) {
-      form.setFields({
-        captchaCode: {
-          error: { message: '验证码加载失败，请点击图片刷新' }
-        }
-      });
-      return;
-    }
-
     try {
       setLoading(true);
-      const res = await Login({
+
+      const loginRequest = Login({
         account: values.account,
         password: values.password,
-        captchaId,
-        captchaCode: values.captchaCode
+        captchaId: DEV_LOGIN_CAPTCHA_ID,
+        captchaCode: DEFAULT_LOGIN_CAPTCHA_CODE
       });
+
+      const res = isDevBypassEnabled()
+        ? await withDevInitTimeout(loginRequest, 'Login')
+        : await loginRequest;
+
       if (isRequestSuccess(res)) {
-        history.push(getLoginRedirectPath(location.search));
+        enterSystem();
         return;
       }
 
-      form.setFieldValue('captchaCode', DEFAULT_LOGIN_CAPTCHA_CODE);
-      void refresh();
+      if (isDevBypassEnabled()) {
+        enterWithDevBypass();
+        return;
+      }
+
+      Message.error(res?.message || '登录失败');
     } catch (error) {
       console.error('登录失败:', error);
-      form.setFieldValue('captchaCode', DEFAULT_LOGIN_CAPTCHA_CODE);
-      void refresh();
+      if (isDevBypassEnabled()) {
+        enterWithDevBypass();
+        return;
+      }
+      Message.error('登录失败，请稍后重试');
     } finally {
       setLoading(false);
     }
@@ -66,7 +76,6 @@ export function PasswordLoginForm() {
       form={form}
       requiredSymbol={false}
       layout="vertical"
-      initialValues={{ captchaCode: DEFAULT_LOGIN_CAPTCHA_CODE }}
       onSubmit={handleSubmit}
     >
       <Form.Item
@@ -85,32 +94,6 @@ export function PasswordLoginForm() {
         rules={[{ required: true, message: '请输入密码' }]}
       >
         <Input.Password placeholder="请输入密码" />
-      </Form.Item>
-
-      <Form.Item
-        label={
-          <div className="text-[14px] font-bold text-gray-800">验证码</div>
-        }
-        required
-      >
-        <div className={styles.captchaRow}>
-          <Form.Item
-            field="captchaCode"
-            rules={[{ required: true, message: '请输入验证码' }]}
-            noStyle
-          >
-            <Input
-              className={styles.captchaInput}
-              placeholder={DEFAULT_LOGIN_CAPTCHA_CODE}
-              maxLength={6}
-            />
-          </Form.Item>
-          <CaptchaImage
-            image={captchaImage}
-            loading={captchaLoading}
-            onRefresh={refresh}
-          />
-        </div>
       </Form.Item>
 
       <Form.Item>

@@ -10,7 +10,8 @@ import type { DataTaskItem } from '../types';
 import { TaskType, ScheduleType, TaskStatus, ExecutionStatus } from '../types';
 
 const taskTypeMap = {
-  [TaskType.TABLE_SYNC]: '表-表同步'
+  [TaskType.TABLE_SYNC]: '表-表同步',
+  [TaskType.WORKFLOW_DAG]: 'DAG工作流'
 };
 
 const scheduleTypeMap = {
@@ -122,7 +123,7 @@ export const useColumns = ({
       {
         title: '操作',
         dataIndex: 'operations',
-        width: 320,
+        width: 280,
         fixed: 'right' as const,
         render: (_, record) => {
           const canOnline =

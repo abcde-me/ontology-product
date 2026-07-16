@@ -32,6 +32,8 @@ export interface AttachedImplicitRelation {
   peerInstanceLabel?: string;
   direction: 'out' | 'in';
   evidenceTitles?: string[];
+  /** 挖掘发现时间（挂接时从发现结果写入） */
+  discoveredAt?: string;
   attachedAt: string;
 }
 
@@ -198,6 +200,7 @@ export const attachDiscoveriesToInstances = (
       peerInstanceLabel,
       direction: isSource ? 'out' : 'in',
       evidenceTitles: discovery.evidence?.map((item) => item.title),
+      discoveredAt: discovery.createdAt,
       attachedAt: now
     });
     existing.add(attachId);

@@ -406,7 +406,47 @@ export const GRAPH_ALGORITHM_OPTIONS: GraphAlgorithmOption[] = [
   }
 ];
 
+/** 画布最多展示的实例数与关系数（超出后无法完整载入） */
+export const CANVAS_MAX_INSTANCES = 40;
+export const CANVAS_MAX_RELATIONS = 100;
+
+/** 载入图谱默认关系跳数 */
+export const DEFAULT_GRAPH_LOAD_HOPS = 1;
+
 export const DEFAULT_GRAPH_ALGORITHM: GraphAlgorithmKey = 'neighbor-2';
+
+export const resolveGraphLoadAlgorithm = (
+  hopCount: number | 'all'
+): {
+  algorithm: GraphAlgorithmKey;
+  algorithmParams: GraphAlgorithmParams;
+} => {
+  if (hopCount === 'all') {
+    return {
+      algorithm: 'connected',
+      algorithmParams: { topN: CANVAS_MAX_INSTANCES }
+    };
+  }
+
+  if (hopCount === 1) {
+    return {
+      algorithm: 'neighbor-1',
+      algorithmParams: { maxDepth: 1 }
+    };
+  }
+
+  if (hopCount === 2) {
+    return {
+      algorithm: 'neighbor-2',
+      algorithmParams: { maxDepth: 2 }
+    };
+  }
+
+  return {
+    algorithm: 'bfs-khop',
+    algorithmParams: { maxDepth: hopCount, topN: CANVAS_MAX_INSTANCES }
+  };
+};
 
 export const getGraphAlgorithmOption = (key: GraphAlgorithmKey) =>
   GRAPH_ALGORITHM_OPTIONS.find((item) => item.value === key);
@@ -460,7 +500,7 @@ export const OPERATION_GUIDE_ITEMS = [
   {
     title: '载入节点与载入图谱',
     content:
-      '「载入节点」仅将选中实例作为焦点节点加入画布；「载入图谱」默认按二度关系展开两跳关联数据。已载入实例状态会变为「已载入」。'
+      '「载入节点」仅将选中实例作为焦点节点加入画布；「载入图谱」可设置关系跳数（默认 1 跳，支持全部），超出画布容量上限的数据无法完整载入。已载入实例状态会变为「已载入」。'
   },
   {
     title: '图算法分析',
