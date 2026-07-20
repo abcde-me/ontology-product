@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import {
   INFERENCE_STATUS_COLOR,
   INFERENCE_STATUS_LABEL,
-  INFERENCE_TYPE_LABEL
+  resolveInferenceTypeLabel
 } from '../constants';
 import type { InferenceAnalysisTaskListItem } from '../types';
 import styles from '../index.module.scss';
@@ -37,8 +37,8 @@ const COMPARE_FIELDS: CompareField[] = [
   {
     key: 'inferenceType',
     label: '推理类型',
-    getValue: (task) => INFERENCE_TYPE_LABEL[task.inferenceType] || '-',
-    render: (task) => INFERENCE_TYPE_LABEL[task.inferenceType] || '-'
+    getValue: (task) => resolveInferenceTypeLabel(task.inferenceType) || '-',
+    render: (task) => resolveInferenceTypeLabel(task.inferenceType) || '-'
   },
   {
     key: 'status',

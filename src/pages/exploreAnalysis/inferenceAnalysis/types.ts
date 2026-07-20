@@ -1,4 +1,7 @@
-export type InferenceType = 'forward' | 'backward';
+export type InferenceType =
+  | 'root_cause'
+  | 'anomaly_detection'
+  | 'simulation_prediction';
 
 export type InferenceTaskStatus = 'not_started' | 'running' | 'completed';
 

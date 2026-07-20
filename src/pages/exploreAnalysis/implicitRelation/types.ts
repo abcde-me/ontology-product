@@ -2,7 +2,9 @@
 export type ImplicitDiscoveryAlgorithm =
   | 'community'
   | 'path-prediction'
-  | 'spatiotemporal';
+  | 'spatiotemporal'
+  | 'core-node'
+  | 'weak-link';
 
 /** 实例选择范围：对象类型下全部实例，或指定部分实例 */
 export type InstanceScopeMode = 'all' | 'selected';
@@ -38,7 +40,9 @@ export interface ImplicitRelationEvidence {
     | 'path'
     | 'topology'
     | 'score'
-    | 'spatiotemporal';
+    | 'spatiotemporal'
+    | 'core-node'
+    | 'weak-link';
   title: string;
   detail: string;
 }
@@ -135,5 +139,20 @@ export interface CreateImplicitRelationTaskInput {
   name: string;
   description?: string;
   algorithm: ImplicitDiscoveryAlgorithm;
-  scope: ImplicitAnalysisScope;
+  scope?: ImplicitAnalysisScope;
+}
+
+/** 关系挖掘列表页 — 面向业务目标的场景模板 */
+export interface ImplicitRelationUsageScenario {
+  id: string;
+  goalQuestion: string;
+  title: string;
+  description: string;
+  expectedOutcome: string;
+  algorithm: ImplicitDiscoveryAlgorithm;
+  defaultTaskName: string;
+  defaultDescription: string;
+  tip: string;
+  /** 演示场景对象类型 code，用于一键预填分析范围 */
+  objectTypeCodes: string[];
 }

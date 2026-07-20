@@ -12,7 +12,11 @@ import {
   resolveScenarioLlmConfig
 } from '@/services/llmScenarioStorage';
 import { INFERENCE_ANALYSIS_RUN_SCENARIO } from '@/services/llmScenarios/definitions/inferenceAnalysisRun.scenario';
-import { INFERENCE_TYPE_DESC, INFERENCE_TYPE_LABEL } from '../constants';
+import {
+  INFERENCE_TYPE_DESC,
+  INFERENCE_TYPE_LABEL,
+  normalizeInferenceType
+} from '../constants';
 import type {
   InferencePathStep,
   InferenceRelatedNode,
@@ -83,7 +87,7 @@ const SYSTEM_PROMPT = `你是本体知识推理助手。根据用户给出的推
   ]
 }
 规则：
-1. 按推理类型执行：正向由因推果；逆向由果溯因
+1. 按推理类型执行：根因分析追溯问题根因；异常检测识别偏离正常的模式；推演预测基于现状推演未来走向
 2. inferencePath 给出 3～6 个有序步骤，体现完整推导链路
 3. relatedNodes 覆盖路径中出现的关键节点，结论具体、可解释
 4. 必须引用已提供的语义映射与领域公理，不得编造未给出的对象
@@ -254,7 +258,6 @@ const generateLocalStructuredResult = (
   input: RunInferenceInput
 ): Omit<RunInferenceResult, 'source'> => {
   const typeLabel = INFERENCE_TYPE_LABEL[input.inferenceType];
-  const isForward = input.inferenceType === 'forward';
   const scenes =
     input.knowledge.ontologySceneNames.join('、') || '（未指定场景）';
   const firstScene = input.knowledge.ontologySceneNames[0] || '目标本体场景';
@@ -263,104 +266,176 @@ const generateLocalStructuredResult = (
   const firstMapping = mappings[0]?.standardTerm || '业务概念';
   const firstAxiom = axioms[0]?.name || '约束公理';
   const firstAxiomExpr = axioms[0]?.expression || '相关业务约束成立';
+  const taskName = input.name.trim();
 
-  const goal =
-    input.description?.trim() ||
-    (isForward
-      ? `基于场景「${scenes}」的已知事实与约束，推导可成立的业务结论`
-      : `针对任务「${input.name}」的目标结论，反推所需前提与证据条件`);
+  const defaultGoals: Record<InferenceType, string> = {
+    root_cause: `针对任务「${taskName}」的异常现象，追溯根本原因与关键影响因素`,
+    anomaly_detection: `基于场景「${scenes}」的事实与约束，识别偏离正常模式的异常点`,
+    simulation_prediction: `基于场景「${scenes}」的已知事实与约束，推演未来状态与可能结果`
+  };
 
-  const conclusionNodeName = isForward
-    ? `${input.name.trim()}-推导结论`
-    : `${input.name.trim()}-必要条件`;
+  const goal = input.description?.trim() || defaultGoals[input.inferenceType];
 
-  const inferencePath: InferencePathStep[] = isForward
-    ? [
-        {
-          id: generateStepId(0),
-          order: 1,
-          title: '汇聚场景事实',
-          description: `从本体场景「${firstScene}」汇聚对象与关系事实，明确推理起点。`,
-          fromNode: firstScene,
-          toNode: firstMapping,
-          relation: '场景事实锚定'
-        },
-        {
-          id: generateStepId(1),
-          order: 2,
-          title: '语义对齐',
-          description: `通过语义映射「${firstMapping}」统一术语与别名，对齐业务概念。`,
-          fromNode: firstMapping,
-          toNode: firstAxiom,
-          relation: '术语语义映射'
-        },
-        {
-          id: generateStepId(2),
-          order: 3,
-          title: '公理约束检查',
-          description: `应用领域公理「${firstAxiom}」进行一致性与可达性检查。`,
-          fromNode: firstAxiom,
-          toNode: conclusionNodeName,
-          relation: firstAxiomExpr
-        },
-        {
-          id: generateStepId(3),
-          order: 4,
-          title: '形成正向结论',
-          description: '综合事实、映射与公理，输出可解释的正向推理结论。',
-          fromNode: firstAxiom,
-          toNode: conclusionNodeName,
-          relation: '由因推果'
-        }
-      ]
-    : [
-        {
-          id: generateStepId(0),
-          order: 1,
-          title: '明确目标结论',
-          description: `将任务「${input.name}」的目标结论作为逆向推理起点。`,
-          fromNode: conclusionNodeName,
-          toNode: firstAxiom,
-          relation: '目标锚定'
-        },
-        {
-          id: generateStepId(1),
-          order: 2,
-          title: '反推公理前提',
-          description: `从领域公理「${firstAxiom}」反推必要前提与边界条件。`,
-          fromNode: firstAxiom,
-          toNode: firstMapping,
-          relation: firstAxiomExpr
-        },
-        {
-          id: generateStepId(2),
-          order: 3,
-          title: '语义落地校验',
-          description: `用语义映射「${firstMapping}」验证术语能否落地到本体对象。`,
-          fromNode: firstMapping,
-          toNode: firstScene,
-          relation: '术语—对象对齐'
-        },
-        {
-          id: generateStepId(3),
-          order: 4,
-          title: '回溯场景证据',
-          description: `回溯至场景「${firstScene}」，形成需满足的证据与条件清单。`,
-          fromNode: firstScene,
-          toNode: conclusionNodeName,
-          relation: '由果溯因'
-        }
-      ];
+  const conclusionNodeNames: Record<InferenceType, string> = {
+    root_cause: `${taskName}-根因结论`,
+    anomaly_detection: `${taskName}-异常清单`,
+    simulation_prediction: `${taskName}-推演结论`
+  };
+  const conclusionNodeName = conclusionNodeNames[input.inferenceType];
+
+  const inferencePathByType: Record<InferenceType, InferencePathStep[]> = {
+    root_cause: [
+      {
+        id: generateStepId(0),
+        order: 1,
+        title: '锚定异常现象',
+        description: `将任务「${taskName}」描述的异常现象作为根因分析起点。`,
+        fromNode: conclusionNodeName,
+        toNode: firstAxiom,
+        relation: '现象锚定'
+      },
+      {
+        id: generateStepId(1),
+        order: 2,
+        title: '反推公理约束',
+        description: `从领域公理「${firstAxiom}」反推必要前提与边界条件。`,
+        fromNode: firstAxiom,
+        toNode: firstMapping,
+        relation: firstAxiomExpr
+      },
+      {
+        id: generateStepId(2),
+        order: 3,
+        title: '语义关联校验',
+        description: `用语义映射「${firstMapping}」关联异常涉及的业务概念。`,
+        fromNode: firstMapping,
+        toNode: firstScene,
+        relation: '术语—对象对齐'
+      },
+      {
+        id: generateStepId(3),
+        order: 4,
+        title: '定位根本原因',
+        description: `回溯至场景「${firstScene}」，形成根因与证据清单。`,
+        fromNode: firstScene,
+        toNode: conclusionNodeName,
+        relation: '因果链追溯'
+      }
+    ],
+    anomaly_detection: [
+      {
+        id: generateStepId(0),
+        order: 1,
+        title: '建立正常基线',
+        description: `从本体场景「${firstScene}」汇聚对象与关系事实，建立正常模式基线。`,
+        fromNode: firstScene,
+        toNode: firstMapping,
+        relation: '基线锚定'
+      },
+      {
+        id: generateStepId(1),
+        order: 2,
+        title: '语义对齐',
+        description: `通过语义映射「${firstMapping}」统一监测指标与业务术语。`,
+        fromNode: firstMapping,
+        toNode: firstAxiom,
+        relation: '术语语义映射'
+      },
+      {
+        id: generateStepId(2),
+        order: 3,
+        title: '公理约束比对',
+        description: `应用领域公理「${firstAxiom}」识别违反约束的异常模式。`,
+        fromNode: firstAxiom,
+        toNode: conclusionNodeName,
+        relation: firstAxiomExpr
+      },
+      {
+        id: generateStepId(3),
+        order: 4,
+        title: '输出异常清单',
+        description: '综合事实、映射与公理，输出可解释的异常检测结果。',
+        fromNode: firstAxiom,
+        toNode: conclusionNodeName,
+        relation: '偏离识别'
+      }
+    ],
+    simulation_prediction: [
+      {
+        id: generateStepId(0),
+        order: 1,
+        title: '汇聚现状事实',
+        description: `从本体场景「${firstScene}」汇聚当前对象与关系事实，明确推演起点。`,
+        fromNode: firstScene,
+        toNode: firstMapping,
+        relation: '现状锚定'
+      },
+      {
+        id: generateStepId(1),
+        order: 2,
+        title: '语义对齐',
+        description: `通过语义映射「${firstMapping}」统一术语与别名，对齐业务概念。`,
+        fromNode: firstMapping,
+        toNode: firstAxiom,
+        relation: '术语语义映射'
+      },
+      {
+        id: generateStepId(2),
+        order: 3,
+        title: '公理约束推演',
+        description: `应用领域公理「${firstAxiom}」进行一致性与可达性推演。`,
+        fromNode: firstAxiom,
+        toNode: conclusionNodeName,
+        relation: firstAxiomExpr
+      },
+      {
+        id: generateStepId(3),
+        order: 4,
+        title: '形成推演结论',
+        description: '综合事实、映射与公理，输出可解释的未来推演结论。',
+        fromNode: firstAxiom,
+        toNode: conclusionNodeName,
+        relation: '趋势推演'
+      }
+    ]
+  };
+
+  const inferencePath = inferencePathByType[input.inferenceType];
+
+  const sceneRoles: Record<InferenceType, string> = {
+    root_cause: '证据落点',
+    anomaly_detection: '起点',
+    simulation_prediction: '起点'
+  };
+
+  const sceneConclusions: Record<InferenceType, string> = {
+    root_cause: `根因定位需在场景「${firstScene}」中找到可核验的证据实例。`,
+    anomaly_detection: `场景「${firstScene}」提供异常检测所需的对象与关系事实基础。`,
+    simulation_prediction: `场景「${firstScene}」提供推演所需的对象与关系事实基础。`
+  };
+
+  const conclusionTexts: Record<InferenceType, string> = {
+    root_cause:
+      mappings.length || axioms.length
+        ? `结合公理与映射，异常现象的可能根因已追溯至场景「${firstScene}」中的关键节点。`
+        : '可用于根因追溯的知识不足，仅给出原则性分析框架。',
+    anomaly_detection:
+      mappings.length || axioms.length
+        ? `在场景「${firstScene}」下，结合映射与公理可识别与「${taskName}」相关的异常模式。`
+        : '知识引用偏少，仅形成框架性异常检测结论，建议补充映射与公理。',
+    simulation_prediction:
+      mappings.length || axioms.length
+        ? `在场景「${firstScene}」下，结合映射与公理可形成与「${taskName}」一致的未来推演结论。`
+        : '知识引用偏少，仅形成框架性推演结论，建议补充映射与公理。'
+  };
 
   const relatedNodes: InferenceRelatedNode[] = [
     {
       id: generateNodeId(0),
       name: firstScene,
       nodeType: 'scene',
-      role: isForward ? '起点' : '证据落点',
-      conclusion: isForward
-        ? `场景「${firstScene}」提供推理所需的对象与关系事实基础。`
-        : `目标成立需在场景「${firstScene}」中找到可核验的证据实例。`,
+      role: sceneRoles[input.inferenceType],
+      conclusion: sceneConclusions[input.inferenceType],
       evidence: `关联场景：${scenes}`
     },
     {
@@ -390,13 +465,7 @@ const generateLocalStructuredResult = (
       name: conclusionNodeName,
       nodeType: 'conclusion',
       role: '结论节点',
-      conclusion: isForward
-        ? mappings.length || axioms.length
-          ? `在场景「${firstScene}」下，结合映射与公理可形成与「${input.name}」一致的正向推断结论。`
-          : '知识引用偏少，仅形成框架性正向结论，建议补充映射与公理。'
-        : mappings.length || axioms.length
-          ? `若目标成立，需同时满足所列公理，并确保「${firstMapping}」可在场景中落地。`
-          : '可用于逆向追溯的知识不足，仅给出原则性必要条件框架。',
+      conclusion: conclusionTexts[input.inferenceType],
       evidence: goal
     }
   ];
@@ -533,11 +602,17 @@ export const runInferenceAnalysis = async (
     throw new Error('请选择推理类型');
   }
 
-  const local = generateLocalStructuredResult(input);
+  const normalizedInput: RunInferenceInput = {
+    ...input,
+    name,
+    inferenceType: normalizeInferenceType(String(input.inferenceType))
+  };
+
+  const local = generateLocalStructuredResult(normalizedInput);
 
   if (isScenarioLlmAvailable(INFERENCE_ANALYSIS_RUN_SCENARIO.code)) {
     try {
-      const llmResult = await generateWithLlm(input, local);
+      const llmResult = await generateWithLlm(normalizedInput, local);
       return { ...llmResult, source: 'llm' };
     } catch (error) {
       if ((error as Error)?.name === 'AbortError') {

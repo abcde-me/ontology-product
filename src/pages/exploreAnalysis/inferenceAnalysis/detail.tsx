@@ -21,7 +21,7 @@ import {
   INFERENCE_NODE_TYPE_LABEL,
   INFERENCE_STATUS_COLOR,
   INFERENCE_STATUS_LABEL,
-  INFERENCE_TYPE_LABEL
+  resolveInferenceTypeLabel
 } from './constants';
 import type { InferenceAnalysisTask, InferenceRelatedNode } from './types';
 import { getInferenceAnalysisTask } from './services/taskStorage';
@@ -118,7 +118,7 @@ export default function InferenceAnalysisDetail() {
       },
       {
         label: '推理类型',
-        value: INFERENCE_TYPE_LABEL[task.inferenceType]
+        value: resolveInferenceTypeLabel(task.inferenceType)
       },
       {
         label: '任务状态',

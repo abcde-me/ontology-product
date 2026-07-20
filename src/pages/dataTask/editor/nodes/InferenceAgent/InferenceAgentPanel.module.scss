@@ -3,7 +3,7 @@
 }
 
 .panel-header {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .panel-header-title {
@@ -14,13 +14,18 @@
 }
 
 .trigger-hint {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   padding: 8px 10px;
   border-radius: 6px;
   background: rgba(var(--primary-1), 0.45);
   border: 1px solid rgba(var(--primary-6), 0.2);
-  font-size: 12px;
-  line-height: 18px;
+  font-size: 11px;
+  line-height: 16px;
+
+  :global(.arco-typography) {
+    font-size: 11px;
+    line-height: 16px;
+  }
 }
 
 .ai-assist-placeholder {
@@ -39,7 +44,7 @@
 }
 
 .ai-assist-desc {
-  font-size: 12px;
-  line-height: 18px;
+  font-size: 11px;
+  line-height: 16px;
   color: var(--color-text-3);
 }

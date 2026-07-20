@@ -131,7 +131,7 @@ export default function CreateTaskModal({
           field="name"
           rules={[{ required: true, message: '请输入任务名称' }]}
         >
-          <Input placeholder="例如：装备保障正向推理" maxLength={64} />
+          <Input placeholder="例如：装备保障根因分析" maxLength={64} />
         </Form.Item>
         <Form.Item label="任务描述" field="description">
           <TextArea

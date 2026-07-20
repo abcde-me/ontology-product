@@ -12,6 +12,7 @@ export const SECONDARY_MENU_ITEMS = {
   RelationInsight: '关系探查',
   ImplicitRelation: '关系挖掘',
   InferenceAnalysis: '推理分析',
+  SpatiotemporalAnalysis: '时空分析',
   AutomationRuleManagement: '规则管理',
   AutomationRuleRunLog: '执行日志',
   ApplicationScenario: '应用场景',

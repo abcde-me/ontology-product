@@ -341,7 +341,7 @@ $icon-bg-selected: rgba(22, 93, 255, 0.14);
     }
 
     .arco-table-th {
-      background: rgba(232, 243, 255, 0.55) !important;
+      background: rgba(var(--primary-6), 0.15) !important;
       color: var(--color-text-3);
       font-weight: 500;
       border-bottom: 1px solid rgba(22, 93, 255, 0.1);

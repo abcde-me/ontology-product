@@ -179,6 +179,480 @@ const normalizeScores = <T extends { score: number }>(
 const nodeLabel = (nodes: Map<string, InstanceGraphNode>, key: string) =>
   nodes.get(key)?.label || key;
 
+const buildTypePairLabel = (
+  source?: InstanceGraphNode,
+  target?: InstanceGraphNode
+): string => {
+  const left = source?.objectTypeName?.trim();
+  const right = target?.objectTypeName?.trim();
+  if (left && right) {
+    return left === right ? left : `${left}·${right}`;
+  }
+  if (left) {
+    return left;
+  }
+  if (right) {
+    return right;
+  }
+  return '实例';
+};
+
+const buildSuggestedRelationName = (params: {
+  algorithm: ImplicitDiscoveryAlgorithm;
+  source?: InstanceGraphNode;
+  target?: InstanceGraphNode;
+  sharedNeighborCount?: number;
+  hasSpace?: boolean;
+  hasTime?: boolean;
+}): string => {
+  const pair = buildTypePairLabel(params.source, params.target);
+
+  switch (params.algorithm) {
+    case 'community':
+      return `${pair}·同社区关联`;
+    case 'path-prediction':
+      if ((params.sharedNeighborCount ?? 0) >= 3) {
+        return `${pair}·强共同关联`;
+      }
+      return `${pair}·间接关联`;
+    case 'spatiotemporal':
+      if (params.hasSpace && params.hasTime) {
+        return `${pair}·时空共现`;
+      }
+      if (params.hasSpace) {
+        return `${pair}·空间邻近`;
+      }
+      if (params.hasTime) {
+        return `${pair}·时间共现`;
+      }
+      return `${pair}·时空关联`;
+    case 'core-node':
+      return `${pair}·核心节点关联`;
+    case 'weak-link':
+      return `${pair}·薄弱环节`;
+    default:
+      return `${pair}·隐性关联`;
+  }
+};
+
+const computeBetweennessCentrality = (
+  adjacency: Adjacency,
+  nodeIds: string[]
+): Map<string, number> => {
+  const scores = new Map<string, number>();
+  nodeIds.forEach((id) => scores.set(id, 0));
+  const nodeSet = new Set(nodeIds);
+
+  nodeIds.forEach((source) => {
+    const stack: string[] = [];
+    const predecessors = new Map<string, string[]>();
+    const sigma = new Map<string, number>();
+    const distance = new Map<string, number>();
+    const delta = new Map<string, number>();
+
+    nodeIds.forEach((id) => {
+      predecessors.set(id, []);
+      sigma.set(id, 0);
+      distance.set(id, -1);
+      delta.set(id, 0);
+    });
+
+    sigma.set(source, 1);
+    distance.set(source, 0);
+    const queue = [source];
+
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      stack.push(current);
+      adjacency.get(current)?.forEach((neighbor) => {
+        if (!nodeSet.has(neighbor)) {
+          return;
+        }
+        if ((distance.get(neighbor) ?? -1) < 0) {
+          queue.push(neighbor);
+          distance.set(neighbor, (distance.get(current) ?? 0) + 1);
+        }
+        if (distance.get(neighbor) === (distance.get(current) ?? 0) + 1) {
+          sigma.set(
+            neighbor,
+            (sigma.get(neighbor) ?? 0) + (sigma.get(current) ?? 0)
+          );
+          predecessors.get(neighbor)!.push(current);
+        }
+      });
+    }
+
+    while (stack.length > 0) {
+      const node = stack.pop()!;
+      predecessors.get(node)?.forEach((pred) => {
+        const contribution =
+          ((sigma.get(pred) ?? 0) / (sigma.get(node) ?? 1)) *
+          (1 + (delta.get(node) ?? 0));
+        delta.set(pred, (delta.get(pred) ?? 0) + contribution);
+      });
+      if (node !== source) {
+        scores.set(node, (scores.get(node) ?? 0) + (delta.get(node) ?? 0));
+      }
+    }
+  });
+
+  return scores;
+};
+
+const pickCoreNodes = (
+  adjacency: Adjacency,
+  nodeIds: string[]
+): { coreSet: Set<string>; centrality: Map<string, number> } => {
+  const betweenness = computeBetweennessCentrality(adjacency, nodeIds);
+  const maxDegree = Math.max(
+    ...nodeIds.map((id) => adjacency.get(id)?.size ?? 0),
+    1
+  );
+  const maxBetween = Math.max(
+    ...nodeIds.map((id) => betweenness.get(id) ?? 0),
+    0.0001
+  );
+
+  const centrality = new Map<string, number>();
+  nodeIds.forEach((id) => {
+    const degreeNorm = (adjacency.get(id)?.size ?? 0) / maxDegree;
+    const betweenNorm = (betweenness.get(id) ?? 0) / maxBetween;
+    centrality.set(id, degreeNorm * 0.35 + betweenNorm * 0.65);
+  });
+
+  const sorted = [...nodeIds].sort(
+    (left, right) => (centrality.get(right) ?? 0) - (centrality.get(left) ?? 0)
+  );
+  const topCount = Math.max(2, Math.ceil(nodeIds.length * 0.25));
+  const threshold =
+    centrality.get(sorted[Math.min(topCount - 1, sorted.length - 1)]) ?? 0;
+
+  const coreSet = new Set<string>();
+  sorted.forEach((id) => {
+    if (
+      (centrality.get(id) ?? 0) >= threshold &&
+      (adjacency.get(id)?.size ?? 0) >= 1
+    ) {
+      coreSet.add(id);
+    }
+  });
+
+  return { coreSet, centrality };
+};
+
+const communityPairKey = (left: number, right: number) => {
+  const min = Math.min(left, right);
+  const max = Math.max(left, right);
+  return `${min}|${max}`;
+};
+
+const countCrossCommunityEdges = (
+  adjacency: Adjacency,
+  communities: Map<string, number>
+): Map<string, number> => {
+  const counts = new Map<string, number>();
+  const seen = new Set<string>();
+
+  adjacency.forEach((neighbors, source) => {
+    const sourceCommunity = communities.get(source);
+    if (sourceCommunity == null) {
+      return;
+    }
+    neighbors.forEach((target) => {
+      if (source >= target) {
+        return;
+      }
+      const edgeKey = pairKey(source, target);
+      if (seen.has(edgeKey)) {
+        return;
+      }
+      seen.add(edgeKey);
+      const targetCommunity = communities.get(target);
+      if (targetCommunity == null || sourceCommunity === targetCommunity) {
+        return;
+      }
+      const key = communityPairKey(sourceCommunity, targetCommunity);
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    });
+  });
+
+  return counts;
+};
+
+const discoverByCoreNode = (
+  nodeMap: Map<string, InstanceGraphNode>,
+  adjacency: Adjacency,
+  now: string
+): DiscoveredImplicitRelation[] => {
+  const nodeIds = Array.from(adjacency.keys());
+  const { coreSet, centrality } = pickCoreNodes(adjacency, nodeIds);
+  if (coreSet.size === 0) {
+    return [];
+  }
+
+  const candidates: Array<{
+    sourceNodeId: string;
+    targetNodeId: string;
+    score: number;
+    shared: string[];
+    path: string[] | null;
+    sourceCore: number;
+    targetCore: number;
+  }> = [];
+  const seen = new Set<string>();
+
+  coreSet.forEach((coreId) => {
+    nodeIds.forEach((otherId) => {
+      if (coreId === otherId || hasUndirectedEdge(adjacency, coreId, otherId)) {
+        return;
+      }
+      const key = pairKey(coreId, otherId);
+      if (seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+
+      const shared = commonNeighbors(adjacency, coreId, otherId);
+      const path = findShortestPath(adjacency, coreId, otherId, 4);
+      if (shared.length === 0 && (!path || path.length <= 2)) {
+        return;
+      }
+
+      const sourceCore = centrality.get(coreId) ?? 0;
+      const targetCore = centrality.get(otherId) ?? 0;
+      const pathBonus = path && path.length > 2 ? 1 / (path.length - 1) : 0;
+      const score =
+        sourceCore *
+        Math.max(targetCore, 0.35) *
+        (1 + shared.length * 0.15 + pathBonus * 0.25);
+
+      if (score <= 0) {
+        return;
+      }
+
+      candidates.push({
+        sourceNodeId: coreId,
+        targetNodeId: otherId,
+        score,
+        shared,
+        path,
+        sourceCore,
+        targetCore
+      });
+    });
+  });
+
+  const ranked = normalizeScores(
+    candidates.sort((left, right) => right.score - left.score)
+  ).slice(0, MAX_DISCOVERIES);
+
+  return ranked.map((item) => {
+    const source = nodeMap.get(item.sourceNodeId);
+    const target = nodeMap.get(item.targetNodeId);
+    const sourceName = nodeLabel(nodeMap, item.sourceNodeId);
+    const targetName = nodeLabel(nodeMap, item.targetNodeId);
+    const evidence: ImplicitRelationEvidence[] = [
+      {
+        type: 'core-node',
+        title: '核心节点结构',
+        detail: `「${sourceName}」核心度 ${item.sourceCore.toFixed(2)}，「${targetName}」结构权重 ${item.targetCore.toFixed(2)}，二者尚未直连但处于网络关键位置。`
+      },
+      {
+        type: 'score',
+        title: '核心关联置信度',
+        detail: `综合中心性与结构可达性得分 ${item.confidence.toFixed(2)}。`
+      }
+    ];
+
+    if (item.shared.length > 0) {
+      evidence.push({
+        type: 'common-neighbor',
+        title: '共同邻居',
+        detail: `共享 ${item.shared.length} 个邻居：${item.shared
+          .slice(0, 5)
+          .map((id) => nodeLabel(nodeMap, id))
+          .join('、')}${item.shared.length > 5 ? ' 等' : ''}。`
+      });
+    }
+
+    if (item.path && item.path.length > 2) {
+      evidence.push({
+        type: 'path',
+        title: '结构路径',
+        detail: `经 ${item.path.length - 1} 跳可达：${item.path
+          .map((id) => nodeLabel(nodeMap, id))
+          .join(' → ')}。`
+      });
+    }
+
+    return {
+      id: `core-node-${item.sourceNodeId}-${item.targetNodeId}`,
+      sourceNodeId: item.sourceNodeId,
+      targetNodeId: item.targetNodeId,
+      sourceNodeName: sourceName,
+      targetNodeName: targetName,
+      sourceObjectTypeId: source?.objectTypeId,
+      targetObjectTypeId: target?.objectTypeId,
+      sourceInstanceId: source?.instanceId,
+      targetInstanceId: target?.instanceId,
+      suggestedName: buildSuggestedRelationName({
+        algorithm: 'core-node',
+        source,
+        target
+      }),
+      confidence: item.confidence,
+      algorithm: 'core-node' as const,
+      evidence,
+      createdAt: now
+    };
+  });
+};
+
+const discoverByWeakLink = (
+  nodeMap: Map<string, InstanceGraphNode>,
+  adjacency: Adjacency,
+  now: string
+): DiscoveredImplicitRelation[] => {
+  const nodeIds = Array.from(adjacency.keys());
+  const communities = runLabelPropagation(adjacency, nodeIds);
+  const crossEdges = countCrossCommunityEdges(adjacency, communities);
+  const candidates: Array<{
+    sourceNodeId: string;
+    targetNodeId: string;
+    score: number;
+    shared: string[];
+    bridgeCount: number;
+    path: string[] | null;
+  }> = [];
+  const seen = new Set<string>();
+
+  for (let i = 0; i < nodeIds.length; i += 1) {
+    for (let j = i + 1; j < nodeIds.length; j += 1) {
+      const sourceId = nodeIds[i];
+      const targetId = nodeIds[j];
+      if (hasUndirectedEdge(adjacency, sourceId, targetId)) {
+        continue;
+      }
+
+      const sourceCommunity = communities.get(sourceId);
+      const targetCommunity = communities.get(targetId);
+      if (
+        sourceCommunity == null ||
+        targetCommunity == null ||
+        sourceCommunity === targetCommunity
+      ) {
+        continue;
+      }
+
+      const key = pairKey(sourceId, targetId);
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+
+      const bridgeCount =
+        crossEdges.get(communityPairKey(sourceCommunity, targetCommunity)) ?? 0;
+      if (bridgeCount > 4) {
+        continue;
+      }
+
+      const shared = commonNeighbors(adjacency, sourceId, targetId);
+      const path = findShortestPath(adjacency, sourceId, targetId, 5);
+      const jaccard =
+        shared.length /
+        Math.max(
+          1,
+          (adjacency.get(sourceId)?.size ?? 0) +
+            (adjacency.get(targetId)?.size ?? 0) -
+            shared.length
+        );
+      const pathBonus = path && path.length > 2 ? 1 / (path.length - 1) : 0;
+      const score =
+        (1 / (bridgeCount + 1)) * (0.45 + jaccard * 0.35 + pathBonus * 0.2);
+
+      if (score <= 0) {
+        continue;
+      }
+
+      candidates.push({
+        sourceNodeId: sourceId,
+        targetNodeId: targetId,
+        score,
+        shared,
+        bridgeCount,
+        path
+      });
+    }
+  }
+
+  const ranked = normalizeScores(
+    candidates.sort((left, right) => right.score - left.score)
+  ).slice(0, MAX_DISCOVERIES);
+
+  return ranked.map((item) => {
+    const source = nodeMap.get(item.sourceNodeId);
+    const target = nodeMap.get(item.targetNodeId);
+    const sourceName = nodeLabel(nodeMap, item.sourceNodeId);
+    const targetName = nodeLabel(nodeMap, item.targetNodeId);
+    const sourceCommunity = communities.get(item.sourceNodeId);
+    const targetCommunity = communities.get(item.targetNodeId);
+    const evidence: ImplicitRelationEvidence[] = [
+      {
+        type: 'weak-link',
+        title: '跨群体桥接薄弱',
+        detail: `「${sourceName}」与「${targetName}」分属不同群体（#${sourceCommunity} / #${targetCommunity}），群体间显式桥接仅 ${item.bridgeCount} 条，结构相对脆弱。`
+      },
+      {
+        type: 'score',
+        title: '薄弱环节置信度',
+        detail: `综合桥接稀疏度与结构可达性得分 ${item.confidence.toFixed(2)}。`
+      }
+    ];
+
+    if (item.shared.length > 0) {
+      evidence.push({
+        type: 'common-neighbor',
+        title: '共同邻居',
+        detail: `共享 ${item.shared.length} 个邻居：${item.shared
+          .slice(0, 5)
+          .map((id) => nodeLabel(nodeMap, id))
+          .join('、')}${item.shared.length > 5 ? ' 等' : ''}。`
+      });
+    }
+
+    if (item.path && item.path.length > 2) {
+      evidence.push({
+        type: 'path',
+        title: '间接连通路径',
+        detail: `存在长度 ${item.path.length - 1} 的间接路径：${item.path
+          .map((id) => nodeLabel(nodeMap, id))
+          .join(' → ')}。`
+      });
+    }
+
+    return {
+      id: `weak-link-${item.sourceNodeId}-${item.targetNodeId}`,
+      sourceNodeId: item.sourceNodeId,
+      targetNodeId: item.targetNodeId,
+      sourceNodeName: sourceName,
+      targetNodeName: targetName,
+      sourceObjectTypeId: source?.objectTypeId,
+      targetObjectTypeId: target?.objectTypeId,
+      sourceInstanceId: source?.instanceId,
+      targetInstanceId: target?.instanceId,
+      suggestedName: buildSuggestedRelationName({
+        algorithm: 'weak-link',
+        source,
+        target
+      }),
+      confidence: item.confidence,
+      algorithm: 'weak-link' as const,
+      evidence,
+      createdAt: now
+    };
+  });
+};
+
 const discoverByCommunity = (
   nodeMap: Map<string, InstanceGraphNode>,
   adjacency: Adjacency,
@@ -302,7 +776,11 @@ const discoverByCommunity = (
       targetObjectTypeId: target?.objectTypeId,
       sourceInstanceId: source?.instanceId,
       targetInstanceId: target?.instanceId,
-      suggestedName: `隐性关联·社区${item.communityId}`,
+      suggestedName: buildSuggestedRelationName({
+        algorithm: 'community',
+        source,
+        target
+      }),
       confidence: item.confidence,
       algorithm: 'community' as const,
       communityId: item.communityId,
@@ -424,7 +902,12 @@ const discoverByPathPrediction = (
       targetObjectTypeId: target?.objectTypeId,
       sourceInstanceId: source?.instanceId,
       targetInstanceId: target?.instanceId,
-      suggestedName: '隐性关联·路径预测',
+      suggestedName: buildSuggestedRelationName({
+        algorithm: 'path-prediction',
+        source,
+        target,
+        sharedNeighborCount: item.shared.length
+      }),
       confidence: item.confidence,
       algorithm: 'path-prediction' as const,
       evidence,
@@ -621,7 +1104,13 @@ const discoverBySpatiotemporal = (
       targetObjectTypeId: target?.objectTypeId,
       sourceInstanceId: source?.instanceId,
       targetInstanceId: target?.instanceId,
-      suggestedName: '隐性关联·时空共现',
+      suggestedName: buildSuggestedRelationName({
+        algorithm: 'spatiotemporal',
+        source,
+        target,
+        hasSpace: item.hasSpace,
+        hasTime: item.hasTime
+      }),
       confidence: item.confidence,
       algorithm: 'spatiotemporal' as const,
       evidence,
@@ -668,7 +1157,11 @@ export const runImplicitRelationDiscovery = async (params: {
     communities = result.communities;
   } else if (algorithm === 'path-prediction') {
     discoveries = discoverByPathPrediction(nodeMap, adjacency, now);
-  } else {
+  } else if (algorithm === 'core-node') {
+    discoveries = discoverByCoreNode(nodeMap, adjacency, now);
+  } else if (algorithm === 'weak-link') {
+    discoveries = discoverByWeakLink(nodeMap, adjacency, now);
+  } else if (algorithm === 'spatiotemporal') {
     const features = await loadSpatioTemporalFeatures(instances);
     discoveries = discoverBySpatiotemporal(nodeMap, adjacency, features, now);
   }

@@ -1,30 +1,32 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Button,
   Form,
   Input,
   Message,
   Modal,
-  Radio,
   Spin
 } from '@arco-design/web-react';
 import { IconLeft, IconMessage } from '@arco-design/web-react/icon';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { listOntologyModel } from '@/api/ontologySceneLibrary/ontologyScene';
 import { isOntologyApiSuccess } from '@/utils/apiResponse';
-import { DISCOVERY_ALGORITHM_OPTIONS } from './constants';
+import { findImplicitRelationUsageScenario } from './constants';
 import type {
   ImplicitAnalysisScope,
   ImplicitDiscoveryAlgorithm,
   ImplicitRelationKnowledge,
-  ImplicitRelationTask
+  ImplicitRelationTask,
+  ImplicitRelationUsageScenario
 } from './types';
 import ImplicitRelationWorkspace from './components/ImplicitRelationWorkspace';
 import ImplicitRelationChatModal from './components/ImplicitRelationChatModal';
 import AnalysisScopeFields, {
   type SceneOption
 } from './components/AnalysisScopeFields';
+import DiscoveryAlgorithmRadioGroup from './components/DiscoveryAlgorithmRadioGroup';
 import TaskConfigPanel from './components/TaskConfigPanel';
+import { buildScenarioScopeDraft } from './services/applyUsageScenario';
 import { getImplicitRelationKnowledge } from './services/implicitRelationStore';
 import {
   toAnalysisScope,
@@ -38,6 +40,8 @@ import styles from './index.module.scss';
 
 const { TextArea } = Input;
 const LIST_PATH = '/tenant/compute/onto/exploreAnalysis/implicitRelation';
+const detailPath = (taskId: string) =>
+  `/tenant/compute/onto/exploreAnalysis/implicitRelation/detail/${taskId}`;
 
 interface EditConfigFormValues {
   description?: string;
@@ -46,6 +50,7 @@ interface EditConfigFormValues {
 
 export default function ImplicitRelationDetail() {
   const history = useHistory();
+  const location = useLocation();
   const { id = '' } = useParams<{ id: string }>();
   const [task, setTask] = useState<ImplicitRelationTask | null>(null);
   const [knowledge, setKnowledge] = useState<ImplicitRelationKnowledge>({
@@ -59,6 +64,10 @@ export default function ImplicitRelationDetail() {
   );
   const [scopeError, setScopeError] = useState<string>();
   const [chatVisible, setChatVisible] = useState(false);
+  const [activeScenario, setActiveScenario] =
+    useState<ImplicitRelationUsageScenario>();
+  const [scopeDraftLoading, setScopeDraftLoading] = useState(false);
+  const setupHandledRef = useRef(false);
   const [editForm] = Form.useForm<EditConfigFormValues>();
 
   const hasResult = Boolean(knowledge.result);
@@ -104,6 +113,7 @@ export default function ImplicitRelationDetail() {
 
   useEffect(() => {
     loadTask();
+    setupHandledRef.current = false;
   }, [loadTask]);
 
   useEffect(() => {
@@ -115,26 +125,44 @@ export default function ImplicitRelationDetail() {
     scope?.ontologySceneId && scope.objectTypes.length > 0
   );
 
-  const openConfigModal = () => {
-    if (!configEditable) {
-      Message.warning('已执行发现，配置不可修改；如实例关系有变化请重新执行');
-      return;
-    }
-    setDraftScope(
-      task?.scope || {
-        instanceMode: 'all',
-        objectTypes: [],
-        instances: [],
-        ontologySceneId: task?.ontologySceneId
+  const openConfigModal = useCallback(
+    (scenario?: ImplicitRelationUsageScenario) => {
+      if (!configEditable) {
+        Message.warning('已执行发现，配置不可修改；如实例关系有变化请重新执行');
+        return;
       }
-    );
-    editForm.setFieldsValue({
-      description: task?.description,
-      algorithm: task?.algorithm || 'community'
-    });
-    setScopeError(undefined);
-    setConfigModalVisible(true);
-  };
+
+      setActiveScenario(scenario);
+      setDraftScope(
+        task?.scope || {
+          instanceMode: 'all',
+          objectTypes: [],
+          instances: [],
+          ontologySceneId: task?.ontologySceneId
+        }
+      );
+      editForm.setFieldsValue({
+        description: task?.description || scenario?.defaultDescription,
+        algorithm: task?.algorithm || scenario?.algorithm || 'community'
+      });
+      setScopeError(undefined);
+      setConfigModalVisible(true);
+
+      if (scenario && !task?.scope?.ontologySceneId) {
+        setScopeDraftLoading(true);
+        void buildScenarioScopeDraft(scenario)
+          .then((draft) => {
+            setDraftScope((current) =>
+              current.ontologySceneId ? current : draft
+            );
+          })
+          .finally(() => {
+            setScopeDraftLoading(false);
+          });
+      }
+    },
+    [configEditable, editForm, task]
+  );
 
   const handleSaveConfig = async () => {
     try {
@@ -167,10 +195,38 @@ export default function ImplicitRelationDetail() {
       setTask(next);
       Message.success('配置已保存');
       setConfigModalVisible(false);
+      setActiveScenario(undefined);
     } catch {
       // form validation
     }
   };
+
+  useEffect(() => {
+    if (!task || setupHandledRef.current || !configEditable) {
+      return;
+    }
+
+    const params = new URLSearchParams(location.search);
+    const setup = params.get('setup') === '1';
+    const scenarioId = params.get('scenario') || undefined;
+    const scenario = scenarioId
+      ? findImplicitRelationUsageScenario(scenarioId)
+      : undefined;
+
+    if (setup || !scopeReady) {
+      setupHandledRef.current = true;
+      openConfigModal(scenario);
+      history.replace(detailPath(id));
+    }
+  }, [
+    configEditable,
+    history,
+    id,
+    location.search,
+    openConfigModal,
+    scopeReady,
+    task
+  ]);
 
   const handleOpenChat = () => {
     if (!knowledge.result) {
@@ -222,7 +278,7 @@ export default function ImplicitRelationDetail() {
           <TaskConfigPanel
             task={task}
             editable={configEditable}
-            onEdit={openConfigModal}
+            onEdit={() => openConfigModal()}
           />
         </div>
 
@@ -233,8 +289,14 @@ export default function ImplicitRelationDetail() {
         ) : !scopeReady ? (
           <div className="flex min-h-[480px] flex-1 flex-col items-center justify-center gap-3 text-[var(--color-text-3)]">
             <div>请先完善任务配置：本体图谱、对象类型与实例范围。</div>
+            {activeScenario?.tip ? (
+              <div className={styles.scenarioTip}>{activeScenario.tip}</div>
+            ) : null}
             {configEditable ? (
-              <Button type="primary" onClick={openConfigModal}>
+              <Button
+                type="primary"
+                onClick={() => openConfigModal(activeScenario)}
+              >
                 编辑配置
               </Button>
             ) : null}
@@ -251,81 +313,79 @@ export default function ImplicitRelationDetail() {
       </div>
 
       <Modal
-        title="编辑任务配置"
+        title={
+          activeScenario ? `配置场景：${activeScenario.title}` : '编辑任务配置'
+        }
         visible={configModalVisible}
-        onCancel={() => setConfigModalVisible(false)}
+        onCancel={() => {
+          setConfigModalVisible(false);
+          setActiveScenario(undefined);
+        }}
         onOk={() => void handleSaveConfig()}
         unmountOnExit
         style={{ width: 680 }}
       >
-        <Form form={editForm} layout="vertical">
-          <Form.Item label="任务描述" field="description">
-            <TextArea
-              placeholder="选填，描述分析目标与业务背景"
-              autoSize={{ minRows: 2, maxRows: 4 }}
-              maxLength={500}
-              showWordLimit
-            />
-          </Form.Item>
-          <Form.Item
-            label="发现算法"
-            field="algorithm"
-            rules={[{ required: true, message: '请选择发现算法' }]}
+        {activeScenario?.tip ? (
+          <div className={styles.scenarioTip}>{activeScenario.tip}</div>
+        ) : null}
+        <Spin loading={scopeDraftLoading} style={{ display: 'block' }}>
+          <Form
+            form={editForm}
+            layout="vertical"
+            className={styles.scenarioConfigForm}
           >
-            <Radio.Group>
-              {DISCOVERY_ALGORITHM_OPTIONS.map((option) => (
-                <Radio key={option.value} value={option.value}>
-                  <div>
-                    <div>{option.label}</div>
-                    <div
-                      style={{
-                        color: 'var(--color-text-3)',
-                        fontSize: 12,
-                        lineHeight: 1.5,
-                        marginTop: 2
-                      }}
-                    >
-                      {option.description}
-                    </div>
-                  </div>
-                </Radio>
-              ))}
-            </Radio.Group>
-          </Form.Item>
-        </Form>
-
-        <div style={{ marginTop: 4, marginBottom: 8 }}>
-          <div
-            style={{
-              marginBottom: 8,
-              color: '#1d2129',
-              fontSize: 13,
-              fontWeight: 500
-            }}
-          >
-            分析范围
-          </div>
-          <AnalysisScopeFields
-            scenes={scenes}
-            scenesLoading={scenesLoading}
-            value={draftScope}
-            onChange={(next) => {
-              setDraftScope(next);
-              setScopeError(undefined);
-            }}
-          />
-          {scopeError ? (
-            <div
-              style={{
-                marginTop: 8,
-                color: 'rgb(var(--danger-6))',
-                fontSize: 12
-              }}
+            <Form.Item
+              label={
+                <span className={styles.scenarioConfigSectionTitle}>
+                  任务描述
+                </span>
+              }
+              field="description"
             >
-              {scopeError}
-            </div>
-          ) : null}
-        </div>
+              <TextArea
+                placeholder="选填，描述分析目标与业务背景"
+                autoSize={{ minRows: 2, maxRows: 4 }}
+                maxLength={500}
+                showWordLimit
+              />
+            </Form.Item>
+            <Form.Item
+              label={
+                <span className={styles.scenarioConfigSectionTitle}>
+                  发现算法
+                </span>
+              }
+              field="algorithm"
+              rules={[{ required: true, message: '请选择发现算法' }]}
+            >
+              <DiscoveryAlgorithmRadioGroup />
+            </Form.Item>
+          </Form>
+
+          <div className={styles.scenarioConfigScopeSection}>
+            <div className={styles.scenarioConfigSectionTitle}>分析范围</div>
+            <AnalysisScopeFields
+              scenes={scenes}
+              scenesLoading={scenesLoading}
+              value={draftScope}
+              onChange={(next) => {
+                setDraftScope(next);
+                setScopeError(undefined);
+              }}
+            />
+            {scopeError ? (
+              <div
+                style={{
+                  marginTop: 8,
+                  color: 'rgb(var(--danger-6))',
+                  fontSize: 12
+                }}
+              >
+                {scopeError}
+              </div>
+            ) : null}
+          </div>
+        </Spin>
       </Modal>
 
       <ImplicitRelationChatModal

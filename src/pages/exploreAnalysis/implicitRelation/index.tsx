@@ -6,13 +6,17 @@ import { listOntologyModel } from '@/api/ontologySceneLibrary/ontologyScene';
 import { isOntologyApiSuccess } from '@/utils/apiResponse';
 import PageHeader from '@/components/PageHeader';
 import CreateTaskModal from './components/CreateTaskModal';
+import ScenarioConfigModal from './components/ScenarioConfigModal';
+import ScenarioGoalView from './components/ScenarioGoalView';
 import ImplicitRelationChatModal from './components/ImplicitRelationChatModal';
 import { useColumns } from './hooks/useColumns';
+import { IMPLICIT_RELATION_USAGE_SCENARIOS } from './constants';
 import type {
   CreateImplicitRelationTaskInput,
   ImplicitDiscoveryResult,
   ImplicitRelationTask,
-  ImplicitRelationTaskListItem
+  ImplicitRelationTaskListItem,
+  ImplicitRelationUsageScenario
 } from './types';
 import { getImplicitRelationKnowledge } from './services/implicitRelationStore';
 import {
@@ -32,6 +36,9 @@ export default function ImplicitRelationList() {
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createVisible, setCreateVisible] = useState(false);
+  const [scenarioConfigVisible, setScenarioConfigVisible] = useState(false);
+  const [activeScenario, setActiveScenario] =
+    useState<ImplicitRelationUsageScenario>();
   const [keyword, setKeyword] = useState('');
   const [data, setData] = useState<ImplicitRelationTaskListItem[]>([]);
   const [deletingId, setDeletingId] = useState<string>();
@@ -43,6 +50,28 @@ export default function ImplicitRelationList() {
   const [chatResult, setChatResult] = useState<ImplicitDiscoveryResult | null>(
     null
   );
+
+  const handleScenarioConfigSubmit = (
+    values: CreateImplicitRelationTaskInput
+  ) => {
+    setCreating(true);
+    try {
+      const task = createImplicitRelationTask(values);
+      Message.success(`「${task.name}」创建成功`);
+      setScenarioConfigVisible(false);
+      setActiveScenario(undefined);
+      history.push(`${DETAIL_PATH}/${task.id}`);
+    } catch (error) {
+      Message.error(error instanceof Error ? error.message : '创建失败');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleScenarioSelect = (scenario: ImplicitRelationUsageScenario) => {
+    setActiveScenario(scenario);
+    setScenarioConfigVisible(true);
+  };
 
   const loadScenes = useCallback(async () => {
     setScenesLoading(true);
@@ -162,10 +191,17 @@ export default function ImplicitRelationList() {
     <div className={styles.listPage}>
       <PageHeader
         title="关系挖掘"
-        subTitle="选择本体图谱、对象类型与实例范围，基于社区分析与路径预测发现潜在关联"
+        subTitle="从「发现隐藏的关系/隐藏的路径/可聚合的群组、相近时间地点关联、核心节点、薄弱环节」等场景进入详情配置"
       />
 
-      <div className="mb-4 flex items-center justify-between gap-3">
+      <section className={styles.scenarioSection}>
+        <ScenarioGoalView
+          scenarios={IMPLICIT_RELATION_USAGE_SCENARIOS}
+          onSelect={handleScenarioSelect}
+        />
+      </section>
+
+      <div className={styles.taskListHeader}>
         <Search
           allowClear
           placeholder="搜索任务名称、描述或关联图谱"
@@ -198,6 +234,19 @@ export default function ImplicitRelationList() {
         scenes={scenes}
         onCancel={() => setCreateVisible(false)}
         onSubmit={handleCreate}
+      />
+
+      <ScenarioConfigModal
+        visible={scenarioConfigVisible}
+        saving={creating}
+        scenario={activeScenario}
+        scenesLoading={scenesLoading}
+        scenes={scenes}
+        onCancel={() => {
+          setScenarioConfigVisible(false);
+          setActiveScenario(undefined);
+        }}
+        onSubmit={handleScenarioConfigSubmit}
       />
 
       <ImplicitRelationChatModal

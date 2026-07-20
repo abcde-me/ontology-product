@@ -6,3 +6,4 @@ export { default as AnalysisScopeFields } from './AnalysisScopeFields';
 export { default as ImplicitRelationChatModal } from './ImplicitRelationChatModal';
 export { default as AddToInstanceModal } from './AddToInstanceModal';
 export { default as TaskConfigPanel } from './TaskConfigPanel';
+export { default as ScenarioGoalView } from './ScenarioGoalView';

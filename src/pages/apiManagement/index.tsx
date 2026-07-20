@@ -38,6 +38,7 @@ export default function ApiManagementList() {
   const [authTarget, setAuthTarget] = useState<OntologyApiListItem | null>(
     null
   );
+  const [authModalTab, setAuthModalTab] = useState<'add' | 'authorized'>('add');
 
   const loadData = useCallback(() => {
     setLoading(true);
@@ -77,6 +78,12 @@ export default function ApiManagementList() {
   };
 
   const handleAuthorize = (record: OntologyApiListItem) => {
+    setAuthModalTab('add');
+    setAuthTarget(record);
+  };
+
+  const handleViewAuthorization = (record: OntologyApiListItem) => {
+    setAuthModalTab('authorized');
     setAuthTarget(record);
   };
 
@@ -155,6 +162,7 @@ export default function ApiManagementList() {
   const columns = useColumns({
     onViewDetail: handleViewDetail,
     onTest: handleTest,
+    onViewAuthorization: handleViewAuthorization,
     onAuthorize: handleAuthorize,
     onPublish: handlePublish,
     onOnline: handleOnline,
@@ -235,7 +243,13 @@ export default function ApiManagementList() {
       </Modal>
 
       <Modal
-        title={authTarget ? `API 授权 - ${authTarget.name}` : 'API 授权'}
+        title={
+          authTarget
+            ? authModalTab === 'authorized'
+              ? `授权列表 - ${authTarget.name}`
+              : `API 授权 - ${authTarget.name}`
+            : 'API 授权'
+        }
         visible={!!authTarget}
         footer={null}
         style={{ width: 560 }}
@@ -245,7 +259,9 @@ export default function ApiManagementList() {
       >
         <ApiAuthorizationModal
           api={authTarget}
+          initialTab={authModalTab}
           onCancel={() => setAuthTarget(null)}
+          onSaved={loadData}
         />
       </Modal>
     </div>

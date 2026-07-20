@@ -400,6 +400,16 @@ export const routes: IRoute[] = [
       }
     ]
   },
+  // 探索分析 - 时空分析
+  {
+    name: 'spatiotemporalAnalysis',
+    key: '/tenant/compute/onto/exploreAnalysis/spatiotemporalAnalysis',
+    component: React.lazy(
+      async () => import('../../exploreAnalysis/spatiotemporalAnalysis')
+    ),
+    permission: ONTOLOGY_PERMISSIONS.LIST,
+    children: []
+  },
   // 应用中心 - 应用场景
   {
     name: 'applicationScene',

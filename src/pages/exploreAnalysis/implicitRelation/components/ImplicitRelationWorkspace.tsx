@@ -3,7 +3,6 @@ import {
   Button,
   Checkbox,
   Message,
-  Space,
   Tag,
   Tooltip,
   Typography
@@ -25,11 +24,16 @@ import type {
 } from '../types';
 import { buildDiscoveryGraph } from '../services/buildDiscoveryGraph';
 import { runImplicitRelationDiscovery } from '../services/discoverImplicitRelations';
-import { saveDiscoveryResult } from '../services/implicitRelationStore';
+import {
+  saveDiscoveryResult,
+  updateDiscoverySuggestedName
+} from '../services/implicitRelationStore';
 import { resolveSummaryItems } from '../services/summarizeDiscovery';
 import ImplicitRelationCanvas from './ImplicitRelationCanvas';
 import EvidenceDrawer from './EvidenceDrawer';
 import AddToInstanceModal from './AddToInstanceModal';
+import AddToOntologyModal from './AddToOntologyModal';
+import EditableRelationName from './EditableRelationName';
 import styles from './ImplicitRelationWorkspace.module.scss';
 
 interface ImplicitRelationWorkspaceProps {
@@ -49,6 +53,7 @@ export default function ImplicitRelationWorkspace({
   const [checkedDiscoveryIds, setCheckedDiscoveryIds] = useState<string[]>([]);
   const [evidenceVisible, setEvidenceVisible] = useState(false);
   const [addToInstanceVisible, setAddToInstanceVisible] = useState(false);
+  const [addToOntologyVisible, setAddToOntologyVisible] = useState(false);
   const [graphRevision, setGraphRevision] = useState(0);
   const [canvasFullscreen, setCanvasFullscreen] = useState(false);
 
@@ -201,12 +206,30 @@ export default function ImplicitRelationWorkspace({
     [checkedDiscoveryIds, result?.discoveries]
   );
 
+  const handleOpenAddToOntology = () => {
+    if (!checkedDiscoveries.length) {
+      Message.warning('请先勾选要添加的关系');
+      return;
+    }
+    setAddToOntologyVisible(true);
+  };
+
   const handleOpenAddToInstance = () => {
     if (!checkedDiscoveries.length) {
       Message.warning('请先勾选要添加的关系');
       return;
     }
     setAddToInstanceVisible(true);
+  };
+
+  const handleRenameDiscovery = (discoveryId: string, name: string) => {
+    const next = updateDiscoverySuggestedName(task.id, discoveryId, name);
+    if (!next) {
+      return;
+    }
+    onKnowledgeChange(next);
+    setGraphRevision((revision) => revision + 1);
+    Message.success('关系名称已更新');
   };
 
   return (
@@ -224,6 +247,140 @@ export default function ImplicitRelationWorkspace({
       </div>
 
       <div className={styles.main}>
+        <div className={styles.sidePane}>
+          <div className={styles.summaryCard}>
+            <div className={styles.sideTitle}>
+              发现总结
+              {result ? (
+                <Tag
+                  size="small"
+                  color={result.summarySource === 'llm' ? 'arcoblue' : 'gray'}
+                >
+                  {result.summarySource === 'llm' ? '大模型' : '本地'}
+                </Tag>
+              ) : null}
+            </div>
+            <div className={styles.summaryBody}>
+              {result ? (
+                <>
+                  <ul className={styles.summaryList}>
+                    {resolveSummaryItems(result).map((item, index) => (
+                      <li
+                        key={`${index}-${item.slice(0, 12)}`}
+                        className={styles.summaryItem}
+                      >
+                        <span className={styles.summaryIndex}>{index + 1}</span>
+                        <span className={styles.summaryItemText}>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className={styles.statRow}>
+                    <span>
+                      算法：{DISCOVERY_ALGORITHM_LABEL[result.algorithm]}
+                    </span>
+                    <span>
+                      节点 {result.nodes?.length ?? graph.nodes.length}
+                    </span>
+                    <span>显性 {result.confirmedEdges.length}</span>
+                    <span>隐性 {result.discoveries.length}</span>
+                  </div>
+                </>
+              ) : (
+                <Typography.Paragraph className={styles.summaryText}>
+                  完善配置后点击「执行发现」，完成后将在此分条展示总结要点。
+                </Typography.Paragraph>
+              )}
+            </div>
+          </div>
+
+          <div className={styles.listCard}>
+            <div className={styles.sideTitle}>
+              <span className={styles.sideTitleText}>发现详情</span>
+              <div className={styles.sideTitleRight}>
+                {result && result.discoveries.length > 0 ? (
+                  <Checkbox
+                    className={styles.selectAllCheckbox}
+                    checked={allChecked}
+                    indeterminate={indeterminate}
+                    onChange={(checked) => {
+                      setCheckedDiscoveryIds(
+                        checked ? result.discoveries.map((item) => item.id) : []
+                      );
+                    }}
+                  >
+                    全选
+                  </Checkbox>
+                ) : null}
+                <Button
+                  type="text"
+                  size="mini"
+                  icon={<IconPlus />}
+                  disabled={!checkedDiscoveries.length}
+                  onClick={handleOpenAddToOntology}
+                >
+                  添加到本体
+                </Button>
+                <Button
+                  type="text"
+                  size="mini"
+                  disabled={!checkedDiscoveries.length}
+                  onClick={handleOpenAddToInstance}
+                >
+                  添加到实例
+                </Button>
+              </div>
+            </div>
+            <div className={styles.discoveryList}>
+              {result?.discoveries.length ? (
+                result.discoveries.map((item) => (
+                  <div
+                    key={item.id}
+                    className={[
+                      styles.discoveryItem,
+                      selectedDiscoveryId === item.id
+                        ? styles.discoveryItemActive
+                        : '',
+                      checkedDiscoveryIds.includes(item.id)
+                        ? styles.discoveryItemChecked
+                        : ''
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    onClick={() => handleListClick(item)}
+                  >
+                    <div className={styles.discoveryItemHeader}>
+                      <Checkbox
+                        checked={checkedDiscoveryIds.includes(item.id)}
+                        onChange={(checked, event) =>
+                          handleToggleCheck(item.id, checked, event)
+                        }
+                      />
+                      <EditableRelationName
+                        value={item.suggestedName}
+                        onChange={(name) =>
+                          handleRenameDiscovery(item.id, name)
+                        }
+                      />
+                    </div>
+                    <div className={styles.discoveryPair}>
+                      {item.sourceNodeName}
+                      <span className={styles.discoveryArrow}>→</span>
+                      {item.targetNodeName}
+                    </div>
+                    <div className={styles.discoveryMeta}>
+                      <span>置信度 {(item.confidence * 100).toFixed(0)}%</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className={styles.emptyList}>
+                  {running ? '正在挖掘关系...' : '暂无发现结果'}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         <div
           className={`${styles.canvasPane} ${
             canvasFullscreen ? styles.canvasPaneFullscreen : ''
@@ -274,132 +431,23 @@ export default function ImplicitRelationWorkspace({
             />
           </div>
         </div>
-
-        <div className={styles.sidePane}>
-          <div className={styles.summaryCard}>
-            <div className={styles.sideTitle}>
-              发现总结
-              {result ? (
-                <Tag
-                  size="small"
-                  color={result.summarySource === 'llm' ? 'arcoblue' : 'gray'}
-                >
-                  {result.summarySource === 'llm' ? '大模型' : '本地'}
-                </Tag>
-              ) : null}
-            </div>
-            <div className={styles.summaryBody}>
-              {result ? (
-                <>
-                  <ul className={styles.summaryList}>
-                    {resolveSummaryItems(result).map((item, index) => (
-                      <li
-                        key={`${index}-${item.slice(0, 12)}`}
-                        className={styles.summaryItem}
-                      >
-                        <span className={styles.summaryIndex}>{index + 1}</span>
-                        <span className={styles.summaryItemText}>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className={styles.statRow}>
-                    <span>
-                      算法：{DISCOVERY_ALGORITHM_LABEL[result.algorithm]}
-                    </span>
-                    <span>
-                      节点 {result.nodes?.length ?? graph.nodes.length}
-                    </span>
-                    <span>显性 {result.confirmedEdges.length}</span>
-                    <span>隐性 {result.discoveries.length}</span>
-                  </div>
-                </>
-              ) : (
-                <Typography.Paragraph className={styles.summaryText}>
-                  完善配置后点击「执行发现」，完成后将在此分条展示总结要点。
-                </Typography.Paragraph>
-              )}
-            </div>
-          </div>
-
-          <div className={styles.listCard}>
-            <div className={styles.sideTitle}>
-              <span>发现的关系</span>
-              <Space size={8}>
-                {result && result.discoveries.length > 0 ? (
-                  <Checkbox
-                    checked={allChecked}
-                    indeterminate={indeterminate}
-                    onChange={(checked) => {
-                      setCheckedDiscoveryIds(
-                        checked ? result.discoveries.map((item) => item.id) : []
-                      );
-                    }}
-                  >
-                    全选
-                  </Checkbox>
-                ) : null}
-                <Button
-                  type="text"
-                  size="mini"
-                  icon={<IconPlus />}
-                  disabled={!checkedDiscoveries.length}
-                  onClick={handleOpenAddToInstance}
-                >
-                  添加到实例
-                </Button>
-              </Space>
-            </div>
-            <div className={styles.discoveryList}>
-              {result?.discoveries.length ? (
-                result.discoveries.map((item) => (
-                  <div
-                    key={item.id}
-                    className={[
-                      styles.discoveryItem,
-                      selectedDiscoveryId === item.id
-                        ? styles.discoveryItemActive
-                        : '',
-                      checkedDiscoveryIds.includes(item.id)
-                        ? styles.discoveryItemChecked
-                        : ''
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    onClick={() => handleListClick(item)}
-                  >
-                    <div className={styles.discoveryItemHeader}>
-                      <Checkbox
-                        checked={checkedDiscoveryIds.includes(item.id)}
-                        onChange={(checked, event) =>
-                          handleToggleCheck(item.id, checked, event)
-                        }
-                      />
-                      <div className={styles.discoveryPair}>
-                        {item.sourceNodeName}
-                        <span className={styles.discoveryArrow}>→</span>
-                        {item.targetNodeName}
-                      </div>
-                    </div>
-                    <div className={styles.discoveryMeta}>
-                      <span>{item.suggestedName}</span>
-                      <span>置信度 {(item.confidence * 100).toFixed(0)}%</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className={styles.emptyList}>
-                  {running ? '正在挖掘关系...' : '暂无发现结果'}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
       </div>
 
       <EvidenceDrawer
         visible={evidenceVisible}
         discovery={selectedDiscovery}
         onClose={() => setEvidenceVisible(false)}
+        onRename={handleRenameDiscovery}
+      />
+      <AddToOntologyModal
+        visible={addToOntologyVisible}
+        task={task}
+        discoveries={checkedDiscoveries}
+        onCancel={() => setAddToOntologyVisible(false)}
+        onSuccess={() => {
+          setAddToOntologyVisible(false);
+          setCheckedDiscoveryIds([]);
+        }}
       />
       <AddToInstanceModal
         visible={addToInstanceVisible}

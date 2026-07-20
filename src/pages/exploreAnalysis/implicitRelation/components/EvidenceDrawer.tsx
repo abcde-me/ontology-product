@@ -6,18 +6,21 @@ import {
   summarizeRelationEvidence,
   type EvidenceSummarySource
 } from '../services/summarizeEvidence';
+import EditableRelationName from './EditableRelationName';
 import styles from './EvidenceDrawer.module.scss';
 
 interface EvidenceDrawerProps {
   visible: boolean;
   discovery: DiscoveredImplicitRelation | null;
   onClose: () => void;
+  onRename?: (discoveryId: string, name: string) => void;
 }
 
 export default function EvidenceDrawer({
   visible,
   discovery,
-  onClose
+  onClose,
+  onRename
 }: EvidenceDrawerProps) {
   const [aiSummary, setAiSummary] = useState<string>();
   const [aiSource, setAiSource] = useState<EvidenceSummarySource>();
@@ -92,9 +95,23 @@ export default function EvidenceDrawer({
       unmountOnExit
     >
       {!discovery ? (
-        <Empty description="请选择一条发现的关系" />
+        <Empty description="请选择一条发现详情" />
       ) : (
         <div className={styles.body}>
+          <div className={styles.nameRow}>
+            <span className={styles.nameLabel}>关系名称</span>
+            {onRename ? (
+              <EditableRelationName
+                value={discovery.suggestedName}
+                size="small"
+                onChange={(name) => onRename(discovery.id, name)}
+              />
+            ) : (
+              <span className={styles.relationName}>
+                {discovery.suggestedName}
+              </span>
+            )}
+          </div>
           <div className={styles.pair}>
             <span className={styles.node}>{discovery.sourceNodeName}</span>
             <span className={styles.arrow}>⇢</span>
@@ -105,7 +122,6 @@ export default function EvidenceDrawer({
               {DISCOVERY_ALGORITHM_LABEL[discovery.algorithm]}
             </Tag>
             <Tag size="small">置信度 {discovery.confidence.toFixed(2)}</Tag>
-            <Tag size="small">{discovery.suggestedName}</Tag>
           </div>
 
           <div className={styles.aiCard}>

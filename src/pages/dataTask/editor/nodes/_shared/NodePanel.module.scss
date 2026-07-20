@@ -13,7 +13,7 @@
 }
 
 .section-block {
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 
   &:last-child {
     margin-bottom: 0;
@@ -24,13 +24,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .section-desc {
-  margin-bottom: 6px;
-  font-size: 12px;
-  line-height: 18px;
+  margin-bottom: 3px;
+  font-size: 11px;
+  line-height: 16px;
   color: var(--color-text-3);
 }
 
@@ -50,7 +50,7 @@
 }
 
 .ai-assist-desc {
-  font-size: 12px;
-  line-height: 18px;
+  font-size: 11px;
+  line-height: 16px;
   color: var(--color-text-3);
 }

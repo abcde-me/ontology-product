@@ -61,7 +61,7 @@ export const useColumns = ({
         )
       },
       {
-        title: '发现关系数',
+        title: '发现内容数',
         dataIndex: 'discoveryCount',
         width: 100
       },

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Modal, Radio, Spin } from '@arco-design/web-react';
-import { DISCOVERY_ALGORITHM_OPTIONS } from '../constants';
+import { Form, Input, Modal, Spin } from '@arco-design/web-react';
 import {
   toAnalysisScope,
   validateAnalysisScope
 } from '../services/scopeInstances';
 import AnalysisScopeFields, { type SceneOption } from './AnalysisScopeFields';
+import DiscoveryAlgorithmRadioGroup from './DiscoveryAlgorithmRadioGroup';
 import type {
   CreateImplicitRelationTaskInput,
   ImplicitAnalysisScope,
@@ -131,25 +131,7 @@ export default function CreateTaskModal({
             field="algorithm"
             rules={[{ required: true, message: '请选择发现算法' }]}
           >
-            <Radio.Group>
-              {DISCOVERY_ALGORITHM_OPTIONS.map((option) => (
-                <Radio key={option.value} value={option.value}>
-                  <div>
-                    <div>{option.label}</div>
-                    <div
-                      style={{
-                        color: 'var(--color-text-3)',
-                        fontSize: 12,
-                        lineHeight: 1.5,
-                        marginTop: 2
-                      }}
-                    >
-                      {option.description}
-                    </div>
-                  </div>
-                </Radio>
-              ))}
-            </Radio.Group>
+            <DiscoveryAlgorithmRadioGroup />
           </Form.Item>
           <Form.Item label="任务描述" field="description">
             <TextArea

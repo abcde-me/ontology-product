@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import {
   INFERENCE_STATUS_COLOR,
   INFERENCE_STATUS_LABEL,
-  INFERENCE_TYPE_LABEL
+  resolveInferenceTypeLabel
 } from '../constants';
 import type {
   InferenceAnalysisTaskListItem,
@@ -54,7 +54,8 @@ export const useColumns = ({
         title: '推理类型',
         dataIndex: 'inferenceType',
         width: 110,
-        render: (value: InferenceType) => INFERENCE_TYPE_LABEL[value] || '-'
+        render: (value: InferenceType) =>
+          resolveInferenceTypeLabel(value) || '-'
       },
       {
         title: '任务状态',

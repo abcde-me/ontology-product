@@ -1,5 +1,5 @@
 /**
- * 关系挖掘结果对话问答：可选注入关系图谱、发现总结与发现的关系。
+ * 关系挖掘结果对话问答：可选注入关系图谱、发现总结与发现详情。
  */
 import {
   resolveDirectLlmRequestUrl,
@@ -26,7 +26,7 @@ export interface RelationMiningChatConfig {
   includeGraph: boolean;
   /** 是否注入发现总结（summary） */
   includeSummary: boolean;
-  /** 是否注入发现的关系（挖掘候选边） */
+  /** 是否注入发现详情（挖掘候选边） */
   includeDiscoveries: boolean;
 }
 
@@ -48,7 +48,7 @@ const MAX_HISTORY_TURNS = 8;
 const MAX_CONFIRMED_EDGES = 40;
 const MAX_DISCOVERIES = 20;
 
-const SYSTEM_PROMPT = `你是本体关系挖掘问答助手。请严格依据提供的「分析范围、关系图谱、发现总结、发现的关系」回答用户问题。
+const SYSTEM_PROMPT = `你是本体关系挖掘问答助手。请严格依据提供的「分析范围、关系图谱、发现总结、发现详情」回答用户问题。
 要求：
 1. 仅基于给定上下文作答，不要编造未出现的节点、关系或证据
 2. 回答简洁专业，使用中文；必要时引用具体实例对与置信度
@@ -121,7 +121,7 @@ export const buildRelationMiningChatContext = (params: {
       );
     sections.push(
       [
-        '发现的关系：',
+        '发现详情：',
         `【挖掘候选（最多 ${MAX_DISCOVERIES} 条）】`,
         discoveries.length ? discoveries.join('\n') : '（无）'
       ].join('\n')

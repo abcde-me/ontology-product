@@ -44,3 +44,30 @@ export const saveDiscoveryResult = (
 
 export const clearDiscoveryResult = (taskId: string) =>
   saveImplicitRelationKnowledge(taskId, emptyKnowledge());
+
+export const updateDiscoverySuggestedName = (
+  taskId: string,
+  discoveryId: string,
+  suggestedName: string
+): ImplicitRelationKnowledge | null => {
+  const knowledge = getImplicitRelationKnowledge(taskId);
+  if (!knowledge.result) {
+    return null;
+  }
+
+  const trimmed = suggestedName.trim();
+  if (!trimmed) {
+    return knowledge;
+  }
+
+  const next: ImplicitRelationKnowledge = {
+    result: {
+      ...knowledge.result,
+      discoveries: knowledge.result.discoveries.map((item) =>
+        item.id === discoveryId ? { ...item, suggestedName: trimmed } : item
+      )
+    }
+  };
+
+  return saveImplicitRelationKnowledge(taskId, next);
+};

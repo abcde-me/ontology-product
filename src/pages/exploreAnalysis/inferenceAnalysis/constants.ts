@@ -4,21 +4,55 @@ import type {
   InferenceType
 } from './types';
 
+export const INFERENCE_ANALYSIS_BASE_PATH =
+  '/tenant/compute/onto/exploreAnalysis/inferenceAnalysis';
+
 export const INFERENCE_TYPE_LABEL: Record<InferenceType, string> = {
-  forward: '正向推理',
-  backward: '逆向推理'
+  root_cause: '根因分析',
+  anomaly_detection: '异常检测',
+  simulation_prediction: '推演预测'
 };
 
 /** 推理类型说明（新建弹窗等处展示） */
 export const INFERENCE_TYPE_DESC: Record<InferenceType, string> = {
-  forward:
-    '从已知事实、语义映射与领域公理出发，依据规则推导出新结论（由因推果）。',
-  backward:
-    '从目标结论或假设出发，反向追溯所需前提、证据与约束条件（由果溯因）。'
+  root_cause: '从异常现象或目标结论出发，沿因果链追溯根本原因与关键影响因素。',
+  anomaly_detection:
+    '基于本体事实、映射与公理，识别偏离正常模式的数据、行为或状态异常。',
+  simulation_prediction:
+    '在已知事实与约束条件下，推演未来状态、趋势或可能结果。'
 };
 
 export const INFERENCE_TYPE_HINT =
-  '正向推理侧重由已知推导结论；逆向推理侧重由目标反推条件。';
+  '根因分析侧重追溯原因；异常检测侧重发现偏离；推演预测侧重由现状推未来。';
+
+/** 兼容旧版 forward / backward 存储值 */
+export const LEGACY_INFERENCE_TYPE_LABEL: Record<string, string> = {
+  forward: '推演预测',
+  backward: '根因分析'
+};
+
+export const resolveInferenceTypeLabel = (type: string) =>
+  INFERENCE_TYPE_LABEL[type as InferenceType] ||
+  LEGACY_INFERENCE_TYPE_LABEL[type] ||
+  type;
+
+/** 兼容旧版 forward / backward 存储值 */
+export const normalizeInferenceType = (type: string): InferenceType => {
+  if (
+    type === 'root_cause' ||
+    type === 'anomaly_detection' ||
+    type === 'simulation_prediction'
+  ) {
+    return type;
+  }
+  if (type === 'forward') {
+    return 'simulation_prediction';
+  }
+  if (type === 'backward') {
+    return 'root_cause';
+  }
+  return 'root_cause';
+};
 
 export const INFERENCE_STATUS_LABEL: Record<InferenceTaskStatus, string> = {
   not_started: '未开始',
@@ -38,14 +72,19 @@ export const INFERENCE_TYPE_OPTIONS: Array<{
   description: string;
 }> = [
   {
-    label: INFERENCE_TYPE_LABEL.forward,
-    value: 'forward',
-    description: INFERENCE_TYPE_DESC.forward
+    label: INFERENCE_TYPE_LABEL.root_cause,
+    value: 'root_cause',
+    description: INFERENCE_TYPE_DESC.root_cause
   },
   {
-    label: INFERENCE_TYPE_LABEL.backward,
-    value: 'backward',
-    description: INFERENCE_TYPE_DESC.backward
+    label: INFERENCE_TYPE_LABEL.anomaly_detection,
+    value: 'anomaly_detection',
+    description: INFERENCE_TYPE_DESC.anomaly_detection
+  },
+  {
+    label: INFERENCE_TYPE_LABEL.simulation_prediction,
+    value: 'simulation_prediction',
+    description: INFERENCE_TYPE_DESC.simulation_prediction
   }
 ];
 

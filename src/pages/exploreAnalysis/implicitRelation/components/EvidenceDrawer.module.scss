@@ -4,6 +4,25 @@
   gap: 14px;
 }
 
+.nameRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nameLabel {
+  color: #86909c;
+  font-size: 12px;
+}
+
+.relationName {
+  color: #1d2129;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
 .pair {
   display: flex;
   align-items: center;

@@ -5,6 +5,7 @@ import type {
   InferencePathStep,
   InferenceRelatedNode
 } from '../types';
+import { normalizeInferenceType } from '../constants';
 
 const STORAGE_KEY = 'onto_inference_analysis_tasks_v1';
 
@@ -103,7 +104,7 @@ const normalizeTask = (
   id: task.id,
   name: task.name,
   description: task.description,
-  inferenceType: task.inferenceType,
+  inferenceType: normalizeInferenceType(String(task.inferenceType || '')),
   status: task.status,
   ontologySceneIds: resolveSceneIds(task),
   semanticMappingIds: task.semanticMappingIds,

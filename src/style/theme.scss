@@ -54,11 +54,9 @@ $spacing-9: 24px;
 //   color: var(--color-white) !important;
 // }
 /******** table ********/
-// .arco-table-td .arco-table-col-fixed-right .arco-table-col-fixed-right-first {
-//   color: red;
-// }
 .arco-table-th {
   font-weight: $font-weight-600;
+  background-color: rgba(var(--primary-6), 0.15) !important;
 }
 
 .arco-table .arco-table-th-item {

@@ -70,6 +70,12 @@ const normalizeAlgorithm = (
   if (algorithm === 'spatiotemporal') {
     return 'spatiotemporal';
   }
+  if (algorithm === 'core-node') {
+    return 'core-node';
+  }
+  if (algorithm === 'weak-link') {
+    return 'weak-link';
+  }
   return 'community';
 };
 
@@ -118,40 +124,45 @@ export const getImplicitRelationTask = (
 };
 
 export const createImplicitRelationTask = (
-  input: CreateImplicitRelationTaskInput
+  input: CreateImplicitRelationTaskInput,
+  options?: { allowIncompleteScope?: boolean }
 ): ImplicitRelationTask => {
   const name = input.name.trim();
   if (!name) {
     throw new Error('任务名称不能为空');
   }
-  if (!input.scope?.ontologySceneId) {
-    throw new Error('请选择本体图谱');
-  }
-  if (!input.scope.objectTypes?.length) {
-    throw new Error('请选择对象类型');
-  }
-  if (
-    input.scope.instanceMode === 'selected' &&
-    !input.scope.instances?.length
-  ) {
-    throw new Error('请选择至少一个实例');
+
+  const scope: ImplicitAnalysisScope | undefined = input.scope?.ontologySceneId
+    ? {
+        ontologySceneId: input.scope.ontologySceneId,
+        ontologySceneName: input.scope.ontologySceneName,
+        objectTypes: input.scope.objectTypes || [],
+        instanceMode:
+          input.scope.instanceMode === 'selected' ? 'selected' : 'all',
+        instances: input.scope.instances || []
+      }
+    : undefined;
+
+  if (!options?.allowIncompleteScope) {
+    if (!scope?.ontologySceneId) {
+      throw new Error('请选择本体图谱');
+    }
+    if (!scope.objectTypes.length) {
+      throw new Error('请选择对象类型');
+    }
+    if (scope.instanceMode === 'selected' && !scope.instances.length) {
+      throw new Error('请选择至少一个实例');
+    }
   }
 
   const now = new Date().toISOString();
-  const scope: ImplicitAnalysisScope = {
-    ontologySceneId: input.scope.ontologySceneId,
-    ontologySceneName: input.scope.ontologySceneName,
-    objectTypes: input.scope.objectTypes,
-    instanceMode: input.scope.instanceMode,
-    instances: input.scope.instances || []
-  };
 
   const task: ImplicitRelationTask = {
     id: generateId(),
     name,
     description: input.description?.trim() || undefined,
-    ontologySceneId: scope.ontologySceneId,
-    ontologySceneName: scope.ontologySceneName,
+    ontologySceneId: scope?.ontologySceneId,
+    ontologySceneName: scope?.ontologySceneName,
     algorithm: input.algorithm,
     scope,
     createdAt: now,

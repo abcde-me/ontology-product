@@ -193,6 +193,13 @@ export const menus: MenuModel[] = [
         key: 'InferenceAnalysis',
         path: '/tenant/compute/onto/exploreAnalysis/inferenceAnalysis',
         permission: ONTOLOGY_PERMISSIONS.LIST
+      },
+      {
+        title: SECONDARY_MENU_ITEMS.SpatiotemporalAnalysis,
+        icon: <RuleRunLogIcon className={iconClass} />,
+        key: 'SpatiotemporalAnalysis',
+        path: '/tenant/compute/onto/exploreAnalysis/spatiotemporalAnalysis',
+        permission: ONTOLOGY_PERMISSIONS.LIST
       }
     ]
   },

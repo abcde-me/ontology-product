@@ -3,12 +3,14 @@ import { Button, Popconfirm, Space, Tag } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
 import dayjs from 'dayjs';
 import type { OntologyApiListItem } from '../types';
+import { ApiAuthorizationListCell } from '../components/ApiAuthorizationListCell';
 import { ApiStatusTag } from '../components/ApiStatusTag';
 import styles from '../index.module.scss';
 
 interface UseColumnsProps {
   onViewDetail: (record: OntologyApiListItem) => void;
   onTest: (record: OntologyApiListItem) => void;
+  onViewAuthorization: (record: OntologyApiListItem) => void;
   onAuthorize: (record: OntologyApiListItem) => void;
   onPublish: (record: OntologyApiListItem) => void;
   onOnline: (record: OntologyApiListItem) => void;
@@ -22,6 +24,7 @@ interface UseColumnsProps {
 export const useColumns = ({
   onViewDetail,
   onTest,
+  onViewAuthorization,
   onAuthorize,
   onPublish,
   onOnline,
@@ -77,6 +80,17 @@ export const useColumns = ({
               </Tag>
             )}
           </Space>
+        )
+      },
+      {
+        title: '授权列表',
+        dataIndex: 'authorizationCount',
+        width: 100,
+        render: (_, record) => (
+          <ApiAuthorizationListCell
+            apiId={record.id}
+            onClick={() => onViewAuthorization(record)}
+          />
         )
       },
       {
@@ -199,6 +213,7 @@ export const useColumns = ({
     [
       deletingId,
       onAuthorize,
+      onViewAuthorization,
       onDelete,
       onOffline,
       onOnline,

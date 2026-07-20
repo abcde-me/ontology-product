@@ -34,6 +34,7 @@ import styles from '../index.module.scss';
 interface ApiAuthorizationModalProps {
   api: OntologyApiListItem | null;
   saving?: boolean;
+  initialTab?: 'add' | 'authorized';
   onCancel: () => void;
   onSaved?: () => void;
 }
@@ -64,6 +65,7 @@ const buildUserScopeLabel = (rule: ApiAuthorizationRule) => {
 export const ApiAuthorizationModal: React.FC<ApiAuthorizationModalProps> = ({
   api,
   saving,
+  initialTab = 'add',
   onCancel,
   onSaved
 }) => {
@@ -124,7 +126,7 @@ export const ApiAuthorizationModal: React.FC<ApiAuthorizationModalProps> = ({
       return;
     }
 
-    setActiveTab('add');
+    setActiveTab(initialTab);
     refreshProjectList();
     loadRules();
     form.setFieldsValue({
@@ -134,7 +136,7 @@ export const ApiAuthorizationModal: React.FC<ApiAuthorizationModalProps> = ({
       userScope: 'all',
       userIds: []
     });
-  }, [api, form, loadRules, refreshProjectList]);
+  }, [api, form, initialTab, loadRules, refreshProjectList]);
 
   useEffect(() => {
     if (userScope === 'partial') {

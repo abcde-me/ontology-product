@@ -214,7 +214,7 @@ export default function ImplicitRelationChatModal({
               setConfig((prev) => ({ ...prev, includeDiscoveries: checked }))
             }
           >
-            发现的关系
+            发现详情
           </Checkbox>
         </div>
 
