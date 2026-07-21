@@ -58,11 +58,15 @@ export default function AddToInstanceModal({
   const handleOk = () => {
     if (!task.scope?.ontologySceneId) {
       Message.warning('任务未绑定本体场景');
-      return;
+      return false;
     }
     if (!discoveries.length) {
       Message.warning('请先选择要添加的关系');
-      return;
+      return false;
+    }
+    if (invalidCount === discoveries.length) {
+      Message.error('添加失败：所选关系均缺少实例端点信息');
+      return false;
     }
 
     setSaving(true);
@@ -76,21 +80,25 @@ export default function AddToInstanceModal({
       });
 
       if (result.attachedCount === 0) {
-        Message.warning(
+        Message.error(
           result.skippedCount > 0
-            ? '所选关系均已添加或缺少实例端点，未写入新记录'
-            : '未能添加任何关系'
+            ? '添加失败：所选关系均已添加或缺少实例端点信息'
+            : '添加失败：未能添加任何关系'
         );
-        return;
+        return false;
       }
 
       Message.success(
-        `已添加 ${result.attachedCount} 条隐式关系到 ${result.instanceCount} 个实例` +
-          (result.skippedCount ? `（跳过 ${result.skippedCount} 条）` : '')
+        `添加成功：已添加 ${result.attachedCount} 条隐式关系到 ${result.instanceCount} 个实例` +
+          (result.skippedCount ? `，跳过 ${result.skippedCount} 条` : '')
       );
       onSuccess();
+      return true;
     } catch (error) {
-      Message.error(error instanceof Error ? error.message : '添加失败');
+      Message.error(
+        error instanceof Error ? error.message : '添加失败，请稍后重试'
+      );
+      return false;
     } finally {
       setSaving(false);
     }
@@ -102,7 +110,7 @@ export default function AddToInstanceModal({
       visible={visible}
       confirmLoading={saving}
       onCancel={onCancel}
-      onOk={handleOk}
+      onOk={() => handleOk()}
       okText="确认添加"
       unmountOnExit
       style={{ width: 720 }}

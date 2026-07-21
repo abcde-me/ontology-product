@@ -12,7 +12,8 @@ import {
   IconPlayArrow,
   IconRefresh,
   IconExpand,
-  IconShrink
+  IconShrink,
+  IconMessage
 } from '@arco-design/web-react/icon';
 import dayjs from 'dayjs';
 import { useLocation } from 'react-router-dom';
@@ -34,6 +35,7 @@ import EvidenceDrawer from './EvidenceDrawer';
 import AddToInstanceModal from './AddToInstanceModal';
 import AddToOntologyModal from './AddToOntologyModal';
 import EditableRelationName from './EditableRelationName';
+import ImplicitRelationChatModal from './ImplicitRelationChatModal';
 import styles from './ImplicitRelationWorkspace.module.scss';
 
 interface ImplicitRelationWorkspaceProps {
@@ -56,6 +58,7 @@ export default function ImplicitRelationWorkspace({
   const [addToOntologyVisible, setAddToOntologyVisible] = useState(false);
   const [graphRevision, setGraphRevision] = useState(0);
   const [canvasFullscreen, setCanvasFullscreen] = useState(false);
+  const [chatVisible, setChatVisible] = useState(false);
 
   useEffect(() => {
     if (!canvasFullscreen) {
@@ -133,7 +136,8 @@ export default function ImplicitRelationWorkspace({
     try {
       const result = await runImplicitRelationDiscovery({
         scope: task.scope,
-        algorithm: task.algorithm
+        algorithm: task.algorithm,
+        algorithmParams: task.algorithmParams
       });
       saveDiscoveryResult(task.id, result);
       onKnowledgeChange({ result });
@@ -157,7 +161,13 @@ export default function ImplicitRelationWorkspace({
     } finally {
       setRunning(false);
     }
-  }, [onKnowledgeChange, task.algorithm, task.id, task.scope]);
+  }, [
+    onKnowledgeChange,
+    task.algorithm,
+    task.algorithmParams,
+    task.id,
+    task.scope
+  ]);
 
   const handleSelectDiscovery = (discoveryId: string | null) => {
     if (!discoveryId) {
@@ -232,18 +242,43 @@ export default function ImplicitRelationWorkspace({
     Message.success('关系名称已更新');
   };
 
+  const handleOpenChat = () => {
+    if (!knowledge.result) {
+      Message.warning('请先执行发现后再进行问答');
+      return;
+    }
+    setChatVisible(true);
+  };
+
   return (
     <div className={styles.workspace}>
       <div className={styles.toolbar}>
-        <div className={styles.sectionTitle}>关系发现</div>
-        <Button
-          type="primary"
-          icon={result ? <IconRefresh /> : <IconPlayArrow />}
-          loading={running}
-          onClick={() => void runDiscovery()}
-        >
-          {result ? '重新执行' : '执行发现'}
-        </Button>
+        <div className={styles.toolbarLeft}>
+          <div className={styles.sectionTitle}>关系发现</div>
+          {result?.ranAt ? (
+            <span className={styles.toolbarMeta}>
+              发现时间 {dayjs(result.ranAt).format('YYYY-MM-DD HH:mm:ss')}
+            </span>
+          ) : null}
+        </div>
+        <div className={styles.toolbarActions}>
+          <Button
+            type="outline"
+            icon={<IconMessage />}
+            disabled={!result}
+            onClick={handleOpenChat}
+          >
+            问答
+          </Button>
+          <Button
+            type="primary"
+            icon={result ? <IconRefresh /> : <IconPlayArrow />}
+            loading={running}
+            onClick={() => void runDiscovery()}
+          >
+            {result ? '重新执行' : '执行发现'}
+          </Button>
+        </div>
       </div>
 
       <div className={styles.main}>
@@ -387,14 +422,7 @@ export default function ImplicitRelationWorkspace({
           }`}
         >
           <div className={styles.canvasHeader}>
-            <div className={styles.canvasTitleRow}>
-              <div className={styles.canvasTitle}>关系图谱</div>
-              {result?.ranAt ? (
-                <span className={styles.canvasMeta}>
-                  发现时间 {dayjs(result.ranAt).format('YYYY-MM-DD HH:mm:ss')}
-                </span>
-              ) : null}
-            </div>
+            <div className={styles.canvasTitle}>关系图谱</div>
             <div className={styles.canvasHeaderRight}>
               {result ? (
                 <span className={styles.canvasMeta}>
@@ -458,6 +486,12 @@ export default function ImplicitRelationWorkspace({
           setAddToInstanceVisible(false);
           setCheckedDiscoveryIds([]);
         }}
+      />
+      <ImplicitRelationChatModal
+        visible={chatVisible}
+        task={task}
+        result={knowledge.result}
+        onClose={() => setChatVisible(false)}
       />
     </div>
   );

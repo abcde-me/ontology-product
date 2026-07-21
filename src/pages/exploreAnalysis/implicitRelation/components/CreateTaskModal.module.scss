@@ -1,0 +1,71 @@
+.createTaskForm {
+  :global {
+    .arco-form-label-item > label,
+    .arco-form-item-label,
+    .arco-form-label-item label {
+      color: #1d2129;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 20px;
+    }
+  }
+}
+
+.scopeSection {
+  margin-bottom: 16px;
+}
+
+.scopeSectionTitle {
+  margin-bottom: 8px;
+  color: #1d2129;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.scopeSectionPanel {
+  padding: 14px 16px;
+  border: 1px solid var(--color-border-2);
+  border-radius: 8px;
+  background: #f7f8fa;
+}
+
+.scopeSectionError {
+  margin-top: 8px;
+  color: rgb(var(--danger-6));
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.advancedCollapse {
+  margin-bottom: 0;
+
+  :global {
+    .arco-collapse-item-header {
+      padding-top: 8px;
+      padding-bottom: 8px;
+      padding-left: 0;
+      color: var(--color-text-2);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .arco-collapse-item-header-right {
+      width: fit-content;
+      padding-right: 22px;
+    }
+
+    .arco-collapse-item-icon-hover-right {
+      right: 0;
+      left: auto;
+    }
+
+    .arco-collapse-item-header-title {
+      flex: none;
+    }
+
+    .arco-collapse-item-content-box {
+      padding: 8px 0 0;
+    }
+  }
+}

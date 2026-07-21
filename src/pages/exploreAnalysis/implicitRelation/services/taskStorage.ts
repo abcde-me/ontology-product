@@ -160,10 +160,12 @@ export const createImplicitRelationTask = (
   const task: ImplicitRelationTask = {
     id: generateId(),
     name,
+    scenarioId: input.scenarioId,
     description: input.description?.trim() || undefined,
     ontologySceneId: scope?.ontologySceneId,
     ontologySceneName: scope?.ontologySceneName,
     algorithm: input.algorithm,
+    algorithmParams: input.algorithmParams,
     scope,
     createdAt: now,
     updatedAt: now
@@ -185,6 +187,7 @@ export const updateImplicitRelationTask = (
       | 'ontologySceneId'
       | 'ontologySceneName'
       | 'algorithm'
+      | 'algorithmParams'
       | 'scope'
     >
   >

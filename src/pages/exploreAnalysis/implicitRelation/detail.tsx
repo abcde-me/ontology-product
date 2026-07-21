@@ -7,7 +7,7 @@ import {
   Modal,
   Spin
 } from '@arco-design/web-react';
-import { IconLeft, IconMessage } from '@arco-design/web-react/icon';
+import { IconEdit, IconLeft } from '@arco-design/web-react/icon';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { listOntologyModel } from '@/api/ontologySceneLibrary/ontologyScene';
 import { isOntologyApiSuccess } from '@/utils/apiResponse';
@@ -20,7 +20,6 @@ import type {
   ImplicitRelationUsageScenario
 } from './types';
 import ImplicitRelationWorkspace from './components/ImplicitRelationWorkspace';
-import ImplicitRelationChatModal from './components/ImplicitRelationChatModal';
 import AnalysisScopeFields, {
   type SceneOption
 } from './components/AnalysisScopeFields';
@@ -48,6 +47,11 @@ interface EditConfigFormValues {
   algorithm: ImplicitDiscoveryAlgorithm;
 }
 
+interface EditInfoFormValues {
+  name: string;
+  description?: string;
+}
+
 export default function ImplicitRelationDetail() {
   const history = useHistory();
   const location = useLocation();
@@ -59,16 +63,17 @@ export default function ImplicitRelationDetail() {
   const [scenesLoading, setScenesLoading] = useState(false);
   const [scenes, setScenes] = useState<SceneOption[]>([]);
   const [configModalVisible, setConfigModalVisible] = useState(false);
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [draftScope, setDraftScope] = useState<Partial<ImplicitAnalysisScope>>(
     {}
   );
   const [scopeError, setScopeError] = useState<string>();
-  const [chatVisible, setChatVisible] = useState(false);
   const [activeScenario, setActiveScenario] =
     useState<ImplicitRelationUsageScenario>();
   const [scopeDraftLoading, setScopeDraftLoading] = useState(false);
   const setupHandledRef = useRef(false);
   const [editForm] = Form.useForm<EditConfigFormValues>();
+  const [infoForm] = Form.useForm<EditInfoFormValues>();
 
   const hasResult = Boolean(knowledge.result);
   const configEditable = !hasResult;
@@ -164,6 +169,35 @@ export default function ImplicitRelationDetail() {
     [configEditable, editForm, task]
   );
 
+  const openInfoModal = useCallback(() => {
+    if (!task) {
+      return;
+    }
+    infoForm.setFieldsValue({
+      name: task.name,
+      description: task.description || ''
+    });
+    setInfoModalVisible(true);
+  }, [infoForm, task]);
+
+  const handleSaveInfo = async () => {
+    try {
+      const values = await infoForm.validate();
+      if (!task) {
+        return;
+      }
+      const next = updateImplicitRelationTask(task.id, {
+        name: values.name,
+        description: values.description
+      });
+      setTask(next);
+      Message.success('任务信息已保存');
+      setInfoModalVisible(false);
+    } catch {
+      // form validation
+    }
+  };
+
   const handleSaveConfig = async () => {
     try {
       if (!configEditable) {
@@ -228,14 +262,6 @@ export default function ImplicitRelationDetail() {
     task
   ]);
 
-  const handleOpenChat = () => {
-    if (!knowledge.result) {
-      Message.warning('请先执行发现后再进行问答');
-      return;
-    }
-    setChatVisible(true);
-  };
-
   if (!task) {
     return null;
   }
@@ -254,20 +280,19 @@ export default function ImplicitRelationDetail() {
             <Button
               type="outline"
               size="small"
+              icon={<IconEdit />}
+              onClick={openInfoModal}
+            >
+              编辑信息
+            </Button>
+            <Button
+              type="outline"
+              size="small"
               icon={<IconLeft />}
               className={styles.detailBackBtn}
               onClick={() => history.push(LIST_PATH)}
             >
               返回列表
-            </Button>
-            <Button
-              type="outline"
-              size="small"
-              icon={<IconMessage />}
-              disabled={!knowledge.result}
-              onClick={handleOpenChat}
-            >
-              问答
             </Button>
           </div>
         </div>
@@ -388,12 +413,32 @@ export default function ImplicitRelationDetail() {
         </Spin>
       </Modal>
 
-      <ImplicitRelationChatModal
-        visible={chatVisible}
-        task={task}
-        result={knowledge.result}
-        onClose={() => setChatVisible(false)}
-      />
+      <Modal
+        title="编辑任务信息"
+        visible={infoModalVisible}
+        onCancel={() => setInfoModalVisible(false)}
+        onOk={() => void handleSaveInfo()}
+        unmountOnExit
+        style={{ width: 520 }}
+      >
+        <Form form={infoForm} layout="vertical">
+          <Form.Item
+            label="任务名称"
+            field="name"
+            rules={[{ required: true, message: '请输入任务名称' }]}
+          >
+            <Input placeholder="例如：装备保障关系挖掘" maxLength={64} />
+          </Form.Item>
+          <Form.Item label="任务描述" field="description">
+            <TextArea
+              placeholder="选填，描述分析目标与业务背景"
+              autoSize={{ minRows: 3, maxRows: 6 }}
+              maxLength={500}
+              showWordLimit
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

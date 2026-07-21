@@ -1,3 +1,9 @@
+/** 新建任务可选的任务类型（对应典型场景模板） */
+export type ImplicitRelationTaskType =
+  | 'invisible-edge'
+  | 'invisible-group'
+  | 'invisible-path';
+
 /** 隐性关系发现算法 */
 export type ImplicitDiscoveryAlgorithm =
   | 'community'
@@ -5,6 +11,19 @@ export type ImplicitDiscoveryAlgorithm =
   | 'spatiotemporal'
   | 'core-node'
   | 'weak-link';
+
+/** 发现算法可调参数（各算法仅使用其中部分字段） */
+export interface ImplicitDiscoveryParams {
+  maxDiscoveries: number;
+  maxIterations: number;
+  maxPathDepth: number;
+  minSharedNeighbors: number;
+  spatialNearKm: number;
+  temporalNearHours: number;
+  minScore: number;
+  coreNodeRatio: number;
+  maxBridgeCount: number;
+}
 
 /** 实例选择范围：对象类型下全部实例，或指定部分实例 */
 export type InstanceScopeMode = 'all' | 'selected';
@@ -117,10 +136,14 @@ export interface ImplicitRelationKnowledge {
 export interface ImplicitRelationTask {
   id: string;
   name: string;
+  /** 任务类型场景 id，如 invisible-edge */
+  scenarioId?: ImplicitRelationTaskType;
   description?: string;
   ontologySceneId?: number;
   ontologySceneName?: string;
   algorithm: ImplicitDiscoveryAlgorithm;
+  /** 发现算法参数（未配置时使用算法默认值） */
+  algorithmParams?: Partial<ImplicitDiscoveryParams>;
   /** 分析范围（对象类型 + 实例） */
   scope?: ImplicitAnalysisScope;
   createdAt: string;
@@ -137,8 +160,10 @@ export interface ImplicitRelationTaskListItem extends ImplicitRelationTask {
 
 export interface CreateImplicitRelationTaskInput {
   name: string;
+  scenarioId?: ImplicitRelationTaskType;
   description?: string;
   algorithm: ImplicitDiscoveryAlgorithm;
+  algorithmParams?: Partial<ImplicitDiscoveryParams>;
   scope?: ImplicitAnalysisScope;
 }
 

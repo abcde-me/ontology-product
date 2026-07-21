@@ -12,6 +12,13 @@ import {
   mapLinkDirectionToFormLinkType
 } from '@/pages/ontologyScene/modules/links/components/linkForm/constants';
 
+export interface CreateLinkPreset {
+  sourceObjectTypeID?: number;
+  targetObjectTypeID?: number;
+  name?: string;
+  description?: string;
+}
+
 interface CreateLinkOnGraphModalProps {
   visible: boolean;
   sceneId: number;
@@ -19,6 +26,11 @@ interface CreateLinkOnGraphModalProps {
   onSuccess?: () => void;
   /** 右键选中的源对象类型 */
   presetSource?: GraphObjectTypePick | null;
+  /** 预填链接名称、对象类型与描述 */
+  preset?: CreateLinkPreset;
+  title?: string;
+  /** 成功后是否自动关闭，批量创建时可设为 false */
+  closeOnSuccess?: boolean;
 }
 
 export default function CreateLinkOnGraphModal({
@@ -26,12 +38,16 @@ export default function CreateLinkOnGraphModal({
   sceneId,
   onClose,
   onSuccess,
-  presetSource
+  presetSource,
+  preset,
+  title = '新建链接',
+  closeOnSuccess = true
 }: CreateLinkOnGraphModalProps) {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [existingCodes, setExistingCodes] = useState<string[]>([]);
   const nameValue = Form.useWatch('name', form);
+  const sourceObjectTypeID = Form.useWatch('sourceObjectTypeID', form);
 
   const suggestedCode = useMemo(() => {
     if (!nameValue?.trim()) {
@@ -39,6 +55,8 @@ export default function CreateLinkOnGraphModal({
     }
     return generateOntologyIdentifier(nameValue, existingCodes);
   }, [existingCodes, nameValue]);
+
+  const resolvedSourceId = presetSource?.id ?? sourceObjectTypeID;
 
   useEffect(() => {
     if (!visible || !sceneId) {
@@ -50,6 +68,18 @@ export default function CreateLinkOnGraphModal({
 
     if (presetSource) {
       form.setFieldValue('sourceObjectTypeID', presetSource.id);
+    } else if (preset?.sourceObjectTypeID) {
+      form.setFieldValue('sourceObjectTypeID', preset.sourceObjectTypeID);
+    }
+
+    if (preset?.targetObjectTypeID) {
+      form.setFieldValue('targetObjectTypeID', preset.targetObjectTypeID);
+    }
+    if (preset?.name) {
+      form.setFieldValue('name', preset.name);
+    }
+    if (preset?.description) {
+      form.setFieldValue('description', preset.description);
     }
 
     fetchSceneAllOntologyIdentifiers(sceneId)
@@ -59,7 +89,7 @@ export default function CreateLinkOnGraphModal({
       .catch(() => {
         setExistingCodes([]);
       });
-  }, [visible, sceneId, form, presetSource]);
+  }, [visible, sceneId, form, preset, presetSource]);
 
   useEffect(() => {
     if (visible && suggestedCode) {
@@ -80,7 +110,7 @@ export default function CreateLinkOnGraphModal({
       }
 
       if (!sourceId || !targetId) {
-        Message.warning('请选择目标对象类型');
+        Message.warning('请选择源对象类型和目标对象类型');
         return;
       }
 
@@ -106,7 +136,9 @@ export default function CreateLinkOnGraphModal({
       if (isOntologyApiSuccess(response) && response.data?.id) {
         Message.success('链接创建成功');
         onSuccess?.();
-        onClose();
+        if (closeOnSuccess) {
+          onClose();
+        }
         return;
       }
 
@@ -122,12 +154,13 @@ export default function CreateLinkOnGraphModal({
 
   return (
     <Modal
-      title="新建链接"
+      title={title}
       visible={visible}
       confirmLoading={loading}
       onOk={handleOk}
       onCancel={onClose}
       unmountOnExit
+      style={{ width: 560 }}
     >
       {presetSource ? (
         <div className="mb-4 rounded-md bg-[#F8FAFC] px-3 py-2 text-[13px] text-[#475569]">
@@ -188,6 +221,21 @@ export default function CreateLinkOnGraphModal({
           <Input placeholder="自动生成" maxLength={50} />
         </Form.Item>
 
+        {!presetSource ? (
+          <Form.Item
+            label="源对象类型"
+            field="sourceObjectTypeID"
+            rules={[{ required: true, message: '请选择源对象类型' }]}
+          >
+            <ObjectTypeSelect
+              ontologyModelID={sceneId}
+              placeholder="链接起点"
+              label=""
+              className="mb-0"
+            />
+          </Form.Item>
+        ) : null}
+
         <Form.Item
           label="目标对象类型"
           field="targetObjectTypeID"
@@ -195,7 +243,7 @@ export default function CreateLinkOnGraphModal({
         >
           <ObjectTypeSelect
             ontologyModelID={sceneId}
-            excludeIds={presetSource ? [presetSource.id] : undefined}
+            excludeIds={resolvedSourceId ? [resolvedSourceId] : undefined}
             placeholder="链接终点"
             label=""
             className="mb-0"

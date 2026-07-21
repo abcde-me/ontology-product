@@ -38,6 +38,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       onCancel,
       loading = false,
       showFooter = true,
+      ontologyModelID: ontologyModelIDProp,
       restrictManyToManyEditToNameOnly = false,
       createMode = false
     },
@@ -60,7 +61,8 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       return initialValues?.linkType ?? LinkType.ONE_TO_ONE;
     });
     const { id: OSId } = useParams<{ id: string }>();
-    const ontologyModelID = OSId ? Number(OSId) : undefined;
+    const ontologyModelID =
+      ontologyModelIDProp ?? (OSId ? Number(OSId) : undefined);
 
     const sourceObjectType = Form.useWatch('sourceObjectType', form);
     const targetObjectType = Form.useWatch('targetObjectType', form);

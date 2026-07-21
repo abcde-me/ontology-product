@@ -15,6 +15,26 @@
   flex-wrap: wrap;
 }
 
+.toolbarActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbarLeft {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+}
+
+.toolbarMeta {
+  color: #86909c;
+  font-size: 12px;
+  font-weight: 400;
+}
+
 .sectionTitle {
   color: #1d2129;
   font-size: 15px;
@@ -99,14 +119,6 @@
   align-items: center;
   justify-content: flex-end;
   gap: 10px 14px;
-}
-
-.canvasTitleRow {
-  display: flex;
-  min-width: 0;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 8px 12px;
 }
 
 .canvasTitle {

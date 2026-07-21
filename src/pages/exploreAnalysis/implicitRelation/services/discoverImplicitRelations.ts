@@ -1,16 +1,14 @@
 /**
  * 隐性关系发现：社区分析 & 路径预测（实例级图谱）
  */
-import {
-  MAX_DISCOVERIES,
-  SPATIAL_NEAR_KM,
-  TEMPORAL_NEAR_HOURS
-} from '../constants';
+import { resolveDiscoveryParams } from './algorithmParams';
+import type { ResolvedDiscoveryParams } from './algorithmParams';
 import type {
   ConfirmedGraphEdge,
   DiscoveredImplicitRelation,
   ImplicitAnalysisScope,
   ImplicitDiscoveryAlgorithm,
+  ImplicitDiscoveryParams,
   ImplicitDiscoveryResult,
   ImplicitRelationEvidence
 } from '../types';
@@ -301,7 +299,8 @@ const computeBetweennessCentrality = (
 
 const pickCoreNodes = (
   adjacency: Adjacency,
-  nodeIds: string[]
+  nodeIds: string[],
+  coreNodeRatio = 0.25
 ): { coreSet: Set<string>; centrality: Map<string, number> } => {
   const betweenness = computeBetweennessCentrality(adjacency, nodeIds);
   const maxDegree = Math.max(
@@ -323,7 +322,7 @@ const pickCoreNodes = (
   const sorted = [...nodeIds].sort(
     (left, right) => (centrality.get(right) ?? 0) - (centrality.get(left) ?? 0)
   );
-  const topCount = Math.max(2, Math.ceil(nodeIds.length * 0.25));
+  const topCount = Math.max(2, Math.ceil(nodeIds.length * coreNodeRatio));
   const threshold =
     centrality.get(sorted[Math.min(topCount - 1, sorted.length - 1)]) ?? 0;
 
@@ -382,10 +381,15 @@ const countCrossCommunityEdges = (
 const discoverByCoreNode = (
   nodeMap: Map<string, InstanceGraphNode>,
   adjacency: Adjacency,
-  now: string
+  now: string,
+  params: ResolvedDiscoveryParams
 ): DiscoveredImplicitRelation[] => {
   const nodeIds = Array.from(adjacency.keys());
-  const { coreSet, centrality } = pickCoreNodes(adjacency, nodeIds);
+  const { coreSet, centrality } = pickCoreNodes(
+    adjacency,
+    nodeIds,
+    params.coreNodeRatio
+  );
   if (coreSet.size === 0) {
     return [];
   }
@@ -413,7 +417,12 @@ const discoverByCoreNode = (
       seen.add(key);
 
       const shared = commonNeighbors(adjacency, coreId, otherId);
-      const path = findShortestPath(adjacency, coreId, otherId, 4);
+      const path = findShortestPath(
+        adjacency,
+        coreId,
+        otherId,
+        params.maxPathDepth
+      );
       if (shared.length === 0 && (!path || path.length <= 2)) {
         return;
       }
@@ -444,7 +453,7 @@ const discoverByCoreNode = (
 
   const ranked = normalizeScores(
     candidates.sort((left, right) => right.score - left.score)
-  ).slice(0, MAX_DISCOVERIES);
+  ).slice(0, params.maxDiscoveries);
 
   return ranked.map((item) => {
     const source = nodeMap.get(item.sourceNodeId);
@@ -511,10 +520,15 @@ const discoverByCoreNode = (
 const discoverByWeakLink = (
   nodeMap: Map<string, InstanceGraphNode>,
   adjacency: Adjacency,
-  now: string
+  now: string,
+  params: ResolvedDiscoveryParams
 ): DiscoveredImplicitRelation[] => {
   const nodeIds = Array.from(adjacency.keys());
-  const communities = runLabelPropagation(adjacency, nodeIds);
+  const communities = runLabelPropagation(
+    adjacency,
+    nodeIds,
+    params.maxIterations
+  );
   const crossEdges = countCrossCommunityEdges(adjacency, communities);
   const candidates: Array<{
     sourceNodeId: string;
@@ -552,12 +566,17 @@ const discoverByWeakLink = (
 
       const bridgeCount =
         crossEdges.get(communityPairKey(sourceCommunity, targetCommunity)) ?? 0;
-      if (bridgeCount > 4) {
+      if (bridgeCount > params.maxBridgeCount) {
         continue;
       }
 
       const shared = commonNeighbors(adjacency, sourceId, targetId);
-      const path = findShortestPath(adjacency, sourceId, targetId, 5);
+      const path = findShortestPath(
+        adjacency,
+        sourceId,
+        targetId,
+        params.maxPathDepth
+      );
       const jaccard =
         shared.length /
         Math.max(
@@ -587,7 +606,7 @@ const discoverByWeakLink = (
 
   const ranked = normalizeScores(
     candidates.sort((left, right) => right.score - left.score)
-  ).slice(0, MAX_DISCOVERIES);
+  ).slice(0, params.maxDiscoveries);
 
   return ranked.map((item) => {
     const source = nodeMap.get(item.sourceNodeId);
@@ -656,13 +675,18 @@ const discoverByWeakLink = (
 const discoverByCommunity = (
   nodeMap: Map<string, InstanceGraphNode>,
   adjacency: Adjacency,
-  now: string
+  now: string,
+  params: ResolvedDiscoveryParams
 ): {
   discoveries: DiscoveredImplicitRelation[];
   communities: Record<string, number>;
 } => {
   const nodeIds = Array.from(adjacency.keys());
-  const communities = runLabelPropagation(adjacency, nodeIds);
+  const communities = runLabelPropagation(
+    adjacency,
+    nodeIds,
+    params.maxIterations
+  );
   const communityMap: Record<string, number> = {};
   communities.forEach((cid, nid) => {
     communityMap[nid] = cid;
@@ -719,7 +743,7 @@ const discoverByCommunity = (
 
   const ranked = normalizeScores(
     candidates.sort((left, right) => right.score - left.score)
-  ).slice(0, MAX_DISCOVERIES);
+  ).slice(0, params.maxDiscoveries);
 
   const discoveries: DiscoveredImplicitRelation[] = ranked.map((item) => {
     const source = nodeMap.get(item.sourceNodeId);
@@ -754,7 +778,7 @@ const discoverByCommunity = (
       adjacency,
       item.sourceNodeId,
       item.targetNodeId,
-      4
+      params.maxPathDepth
     );
     if (path && path.length > 2) {
       evidence.push({
@@ -795,7 +819,8 @@ const discoverByCommunity = (
 const discoverByPathPrediction = (
   nodeMap: Map<string, InstanceGraphNode>,
   adjacency: Adjacency,
-  now: string
+  now: string,
+  params: ResolvedDiscoveryParams
 ): DiscoveredImplicitRelation[] => {
   const nodeIds = Array.from(adjacency.keys());
   const candidates: Array<{
@@ -815,7 +840,7 @@ const discoverByPathPrediction = (
         continue;
       }
       const shared = commonNeighbors(adjacency, a, b);
-      if (shared.length === 0) {
+      if (shared.length < params.minSharedNeighbors) {
         continue;
       }
       const key = pairKey(a, b);
@@ -833,7 +858,7 @@ const discoverByPathPrediction = (
             (adjacency.get(b)?.size ?? 0) -
             shared.length
         );
-      const path = findShortestPath(adjacency, a, b, 4);
+      const path = findShortestPath(adjacency, a, b, params.maxPathDepth);
       const pathBonus = path && path.length > 2 ? 1 / (path.length - 1) : 0;
       const score = aa * 0.55 + jaccard * 0.3 + pathBonus * 0.15;
       if (score <= 0) {
@@ -852,7 +877,7 @@ const discoverByPathPrediction = (
 
   const ranked = normalizeScores(
     candidates.sort((left, right) => right.score - left.score)
-  ).slice(0, MAX_DISCOVERIES);
+  ).slice(0, params.maxDiscoveries);
 
   return ranked.map((item) => {
     const source = nodeMap.get(item.sourceNodeId);
@@ -933,7 +958,8 @@ const discoverBySpatiotemporal = (
   nodeMap: Map<string, InstanceGraphNode>,
   adjacency: Adjacency,
   features: Map<string, SpatioTemporalFeature>,
-  now: string
+  now: string,
+  params: ResolvedDiscoveryParams
 ): DiscoveredImplicitRelation[] => {
   const nodeIds = Array.from(nodeMap.keys());
   const usable = nodeIds.filter((id) => {
@@ -992,17 +1018,17 @@ const discoverBySpatiotemporal = (
         fb.lat != null
       ) {
         distanceKm = haversineKm(fa.lon, fa.lat, fb.lon, fb.lat);
-        if (distanceKm <= SPATIAL_NEAR_KM * 2) {
+        if (distanceKm <= params.spatialNearKm * 2) {
           hasSpace = true;
-          spaceScore = 1 / (1 + distanceKm / SPATIAL_NEAR_KM);
+          spaceScore = 1 / (1 + distanceKm / params.spatialNearKm);
         }
       }
 
       if (fa.timeMs != null && fb.timeMs != null) {
         hoursDiff = Math.abs(fa.timeMs - fb.timeMs) / (1000 * 60 * 60);
-        if (hoursDiff <= TEMPORAL_NEAR_HOURS * 2) {
+        if (hoursDiff <= params.temporalNearHours * 2) {
           hasTime = true;
-          timeScore = 1 / (1 + hoursDiff / TEMPORAL_NEAR_HOURS);
+          timeScore = 1 / (1 + hoursDiff / params.temporalNearHours);
         }
       }
 
@@ -1017,7 +1043,7 @@ const discoverBySpatiotemporal = (
             ? spaceScore * 0.85
             : timeScore * 0.8;
 
-      if (score < 0.2) {
+      if (score < params.minScore) {
         continue;
       }
 
@@ -1043,7 +1069,7 @@ const discoverBySpatiotemporal = (
 
   const ranked = normalizeScores(
     candidates.sort((left, right) => right.score - left.score)
-  ).slice(0, MAX_DISCOVERIES);
+  ).slice(0, params.maxDiscoveries);
 
   return ranked.map((item) => {
     const source = nodeMap.get(item.sourceNodeId);
@@ -1058,7 +1084,7 @@ const discoverBySpatiotemporal = (
         title: '空间邻近',
         detail: `「${sourceName}」与「${targetName}」空间距离约 ${formatDistance(
           item.distanceKm
-        )}（阈值 ${SPATIAL_NEAR_KM} 公里内显著），字段 ${item.spaceSource || '经纬度'}。`
+        )}（阈值 ${params.spatialNearKm} 公里内显著），字段 ${item.spaceSource || '经纬度'}。`
       });
     }
 
@@ -1068,7 +1094,7 @@ const discoverBySpatiotemporal = (
         title: '时间邻近',
         detail: `二者时间间隔约 ${formatDuration(
           item.hoursDiff
-        )}（阈值 ${TEMPORAL_NEAR_HOURS} 小时内显著），字段 ${item.timeSource || '时间戳'}。`
+        )}（阈值 ${params.temporalNearHours} 小时内显著），字段 ${item.timeSource || '时间戳'}。`
       });
     }
 
@@ -1082,7 +1108,7 @@ const discoverBySpatiotemporal = (
       adjacency,
       item.sourceNodeId,
       item.targetNodeId,
-      4
+      params.maxPathDepth
     );
     if (path && path.length > 2) {
       evidence.push({
@@ -1122,9 +1148,11 @@ const discoverBySpatiotemporal = (
 export const runImplicitRelationDiscovery = async (params: {
   scope: ImplicitAnalysisScope;
   algorithm: ImplicitDiscoveryAlgorithm;
+  algorithmParams?: Partial<ImplicitDiscoveryParams>;
   signal?: AbortSignal;
 }): Promise<ImplicitDiscoveryResult> => {
-  const { scope, algorithm, signal } = params;
+  const { scope, algorithm, algorithmParams, signal } = params;
+  const resolvedParams = resolveDiscoveryParams(algorithm, algorithmParams);
   const instances = await resolveScopeInstances(scope);
   const graph = await buildInstanceRelationGraph({
     sceneId: scope.ontologySceneId,
@@ -1152,18 +1180,29 @@ export const runImplicitRelationDiscovery = async (params: {
   let communities: Record<string, number> | undefined;
 
   if (algorithm === 'community') {
-    const result = discoverByCommunity(nodeMap, adjacency, now);
+    const result = discoverByCommunity(nodeMap, adjacency, now, resolvedParams);
     discoveries = result.discoveries;
     communities = result.communities;
   } else if (algorithm === 'path-prediction') {
-    discoveries = discoverByPathPrediction(nodeMap, adjacency, now);
+    discoveries = discoverByPathPrediction(
+      nodeMap,
+      adjacency,
+      now,
+      resolvedParams
+    );
   } else if (algorithm === 'core-node') {
-    discoveries = discoverByCoreNode(nodeMap, adjacency, now);
+    discoveries = discoverByCoreNode(nodeMap, adjacency, now, resolvedParams);
   } else if (algorithm === 'weak-link') {
-    discoveries = discoverByWeakLink(nodeMap, adjacency, now);
+    discoveries = discoverByWeakLink(nodeMap, adjacency, now, resolvedParams);
   } else if (algorithm === 'spatiotemporal') {
     const features = await loadSpatioTemporalFeatures(instances);
-    discoveries = discoverBySpatiotemporal(nodeMap, adjacency, features, now);
+    discoveries = discoverBySpatiotemporal(
+      nodeMap,
+      adjacency,
+      features,
+      now,
+      resolvedParams
+    );
   }
 
   const { summary, items, source } = await summarizeDiscoveryResult({

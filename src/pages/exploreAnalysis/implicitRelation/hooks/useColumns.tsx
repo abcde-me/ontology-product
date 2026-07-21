@@ -84,7 +84,7 @@ export const useColumns = ({
               className="p-0"
               onClick={() => onViewDetail(record)}
             >
-              查看详情
+              详情
             </Button>
             <Button
               type="text"

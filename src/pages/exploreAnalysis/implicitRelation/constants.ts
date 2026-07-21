@@ -1,7 +1,18 @@
 import type {
   ImplicitDiscoveryAlgorithm,
+  ImplicitRelationTaskType,
   ImplicitRelationUsageScenario
 } from './types';
+
+/** 新建任务弹窗 — 任务类型选项（与列表页典型场景前三项一致） */
+export const IMPLICIT_RELATION_TASK_TYPE_OPTIONS: Array<{
+  value: ImplicitRelationTaskType;
+  label: string;
+}> = [
+  { value: 'invisible-edge', label: '发现隐藏的关系' },
+  { value: 'invisible-path', label: '发现隐藏的路径' },
+  { value: 'invisible-group', label: '发现可聚合的群组' }
+];
 
 export const DISCOVERY_ALGORITHM_OPTIONS: Array<{
   value: ImplicitDiscoveryAlgorithm;
@@ -9,15 +20,15 @@ export const DISCOVERY_ALGORITHM_OPTIONS: Array<{
   description: string;
 }> = [
   {
-    value: 'community',
-    label: '社区分析',
-    description: '基于社区发现识别同社区但尚未直连的实例，推断潜在关联'
-  },
-  {
     value: 'path-prediction',
     label: '路径预测',
     description:
       '基于共同邻居与路径相似度（Adamic-Adar）预测尚未存在但可信的链接'
+  },
+  {
+    value: 'community',
+    label: '社区分析',
+    description: '基于社区发现识别同社区但尚未直连的实例，推断潜在关联'
   },
   {
     value: 'spatiotemporal',
@@ -150,3 +161,7 @@ export const IMPLICIT_RELATION_USAGE_SCENARIOS: ImplicitRelationUsageScenario[] 
 
 export const findImplicitRelationUsageScenario = (id: string) =>
   IMPLICIT_RELATION_USAGE_SCENARIOS.find((item) => item.id === id);
+
+export const findImplicitRelationTaskTypeScenario = (
+  taskType: ImplicitRelationTaskType
+) => findImplicitRelationUsageScenario(taskType);

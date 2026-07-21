@@ -85,6 +85,8 @@ export interface LinkFormProps {
   onCancel: () => void;
   loading?: boolean;
   showFooter?: boolean;
+  /** 弹窗等场景传入，覆盖路由中的场景 ID */
+  ontologyModelID?: number;
   /** 编辑页：已是 N:N 时仅允许修改链接名称，其余区块只读 */
   restrictManyToManyEditToNameOnly?: boolean;
   /** 创建页：无链接类型分类，使用方向 + 链接对 */
